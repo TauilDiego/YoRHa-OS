@@ -1,0 +1,6 @@
+# Strays from the private test environment
+*.qcow2
+*.qsb
+
+# Private test environment (VM lab, containers): kept out of the public repo.
+/lab/
