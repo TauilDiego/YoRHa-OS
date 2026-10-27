@@ -1,5 +1,24 @@
 # Relatório da noite (2026-10-27): implementação do U1
 
+## Estado atual (2026-10-27, tarde)
+
+Este relatório descreve a noite. Desde então, o dono revisou várias coisas. O que vale hoje:
+
+- **Tarefas:** 55 de 55 concluídas (as revisões estão na Phase 8 do `tasks.md`, T047–T055).
+- **SC-006:** aprovado pelo dono.
+- **Barra:** 68 px (configurável de 28 a 96), aba de 33 px, vão de 17 px de jogo e régua
+  pontilhada na escala do jogo (`s × 1,0`), com pontos redondos como no Figma. A régua
+  `s × 0,3` e as alturas 46/50/54 da noite foram superadas.
+- **Abas:** sem seletor em lugar nenhum; a pipa fica só nos itens de lista.
+- **Pipa:** parada, como no jogo, e pisca ao trocar de item (240 ms).
+- **SC-008:** conferido no hidpi a 68 px lógicos (85 físicos), sessão
+  `2026-10-27T132649-vm-teste-c-u1-pipa-parada-com-blink-regua-com-ponto`. O "40 px = 50
+  físicos" da tabela abaixo é da noite.
+- **`check-u1`:** 15 de 15.
+- **Fundo:** a medição do jogo mostrou que não há grid; o fundo fiel ao jogo vem na spec 004.
+- **Ainda aberto:** o WARN do Qt ao fechar a galeria (`qt.qpa.wayland.textinput`).
+
+
 ## Resumo
 
 O U1 está **implementado e validado na VM**. O HUD, a galeria e o design system completo estão

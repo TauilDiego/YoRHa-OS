@@ -11,11 +11,13 @@ Fonte única dos valores do `docs/design-system.md`. Todos os tamanhos estão em
 |---|---|---|
 | `color` | `darkGray`, `mediumGray`, `lightGray`, `darkYellow`, `lightYellow`, `boxShadow`, `textShadow`, `grid`, `alert` | Valores do FR-001. Nenhuma cor fora daqui (verificável com grep por `#` fora do `Tokens.qml`) |
 | `type` | `pageHeader`, `subheader`, `headerButton`, `listButton`, `cardHeader`, `standard`, `small`, `button`: cada um com `{ family, size, weight, letterSpacing }` | `family` = M PLUS 1, ou a original quando instalada (R7) |
-| `shadow` | `text { ratio: 0.15 }`, `box { x: 3, y: 3 }`, `soft { x: 3, y: 3, blur: 4, color }` | O `text` é proporcional ao tamanho (FR-006) |
-| `space` | `buttonMargin` 10, `pageMarginH` 62, `pageMarginV` 39, `tabH` 47, `tabW` 214, `meterW` 163, `meterH` 11, `selector { w: 32, h: 14, dot: 5, dotOffset: 10, gap: 7 }` | Medidas do §1, §3 e §6 |
-| `motion` | `highlight` 150, `touch` 160, `untouch` 120, `blink` 240, `frozen` (bool) | `frozen` = true quando há fixtures (R8) |
-| `vignette` | `edge` `#A6A18D`, `corner` `#8B8877` | FR-002a |
-| funções | `line(v, s)`, `px(v, s)` | `line` ≥ 1 e inteiro |
+| `shadow` | `textRatio` 0.15, `boxX`/`boxY` 3, `softX`/`softY` 3, `softBlur` 4, `softColor` | A sombra de texto é proporcional ao tamanho (FR-006) |
+| `space` | `buttonMargin` 10, `pageMarginH` 62, `pageMarginV` 39, `tabH` 47, `tabW` 214, `square` 22, `meterW` 163, `meterH` 11, `listItemH` 48, `listItemGap` 12, `railGap` 5, `rail` 2, `rule` 2, `gridStep` 7, `cardW`/`cardH`, `selectorW` 32, `selectorH` 14, `selectorHole` 6, `selectorDot` 5, `selectorDotOffset` 10, `selectorGap` 7 | Medidas do §1, §3 e §6; os campos do seletor são planos (não um grupo) |
+| `motion` | `highlight` 150, `touch` 160, `untouch` 120, `blink` 240, `meter` 250 | Durações em ms |
+| `frozen` | bool, direto no `Tokens` (antes `motion.frozen`) | true quando há fixtures (R8); definido pelo `shell.qml` |
+| `vignette` | `start` 0.42, `edgeAlpha` 0.28, `cornerAlpha` 0.50 | Tinta sobre o papel, dando ≈`#A6A18D` nas bordas e ≈`#8B8877` nos cantos (FR-002a) |
+| escala por monitor | `monitorScales` ({ nome: escala }), `scaleOf(nome)` | Alimentado pelo `Compositor` (R5) |
+| funções | `line(v, s)`, `px(v, s)`, `snap(v, dpr)`, `hair(v, dpr)` | `line` ≥ 1 e inteiro; `snap` e `hair` levam à grade física (FR-008b) |
 
 ## Settings (`services/Settings.qml`, singleton)
 
@@ -24,6 +26,7 @@ Fonte única dos valores do `docs/design-system.md`. Todos os tamanhos estão em
 | `uiScale` | real | 1.0 | 0,5–3,0. Fora da faixa, usa o padrão e registra um aviso |
 | `barHeight` | int | 68 | Limitado a 28–96 |
 | `vignette` | bool | true | — |
+| `wallpaperMotion` | bool | true | Movimento do fundo (H4); o IPC `wallpaper motion` sobrepõe até reiniciar |
 
 Origem: `shell/config/defaults.json`, sobrescrito por `$XDG_CONFIG_HOME/rien-os/shell.json`.
 
