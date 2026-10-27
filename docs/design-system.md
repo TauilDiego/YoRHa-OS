@@ -467,14 +467,78 @@ novo como texturas vivas; as cores chegam do `Tokens`.
   CPU do Quickshell por troca, a ≈60 fps; 10 crossfades, 0,18 s. Por segundo animado o CPU é
   parecido: o extra da camuflagem fica na GPU.
 
-### Lista + prévia + opções
+### Lista + prévia + opções (`PickerLayout`)
 
-O layout do seletor (lista agrupada à esquerda, prévia ao vivo no meio, opções e informações à
-direita), reaproveitável pros próximos menus, entra com o seletor da spec 004 (US2), que usa as
-peças do popup da spec 003. Pendente.
+O layout da tela ITEMS do jogo, pra qualquer seletor dentro da moldura de popup (§7): uma lista
+agrupada à esquerda, a prévia ao vivo do item em foco no meio e, à direita, o quadro de opções com
+as informações. É o corpo do seletor de papel de parede e serve pros próximos menus do mesmo tipo
+(tema, fonte, som…). Medidas em px do jogo, no quadro de 1612 × 908 da moldura:
+
+| Peça | Onde | Medidas |
+|---|---|---|
+| Lista agrupada | x 48, y 150 | itens de 380 (`space.pickerListW`), depois das faixas e da pipa |
+| Prévia (o que o menu põe no meio) | x 560, y 150 | 560 de largura (`space.pickerPreviewW`) |
+| Quadro "Options" | x 1160, y 150 | 404 de largura (`space.pickerOptionsW`); a pipa das linhas fica no vão de 40 px antes dele |
+| Fim das colunas | 24 px acima da régua do rodapé | a lista rola dali pra baixo |
+
+- **Lista agrupada (`GroupedList`):** a lista de cursor com títulos de grupo.
+  - **título:** texto `small`, `medium-gray`, alinhado com os itens, numa linha de 18 px, com 10 px
+    acima (menos o primeiro) e 2 abaixo; nunca recebe o cursor;
+  - **aviso:** uma linha `small` debaixo de um título vazio (ex.: "Put pictures in ~/Pictures/Wallpapers");
+  - **item:** o item de lista `opaque`, com a marca à direita em `small` (`● ALL`, ou as saídas);
+  - **item apagado:** o estado `dimmed`; com o cursor, a faixa de tinta e o texto claro a 55% (como
+    a linha de opção apagada);
+  - **sem foco:** o item atual fica `selected`, com a pipa clara e parada (§7);
+  - **rolagem:** quando não cabe, rola na hora, por entradas inteiras, mostrando o item atual com os
+    trilhos e, se ele for o primeiro do grupo, o título.
+- **Prévia (`PreviewCard`, no seletor de papel de parede):** o card com o quadrado claro antes do
+  título (`Card` com `mark`), a mídia de 512 × 288 numa moldura de 2 px `medium-gray`, 24 px das
+  bordas, e a descrição embaixo (23 px, peso 500, linhas a 1,45 × o tamanho, no mínimo 100 px).
+- **Quadro de opções:** o `Card` com `mark` e o título "Options"; as linhas de opção (§7) de escolha,
+  `◂ valor ▸`, desenhadas a 0,815 (`space.pickerOptionScale`: rótulo de 22 px, quadrado de 18, valor
+  de 19 num espaço de 155) na mesma faixa de 48 px e com a mesma pipa; uma régua de 2 px
+  `light-gray`; e as linhas de informação: rótulo `small` em caixa alta `medium-gray` à esquerda,
+  valor `small` peso 600 à direita, quebrando linha quando não cabe.
+- **Foco em duas colunas** (a regra do §7, com a lista no lugar das categorias):
+  - **lista:** ↑↓ andam (dando a volta, pulando os títulos); Enter aplica (nada num item apagado);
+    → vai pra primeira opção; Esc fecha;
+  - **opções:** ↑↓ andam; ←→ mudam o valor, sem dar a volta; ← no primeiro valor volta pra lista;
+    Enter avança o valor, dando a volta; Esc volta;
+  - **mouse:** passar por cima move o foco (só com o ponteiro se mexendo de verdade); clicar num
+    item aplica; clicar numa seta muda o valor; clicar no resto da linha avança.
+- **Rodapé de teclas:**
+
+| Foco | Teclas |
+|---|---|
+| lista | `↑↓ Select` `Enter Apply` `→ Options` `Esc Close` (sem `Enter Apply` num item apagado) |
+| opções | `↑↓ Select` `←→ Change` `Esc Back` |
+
+**No seletor de papel de parede** (`WallpaperPicker`, `ALT + W` na VM, `qs ipc call wallpaper picker
+open|close|toggle`):
+- **título:** `WALLPAPER -Select`; rodapé à esquerda: `rien-OS 0.1 · N monitors`;
+- **lista:** SCENES, IMAGES e VIDEO, com `● ALL` (ou as saídas) no que está aplicado; abre com o
+  cursor no papel de parede do monitor em que abriu;
+- **opções:** `Monitor` (All monitors, depois cada saída), `Transition` (as quatro) e, só nas
+  imagens, `Paper filter` (On/Off). A transição e o filtro valem na hora; o monitor é só do seletor e
+  volta pra "All monitors" a cada abertura;
+- **informações:** `TYPE`, `LAYERS`, `MOTION` e `NOW ON`;
+- **Enter** aplica no monitor escolhido (ou em todos), com a transição escolhida, que acontece atrás
+  do escurecimento.
+
+**Peças da 001/003 que ganharam um acréscimo:**
+- `Card.mark`: o quadrado claro de 14 px antes do título (o título que não cabe corta com
+  reticências);
+- `ListItem.trailingRole` (o papel do texto da direita) e `ListItem.contentScale` / `OptionRow.contentScale`
+  (texto, quadrado e valor menores na mesma faixa, trilhos, sombra e pipa).
+
+A galeria mostra tudo isso na página 3 (Tab duas vezes): as quatro cenas, uma imagem com e sem o
+filtro, um quadro parado de cada transição (camuflagem em 700 ms; as outras na metade), a lista
+agrupada com e sem foco e o layout inteiro em miniatura.
 
 ### Tokens e configuração
 
+- **Tokens do layout** (`Tokens.space`): `pickerListW` 380, `pickerPreviewW` 560, `pickerOptionsW`
+  404, `pickerMediaW` × `pickerMediaH` 512 × 288, `pickerOptionScale` 0,815.
 - **Tokens** (`Tokens.wallpaper`): `darkLine`, `darkVignette`, `ruleAlpha`, `darkRuleAlpha`,
   `dotWeave`, `glint` `#E6E1C8`, `inkSquare`, `filterTint`, `filterAmount`, `filterVignette*`,
   `reveal` 1200, `lead` 200, `settle` 450, `duration` 900.
@@ -483,7 +547,8 @@ peças do popup da spec 003. Pendente.
   `glitch` 2) e `reduceMotion`. A última escolha feita (no seletor ou por comando) vale mais que a
   config e fica no arquivo de estado.
 - **Comandos:** `qs ipc call wallpaper list | set <id> <monitor|all> | next | prev | transition
-  <tipo> | camouflage <cell> <trail> <glitch> | filter <caminho> <true|false> | dump`.
+  <tipo> | camouflage <cell> <trail> <glitch> | filter <caminho> <true|false> | picker
+  <open|close|toggle> | dump`.
 
 ## Créditos
 
