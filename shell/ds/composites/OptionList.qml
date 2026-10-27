@@ -29,24 +29,32 @@ Item {
     readonly property int shadowRoom: Tokens.px(Tokens.shadow.boxX, s)
     readonly property int rowH: Tokens.px(Tokens.space.listItemH, s)
     readonly property int pitch: rowH + Tokens.px(Tokens.space.listItemGap, s)
-    readonly property int count: Array.isArray(options) ? options.length : 0
+    readonly property int count: options?.length ?? 0
 
     // The row at `index` (OptionRow), e.g. for its geometry; null when out of range.
     function rowAt(index: int): var {
         return rows.itemAt(index);
     }
 
-    // Scroll just enough to show row `currentIndex` with its rails.
+    // How many whole rows fit; a parent that wants no partial row sizes the list with fitHeight().
+    readonly property int visibleRows: Math.max(1, Math.floor((height - 2 * railRoom + pitch - rowH) / pitch))
+    function fitHeight(room: real): int {
+        const n = Math.max(1, Math.floor((room - 2 * railRoom + pitch - rowH) / pitch));
+        return n * pitch - (pitch - rowH) + 2 * railRoom;
+    }
+
+    // Scroll by whole rows, just enough to show row `currentIndex` with its rails.
     property real scrollY: 0
     function follow(): void {
-        const top = currentIndex * pitch;
-        const bottom = top + rowH + 2 * railRoom;
-        let y = scrollY;
-        if (top < y)
-            y = top;
-        else if (bottom > y + height)
-            y = bottom - height;
-        scrollY = Math.max(0, Math.min(y, flick.contentHeight - height));
+        if (pitch <= 0)                          // still being built
+            return;
+        let first = Math.round(scrollY / pitch) || 0;
+        if (currentIndex < first)
+            first = currentIndex;
+        else if (currentIndex >= first + visibleRows)
+            first = currentIndex - visibleRows + 1;
+        first = Math.max(0, Math.min(first, count - visibleRows));
+        scrollY = first * pitch;
     }
     onCurrentIndexChanged: follow()
     onHeightChanged: follow()
@@ -55,19 +63,15 @@ Item {
         follow();
     }
 
-    Flickable {
-        id: flick
+    // A clipped window on the rows; the column moves up by scrollY (whole rows).
+    Item {
         anchors.fill: parent
         clip: true
-        interactive: false
-        contentWidth: width
-        contentHeight: column.implicitHeight + 2 * root.railRoom
-        contentY: root.scrollY
 
         Column {
             id: column
             x: root.selectorRoom
-            y: root.railRoom
+            y: root.railRoom - root.scrollY
             width: root.width - x - root.shadowRoom
             spacing: Tokens.px(Tokens.space.listItemGap, root.s)
 

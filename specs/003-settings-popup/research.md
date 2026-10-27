@@ -68,7 +68,9 @@ foi decidido na 001 (escala, fixtures, tokens, adaptador do compositor) vale aqu
     e escala com `s = altura do painel / 908`, vezes `Settings.uiScale`. Em 1080p, `s ≈ 1`: os
     textos ficam no tamanho do jogo, como no mockup;
   - as colunas do mockup de tela cheia (categorias 400, opções 640, quadro 538) encolhem pra
-    caber: **categorias 330, opções 560, quadro 460** (ver [contracts/components.md](contracts/components.md));
+    caber: **categorias 300, opções 600, quadro 440** (ver [contracts/components.md](contracts/components.md); na implementação
+    as categorias e o quadro cederam espaço pras opções, que com 560 cortavam rótulos do mockup como
+    "Background motion");
   - linhas finas na grade física, com as funções da 001 (`Tokens.line`, `snap`, `hair`).
 - **Motivo:** FR-002 ("≈84%… o layout do mockup aprovado em escala") e FR-008b da 001 (pixels
   lógicos, sem DPI).

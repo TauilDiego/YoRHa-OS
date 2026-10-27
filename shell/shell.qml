@@ -98,6 +98,7 @@ ShellRoot {
     property bool settingsOpening: false
     property bool settingsLoaded: false
     property string settingsMonitor: ""
+    property int settingsCategory: 0             // where the pop-up reopens
     property var settingsLast: ({})              // the closed pop-up's last state, for `dump`
     readonly property var settingsScreen: {
         for (const sc of Quickshell.screens)
@@ -143,6 +144,7 @@ ShellRoot {
             settingsUnload.stop();
             settingsLoaded = true;
         } else {
+            settingsLast = settingsLoader.item?.dumpState() ?? settingsLast;
             settingsUnload.restart();
         }
     }
@@ -157,6 +159,8 @@ ShellRoot {
         SettingsPopup {
             screen: shell.settingsScreen
             keyboardActive: shell.settingsOpen
+            category: shell.settingsCategory
+            onCategoryChanged: shell.settingsCategory = category
             onCloseRequested: shell.closeSettings()
         }
     }
@@ -194,21 +198,30 @@ ShellRoot {
                 shell.openSettings();
         }
         function isOpen(): string { return shell.settingsOpen ? "true" : "false"; }
-        function reset(): void { SettingsModel.reset(); }
+        // Values back to the catalog and the pop-up back to its first category, so a test
+        // always starts from the same place.
+        function reset(): void {
+            SettingsModel.reset();
+            shell.settingsCategory = 0;
+            shell.settingsLast = {};
+            settingsLoader.item?.restart(0);
+        }
         function dump(): string {
-            const page = shell.settingsLast;
+            const live = shell.settingsOpen ? settingsLoader.item : null;
+            const page = live ? live.dumpState() : shell.settingsLast;
             return JSON.stringify({
                 open: shell.settingsOpen,
                 monitor: shell.settingsMonitor,
                 focus: page.focus ?? "categories",
-                category: page.category ?? (SettingsModel.categories[0]?.id ?? ""),
+                category: page.category ?? (SettingsModel.categories[shell.settingsCategory]?.id ?? ""),
                 option: page.option ?? null,
                 busy: SettingsModel.busy,
                 error: SettingsModel.error,
                 keys: page.keys ?? [],
                 card: page.card ?? { title: "", note: "" },
                 values: SettingsModel.dumpValues(),
-                dimmed: SettingsModel.dimmedIds()
+                dimmed: SettingsModel.dimmedIds(),
+                geometry: live ? page.geometry : null
             });
         }
     }

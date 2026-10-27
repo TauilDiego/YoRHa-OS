@@ -18,8 +18,8 @@ Item {
     property string text
     property string variant: "opaque"
     property string trailing: ""
-    // spec 003: px kept free on the right for a value the parent draws (OptionRow); the label
-    // is cut with an ellipsis before it. 0 changes nothing.
+    // spec 003: px kept free on the right for a value the parent draws (OptionRow). The label is
+    // cut with an ellipsis before it, or before the trailing text, or at the band's padding.
     property real reserve: 0
 
     readonly property bool hovered: mouse.containsMouse
@@ -84,7 +84,8 @@ Item {
         Label {
             id: label
             x: root.pad + Tokens.px(Tokens.space.square, root.s) + root.gap
-            width: root.reserve > 0 ? Math.max(0, Math.min(implicitWidth, root.width - x - root.reserve)) : implicitWidth
+            width: Math.max(0, Math.min(implicitWidth, root.width - x - Math.max(root.pad, root.reserve)
+                                                        - (root.trailing !== "" ? root.gap + Math.ceil(tail.implicitWidth) + root.pad : 0)))
             anchors.verticalCenter: parent.verticalCenter
             s: root.s
             role: "listButton"

@@ -18,7 +18,7 @@ As regras da 001 continuam:
 | `shadow` | `popup` | 6 | Sombra chapada do painel, em tinta (`darkGray`): a `boxShadow` clara viraria brilho sobre o escurecimento |
 | `space` | `popupShare` | 0.84 | Fração da tela ocupada pelo painel (FR-002) |
 | `space` | `popupW`, `popupH` | 1612, 908 | Quadro de desenho do painel, em px do jogo (research R5) |
-| `space` | `settingsCatsW`, `settingsOptsW`, `settingsCardW` | 330, 560, 460 | Larguras das três colunas |
+| `space` | `settingsCatsW`, `settingsOptsW`, `settingsCardW` | 300, 600, 440 | Larguras das três colunas (eram 330, 560 e 460: com 560, "Background motion" e outros rótulos do mockup saíam cortados, e o quadro ficava a 24 px das opções) |
 | `space` | `stepperValueW` | 190 | Largura do texto entre ◂ e ▸ |
 | `space` | `sliderW` | 220 | Trilha do slider |
 | `motion` | `popupFade` | 150 | Fade de abertura (FR-006) |
@@ -58,11 +58,11 @@ As regras da 001 continuam:
 |---|---|---|---|---|
 | Título `SYSTEM -Settings` | 48 | 42 | — | `PageHeader` |
 | Régua lisa | 48 | 112 | painel − 96 | `Rule plain` |
-| Legenda `CATEGORIES` | 118 | 136 | — | `small`, `mediumGray` |
-| Faixas verticais + categorias | 48 / 118 | 170 | 330 | `CursorList` (a pipa usa os 39 px antes do item) |
-| Nome da categoria + contagem | 518 | 136 | — | `small`; nome em tinta, contagem em `mediumGray` |
-| Opções | 518 | 170 | 560 | `OptionList`; a pipa fica nos 39 px antes |
-| Quadro de descrição | 1104 | 170 | 460 | `DescriptionCard`, altura mínima 360 |
+| Legenda `CATEGORIES` | 110 | 136 | — | `small`, `mediumGray`, alinhada com os itens |
+| Faixas verticais + categorias | 48 / 110 | 170 | 300 | `CursorList` (faixas 13 + 10 de folga + 39 da pipa = itens em 48 + 62) |
+| Nome da categoria + contagem | 480 | 136 | — | `small`; nome em tinta, contagem em `mediumGray` |
+| Opções | 480 | 170 | 600 | `OptionList`; a pipa fica nos 39 px antes; altura em linhas inteiras |
+| Quadro de descrição | 1124 | 170 | 440 | `DescriptionCard`, altura mínima 360 |
 | Régua do rodapé | 48 | 820 | painel − 96 | `Rule plain` |
 | Versão | 48 | 846 | — | `small`, `mediumGray` |
 | Teclas | direita − 48 | 846 | — | `KeyHints` |

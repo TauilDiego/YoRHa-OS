@@ -123,9 +123,9 @@ Singleton {
         readonly property real popupShare: 0.84
         readonly property real popupW: 1612
         readonly property real popupH: 908
-        readonly property real settingsCatsW: 330
-        readonly property real settingsOptsW: 560
-        readonly property real settingsCardW: 460
+        readonly property real settingsCatsW: 300
+        readonly property real settingsOptsW: 600
+        readonly property real settingsCardW: 440
         readonly property real stepperValueW: 190          // text between ◂ and ▸
         readonly property real sliderW: 220                // editable meter's track
     }

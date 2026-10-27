@@ -51,8 +51,9 @@ Item {
     // (11 px + 12 px before it) comes on top of its text.
     readonly property real textShare: 0.45
     readonly property int arrowRoom: type === "action" ? Tokens.px(11, s) + Tokens.px(12, s) : 0
+    readonly property int numberW: Tokens.px(46, s)          // the slider's number
 
-    implicitWidth: item.implicitWidth + valueBox.width + gap
+    implicitWidth: Tokens.px(Tokens.space.settingsOptsW, s)     // the parent sets the width
     implicitHeight: item.implicitHeight
 
     ListItem {
@@ -81,12 +82,26 @@ Item {
     readonly property color ink: !inked ? (dimmed ? Tokens.color.mediumGray : Tokens.color.darkGray)
                                         : (dimmed ? Qt.rgba(light.r, light.g, light.b, 0.55) : light)
 
+    // The free text at its natural width, never shown: sizing from the shown, elided label
+    // would feed its width back into itself.
+    Label {
+        id: freeMeasure
+        visible: false
+        s: root.s
+        role: "standard"
+        font.weight: Font.Medium
+        font.variableAxes: ({ "wght": Font.Medium })
+        text: root.valueText
+    }
+
     Item {
         id: valueBox
         x: root.width - item.pad - width
-        width: root.type === "slider" ? slider.width
-             : root.stepping ? stepper.implicitWidth
-             : Math.min(Math.ceil(free.implicitWidth) + root.arrowRoom, Math.round(root.width * root.textShare))
+        // From tokens only: reading the children's sizes here makes a binding loop while a
+        // delegate is being set up.
+        width: root.type === "slider" ? Tokens.px(Tokens.space.sliderW, root.s) + Tokens.px(16, root.s) + root.numberW
+             : root.stepping ? 2 * (Tokens.px(11, root.s) + Tokens.px(14, root.s)) + Tokens.px(Tokens.space.stepperValueW, root.s)
+             : Math.min(Math.ceil(freeMeasure.implicitWidth) + root.arrowRoom, Math.round(root.width * root.textShare))
         height: item.bandH
 
         ValueStepper {
@@ -122,7 +137,7 @@ Item {
                 onPicked: v => root.picked(v)
             }
             Label {
-                width: Tokens.px(46, root.s)
+                width: root.numberW
                 anchors.verticalCenter: parent.verticalCenter
                 s: root.s
                 role: "standard"
@@ -144,7 +159,7 @@ Item {
 
             Label {
                 id: free
-                width: Math.min(implicitWidth, valueBox.width - root.arrowRoom)
+                width: Math.min(Math.ceil(freeMeasure.implicitWidth), valueBox.width - root.arrowRoom)
                 anchors.verticalCenter: parent.verticalCenter
                 s: root.s
                 role: "standard"
