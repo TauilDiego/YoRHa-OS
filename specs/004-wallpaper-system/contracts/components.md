@@ -14,6 +14,16 @@ os textos, do `Strings`.
 | `GroupedList` | `model` (lista com `{ group }` e itens `{ label, trailing, dim }`), `currentIndex`, `focused`, `s` | `activated(int index)` | `CursorList` da 001 com títulos de grupo (texto `small`, sem foco). A pipa e o blink vêm da `ListItem`/`Selector`; `focused: false` = estado "sem foco" da 003 (pipa clara, parada). Se a 003 der grupos à `CursorList`, este componente vira só um alias |
 | `WallpaperPicker` | `screen` (a saída em foco) | `closeRequested()` | O seletor (FR-006–FR-009): moldura de popup da 003, título `WALLPAPER -Select`, `GroupedList` à esquerda, `Card` da prévia (nome, `WallpaperView` pequena, descrição), `Card` "Options" com linhas `Monitor`, `Transition` e `Paper filter` (só imagens) + informações (Type, Layers, Motion, Now on), rodapé de teclas. Duas colunas: lista ↔ opções (padrão da 003). `dump()` devolve o estado do data-model "Picker" |
 
+**Emenda da US6 (2026-10-27): a barra sobre o fundo**
+
+| Componente | Acréscimo | Comportamento |
+|---|---|---|
+| `WallpaperTransition` | `topProgress` (0..1, leitura), `band` (altura da faixa da barra, px lógicos) | Quanto da faixa da barra a transição em andamento já cobriu, com as mesmas contas do shader: camuflagem = fração das células da faixa já reveladas; varredura = borda ÷ largura; quadradinhos = fração dos quadradinhos das linhas da faixa já começados; crossfade = progresso. Sinal `begun()` quando uma transição começa |
+| `WallpaperView` | `luma` (leitura, −1 até medir) | Imagem: quando fica pronta e não há medida guardada, mede a faixa de cima (`grabToImage` + `Canvas.getImageData`) e guarda no catálogo |
+| `Wallpaper` | publica `WallpaperStore.setToneMix` | Parado: o tom do fundo na tela. Numa transição: `de + (para − de) × smoothstep(topProgress)`. Esperando a imagem nova ou a medida dela: segura o tom |
+| `Label`, `Rule`, `HeaderButton`, `Meter`, `TabBar` (001) | `property real tone: 0` | Cores = `Tokens.hudColor(papel, tone)` (FR-028). Com 0, as cores de antes, sem conta |
+| `Hud` (001) | `color: "transparent"`, sem `Rectangle` nem `Vignette` | Lê `WallpaperStore.toneMix[monitor]` e passa pros componentes; `dumpEntry()` ganha `tone`, `toneMix` e `texts` |
+
 ## Reaproveitados
 
 | De | Componente | Uso aqui |

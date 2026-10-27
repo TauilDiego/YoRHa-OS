@@ -32,3 +32,8 @@ Formato do `hud dump`, com uma entrada por monitor:
 
 `x` e `w` são a posição e a largura da aba na janela, em px lógicos (servem pros testes de
 clique). Os estados de aba no `dump` são `selected` (em foco), `normal` (existe) e `dimmed` (apagada).
+
+**Acréscimo da spec 004 (US6, 2026-10-27):** cada entrada ganha `tone` (`"paper"`/`"light"`),
+`toneMix` (0..1) e `texts` (caixa e cor de cada texto da barra), e o alvo `hud` ganha `visible(on:
+bool)`, só pra testes. O formato está em `specs/004-wallpaper-system/contracts/ipc.md`, "Emenda da
+US6".
