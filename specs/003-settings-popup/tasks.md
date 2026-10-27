@@ -121,10 +121,10 @@ teclas com o `dump` a cada passo; quadros do blink).
 **Independent Test**: cenário 6 do quickstart (uma mudança de cada tipo, por tecla e por clique,
 conferida no `dump` e no screenshot).
 
-- [ ] T032 [US3] `SettingsPage`: ←/→/Enter e cliques ligados ao `SettingsModel` (`step`, `activate`, `pick`), com "← numa linha que não muda volta pras categorias"; `OptionList` recebe `values` e `dims` do modelo
-- [ ] T033 [US3] Quadro: `DEFAULT`/`NOW`, aviso de dependência (`needsText`, `alert`) e aviso de ação (`busy`, tinta) que some sozinho
-- [ ] T034 [US3] Fechar e abrir mantém os valores; reiniciar o shell (`lab/ssh 'pkill -x qs'`) volta ao catálogo (FR-018)
-- [ ] T035 [US3] `lab/check-003`: cenário 6. Validar no lab (`lab/perf begin "003: US3"`)
+- [x] T032 [US3] `SettingsPage`: ←/→/Enter e cliques ligados ao `SettingsModel` (`step`, `activate`, `pick`), com "← numa linha que não muda volta pras categorias"; `OptionList` recebe `values` e `dims` do modelo — já ligado na US2 (teclas e cliques chamam `step`/`activate`/`pick`). Sessão `2026-10-27T161514-vm-teste-a-003-us3-mudar-valores`
+- [x] T033 [US3] Quadro: `DEFAULT`/`NOW`, aviso de dependência (`needsText`, `alert`) e aviso de ação (`busy`, tinta) que some sozinho — aviso de dependência em `alert`, aviso de ação em tinta (`noteKind`). Sessão `2026-10-27T161514-vm-teste-a-003-us3-mudar-valores`
+- [x] T034 [US3] Fechar e abrir mantém os valores; reiniciar o shell (`lab/ssh 'pkill -x qs'`) volta ao catálogo (FR-018) — conferido no cenário 6: fechar e abrir mantém Night light/Scale/Brightness; depois de `pkill -x qs` voltam a OFF/1.25×/70. Sessão `2026-10-27T161514-vm-teste-a-003-us3-mudar-valores`
+- [x] T035 [US3] `lab/check-003`: cenário 6. Validar no lab (`lab/perf begin "003: US3"`) — `lab/check-003 --only 6,9`: 5 PASS em `out/check-003-us3` (passo a passo em `sc006-steps.txt`). Sessão `2026-10-27T161514-vm-teste-a-003-us3-mudar-valores`
 
 **Checkpoint**: as três histórias funcionam.
 
