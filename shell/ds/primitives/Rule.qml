@@ -5,8 +5,9 @@ import ".."
 // Rules (design-system §2, §6).
 //   plain:    a 2 px ink line; the parent sets the width.
 //   dotted:   the same line with the game's pattern underneath, repeating every 77 px:
-//             a 12×4 tick hanging from the line and a ∵ trio of dots (centers 16 apart,
-//             second row 12 px lower). The line sits at the top of the item.
+//             a 12×4 tick hanging from the line and, halfway to the next tick, a ∵ trio of
+//             round dots (centers 16 apart, second row 12 px lower), as in the Figma.
+//             The line sits at the top of the item.
 //   vertical: the double strips at the left of tab bars and lists (3 px + 4 gap + 6 px);
 //             the parent sets the height.
 Item {
@@ -126,6 +127,8 @@ Item {
         }
 
         readonly property real dz: ph(root.dot)
+        // Round dots, as in the Figma; below 4 physical px a crisp square reads as a dot anyway.
+        readonly property real dotRadius: dz * d >= 4 ? dz / 2 : 0
         readonly property real tw: ph(root.tickW)
         readonly property real th: ph(root.tickH)
         readonly property real step: g(root.period * root.s)
@@ -167,18 +170,21 @@ Item {
                     visible: cell.trio
                     x: marks.sx(cell.cx - marks.dx); y: marks.y1
                     width: marks.dz; height: marks.dz
+                    radius: marks.dotRadius
                     color: root.color
                 }
                 Rectangle {
                     visible: cell.trio
                     x: marks.sx(cell.cx + marks.dx); y: marks.y1
                     width: marks.dz; height: marks.dz
+                    radius: marks.dotRadius
                     color: root.color
                 }
                 Rectangle {
                     visible: cell.trio
                     x: marks.sx(cell.cx); y: marks.y2
                     width: marks.dz; height: marks.dz
+                    radius: marks.dotRadius
                     color: root.color
                 }
             }

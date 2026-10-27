@@ -7,13 +7,16 @@ import ".."
 // The Pod cursor (FR-005): a kite pointing right, with a round hole near the back, plus two
 // small ink squares at its tip, one above and one below the axis. The item's right edge is
 // the kite's tip; the parent leaves Tokens.space.selectorGap between it and the target.
-// With `bobbing`, the whole group sways horizontally as a sine; frozen → rests at 0.
+// It stays still, as in the game. `shown` blinks it: hiding fades out (ease-in) in half of
+// Tokens.motion.blink; showing waits that half, then fades in (ease-out). When the cursor moves,
+// the old item's selector fades out while the new one waits, so it reads as one blink.
+// Frozen (fixtures): no fade, so screenshots stay identical.
 Item {
     id: root
 
     property real s: 1
     property string tone: "dark"                 // kite color: "dark" (ink) or "light"
-    property bool bobbing: false
+    property bool shown: false
 
     // Kite geometry (game px × s): back vertex, shoulder 10 px behind it, tip; hole near the back.
     readonly property real kiteW: Tokens.space.selectorW * s
@@ -28,23 +31,31 @@ Item {
     implicitWidth: Tokens.px(Tokens.space.selectorW, s)
     implicitHeight: 2 * dotOffset + dot
 
-    // Horizontal sway (±amplitude, one period per cycle), in whole pixels so edges stay crisp.
-    property real offset: 0
-    readonly property real amplitude: Tokens.motion.bobAmplitude * s
-    readonly property int period: Tokens.motion.bobPeriod
-    readonly property bool swaying: bobbing && visible && !Tokens.frozen
-    onSwayingChanged: if (!swaying) offset = 0
+    // The blink: half the time out, half in.
+    readonly property int half: Tokens.frozen ? 0 : Math.round(Tokens.motion.blink / 2)
 
-    SequentialAnimation on offset {
-        running: root.swaying
-        loops: Animation.Infinite
-        NumberAnimation { from: 0; to: root.amplitude; duration: root.period / 4; easing.type: Easing.OutSine }
-        NumberAnimation { from: root.amplitude; to: -root.amplitude; duration: root.period / 2; easing.type: Easing.InOutSine }
-        NumberAnimation { from: -root.amplitude; to: 0; duration: root.period / 4; easing.type: Easing.InSine }
+    opacity: 0
+    visible: opacity > 0
+    states: State {
+        name: "shown"
+        when: root.shown
+        PropertyChanges { root.opacity: 1 }
     }
+    transitions: [
+        Transition {
+            to: "shown"
+            SequentialAnimation {
+                PauseAnimation { duration: root.half }
+                NumberAnimation { property: "opacity"; duration: root.half; easing.type: Easing.OutSine }
+            }
+        },
+        Transition {
+            from: "shown"
+            NumberAnimation { property: "opacity"; duration: root.half; easing.type: Easing.InSine }
+        }
+    ]
 
     Item {
-        x: Math.round(root.offset)
         width: root.width
         height: root.height
 

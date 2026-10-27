@@ -122,8 +122,7 @@ Singleton {
         readonly property int highlight: 150               // ink sweep (FR-004), calibrate later
         readonly property int touch: 160                   // selected tab's stem down to the rule
         readonly property int untouch: 120                 // the stem back up, when deselected
-        readonly property int bobPeriod: 1000              // selector bob (FR-005)
-        readonly property real bobAmplitude: 5
+        readonly property int blink: 240                   // selector blink on move, total (FR-005)
         readonly property int meter: 250                   // meter value change
     }
     // Set by shell.qml while fixtures are active, so screenshots are pixel-identical (SC-002).

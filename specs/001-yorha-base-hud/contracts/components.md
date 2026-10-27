@@ -27,7 +27,7 @@ Regras para todos os componentes:
 |---|---|---|---|
 | `HeaderButton` | `text`, `state`: `"normal"` / `"hovered"` / `"selected"` / `"dimmed"`, `reachRule: bool`, `ruleY` | `clicked()` | 214×47·s. Com `selected` + `reachRule`, uma haste desce até a régua logo depois da tinta (`motion.touch`) e recolhe ao perder a seleção (`motion.untouch`) (FR-011). Sem `Selector`: aba não tem pipa |
 | `ListItem` | `text`, `state` (os mesmos 4), `variant`: `"opaque"` / `"plain"`, `trailing: string` | `clicked()` | Faixa de tinta que pinta da esquerda pra direita + trilhos + sombra (FR-004) |
-| `Selector` | `tone`: `"dark"` / `"light"`, `bobbing: bool` | — | Pipa + 2 quadradinhos, balançando juntos (FR-005). Congela quando `Tokens.motion.frozen` |
+| `Selector` | `tone`: `"dark"` / `"light"`, `shown: bool` | — | Pipa + 2 quadradinhos, parados. `shown` pisca: some com ease-in em meio `motion.blink`; aparece depois de meio `motion.blink`, com ease-out (FR-005). Sem fade quando `Tokens.frozen` |
 | `Meter` | `value` (0–1), `critical: bool`, `w` (padrão 163), `h` (padrão 11) | — | `hp-bar` chapado. Anima a mudança de valor. `critical` → `alert` (FR-007) |
 | `PageHeader` | `title`, `subtitle` | — | Caixa alta + sombra proporcional (FR-006) |
 | `Card` | `title`, `default property` (corpo), `footer` | — | Cabeçalho de tinta + corpo `lightYellow` |

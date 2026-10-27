@@ -70,7 +70,7 @@ O dono do projeto (e os agentes que vão construir as próximas telas) abre uma 
 todas as peças do design system lado a lado, cada uma nos seus estados:
 - primitivas: marcador quadrado, réguas (lisa, pontilhada e vertical), fundo com grid;
 - botão-aba e item de lista: normal, destacado, selecionado e apagado;
-- seletor balançando (claro e escuro);
+- seletor (claro e escuro);
 - medidor (normal e crítico);
 - título de página;
 - card;
@@ -176,8 +176,9 @@ com dados de teste, dois screenshots seguidos saem iguais.
   A duração da transição é um token, começando em 0,15 s (a análise do jogo estima ≈100–150 ms);
   o valor final é calibrado depois.
 - **FR-005**: O cursor de seleção MUST ser a pipa (seletor) + 2 quadradinhos empilhados entre a
-  ponta dela e o item, e MUST balançar lateralmente como um bloco só, de forma contínua e suave,
-  enquanto está visível. Ele aparece no item de lista destacado e no selecionado; as abas não têm seletor
+  ponta dela e o item. Ele fica parado, como no jogo; ao trocar de item, MUST piscar: some do
+  item antigo e reaparece no novo, com ease in-out, em `motion.blink` (≈240 ms no total; pedido do
+  dono em 2026-10-27). Ele aparece no item de lista destacado e no selecionado; as abas não têm seletor
   (decisão do dono em 2026-10-27).
 - **FR-006**: Títulos de página MUST aparecer em caixa alta, com espaçamento largo entre letras
   e a sombra `text-shadow` chapada, deslocada pra baixo e pra direita em ≈15% do tamanho do

@@ -100,8 +100,9 @@ Cantos sempre retos (raio 0).
   invertido.
 - **Régua:**
   - **lisa;**
-  - **pontilhada:** uma linha com pontos e pequenos traços embaixo; aparece sob a barra de abas
-    e no rodapé;
+  - **pontilhada:** uma linha com um traço pendurado embaixo a cada 77 px e, no meio do caminho
+    entre dois traços, um trio ∵ de pontos **redondos** (como no Figma); aparece sob a barra de
+    abas e no rodapé;
   - **vertical:** as faixas duplas na lateral das listas.
 - **Fundo:** papel `dark-yellow`, grid a 6%, arcos de círculo e feixes de linhas diagonais finas.
   Medido nas capturas do jogo (§6):
@@ -140,7 +141,8 @@ e outro abaixo do eixo. Medidas aproximadas, tiradas do Figma em 1×:
 - os centros dos quadradinhos ficam a ±10 px do eixo, alinhados com a ponta, ≈7 px antes do
   item.
 
-O balanço move a pipa e os quadradinhos juntos.
+A pipa e os quadradinhos ficam **parados**, como no jogo. Ao trocar de item, eles piscam juntos:
+somem do item antigo e reaparecem no novo, com ease in-out (`motion.blink`, ≈240 ms no total).
 
 ### Item de lista
 
@@ -187,6 +189,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 | Fontes | Comerciais | M PLUS 1 por padrão; as originais quando estiverem instaladas |
 | Alerta | Não existe | `alert` `#8F3A30`, só pra estados críticos |
 | Sombra do título | 8,8 fixo | Proporcional ao tamanho do texto (≈15%) |
+| Cursor (pipa) | Parado; pula de um item pro outro | **Decidido (2026-10-27):** parado, e pisca ao trocar de item (some e reaparece com ease in-out, `motion.blink` ≈240 ms) |
 | Abas da barra | Seletor (pipa) ao lado da aba em foco | **Decidido (2026-10-27):** as abas nunca têm seletor, nem no HUD nem nos menus: só as abas lado a lado. A pipa fica só nos itens de lista |
 | Fundo do desktop | Só nos menus | **Decidido (2026-10-27):** o fundo inteiro da área de trabalho é o papel do menu (grid, vinheta, arcos e feixes, com movimento sutil que pode ser desligado), no lugar do wallpaper |
 | Vinheta | Em todos os menus | Como no jogo (bordas `#A6A18D`, cantos `#8B8877`), desligável. Nos menus de tela cheia e na tela inteira do desktop: o fundo e o papel da barra do topo formam uma vinheta só, sem emenda (2026-10-27). As janelas, as abas, a régua e os textos ficam por cima, sem vinheta |
@@ -222,7 +225,7 @@ convertidas pra 1080p (×1,2). As imagens ficam só no repositório privado, pra
 | Margem horizontal | 62 | **M** 62 nos dois lados | Seguir o Figma |
 | Margem vertical | 39 | **M** abas começam em y=37; a régua de baixo fica a ≈62 da borda | Seguir o Figma; a de baixo é maior |
 | Régua sob as abas | — | **M** linha de 2 px; tracinhos de 12×3–5 px a cada 77 px embaixo | Adotar |
-| Régua pontilhada | — | **M** a cada 77 px, um trio de pontos (∵) de ≈7 px, centros a 16 px, 2ª fileira 12 px abaixo | Adotar |
+| Régua pontilhada | — | **M** a cada 77 px, um traço de 12×4 pendurado na linha e, no meio do caminho até o próximo, um trio de pontos redondos (∵) de ≈6–7 px, centros a 16 px, 2ª fileira 12 px abaixo (confere com o Figma) | Adotar |
 | Título da página | 55, tracking 3 | **M** maiúsculas de 42 px → **E** fonte ≈56–58 | Seguir o Figma |
 | Sombra do título | 8,8 | **M** ≈(8–9, 8), dura, cor ≈`#8C897C` | Manter; proporcional (§5) |
 | Sombra de painéis | 3,3 | **M** 3–4 px, dura, ≈`#716D61` | Seguir o Figma |
@@ -244,7 +247,7 @@ convertidas pra 1080p (×1,2). As imagens ficam só no repositório privado, pra
   de fechar.
 - **Realce de item:** a faixa varre da esquerda pra direita junto com os trilhos, em ≈100–150 ms
   com desaceleração. A spec fala em 0,2 s.
-- **Balanço do cursor:** senoidal, período ≈1 s, amplitude ≈4–6 px.
+- **Cursor:** parado. O rien-OS acrescenta um blink suave quando ele troca de item (ver §5).
 - **Fechar o menu:** a tela se desfaz em estilhaços triangulares, em ≈300–500 ms.
 - **Estado danificado:** aberração cromática e glitch no texto.
 - Os tempos ficam em tokens, pra calibrar depois com gravação a 60 fps no laboratório.

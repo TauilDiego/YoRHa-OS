@@ -247,7 +247,7 @@ PanelWindow {
                                     anchors.centerIn: parent
                                     s: root.s
                                     tone: swatch.modelData
-                                    bobbing: true
+                                    shown: true
                                 }
                             }
                             Caption {

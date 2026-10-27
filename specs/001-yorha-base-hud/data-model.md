@@ -13,7 +13,7 @@ Fonte única dos valores do `docs/design-system.md`. Todos os tamanhos estão em
 | `type` | `pageHeader`, `subheader`, `headerButton`, `listButton`, `cardHeader`, `standard`, `small`, `button`: cada um com `{ family, size, weight, letterSpacing }` | `family` = M PLUS 1, ou a original quando instalada (R7) |
 | `shadow` | `text { ratio: 0.15 }`, `box { x: 3, y: 3 }`, `soft { x: 3, y: 3, blur: 4, color }` | O `text` é proporcional ao tamanho (FR-006) |
 | `space` | `buttonMargin` 10, `pageMarginH` 62, `pageMarginV` 39, `tabH` 47, `tabW` 214, `meterW` 163, `meterH` 11, `selector { w: 32, h: 14, dot: 5, dotOffset: 10, gap: 7 }` | Medidas do §1, §3 e §6 |
-| `motion` | `highlight` 150, `touch` 160, `untouch` 120, `bobPeriod` 1000, `bobAmplitude` 5, `frozen` (bool) | `frozen` = true quando há fixtures (R8) |
+| `motion` | `highlight` 150, `touch` 160, `untouch` 120, `blink` 240, `frozen` (bool) | `frozen` = true quando há fixtures (R8) |
 | `vignette` | `edge` `#A6A18D`, `corner` `#8B8877` | FR-002a |
 | funções | `line(v, s)`, `px(v, s)` | `line` ≥ 1 e inteiro |
 

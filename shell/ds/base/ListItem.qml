@@ -9,8 +9,8 @@ import "../primitives"
 //   variant: "opaque" (lightGray band at rest, category lists) or "plain" (no band at rest).
 //   Hovered/selected: the ink band, its rails (2 px, 5 px above and below) and its box shadow
 //   sweep in from the left together.
-// The parent sets the width. Like HeaderButton, the Selector hangs to the left at
-// x = -selectorRoom, outside the item.
+// The parent sets the width. The Selector hangs to the left at x = -selectorRoom, outside the
+// item; the parent keeps that room free.
 Item {
     id: root
 
@@ -149,9 +149,8 @@ Item {
         x: -root.selectorRoom
         y: Math.round((root.bandH - height) / 2)
         s: root.s
-        visible: root.inked
+        shown: root.inked
         tone: root.state === "selected" ? "light" : "dark"
-        bobbing: true
     }
 
     MouseArea {
