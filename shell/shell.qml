@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "ds"
+import "hud"
 import "services"
 
 ShellRoot {
@@ -16,6 +17,14 @@ ShellRoot {
     }
 
     property bool galleryOpen: false
+
+    // One HUD per monitor (FR-009).
+    Variants {
+        id: huds
+        model: Quickshell.screens
+
+        Hud {}
+    }
 
     // --- IPC (contracts/ipc.md) ---------------------------------------------------------------
     IpcHandler {
@@ -34,6 +43,11 @@ ShellRoot {
 
     IpcHandler {
         target: "hud"
-        function dump(): string { return JSON.stringify([]); }
+        function dump(): string {
+            const out = [];
+            for (const hud of huds.instances)
+                out.push(hud.dumpEntry());
+            return JSON.stringify(out);
+        }
     }
 }
