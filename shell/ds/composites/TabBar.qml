@@ -64,6 +64,7 @@ Item {
                 state: entry.state ?? "normal"
                 reachRule: true
                 ruleY: root.ruleY
+                selectorTone: "dark"                 // the selector always hangs over the paper
                 onClicked: root.activated(index)
                 onHoveredChanged: {
                     if (hovered)

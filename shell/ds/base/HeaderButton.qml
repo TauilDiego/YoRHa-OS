@@ -20,6 +20,7 @@ Item {
     property bool reachRule: false
     property real ruleY: 0
     property real fixedWidth: 0                  // game px; 0 = fit the label
+    property string selectorTone: ""             // "dark" / "light"; "" = light when selected
 
     readonly property bool hovered: mouse.containsMouse
     readonly property int selectorRoom: Tokens.px(Tokens.space.selectorW + Tokens.space.selectorGap, s)
@@ -114,7 +115,7 @@ Item {
         y: Math.round((root.bandH - height) / 2)
         s: root.s
         visible: root.inked
-        tone: root.state === "selected" ? "light" : "dark"
+        tone: root.selectorTone || (root.state === "selected" ? "light" : "dark")
         bobbing: true
     }
 
