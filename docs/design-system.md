@@ -193,7 +193,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 | Sombra do título | 8,8 fixo | Proporcional ao tamanho do texto (≈15%) |
 | Cursor (pipa) | Parado; pula de um item pro outro | **Decidido (2026-10-27):** parado, e pisca ao trocar de item (some e reaparece com ease in-out, `motion.blink` ≈240 ms) |
 | Abas da barra | Seletor (pipa) ao lado da aba em foco | **Decidido (2026-10-27):** as abas nunca têm seletor, nem no HUD nem nos menus: só as abas lado a lado. A pipa fica só nos itens de lista |
-| Fundo do desktop | Só nos menus | **Decidido (2026-10-27):** o fundo inteiro da área de trabalho é o papel do menu (vinheta, arcos e feixes, sem grid, com movimento sutil que pode ser desligado). Desde a spec 004 ele é um papel de parede do próprio rien-OS, trocável (§7) |
+| Fundo do desktop | Só nos menus | **Decidido (2026-10-27):** o fundo inteiro da área de trabalho é o papel do menu (vinheta, arcos e feixes, sem grid, com movimento sutil que pode ser desligado). Desde a spec 004 ele é um papel de parede do próprio rien-OS, trocável (§8) |
 | Vinheta | Em todos os menus | Como no jogo (bordas `#A6A18D`, cantos `#8B8877`), desligável. Nos menus de tela cheia e na tela inteira do desktop: o fundo e o papel da barra do topo formam uma vinheta só, sem emenda (2026-10-27). As janelas, as abas, a régua e os textos ficam por cima, sem vinheta |
 
 ### Escala
@@ -256,7 +256,126 @@ convertidas pra 1080p (×1,2). As imagens ficam só no repositório privado, pra
 - **Estado danificado:** aberração cromática e glitch no texto.
 - Os tempos ficam em tokens, pra calibrar depois com gravação a 60 fps no laboratório.
 
-## 7. Papel de parede (spec 004)
+## 7. Popup e configurações (spec 003)
+
+As peças da tela de configurações (`specs/003-settings-popup`), que viram padrão dos menus do U3.
+Medidas em px do jogo; cada superfície multiplica pelo seu `s`. Todas estão na página 2 da
+galeria (Tab), com os estados abaixo.
+
+### Tokens novos
+
+| Token | Valor | Uso |
+|---|---|---|
+| `color.dim` | `#141310` a 55% | Escurecimento do desktop atrás do popup. **Sem desfoque** (constituição VII) |
+| `shadow.popup` | 6, em tinta | Sombra chapada do painel. A `box-shadow` clara viraria brilho sobre o escurecimento |
+| `space.popupShare` | 0,84 | Fração da tela ocupada pelo painel |
+| `space.popupW` × `popupH` | 1612 × 908 | Quadro de desenho do painel (84% de 1920 × 1080) |
+| `space.settingsCatsW` / `OptsW` / `CardW` | 300 / 600 / 440 | As três colunas das configurações |
+| `space.stepperValueW` | 190 | Texto entre ◂ e ▸ |
+| `space.sliderW` | 220 | Trilha do slider |
+| `motion.popupFade` | 150 ms | Fade de abertura do popup e do escurecimento; o fechamento é imediato |
+| `motion.actionBusy` | 2000 ms | Quanto tempo o aviso de uma ação fica no quadro |
+| `reduced` / `instant` | — | Movimento reduzido (`reduceMotion` no `shell.json`): o fade e o blink da pipa ficam instantâneos, como com fixtures |
+
+### Moldura de popup (`PopupFrame`, `PopupWindow`)
+
+- Uma janela só, transparente, na camada `Overlay`, cobrindo o monitor em foco.
+- O resto da tela fica sob `color.dim` (janelas, barra do topo e fundo continuam visíveis).
+- No centro, o painel de papel com `popupShare` da largura e da altura, sombra `shadow.popup` e a
+  vinheta própria (a mesma config `vignette`).
+- **Dentro do painel:**
+  - título de página (`SYSTEM -Settings`) em (48, 42);
+  - régua lisa em y 112;
+  - régua lisa 88 px acima do fundo;
+  - texto à esquerda do rodapé (`small`, `medium-gray`);
+  - rodapé de teclas à direita.
+- **Escala:** `s` = o menor entre altura do painel / 908 e largura / 1612, × `uiScale`. Em telas
+  16:10 a sobra vai pra altura, e o rodapé fica colado embaixo.
+- **Interação:**
+  - teclado exclusivo enquanto aberto;
+  - clique no escurecimento fecha;
+  - o fade de abertura vale pros dois juntos.
+- **Fechamento em duas fases:** some e solta o teclado na hora; a janela sai 150 ms depois.
+- **Reuso:** a mesma moldura serve o seletor de papel de parede (spec 004).
+
+### Lista de categorias sem foco (`CursorList`, `focused: false`)
+
+O item atual fica `selected`: faixa, trilhos e a pipa **clara e parada**. Passar o foco de uma
+coluna pra outra não pisca a pipa clara; a escura pisca ao entrar no item novo.
+
+### Linha de opção (`OptionRow`)
+
+O item de lista `plain` (sem faixa em repouso) com o valor à direita, a 16 px da borda.
+
+| Tipo | Valor | ← / → | Enter / clique |
+|---|---|---|---|
+| liga/desliga | `◂ ON ▸` / `◂ OFF ▸` | alterna | alterna |
+| escolha | `◂ valor ▸`, seta da ponta a 30% | anda, sem dar a volta | avança, dando a volta |
+| slider | trilha de 220 × 11 + número (46 px, à direita) | ± o passo da opção, 0–100 | clique ou arraste na trilha: o ponto clicado |
+| ação | rótulo + seta (11 × 16) | ← volta pras categorias | aviso no quadro por `actionBusy` |
+| informação | texto `medium-gray` | ← volta pras categorias | nada |
+
+| Estado | Faixa | Texto e valor | Pipa | Setas ◂ ▸ |
+|---|---|---|---|---|
+| normal | nenhuma | tinta | — | escondidas (o espaço fica) |
+| em foco | tinta, trilhos, sombra | `light-yellow` quando a varredura passa por eles; informação a 75% | escura | visíveis |
+| apagada | nenhuma | `medium-gray` | — | escondidas |
+| apagada + em foco | tinta | `light-yellow` a 55% | escura | visíveis, apagadas |
+
+- Rótulos e valores longos cortam com reticências.
+- O texto livre (ação, informação) ocupa no máximo 45% da linha.
+- Os valores usam 23 px, peso 500 e algarismos tabulares.
+
+### Seletor de valor (`ValueStepper`)
+
+`◂ valor ▸`:
+- triângulos de 11 × 16;
+- 14 px até o texto;
+- o texto centrado em 190 px.
+
+As setas só aparecem na linha em foco. A da ponta da lista fica a 30% e o clique numa seta muda o
+valor pra esse lado.
+
+### Slider (`Meter` editável)
+
+O medidor do HUD com dois acréscimos:
+- `editable`: clique ou arraste na trilha (área de toque 12 px acima e abaixo);
+- `inverted`: trilha `medium-gray` e preenchimento `light-yellow`, sobre a faixa de tinta.
+
+### Quadro de descrição (`DescriptionCard`)
+
+O `Card` com o quadrado claro de 14 px antes do título, como no mockup.
+- **Corpo:** a descrição (23 px, peso 500, linhas a 1,5 × o tamanho); depois um aviso (18 px,
+  peso 600): `alert` pro que fazer antes ("Turn on Wi-Fi first.") ou tinta pra ação em andamento.
+- **Pé:** linhas `DEFAULT` / `NOW`, ou `SETTINGS` com o foco nas categorias. O rótulo vai em
+  `medium-gray` e o valor em peso 600.
+- **Altura:** mínima de 360, cresce com o texto até o rodapé. O que não couber corta com
+  reticências.
+
+### Rodapé de teclas (`KeyHints`)
+
+Caixa de tinta com a tecla (`button`, `light-yellow`), de 34 × 30 no mínimo e 8 px de folga dos
+lados, e o rótulo `small` a 12 px; 34 px entre as dicas. Mostra só as teclas que valem no foco
+atual:
+
+| Foco | Teclas |
+|---|---|
+| categorias | `↑↓ Select` `→ Open` `Esc Close` (sem `→ Open` numa categoria vazia) |
+| opção que muda | `↑↓ Select` `←→ Change` `Esc Back` |
+| ação | `↑↓ Select` `Enter <ação>` `Esc Back` |
+| informação ou apagada | `↑↓ Select` `Esc Back` |
+
+### Foco em duas colunas (a regra)
+
+- **Um foco só:** fica nas categorias ou nas opções.
+- **Mover nas categorias** já troca as opções; → ou Enter entra; Esc volta (ou fecha, nas
+  categorias); ← numa linha que não muda também volta.
+- **O mouse move o foco junto,** mas só quando o ponteiro se mexe de verdade: um ponteiro parado
+  sobre itens que aparecem embaixo dele (popup abrindo, outra categoria) não rouba o foco do
+  teclado.
+- **Rolagem:** uma coluna que não cabe rola em linhas inteiras, com a pipa sempre visível.
+
+## 8. Papel de parede (spec 004)
 
 O rien-OS desenha o próprio papel de parede, sem ferramenta de fora (`swww`, `hyprpaper`…): um
 fundo por monitor na camada de fundo do Wayland. Cada monitor mostra a escolha dele, ou a de

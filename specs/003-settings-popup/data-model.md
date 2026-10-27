@@ -71,6 +71,7 @@ opções de verdade fica pra uma spec futura.
 | `focus` | enum `categories`, `options` | Uma coluna só tem o foco (FR-010) |
 | `category` | int | Índice; mover nas categorias troca as opções na hora |
 | `option` | int | Índice; volta a 0 quando a categoria muda; `null` no `dump` com o foco nas categorias |
+| `busy` | string | Do `SettingsModel`: `"cat.opt"` da ação em andamento, ou `""` |
 
 **Transições do foco (FR-010):**
 

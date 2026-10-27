@@ -7,6 +7,7 @@ import "../ds"
 import "../ds/primitives"
 import "../ds/base"
 import "../ds/composites"
+import "../popup"
 import "../services"
 import "../strings"
 
@@ -19,6 +20,8 @@ PanelWindow {
     id: root
 
     signal closeRequested()
+
+    property int page: 0                      // spec 003: Tab switches to the second page
 
     readonly property real s: height > 0 ? height / 1080 : 1
     readonly property var states4: ["normal", "hovered", "selected", "dimmed"]
@@ -94,6 +97,7 @@ PanelWindow {
         anchors.fill: parent
         focus: true
         Keys.onEscapePressed: root.closeRequested()
+        Keys.onTabPressed: root.page = (root.page + 1) % 2     // spec 003: the second page
 
         Rectangle {
             anchors.fill: parent
@@ -404,6 +408,239 @@ PanelWindow {
             anchors.fill: parent
             s: root.s
             enabled: Settings.vignette
+        }
+
+        // --- spec 003: page 2 (Tab), the settings pop-up's pieces (FR-024, SC-008) -------------
+        // Samples come from the settings catalog (SettingsModel), shown as they are.
+        Rectangle {
+            id: page2
+            anchors.fill: parent
+            visible: root.page === 1
+            color: Tokens.color.darkYellow
+
+            readonly property var states3: ["normal", "focused", "dimmed"]
+            readonly property var stateNames3: [Strings.gallery.stateNormal, Strings.gallery.stateFocused, Strings.gallery.stateDimmed]
+            // One option of each type, by its place in the default catalog.
+            readonly property var samples: [["display", "night"], ["display", "scale"], ["display", "brightness"], ["bluetooth", "pair"], ["power", "battery"]]
+            function sample(i: int): var {
+                return SettingsModel.find(samples[i][0], samples[i][1]);
+            }
+            function sampleValue(i: int): var {
+                return SettingsModel.value(samples[i][0], samples[i][1]);
+            }
+            readonly property var keysCategories: [
+                { key: Strings.settings.keyUpDown, label: Strings.settings.select },
+                { key: Strings.settings.keyRight, label: Strings.settings.open },
+                { key: Strings.settings.keyEsc, label: Strings.settings.close }
+            ]
+            readonly property var keysOption: [
+                { key: Strings.settings.keyUpDown, label: Strings.settings.select },
+                { key: Strings.settings.keyLeftRight, label: Strings.settings.change },
+                { key: Strings.settings.keyEsc, label: Strings.settings.back }
+            ]
+
+            PageHeader {
+                x: root.u(Tokens.space.pageMarginH)
+                y: root.u(Tokens.space.pageMarginV)
+                s: root.s
+                title: Strings.gallery.title
+                subtitle: Strings.gallery.page2Subtitle
+            }
+
+            Rule {
+                x: root.u(Tokens.space.pageMarginH)
+                y: root.u(128)
+                width: parent.width - 2 * x
+                s: root.s
+            }
+
+            // Option rows: the five types (rows) in three states (columns).
+            Repeater {
+                model: 3
+                Section {
+                    id: stateCol
+                    required property int index
+                    x: root.u(Tokens.space.pageMarginH + index * (root.colW + root.colGap))
+                    y: root.u(root.bodyY)
+                    name: index === 0 ? Strings.gallery.optionRow + " · " + page2.stateNames3[0] : page2.stateNames3[index]
+                    spacing: root.u(12) + Tokens.px(Tokens.space.railGap, root.s) + Tokens.line(Tokens.space.rail, root.s)
+
+                    Column {
+                        spacing: Tokens.px(Tokens.space.listItemGap, root.s)
+                        Repeater {
+                            model: 5
+                            OptionRow {
+                                required property int index
+                                readonly property int selectorRoom: Tokens.px(Tokens.space.selectorW + Tokens.space.selectorGap, root.s)
+                                x: selectorRoom
+                                width: root.u(root.colW) - selectorRoom - root.u(Tokens.shadow.boxX)
+                                s: root.s
+                                option: page2.sample(index) ?? ({})
+                                value: page2.sampleValue(index)
+                                focused: stateCol.index === 1 || (stateCol.index === 2 && index === 3)
+                                dimmed: stateCol.index === 2
+                            }
+                        }
+                    }
+                }
+            }
+
+            // --- bottom, column 1: value stepper, editable meter, key hints
+            Column {
+                x: root.u(Tokens.space.pageMarginH)
+                y: root.u(540)
+                spacing: root.u(24)
+
+                Section {
+                    name: Strings.gallery.valueStepper
+                    Repeater {
+                        model: [[Strings.gallery.stepperMiddle, 1], [Strings.gallery.stepperStart, 0], [Strings.gallery.stepperEnd, 3]]
+                        SampleRow {
+                            id: stepRow
+                            required property var modelData
+                            name: modelData[0]
+                            height: root.u(30)
+                            ValueStepper {
+                                anchors.verticalCenter: parent.verticalCenter
+                                s: root.s
+                                arrows: true
+                                text: page2.sample(1)?.values?.[stepRow.modelData[1]] ?? ""
+                                atStart: stepRow.modelData[1] === 0
+                                atEnd: stepRow.modelData[1] === 3
+                            }
+                        }
+                    }
+                }
+
+                Section {
+                    name: Strings.gallery.meter
+                    SampleRow {
+                        name: Strings.gallery.meterEditable
+                        height: root.u(30)
+                        Meter {
+                            id: editableMeter
+                            anchors.verticalCenter: parent.verticalCenter
+                            s: root.s
+                            w: Tokens.space.sliderW
+                            value: 0.7
+                            editable: true
+                            onPicked: v => value = v
+                        }
+                    }
+                    SampleRow {
+                        name: Strings.gallery.meterInverted
+                        height: root.u(30)
+                        Rectangle {
+                            width: root.u(Tokens.space.sliderW + 24)
+                            height: parent.height
+                            color: Tokens.color.darkGray
+                            Meter {
+                                anchors.centerIn: parent
+                                s: root.s
+                                w: Tokens.space.sliderW
+                                value: 0.7
+                                inverted: true
+                            }
+                        }
+                    }
+                }
+
+                Section {
+                    name: Strings.gallery.keyHints
+                    KeyHints {
+                        s: root.s
+                        model: page2.keysCategories
+                    }
+                    KeyHints {
+                        s: root.s
+                        model: page2.keysOption
+                    }
+                }
+            }
+
+            // --- bottom, column 2: description card with a note
+            Section {
+                x: root.u(Tokens.space.pageMarginH + root.colW + root.colGap)
+                y: root.u(540)
+                name: Strings.gallery.descriptionCard + " · " + Strings.gallery.cardWithNote
+                DescriptionCard {
+                    s: root.s
+                    minHeight: 0
+                    title: page2.sample(1)?.label ?? ""
+                    text: page2.sample(1)?.desc ?? ""
+                    note: SettingsModel.needs.bt ?? ""
+                    meta: [
+                        { label: Strings.settings.defaultLabel, value: SettingsModel.defaultDisplay("display", "scale") },
+                        { label: Strings.settings.nowLabel, value: SettingsModel.display("display", "scale") }
+                    ]
+                }
+            }
+
+            // --- bottom, column 3: description card without a note; cursor list without the
+            // focus and the pop-up frame, side by side
+            Column {
+                x: root.u(Tokens.space.pageMarginH + 2 * (root.colW + root.colGap))
+                y: root.u(540)
+                spacing: root.u(24)
+
+                Section {
+                    name: Strings.gallery.descriptionCard
+                    DescriptionCard {
+                        s: root.s
+                        minHeight: 0
+                        title: SettingsModel.categories[0]?.label ?? ""
+                        text: SettingsModel.categories[0]?.about ?? ""
+                        meta: [{ label: Strings.settings.count, value: String(SettingsModel.categories[0]?.options?.length ?? 0) }]
+                    }
+                }
+
+                Row {
+                    spacing: root.u(20)
+
+                    Section {
+                        name: Strings.gallery.cursorListUnfocused
+                        CursorList {
+                            width: root.u(250)
+                            s: root.s
+                            keysEnabled: false
+                            focused: false
+                            model: SettingsModel.categories.slice(0, 2).map(c => c.label)
+                            currentIndex: 1
+                        }
+                    }
+
+                    Section {
+                        name: Strings.gallery.popupFrame
+                        // A miniature desktop under the frame, so the dimming shows.
+                        Rectangle {
+                            width: root.u(288)
+                            height: root.u(162)
+                            color: Tokens.color.lightGray
+                            clip: true
+                            Rectangle {
+                                x: root.u(16)
+                                y: root.u(14)
+                                width: root.u(150)
+                                height: root.u(96)
+                                color: Tokens.color.lightYellow
+                            }
+                            PopupFrame {
+                                anchors.fill: parent
+                                title: Strings.settings.title
+                                subtitle: Strings.settings.subtitle
+                                footerLeft: Strings.settings.version
+                                keys: page2.keysCategories
+                            }
+                        }
+                    }
+                }
+            }
+
+            Vignette {
+                anchors.fill: parent
+                s: root.s
+                enabled: Settings.vignette
+            }
         }
     }
 }

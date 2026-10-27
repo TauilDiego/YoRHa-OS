@@ -9,6 +9,7 @@ import "gallery"
 import "hud"
 import "wallpaper"
 import "services"
+import "settings"
 
 ShellRoot {
     id: shell
@@ -24,6 +25,13 @@ ShellRoot {
         target: Tokens
         property: "monitorScales"
         value: Compositor.monitorScales
+    }
+
+    // spec 003: reduced motion (fades and the selector blink become instant).
+    Binding {
+        target: Tokens
+        property: "reduced"
+        value: Settings.reduceMotion
     }
 
     property bool galleryOpen: false
@@ -83,6 +91,81 @@ ShellRoot {
         }
     }
 
+    // --- spec 003: settings pop-up -------------------------------------------------------------
+    // Opens on the focused monitor and stays there until it closes; opening re-reads the
+    // focused monitor first (research R3). Closing is two-step, like the gallery (research R2):
+    // the pop-up hides and drops its keyboard focus at once, and is unloaded a moment later.
+    property bool settingsOpen: false
+    property bool settingsOpening: false
+    property bool settingsLoaded: false
+    property string settingsMonitor: ""
+    property int settingsCategory: 0             // where the pop-up reopens
+    property var settingsLast: ({})              // the closed pop-up's last state, for `dump`
+    readonly property var settingsScreen: {
+        for (const sc of Quickshell.screens)
+            if (sc.name === settingsMonitor)
+                return sc;
+        return Quickshell.screens[0] ?? null;
+    }
+
+    function openSettings(): void {
+        if (settingsOpen || settingsOpening)
+            return;
+        settingsOpening = true;
+        Compositor.refreshFocusedMonitor();
+        settingsFallback.restart();
+    }
+    // Called when the monitor query is back (or after the fallback, if it never comes).
+    function showSettings(): void {
+        if (!settingsOpening)
+            return;
+        settingsOpening = false;
+        settingsFallback.stop();
+        settingsMonitor = Compositor.focusedMonitor;
+        settingsOpen = true;
+    }
+    function closeSettings(): void {
+        settingsOpening = false;
+        settingsOpen = false;
+    }
+    Connections {
+        target: Compositor
+        function onMonitorScalesChanged(): void {
+            shell.showSettings();
+        }
+    }
+    Timer {
+        id: settingsFallback
+        interval: 250
+        onTriggered: shell.showSettings()
+    }
+
+    onSettingsOpenChanged: {
+        if (settingsOpen) {
+            settingsUnload.stop();
+            settingsLoaded = true;
+        } else {
+            settingsLast = settingsLoader.item?.dumpState() ?? settingsLast;
+            settingsUnload.restart();
+        }
+    }
+    Timer {
+        id: settingsUnload
+        interval: 150
+        onTriggered: if (!shell.settingsOpen) shell.settingsLoaded = false
+    }
+    LazyLoader {
+        id: settingsLoader
+        active: shell.settingsLoaded
+        SettingsPopup {
+            screen: shell.settingsScreen
+            keyboardActive: shell.settingsOpen
+            category: shell.settingsCategory
+            onCategoryChanged: shell.settingsCategory = category
+            onCloseRequested: shell.closeSettings()
+        }
+    }
+
     // --- IPC (contracts/ipc.md) ---------------------------------------------------------------
     IpcHandler {
         target: "gallery"
@@ -135,6 +218,46 @@ ShellRoot {
             });
         }
         // --- end spec 004 ------------------------------------------------------------------
+    }
+
+    // spec 003 (specs/003-settings-popup/contracts/ipc.md)
+    IpcHandler {
+        target: "settings"
+        function open(): void { shell.openSettings(); }
+        function close(): void { shell.closeSettings(); }
+        function toggle(): void {
+            if (shell.settingsOpen || shell.settingsOpening)
+                shell.closeSettings();
+            else
+                shell.openSettings();
+        }
+        function isOpen(): string { return shell.settingsOpen ? "true" : "false"; }
+        // Values back to the catalog and the pop-up back to its first category, so a test
+        // always starts from the same place.
+        function reset(): void {
+            SettingsModel.reset();
+            shell.settingsCategory = 0;
+            shell.settingsLast = {};
+            settingsLoader.item?.restart(0);
+        }
+        function dump(): string {
+            const live = shell.settingsOpen ? settingsLoader.item : null;
+            const page = live ? live.dumpState() : shell.settingsLast;
+            return JSON.stringify({
+                open: shell.settingsOpen,
+                monitor: shell.settingsMonitor,
+                focus: page.focus ?? "categories",
+                category: page.category ?? (SettingsModel.categories[shell.settingsCategory]?.id ?? ""),
+                option: page.option ?? null,
+                busy: SettingsModel.busy,
+                error: SettingsModel.error,
+                keys: page.keys ?? [],
+                card: page.card ?? { title: "", note: "" },
+                values: SettingsModel.dumpValues(),
+                dimmed: SettingsModel.dimmedIds(),
+                geometry: live ? page.geometry : null
+            });
+        }
     }
 
     IpcHandler {

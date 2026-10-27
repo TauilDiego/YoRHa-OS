@@ -68,7 +68,9 @@ foi decidido na 001 (escala, fixtures, tokens, adaptador do compositor) vale aqu
     e escala com `s = altura do painel / 908`, vezes `Settings.uiScale`. Em 1080p, `s ≈ 1`: os
     textos ficam no tamanho do jogo, como no mockup;
   - as colunas do mockup de tela cheia (categorias 400, opções 640, quadro 538) encolhem pra
-    caber: **categorias 330, opções 560, quadro 460** (ver [contracts/components.md](contracts/components.md));
+    caber: **categorias 300, opções 600, quadro 440** (ver [contracts/components.md](contracts/components.md); na implementação
+    as categorias e o quadro cederam espaço pras opções, que com 560 cortavam rótulos do mockup como
+    "Background motion");
   - linhas finas na grade física, com as funções da 001 (`Tokens.line`, `snap`, `hair`).
 - **Motivo:** FR-002 ("≈84%… o layout do mockup aprovado em escala") e FR-008b da 001 (pixels
   lógicos, sem DPI).
@@ -155,8 +157,9 @@ foi decidido na 001 (escala, fixtures, tokens, adaptador do compositor) vale aqu
   - o escurecimento e o painel entram juntos com `opacity` 0 → 1 em `Tokens.motion.popupFade`
     (150 ms); o fechamento é imediato;
   - com `Tokens.frozen` (fixtures), o fade, a varredura e o blink ficam instantâneos (FR-022);
-  - **movimento reduzido** (caso de borda) ainda não existe como opção. Quando existir, ele passa a
-    ligar a mesma chave que as fixtures usam hoje, num lugar só (`Tokens`).
+  - **movimento reduzido** (caso de borda): a opção `Settings.reduceMotion` entrou junto com a 004.
+    O `shell.qml` liga `Tokens.reduced`, e `Tokens.instant` (= `frozen || reduced`) deixa o fade
+    e o blink instantâneos. A varredura da faixa continua presa só às fixtures.
 - **Motivo:** FR-006, FR-022 e a constituição VII (nada de abstração antes da segunda necessidade).
 
 ## R12. IPC e evidência

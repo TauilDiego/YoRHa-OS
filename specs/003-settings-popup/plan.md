@@ -57,8 +57,9 @@ O custo do popup aberto entra no relatório do `lab/perf`.
 - zero erros e zero avisos de QML (FR-023);
 - nada mexe no sistema (FR-018).
 
-**Scale/Scope**: 1 popup por vez, 7 categorias, 36 opções, 5 componentes novos e 2 estendidos, 1
-serviço novo, 1 alvo de IPC.
+**Scale/Scope**: 1 popup por vez, 7 categorias, 36 opções, 1 serviço novo e 1 alvo de IPC.
+Componentes: 5 novos no design system mais a moldura (`PopupFrame` + `PopupWindow`); 4 estendidos
+(`Meter`, `CursorList`, `ListItem.reserve`, `Selector` com o movimento reduzido).
 
 ## Constitution Check
 
@@ -70,7 +71,7 @@ serviço novo, 1 alvo de IPC.
 | II. Camada sobre Arch limpo | Não instala nada | ✅ (n/a) |
 | III. Padrões × arquivos do usuário | O catálogo é do projeto; nada é gravado no `~/.config` | ✅ |
 | IV. Pronto com evidência da VM | Cada SC tem prova no [quickstart.md](quickstart.md): screenshot, `settings dump`, teclas via QMP, quadros, log | ✅ |
-| V. Spec antes de código | Spec aprovada em 2026-10-27; **este plano aguarda a aprovação do dono** antes da implementação | ⏳ |
+| V. Spec antes de código | Spec e plano aprovados pelo dono em 2026-10-27 ("pode implementar") | ✅ |
 | VI. Paralelizar | O contrato ([contracts/](contracts/)) vem antes e congela. Depois, três frentes `[P]`, cada uma com worktree e VM (`teste-a/b/c`): componentes, moldura, serviço | ✅ |
 | VII. Simplicidade | Sem framework de teste. Uma abstração nova (`PopupWindow`), justificada pela segunda necessidade já aprovada (o seletor da 004) | ✅ |
 | Restrições: marcas | Nada do jogo; textos em inglês no `Strings`; o catálogo é de exemplo | ✅ |
@@ -107,18 +108,21 @@ specs/003-settings-popup/
 shell/
 ├── shell.qml                    # + LazyLoader → SettingsPopup; IpcHandler "settings"
 ├── ds/
-│   ├── Tokens.qml               # + color.dim, space.popup*/settings*, motion.popupFade/actionBusy
+│   ├── Tokens.qml               # + color.dim, shadow.popup, space.popup*/settings*, motion.popupFade/actionBusy, reduced/instant
 │   ├── base/
 │   │   ├── ValueStepper.qml     # novo: ◂ valor ▸
 │   │   ├── KeyHints.qml         # novo: rodapé de teclas
+│   │   ├── ListItem.qml         # + reserve (rótulo corta antes do valor)
+│   │   ├── Selector.qml         # blink instantâneo com movimento reduzido
 │   │   └── Meter.qml            # + editable, inverted, picked()
 │   └── composites/
-│       ├── CursorList.qml       # + focused, wrap, keysEnabled
+│       ├── CursorList.qml       # + focused, wrap, keysEnabled, hoveredIndex
 │       ├── OptionRow.qml        # novo: ListItem plain + valor por tipo
 │       ├── OptionList.qml       # novo: coluna de opções com rolagem
 │       └── DescriptionCard.qml  # novo: Card com descrição, aviso, DEFAULT/NOW
 ├── popup/
-│   └── PopupWindow.qml          # novo: escurecimento + painel + fade (reutilizável, spec 004)
+│   ├── PopupFrame.qml           # novo: o desenho (escurecimento + painel), sem janela; a galeria mostra em miniatura
+│   └── PopupWindow.qml          # novo: a janela, o teclado e o fade (reutilizável, spec 004)
 ├── settings/
 │   ├── SettingsPopup.qml        # novo: PopupWindow + SettingsPage
 │   └── SettingsPage.qml         # novo: as três colunas e o foco de duas colunas
@@ -127,17 +131,18 @@ shell/
 │   ├── Compositor.qml           # + focusedMonitor
 │   └── qmldir                   # + SettingsModel
 ├── strings/Strings.qml          # + grupo `settings`
-├── gallery/Gallery.qml          # + os componentes novos
+├── gallery/Gallery.qml          # + página 2 (Tab) com os componentes novos
 └── fixtures/
     ├── settings-default.json    # novo: o catálogo do mockup
     ├── settings-broken.json     # novo: caso de borda (catálogo ausente)
-    └── settings-long.json       # novo: caso de borda (14 opções, textos longos)
+    ├── settings-long.json       # novo: caso de borda (aponta pro catálogo longo)
+    └── settings-catalog-long.json # novo: 14 opções com textos longos + uma categoria vazia
 
 rien-OS-private/lab/             # (privado)
 ├── guest/hyprland.lua           # + ALT + I → settings toggle
 ├── click                        # novo: clique via QMP (extraído do check-u1)
-├── burst                        # novo: n quadros de uma região, com grim na VM
-└── check-003                    # novo: o quickstart automatizado
+├── burst                        # novo: n quadros de uma região, com grim na VM (+ times.txt)
+└── check-003                    # novo: o quickstart automatizado (--only, --profile)
 ```
 
 **Structure Decision**: o mesmo projeto (`shell/`), seguindo as camadas da 001. Os componentes

@@ -20,6 +20,8 @@ Singleton {
         readonly property color boxShadow: Qt.rgba(0x7C / 255, 0x7E / 255, 0x6C / 255, 0.69)
         readonly property color textShadow: Qt.rgba(0x7E / 255, 0x7E / 255, 0x74 / 255, 0.57)
         readonly property color alert: "#8F3A30"         // critical states only
+        // spec 003: ink over the rest of the monitor behind a pop-up (≈55%, never blurred)
+        readonly property color dim: Qt.rgba(0x14 / 255, 0x13 / 255, 0x10 / 255, 0.55)
     }
 
     // --- typography (FR-008a) -------------------------------------------------------------
@@ -80,6 +82,8 @@ Singleton {
         readonly property real softY: 3
         readonly property real softBlur: 4
         readonly property color softColor: Qt.rgba(0, 0, 0, 0.425)
+        // spec 003: the pop-up panel's hard shadow (ink, over the dimmed desktop)
+        readonly property real popup: 6
     }
 
     // --- spacing and sizes (game px at 1080p) ------------------------------------------------
@@ -112,6 +116,16 @@ Singleton {
         readonly property real selectorDot: 5
         readonly property real selectorDotOffset: 10      // dot centers at ±10 from the axis
         readonly property real selectorGap: 7             // dots → item
+        // spec 003: settings pop-up. The panel is drawn in a 1612×908 game-px frame (84% of
+        // 1920×1080) and scaled to popupShare of the monitor.
+        readonly property real popupShare: 0.84
+        readonly property real popupW: 1612
+        readonly property real popupH: 908
+        readonly property real settingsCatsW: 300
+        readonly property real settingsOptsW: 600
+        readonly property real settingsCardW: 440
+        readonly property real stepperValueW: 190          // text between ◂ and ▸
+        readonly property real sliderW: 220                // editable meter's track
     }
 
     // --- motion -----------------------------------------------------------------------------
@@ -122,9 +136,16 @@ Singleton {
         readonly property int untouch: 120                 // the stem back up, when deselected
         readonly property int blink: 240                   // selector blink on move, total (FR-005)
         readonly property int meter: 250                   // meter value change
+        // spec 003
+        readonly property int popupFade: 150               // pop-up opening fade; closing is instant
+        readonly property int actionBusy: 2000             // an action's "in progress" note
     }
     // Set by shell.qml while fixtures are active, so screenshots are pixel-identical (SC-002).
     property bool frozen: false
+    // spec 003: reduced motion (set by shell.qml from Settings.reduceMotion). Fades and the
+    // selector blink become instant, as they do while frozen.
+    property bool reduced: false
+    readonly property bool instant: frozen || reduced
 
     // --- vignette (FR-002a), measured in the game's menus (design-system §6): ink over the paper
     // on a circle of half the screen's diagonal; clear in the middle (the top and bottom centers

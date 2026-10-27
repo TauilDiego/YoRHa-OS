@@ -14,7 +14,7 @@ mesmas regras: a UI lê dados só dele, e uma leitura que falha nunca lança err
 |---|---|---|
 | `categories` | lista de `Category` (data-model) | Na ordem do arquivo |
 | `error` | string | `""` quando o catálogo carregou; senão, a mensagem curta mostrada no quadro (caso de borda) |
-| `busy` | string | Id da opção com ação em andamento, ou `""`. Limpa sozinho depois de `motion.actionBusy` |
+| `busy` | string | `"cat.opt"` da opção com ação em andamento, ou `""`. Limpa sozinho depois de `motion.actionBusy` |
 | `value(catId, optId)` | var | `bool` (liga/desliga), `int` índice (escolha), `int` 0–100 (slider), `null` (ação, informação) |
 | `display(catId, optId)` | string | O texto do valor: `ON`/`OFF`, o rótulo da escolha, o número, o texto da ação ou da informação |
 | `defaultDisplay(catId, optId)` | string | O mesmo, pro valor padrão; `""` se a opção não tem padrão |
@@ -25,6 +25,11 @@ mesmas regras: a UI lê dados só dele, e uma leitura que falha nunca lança err
 | `pick(catId, optId, v)` | void | Slider: valor = `round(v × 100)` |
 | `reset()` | void | Volta todos os valores ao catálogo (IPC, research R12) |
 | `dumpValues()` | objeto | `{ catId: { optId: valor de exibição } }` pro `settings dump` |
+| `dimmedIds()` | lista | As opções apagadas, como `"cat.opt"`, pro `settings dump` |
+
+**Domínio `settings` das fixtures:** é novo, e o `fixtures.schema.json` da 001 (que tem
+`additionalProperties: false`) ainda não o lista. No merge na principal, ele ganha
+`"settings": { "type": "string", "description": "Caminho de outro catálogo de configurações (spec 003)" }`.
 
 **Regras:**
 - As mudanças só valem em memória (FR-018). Nada é gravado.

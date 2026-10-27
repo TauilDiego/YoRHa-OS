@@ -1,0 +1,83 @@
+{
+  "needs": {"wifi": "Turn on Wi-Fi first.", "bt": "Turn on Bluetooth first."},
+  "categories": [
+    {
+      "id": "display", "label": "Display",
+      "about": "Screens, resolution, scale, brightness and night light.",
+      "options": [
+        {"id": "resolution", "label": "Resolution", "type": "choice", "desc": "Pixels on the built-in screen. The native resolution is the sharpest.", "values": ["1920 × 1080", "2560 × 1600"], "value": 1, "default": 1},
+        {"id": "refresh", "label": "Refresh rate", "type": "choice", "desc": "How many times per second the screen redraws. Higher is smoother and uses more battery.", "values": ["60 Hz", "120 Hz", "165 Hz"], "value": 1, "default": 1},
+        {"id": "scale", "label": "Scale", "type": "choice", "desc": "Makes everything bigger on dense screens. 1.25× suits a 2560 × 1600 laptop.", "values": ["1.00×", "1.25×", "1.50×", "2.00×"], "value": 1, "default": 1},
+        {"id": "brightness", "label": "Brightness", "type": "slider", "desc": "Backlight of the built-in screen.", "value": 70, "default": 70, "step": 5},
+        {"id": "night", "label": "Night light", "type": "toggle", "desc": "Warms the colors after sunset so the screen is easier on the eyes at night.", "value": false, "default": false}
+      ]
+    },
+    {
+      "id": "sound", "label": "Sound",
+      "about": "Where the sound goes and how loud it is.",
+      "options": [
+        {"id": "output", "label": "Output", "type": "choice", "desc": "The device that plays the sound.", "values": ["Speakers", "Headphones", "HDMI"], "value": 0, "default": 0},
+        {"id": "volume", "label": "Volume", "type": "slider", "desc": "Output volume. The top bar shows it as VOL.", "value": 64, "default": 50, "step": 2},
+        {"id": "mute", "label": "Mute", "type": "toggle", "desc": "Silences every output. The top bar shows MUTE.", "value": false, "default": false},
+        {"id": "mic", "label": "Microphone", "type": "slider", "desc": "Input level of the active microphone.", "value": 80, "default": 80, "step": 5},
+        {"id": "ui-sounds", "label": "Interface sounds", "type": "toggle", "desc": "Short sounds when you move through menus and confirm.", "value": true, "default": true}
+      ]
+    },
+    {
+      "id": "network", "label": "Network",
+      "about": "Wi-Fi, cable and VPN.",
+      "options": [
+        {"id": "wifi", "label": "Wi-Fi", "type": "toggle", "desc": "Turns the wireless adapter on or off.", "key": "wifi", "value": true, "default": true},
+        {"id": "network", "label": "Network", "type": "choice", "desc": "The wireless network in use. Saved networks connect on their own.", "needs": "wifi", "values": ["home-5G", "home-2G", "office"], "value": 0, "default": 0},
+        {"id": "wired", "label": "Wired", "type": "info", "desc": "Ethernet. Plug in a cable and it connects on its own.", "text": "Not connected"},
+        {"id": "vpn", "label": "VPN", "type": "action", "desc": "Adds a WireGuard or OpenVPN connection.", "text": "Set up", "busy": "Opening the VPN setup…"},
+        {"id": "airplane", "label": "Airplane mode", "type": "toggle", "desc": "Turns off every radio: Wi-Fi and Bluetooth.", "value": false, "default": false}
+      ]
+    },
+    {
+      "id": "bluetooth", "label": "Bluetooth",
+      "about": "Paired devices and pairing new ones.",
+      "options": [
+        {"id": "bluetooth", "label": "Bluetooth", "type": "toggle", "desc": "Turns the Bluetooth adapter on or off.", "key": "bt", "value": true, "default": true},
+        {"id": "keyboard", "label": "K2 Keyboard", "type": "info", "desc": "Paired and connected. Battery at 64%.", "needs": "bt", "text": "Connected"},
+        {"id": "headphones", "label": "Headphones", "type": "info", "desc": "Paired, not connected. Turn them on to connect.", "needs": "bt", "text": "Paired"},
+        {"id": "pair", "label": "Pair a device", "type": "action", "desc": "Makes this computer visible for 60 seconds so a new device can pair.", "needs": "bt", "text": "Search", "busy": "Searching for devices for 60 seconds…"}
+      ]
+    },
+    {
+      "id": "appearance", "label": "Appearance",
+      "about": "How rien-OS looks and moves.",
+      "options": [
+        {"id": "ui-scale", "label": "Interface scale", "type": "choice", "desc": "Size of the rien-OS interface, on top of the screen scale.", "values": ["90%", "100%", "110%", "125%"], "value": 1, "default": 1},
+        {"id": "bar-height", "label": "Top bar height", "type": "choice", "desc": "Height of the bar at the top of the screen. The tabs and the dotted rule follow it.", "values": ["40 px", "50 px", "68 px", "80 px"], "value": 2, "default": 2},
+        {"id": "vignette", "label": "Vignette", "type": "toggle", "desc": "Darkens the edges and corners of full-screen menus and the desktop, like the game.", "value": true, "default": true},
+        {"id": "bg-motion", "label": "Background motion", "type": "toggle", "desc": "The arcs and beams that drift slowly behind the desktop.", "value": true, "default": true},
+        {"id": "reduce-motion", "label": "Reduce motion", "type": "toggle", "desc": "Stops the ink sweeps and the blink of the selector.", "value": false, "default": false},
+        {"id": "cursor-size", "label": "Cursor size", "type": "choice", "desc": "Size of the mouse pointer, in logical pixels.", "values": ["32", "48", "64"], "value": 1, "default": 1},
+        {"id": "language", "label": "Language", "type": "choice", "desc": "Language of the interface. Applies to every menu after a restart of the shell.", "values": ["English", "Português", "日本語"], "value": 0, "default": 0}
+      ]
+    },
+    {
+      "id": "keyboard", "label": "Keyboard",
+      "about": "Layout, repeat and shortcuts.",
+      "options": [
+        {"id": "layout", "label": "Layout", "type": "choice", "desc": "The keyboard layout. Accents work with dead keys on US International.", "values": ["US International", "US", "ABNT2"], "value": 0, "default": 0},
+        {"id": "caps", "label": "Caps Lock", "type": "choice", "desc": "What the Caps Lock key does.", "values": ["Caps Lock", "Escape", "Control"], "value": 1, "default": 0},
+        {"id": "delay", "label": "Repeat delay", "type": "choice", "desc": "How long a key has to be held before it starts repeating.", "values": ["200 ms", "300 ms", "400 ms", "600 ms"], "value": 1, "default": 2},
+        {"id": "rate", "label": "Repeat rate", "type": "slider", "desc": "How fast a held key repeats.", "value": 50, "default": 50, "step": 5},
+        {"id": "shortcuts", "label": "Shortcuts", "type": "action", "desc": "Every keyboard shortcut of the desktop, by area.", "text": "Open", "busy": "Opening the shortcut list…"}
+      ]
+    },
+    {
+      "id": "power", "label": "Power",
+      "about": "Battery, profiles and what happens when idle.",
+      "options": [
+        {"id": "battery", "label": "Battery", "type": "info", "desc": "Charge of the internal battery. The top bar shows it as BAT.", "text": "87% · charging"},
+        {"id": "profile", "label": "Profile", "type": "choice", "desc": "Trades speed for battery life.", "values": ["Power saver", "Balanced", "Performance"], "value": 1, "default": 1},
+        {"id": "screen-off", "label": "Screen off after", "type": "choice", "desc": "Idle time before the screen turns off.", "values": ["2 min", "5 min", "10 min", "Never"], "value": 1, "default": 1},
+        {"id": "suspend", "label": "Suspend after", "type": "choice", "desc": "Idle time before the computer suspends.", "values": ["10 min", "15 min", "30 min", "Never"], "value": 1, "default": 1},
+        {"id": "lid", "label": "Lid closed", "type": "choice", "desc": "What happens when the laptop lid closes.", "values": ["Suspend", "Lock", "Do nothing"], "value": 0, "default": 0}
+      ]
+    }
+  ]
+}

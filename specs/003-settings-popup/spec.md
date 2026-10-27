@@ -4,7 +4,8 @@
 
 **Created**: 2026-10-27
 
-**Status**: Rascunho, aguardando a aprovação do dono
+**Status**: Aprovada pelo dono em 2026-10-27 e implementada na branch `003-settings-popup` (ver
+[relatorio.md](relatorio.md)); falta a aprovação visual do dono (SC-009)
 
 **Input**: Pedido do dono, a partir do mockup aprovado da aba SYSTEM
 (https://claude.ai/artifact/Hi6evdHnH2tFQw9eyKv2H5; cópia em
@@ -18,8 +19,8 @@ escurecendo o fundo do SO". Dados: "tudo fixture".
 
 Em qualquer momento da sessão, o usuário aperta um atalho e as configurações aparecem como um popup
 no centro do monitor em foco. O resto da tela (janelas, barra do topo, fundo) continua visível, mas
-escurecido, pra deixar claro que o popup tem o foco. O popup tem a cara dos menus do jogo: papel com
-grid, vinheta, título `SYSTEM -Settings` com a sombra chapada e a régua embaixo. Ele fecha pelo mesmo
+escurecido, pra deixar claro que o popup tem o foco. O popup tem a cara dos menus do jogo: papel
+(sem grid, como todo o rien-OS desde 2026-10-27), vinheta, título `SYSTEM -Settings` com a sombra chapada e a régua embaixo. Ele fecha pelo mesmo
 atalho, pelo Esc ou com um clique fora dele.
 
 **Why this priority**: Sem abrir e fechar, nada do resto existe. É também o padrão de "janela por cima
@@ -149,7 +150,8 @@ dependentes.
 
 **Aparência**
 
-- **FR-007**: O popup MUST usar o design system da 001: papel com grid, vinheta (desligável pela
+- **FR-007**: O popup MUST usar o design system da 001: papel (sem grid: o dono tirou o grid de
+  todo o rien-OS em 2026-10-27), vinheta (desligável pela
   config `vignette` que já existe), sombra deslocada chapada, título `SYSTEM` com a sombra e o
   complemento `-Settings`, régua lisa embaixo do título e régua lisa acima do rodapé. Nada de
   cor, tamanho ou tempo fora dos tokens.
@@ -181,7 +183,7 @@ dependentes.
   - com o foco numa opção: o nome, a descrição, DEFAULT e NOW (quando a opção tem valor), e um
     aviso quando a opção está apagada (o que fazer) ou quando uma ação está em andamento.
 - **FR-015**: O rodapé MUST mostrar só as teclas que valem no foco atual:
-  - categorias: `↑↓ Select`, `→ Open`, `Esc Close`;
+  - categorias: `↑↓ Select`, `→ Open`, `Esc Close` (numa categoria sem opções, sem `→ Open`);
   - opção que muda: `↑↓ Select`, `←→ Change`, `Esc Back`;
   - ação: `↑↓ Select`, `Enter <ação>`, `Esc Back`;
   - informação ou apagada: `↑↓ Select`, `Esc Back`.
@@ -285,5 +287,7 @@ Cada critério diz qual evidência da VM o comprova (constituição IV).
 - **Dependências:** os componentes, tokens e serviços da 001 (design system, CursorList, ListItem,
   Selector com blink, Meter, Card, régua, vinheta, fixtures, configurações do usuário) e o
   laboratório com os perfis 1080 e hidpi.
-- **Movimento reduzido:** ainda não existe uma opção real; a spec só exige que, quando existir, o
-  popup a respeite. Nos testes, o comportamento sem animação vem das fixtures (FR-022).
+- **Movimento reduzido:** a opção passou a existir junto com a 004: `reduceMotion` no `shell.json`
+  do usuário (padrão desligado). O popup respeita: fade e blink instantâneos. Nos testes, o
+  comportamento sem animação vem das fixtures (FR-022); o `check-003` também testa o
+  `reduceMotion`.
