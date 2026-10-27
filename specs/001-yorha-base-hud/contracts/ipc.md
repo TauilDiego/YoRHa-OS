@@ -21,8 +21,8 @@ Formato do `hud dump`, com uma entrada por monitor:
 ```json
 [{
   "monitor": "Virtual-1",
-  "height": 40,
-  "tabs": [{ "label": "01", "state": "normal", "x": 31, "w": 63 }, { "label": "02", "state": "selected", "x": 101, "w": 63 }],
+  "height": 68,
+  "tabs": [{ "label": "01", "state": "normal", "x": 26, "w": 67 }, { "label": "02", "state": "selected", "x": 100, "w": 67 }],
   "title": "kitty — ~/projetos",
   "readings": [{ "key": "cpu", "label": "CPU", "value": 23, "critical": false, "extra": "none", "available": true }],
   "date": "2026.10.26",

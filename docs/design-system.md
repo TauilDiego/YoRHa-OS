@@ -125,8 +125,8 @@ borda esquerda reserva espaço pro cursor; no rien-OS, as abas não têm seletor
 | Estado | Fundo | Quadrado e texto | Cursor |
 |---|---|---|---|
 | Dormant (repouso) | `light-gray` | `dark-gray` | — |
-| Hovered (foco) | `dark-gray` | `light-yellow` | Seletor escuro + 2 quadradinhos |
-| Selected | `dark-gray` | `light-yellow` | Seletor claro + 2 quadradinhos |
+| Hovered (foco) | `dark-gray` | `light-yellow` | — |
+| Selected | `dark-gray` | `light-yellow` | — |
 
 Na barra de abas, a aba Selected desce até a régua de baixo e se funde com ela (§6).
 
@@ -232,8 +232,8 @@ convertidas pra 1080p (×1,2). As imagens ficam só no repositório privado, pra
 | Sombra do título | 8,8 | **M** ≈(8–9, 8), dura, cor ≈`#8C897C` | Manter; proporcional (§5) |
 | Sombra de painéis | 3,3 | **M** 3–4 px, dura, ≈`#716D61` | Seguir o Figma |
 | Papel | `#C9C5AB` | **M** `#C7C2AA`–`#C8C3AC` | Seguir o Figma |
-| Vinheta | — | **M** bordas `#A6A18D`, cantos `#8B8877`, em todas as telas de menu | **Decidido:** como no jogo, nos menus de tela cheia, desligável |
-| Grid | 6% | **Revisto (2026-10-27):** não existe no fundo do jogo; a leitura anterior era a compressão das capturas | Tirar do fundo |
+| Vinheta | — | **M** bordas `#A6A18D`, cantos `#8C8978`, em todas as telas de menu; perfil num círculo de meia diagonal (o centro de cima e de baixo fica papel) | **Decidido:** como no jogo, na tela inteira do desktop e nos menus de tela cheia, desligável |
+| Grid | 6% | **Revisto (2026-10-27):** não existe no fundo do jogo; a leitura anterior era a compressão das capturas | Tirar do fundo (feito na 004 US1) |
 | Fundo (medido) | — | **M** centro `#C8C3AC`, bordas `#A6A18D`, cantos `#8C8978` (vinheta radial); grão fino, desvio ≈2 níveis em 255 (o rien-OS fica sem, escolha do dono); diagonais ≈20 níveis mais escuras que o papel (≈17% de tinta), em feixes de 2–3 linhas que começam e terminam na tela; arcos duplos (dois círculos a ≈6 px), centro fora da tela | Seguir (spec 004) |
 | Fundo escuro | — | **M** atrás de popups e legendas: `#141414`, arcos e diagonais cinza até ≈`#454545` | Variante pra testar |
 | `light-yellow` | `#D7D1B3` | **M** `#D2CDB4`–`#D4CEB5` | Seguir o Figma |
@@ -250,7 +250,7 @@ convertidas pra 1080p (×1,2). As imagens ficam só no repositório privado, pra
 - Kijima diz que as animações deviam parecer "úmidas" (fluidas). Qualquer botão pula a animação
   de fechar.
 - **Realce de item:** a faixa varre da esquerda pra direita junto com os trilhos, em ≈100–150 ms
-  com desaceleração. A spec fala em 0,2 s.
+  com desaceleração. A spec usa 0,15 s (token `motion.highlight`).
 - **Cursor:** parado. O rien-OS acrescenta um blink suave quando ele troca de item (ver §5).
 - **Fechar o menu:** a tela se desfaz em estilhaços triangulares, em ≈300–500 ms.
 - **Estado danificado:** aberração cromática e glitch no texto.

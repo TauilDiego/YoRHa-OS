@@ -16,7 +16,9 @@ O HUD é um `PanelWindow` por monitor, com:
 - título da janela ativa;
 - relógio.
 
-Todos os dados passam por serviços que aceitam fixtures. A galeria abre por IPC. A escala
+Todos os dados passam por serviços que aceitam fixtures. A galeria abre por IPC. A H4 (pedida
+depois da aprovação da spec) acrescenta o fundo da área de trabalho: um `PanelWindow` por monitor
+na camada de fundo, com o papel, a vinheta e a decoração (`PaperDecor`) se movendo devagar. A escala
 segue o modelo do Serpantinum: pixels lógicos, um fator `s` por superfície e um `uiScale` do
 usuário.
 
@@ -31,7 +33,8 @@ A verificação acontece toda no laboratório privado, dentro de `lab/perf`. O l
 **Language/Version**: QML (Qt 6) sobre Quickshell 0.3.1; Lua (config do Hyprland na VM); Bash (lab)
 
 **Primary Dependencies**: módulos do Quickshell: `Quickshell`, `Quickshell.Wayland`,
-`Quickshell.Hyprland`, `Quickshell.Io` (`FileView`, `JsonAdapter`, `IpcHandler`, `Process`),
+`Quickshell.Hyprland`, `Quickshell.Io` (`FileView`, `IpcHandler`, `Process`; a configuração é
+lida com `JSON.parse`, R6),
 `Quickshell.Services.Pipewire`, `Quickshell.Services.UPower`; `QtQuick.Shapes`. A fonte M PLUS 1
 (OFL) vai junto no repositório.
 
@@ -59,8 +62,8 @@ de cada teste é medido no host pelo `lab/perf`.
 - dois screenshots com fixtures idênticos pixel a pixel (SC-002);
 - zero erros e zero avisos de QML (FR-017).
 
-**Scale/Scope**: 1 HUD por monitor, ~16 componentes de design system, 7 serviços, 1 galeria, 3
-alvos de IPC.
+**Scale/Scope**: 1 HUD e 1 fundo por monitor, ~17 componentes de design system, 7 serviços, 1
+galeria, 4 alvos de IPC (`gallery`, `fixtures`, `wallpaper`, `hud`).
 
 ## Constitution Check
 
@@ -68,11 +71,11 @@ alvos de IPC.
 
 | Princípio | Como o plano cumpre | Status |
 |---|---|---|
-| I. Sistema do dono intocável | A UI, o `qmllint` e os testes rodam só na VM. No host, só ferramentas do lab (QEMU, ssh, rsync, ImageMagick pra comparar imagens, o leitor `lab/perf`) | ✅ |
+| I. Sistema do dono intocável | A UI, o `qmllint` e os testes rodam só na VM. No host, só ferramentas do lab (QEMU, ssh, rsync, ImageMagick pra comparar imagens, o leitor `lab/perf` em python3), listadas na constituição 1.1.1 | ✅ |
 | II. Camada sobre Arch limpo | O U1 não instala nada no sistema. O `shell/` é carregado pelo `qs -p` | ✅ (n/a) |
 | III. Padrões × arquivos do usuário | `config/defaults.json` é gerenciado; o `shell.json` do usuário só sobrescreve (R6) | ✅ |
 | IV. Pronto com evidência da VM | Cada SC tem prova no [quickstart.md](quickstart.md): screenshot, `hud dump`, log | ✅ |
-| V. Spec antes de código | Spec aprovada em 2026-10-27; este plano aguarda aprovação antes do `/speckit-tasks` | ✅ |
+| V. Spec antes de código | Spec e plano aprovados em 2026-10-27, antes do `/speckit-tasks` | ✅ |
 | VI. Paralelizar | Os contratos ([contracts/](contracts/)) vêm antes e ficam congelados. Depois, primitivas/base, serviços, HUD e galeria vão em paralelo, cada agente com worktree e VM próprios. Pré-requisito: lab com várias VMs (R10) | ✅ (com pré-requisito) |
 | VII. Simplicidade | Sem framework de teste nem abstração extra; o único adaptador (`Compositor`) é exigido pelas restrições | ✅ |
 | Restrições: marcas | Nada do jogo no repositório: a fonte é a M PLUS 1 (OFL), as cores vêm do Figma CC BY (creditado), as referências do jogo ficam só no privado | ✅ |
@@ -96,25 +99,26 @@ specs/001-yorha-base-hud/
 │   ├── ipc.md           # comandos qs ipc
 │   └── fixtures.schema.json
 ├── checklists/requirements.md
-└── tasks.md             # gerado pelo /speckit-tasks (ainda não existe)
+└── tasks.md             # gerado pelo /speckit-tasks
 ```
 
 ### Source Code (repository root)
 
 ```text
 shell/
-├── shell.qml                  # ShellRoot: Variants(screens) → Hud; LazyLoader → Gallery; IpcHandlers
+├── shell.qml                  # ShellRoot: Variants(screens) → Hud e Wallpaper; LazyLoader → Gallery; IpcHandlers
 ├── ds/
 │   ├── Tokens.qml             # singleton: cores, tipografia, sombras, espaços, motion, line()/px()
-│   ├── primitives/            # Label, Square, Rule, GridBackground, Vignette
+│   ├── primitives/            # Label, Square, Rule, GridBackground, Vignette, PaperDecor (H4)
 │   ├── base/                  # HeaderButton, ListItem, Selector, Meter, PageHeader, Card
 │   └── composites/            # TabBar, CursorList
 ├── services/                  # singletons: Clock, Telemetry, Audio, Battery, Compositor, Settings, Fixtures
 ├── strings/Strings.qml        # textos fixos em inglês (FR-018)
 ├── hud/                       # Hud.qml (PanelWindow por monitor) + Telemetry/Clock/Title parts
 ├── gallery/Gallery.qml        # tela cheia, vinheta, todas as peças com nome
-├── config/defaults.json       # uiScale 1, barHeight 40, vignette true
-├── fixtures/                  # hud-default.json, battery-low.json, no-battery.json, muted.json, long-title.json, no-window.json
+├── wallpaper/Wallpaper.qml    # H4: fundo por monitor na camada Background (papel, vinheta, PaperDecor)
+├── config/defaults.json       # uiScale 1, barHeight 68, vignette true, wallpaperMotion true
+├── fixtures/                  # hud-default.json, hud-live-ws.json, battery-low.json, no-battery.json, muted.json, long-title.json, no-window.json
 └── assets/fonts/              # MPLUS1[wght].ttf + OFL.txt
 
 rien-OS-private/lab/           # (privado) mudanças do laboratório
@@ -149,7 +153,8 @@ conferida pelos imports. As mudanças do laboratório ficam no repositório priv
    - **A:** primitivas + base;
    - **B:** serviços (Clock, Telemetry, Audio, Battery, Compositor);
    - **C:** compostos (depende de A, mas só pela interface).
-4. **Superfícies:** HUD (H1, H2) e galeria (H3). Podem ir em paralelo entre si.
+4. **Superfícies:** HUD (H1, H2) e galeria (H3). Podem ir em paralelo entre si. O fundo (H4)
+   veio depois, pedido pelo dono, e reusa a `Vignette` e o `Settings`.
 5. **Validação:** o [quickstart.md](quickstart.md) inteiro, dentro de `lab/perf`, e a entrega dos
    screenshots pra revisão do dono (SC-006).
 

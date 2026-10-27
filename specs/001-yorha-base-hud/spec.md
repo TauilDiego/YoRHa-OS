@@ -4,7 +4,8 @@
 
 **Created**: 2026-10-26
 
-**Status**: Aprovada pelo dono em 2026-10-27 (alinhada com o design system em `docs/design-system.md`)
+**Status**: Aprovada pelo dono em 2026-10-27 (alinhada com o design system em `docs/design-system.md`).
+Visual aprovado pelo dono (SC-006) em 2026-10-27. Revisões do mesmo dia registradas no T039.
 
 **Input**: User description: "U1 — Base visual: design system YoRHa (inspirado na UI de NieR:Automata) e o HUD (barra do topo) da UI rien-OS, rodando no Quickshell dentro da VM do laboratório. Design system: paleta papel/tinta (#D1CDB7 fundo, #BAB5A1 fraco, #DCD8C0 claro, #454138 tinta, um vermelho só pra alerta), grid fino no fundo, quadrado como marcador, item de menu que pinta da esquerda pra direita com trilhos acima/abaixo e sombra deslocada, cursor que balança, títulos em caixa alta com sombra, painel com faixa de cabeçalho escura, medidor estilo barra de HP, linha dupla. HUD: barra no topo com workspaces como abas do menu de pausa (01, 02...; ativo invertido, vazios apagados, clique troca), telemetria CPU/MEM/VOL/BAT com medidores, relógio e data, título da janela ativa. Os dados vêm de serviços que aceitam fixtures (relógio fixo, bateria 87%, etc.) pra screenshots determinísticos. Sem blur. Verificação por screenshot no lab."
 
@@ -59,8 +60,9 @@ workspace mudou e que a aba nova está destacada.
 1. **Given** o workspace 1 em foco, **When** o usuário clica na aba 03, **Then** o desktop vai pro
    workspace 3 e a aba 03 fica invertida em até meio segundo.
 2. **Given** o cursor do mouse sobre uma aba que não está ativa, **When** o usuário passa o mouse
-   por cima, **Then** a aba mostra o estado de destaque (tinta pintando, trilhos acima e abaixo,
-   sombra deslocada) e volta ao normal quando o mouse sai.
+   por cima, **Then** a aba mostra o estado de destaque (tinta pintando da esquerda pra
+   direita e texto invertido; sem trilhos nem sombra, que são só dos itens de lista) e volta ao
+   normal quando o mouse sai.
 
 ---
 
@@ -98,6 +100,10 @@ No lugar do wallpaper, a área de trabalho inteira mostra o papel dos menus do j
 grid fino, a vinheta nas bordas e, bem apagados, arcos de círculo grandes e feixes de linhas
 diagonais, que se movem muito devagar.
 
+**Revisto (2026-10-27):** a medição das capturas mostrou que o fundo do jogo não tem grid. O fundo
+fiel ao jogo (sem grid e sem grão, vinheta medida, arcos duplos, feixes em segmentos) vem na spec
+004 (`004-wallpaper-system`, US1). O texto abaixo registra o que foi entregue no U1.
+
 **Why this priority**: Completa a imersão: com janelas fechadas, a tela inteira parece um menu
 YoRHa. Pedido do dono depois de ver a UI rodando (2026-10-27).
 
@@ -106,8 +112,9 @@ com dados de teste, dois screenshots seguidos saem iguais.
 
 **Acceptance Scenarios**:
 
-1. **Given** um workspace vazio, **When** a sessão está aberta, **Then** o fundo mostra papel,
-   grid, vinheta, arcos e feixes diagonais em todos os monitores, nítidos em qualquer escala.
+1. **Given** um workspace vazio, **When** a sessão está aberta, **Then** o fundo mostra o papel
+   (o fundo fiel ao jogo vem na spec 004), vinheta, arcos e feixes diagonais em todos os
+   monitores, nítidos em qualquer escala.
 2. **Given** `wallpaperMotion: false` no `shell.json` (ou dados de teste ativos), **When** o
    tempo passa, **Then** o fundo fica parado.
 
@@ -153,7 +160,8 @@ com dados de teste, dois screenshots seguidos saem iguais.
   | `grid` | `#4E4B42` a 6% | Grid do fundo |
   | `alert` | `#8F3A30` | Só estados críticos; a única cor fora da sépia |
 - **FR-002**: Superfícies de fundo MUST mostrar um grid fino e regular, com linhas nítidas em
-  qualquer escala de tela.
+  qualquer escala de tela. (Revisto em 2026-10-27: o jogo não tem grid; o fundo do desktop fica
+  sem grid na spec 004, e o grid continua só como primitiva.)
 - **FR-002a**: Superfícies de tela cheia (a galeria e os menus futuros) MUST ter a vinheta do jogo:
   as bordas escurecem até ≈`#A6A18D` e os cantos até ≈`#8B8877`. A vinheta MUST poder ser
   desligada. O papel do HUD entra na vinheta do fundo, contínua com ele, sem emenda; abas, régua
@@ -162,7 +170,8 @@ com dados de teste, dois screenshots seguidos saem iguais.
 - **FR-003**: O design system MUST oferecer estas peças reutilizáveis, em camadas (cada camada
   só usa as de baixo), com os nomes de `docs/design-system.md`:
   - **tokens:** cores, tipografia, sombras, espaçamentos, durações de animação;
-  - **primitivas:** texto, marcador quadrado, régua (lisa, pontilhada e vertical), fundo com grid;
+  - **primitivas:** texto, marcador quadrado, régua (lisa, pontilhada e vertical), fundo com grid,
+    vinheta e a decoração do papel (arcos e feixes, `PaperDecor`, US4);
   - **base:** botão-aba, item de lista, seletor (variantes clara e escura), medidor, título de
     página, card;
   - **compostos:** barra de abas e lista com cursor.
@@ -170,16 +179,15 @@ com dados de teste, dois screenshots seguidos saem iguais.
   cursor do teclado), selecionado (persistente) e apagado. Ao destacar:
   - a tinta pinta o item da esquerda pra direita;
   - o texto inverte de cor;
-  - aparecem trilhos finos acima e abaixo;
-  - aparece uma sombra deslocada.
+  - **só no item de lista:** aparecem trilhos finos acima e abaixo e uma sombra deslocada. O
+    botão-aba fica sem trilhos e sem sombra (decisão do dono em 2026-10-27, alinhada ao código).
 
   A duração da transição é um token, começando em 0,15 s (a análise do jogo estima ≈100–150 ms);
   o valor final é calibrado depois.
 - **FR-005**: O cursor de seleção MUST ser a pipa (seletor) + 2 quadradinhos empilhados entre a
   ponta dela e o item. Ele fica parado, como no jogo; ao trocar de item, MUST piscar: some do
   item antigo e reaparece no novo, com ease in-out, em `motion.blink` (≈240 ms no total; pedido do
-  dono em 2026-10-27). Ele aparece no item de lista destacado e no selecionado; as abas não têm seletor
-  (decisão do dono em 2026-10-27).
+  dono em 2026-10-27). Ele aparece no item de lista destacado e no selecionado; as abas não têm seletor (FR-011).
 - **FR-006**: Títulos de página MUST aparecer em caixa alta, com espaçamento largo entre letras
   e a sombra `text-shadow` chapada, deslocada pra baixo e pra direita em ≈15% do tamanho do
   texto.
@@ -190,10 +198,12 @@ com dados de teste, dois screenshots seguidos saem iguais.
 - **FR-008a**: A tipografia MUST usar a M PLUS 1 (OFL) por padrão, com pesos mais fortes nos
   títulos. Se FOT-Rodin ProN ou Helvetica Now Micro estiverem instaladas, MUST usá-las nos
   papéis delas, sem mudar o layout.
-- **FR-008b**: Todas as medidas MUST estar em pixels lógicos, sem cálculo de DPI: os tokens guardam
-  as medidas do jogo a 1080p, e cada tela multiplica por um fator `s` (no HUD, `alturaDaAba/47`)
-  e por um `uiScale` do usuário (padrão 1). Linhas finas arredondam pra pixel inteiro, com
-  mínimo de 1px.
+- **FR-008b**: Todas as medidas MUST estar em pixels lógicos: os tokens guardam as medidas do jogo
+  a 1080p, e cada tela multiplica por um fator `s` (no HUD, `alturaDaAba/47`) e por um `uiScale`
+  do usuário (padrão 1). A galeria, ferramenta de referência, usa só `altura/1080`, sem `uiScale`.
+  As linhas finas (grid, réguas, trilhos) MUST ser encaixadas na grade física do monitor, com a
+  escala fracionária que o adaptador `Compositor` fornece, e ter no mínimo 1 px físico, pra
+  ficarem nítidas a 1,25 (revisto em 2026-10-27, depois do hidpi).
 
 **HUD**
 
@@ -203,8 +213,8 @@ com dados de teste, dois screenshots seguidos saem iguais.
   régua pontilhada embaixo, na escala do jogo (revisado pelo dono em 2026-10-27: era 40px, com
   vão de ≈2px e régua bem menor).
 - **FR-010**: O HUD MUST mostrar, da esquerda pra direita:
-  1. a marca do sistema: as duas faixas verticais do jogo, sem nome nem logo (o nome rien-OS
-     aparece só na galeria e nos menus);
+  1. a marca do sistema: as duas faixas verticais do jogo, sem nome nem logo (o nome rien-OS não
+     aparece no HUD; fica pros menus);
   2. as abas de workspace;
   3. o título da janela ativa (centralizado);
   4. as leituras de CPU, memória, volume e bateria;
@@ -250,10 +260,11 @@ com dados de teste, dois screenshots seguidos saem iguais.
 **Fundo da área de trabalho**
 
 - **FR-019**: Cada monitor MUST ter um fundo desenhado na camada de fundo do Wayland (atrás de
-  todas as janelas), com papel, grid, vinheta, arcos de círculo e feixes de linhas diagonais.
+  todas as janelas), com papel, vinheta, arcos de círculo e feixes de linhas diagonais. O U1
+  entregou também o grid; o fundo fiel ao jogo (sem grid, sem grão) vem na spec 004.
   Nada de imagem: o fundo é desenhado e fica nítido em qualquer resolução e escala.
 - **FR-020**: Os arcos e os feixes MUST se mover de forma sutil e contínua (uma volta a cada
-  vários minutos), sem redesenhar a cena a cada quadro. O movimento MUST poder ser desligado
+  ≈10 min), sem redesenhar a cena a cada quadro. O movimento MUST poder ser desligado
   (`wallpaperMotion` no `shell.json`) e MUST parar quando há dados de teste.
 - **FR-021**: A vinheta do fundo MUST seguir a configuração `vignette`.
 
@@ -285,7 +296,8 @@ com dados de teste, dois screenshots seguidos saem iguais.
 - **SC-008**: Na VM, nos perfis 1920x1080 @1 e 2560x1600 @1,25, a barra mede a altura padrão em px lógicos (68) e o
   grid e as réguas aparecem nítidos (sem borrado de meio pixel) nos screenshots.
 
-- **SC-009**: Num workspace vazio, o screenshot mostra o fundo (papel e grid no centro da tela);
+- **SC-009**: Num workspace vazio, o screenshot mostra o fundo (o papel no centro da tela; o fundo
+  fiel ao jogo vem na spec 004);
   com dados de teste, dois screenshots seguidos são idênticos.
 - **SC-010**: O custo do fundo com e sem movimento fica registrado no `lab/perf` (sem meta no
   U1: otimizar é da U6).
