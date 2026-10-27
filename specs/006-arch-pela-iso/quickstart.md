@@ -10,7 +10,7 @@ Use uma VM só sua (`NIER_LAB_VM`) e recursos menores, pra não atrapalhar os ag
 
 ```sh
 cd ~/projects/rien-OS-private
-export NIER_LAB_CPUS=4 NIER_LAB_MEM=4G
+export NIER_LAB_CPUS=2 NIER_LAB_MEM=4G
 lab/ls > /tmp/camadas-antes.txt
 sha256sum ~/.local/share/nier-lab/vms/{basic,arch-limpo,hypr-base}.qcow2 > /tmp/discos-antes.txt   # SC-006: só as congeladas (dev e teste-* mudam com os outros agentes)
 ```

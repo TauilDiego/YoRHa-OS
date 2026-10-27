@@ -2,8 +2,21 @@
 
 **Branch**: `006-arch-pela-iso` | **Date**: 2026-10-27 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `specs/006-arch-pela-iso/spec.md` (rascunho, aguardando a
-aprovação do dono junto com este plano)
+**Input**: Feature specification from `specs/006-arch-pela-iso/spec.md` (spec e plano aprovados pelo
+dono em 2026-10-27, com as decisões abaixo)
+
+## Decisões do dono (2026-10-27)
+
+Substituem as perguntas em aberto do rascunho (detalhes na spec, "Decisões do dono"):
+
+| # | Decisão | Efeito no plano |
+|---|---|---|
+| 1 | `arch-iso` **ao lado** da cadeia atual; nenhuma camada existente muda | research R9, opção A. A troca da base da `hypr-base` é outra tarefa, depois |
+| 2 | systemd-boot (sem GRUB), btrfs com subvolumes, zram, NetworkManager, perfil mínimo; variantes pelo `--config` na S3; Plymouth depois | `lab/iso/archinstall.json` como no contrato. Nada de UKI nem de hooks fora do padrão: o Plymouth entra depois só com o pacote, o hook `plymouth` no `mkinitcpio.conf` e `splash` nas opções da entrada do systemd-boot |
+| 3 | Sudo sem senha pro usuário do lab, marcado e removível | `/etc/sudoers.d/90-nier-lab`, listado no manifesto |
+| 4 | Pacotes do dia + `--snapshot <data>` opcional (Arch Linux Archive) | research R7 |
+| 5 | Sem cache de pacotes agora; medir o download e dizer se um cache compensa | research R7; o tempo de download sai do `install.live.log` e do `lab/perf` |
+| — | Uma VM desta fase por vez, `NIER_LAB_CPUS=2 NIER_LAB_MEM=4G` (teto do dono: 4 VMs, 2 núcleos e 4 GB cada) | O padrão do `lab/install-iso` passa a ser **2 CPUs e 4 GB** (era 4/4) |
 
 ## Summary
 
@@ -57,7 +70,7 @@ segundo boot até o SSH < 60 s (SC-002); configuração inválida recusada em < 
 **Constraints**:
 - ISO oficial sem modificação, sem tecla e sem mudar parâmetros de boot (research R2);
 - nenhuma senha em linha de comando, terminal, log guardado ou repositório (FR-015, SC-009);
-- convive com outras VMs ligadas (porta livre, `NIER_LAB_VM`, 4 CPUs e 4 GB por padrão);
+- convive com outras VMs ligadas (porta livre, `NIER_LAB_VM`, 2 CPUs e 4 GB por padrão, decisão do dono);
 - não muda nenhuma camada existente (FR-005, SC-006);
 - o archinstall pode mudar o formato da configuração entre versões: a validação com `--dry-run` vem
   antes de qualquer gravação (FR-013).
@@ -76,7 +89,7 @@ de `user-data`, 1 roteiro de conferências; mudanças pequenas em `lab/fetch`, `
 | II. Camada sobre Arch limpo, não imagem | A ISO é a **oficial**, sem modificação, usada do jeito que um usuário usa. O projeto continua sem ISO ou imagem própria; esta fase justamente produz o "Arch limpo" realista sobre o qual a camada do projeto vai ser testada (S3) | ✅ |
 | III. Padrões × arquivos do usuário | Não se aplica ao produto (é infraestrutura do lab). Dentro do lab: as adaptações (SSH, sudo, hostname) ficam separadas e listadas num manifesto, pra a S3 saber o que é "do usuário" | ✅ |
 | IV. Pronto exige evidência da VM | Cada SC tem prova no [quickstart.md](quickstart.md): códigos de saída, `checks.txt`, `install.log`, `console.png`, o `lab/shot` da US3 e o relatório do `lab/perf` | ✅ |
-| V. Spec antes de código | Spec e plano escritos juntos a pedido do dono; **os dois aguardam aprovação**. Nenhum script do lab foi mudado nem rodado | ✅ |
+| V. Spec antes de código | Spec e plano escritos juntos a pedido do dono e **aprovados por ele em 2026-10-27**, com as decisões acima registradas | ✅ |
 | VI. Paralelizar | Os contratos ([contracts/](contracts/)) vêm antes. Depois, `lab/fetch iso`, o gerador de configuração/`cidata` e o roteiro de conferências vão em paralelo (arquivos separados). O spike e a integração são sequenciais. Nenhum agente precisa de VM pra as tarefas `[P]` de escrita; a VM só entra no spike e na validação | ✅ |
 | VII. Simplicidade | Sem cache de pacotes, sem servidor HTTP no host, sem imagem própria; reusa o `lib.sh` (porta livre, `wait_ssh`, `qmp`, `perf`). O cache só entra se a medição pedir | ✅ |
 | Restrições: segredos | Senha gerada por camada, só em `$LAB_HOME` (modo 600); hash feito na VM com a senha por stdin; credenciais apagadas da ISO antes de desligar; `--debug` do archinstall proibido (grava credenciais no log) | ✅ |
@@ -181,7 +194,7 @@ comportamento. O `lab/bootstrap` não muda nesta fase.
 | Mirror lento ou fora do ar; sincronização do chaveiro demorada | Instalação longa ou falha | Limite de tempo (FR-016); um mirror só, previsível; `--snapshot` pra repetir; cache de pacotes como trabalho futuro se a medição pedir |
 | ISO some dos mirrors (≈ 3 meses) | Download falha | Fallback pro `archive.archlinux.org` (FR-009) |
 | Chave de release do Arch troca | Verificação falha | Mensagem clara; troca manual, conferida pelo dono, com commit no repositório privado |
-| Concorrência com os agentes da UI (CPU, memória, portas) | Testes deles ficam lentos | 4 CPUs / 4 GB por padrão, porta livre automática, VM própria; o custo fica no `lab/perf` |
+| Concorrência com os agentes da UI (CPU, memória, portas) | Testes deles ficam lentos | 2 CPUs / 4 GB por padrão (teto do dono), uma VM desta fase por vez, porta livre automática; o custo fica no `lab/perf` |
 | Disco do dono enche (ISO 1,6 GB + camada ~2–3 GB por execução) | Lab para | Conferência de espaço antes (FR-021); `fstrim` + `discard` antes de congelar; `lab/rm` apaga tudo da camada |
 | A `hypr-base.sh` assume coisas da `basic` (rede, pacotes, sudo) | US3 falha | Adaptações do lab dão sudo sem senha e o usuário `arch`; o que mais faltar vira ajuste na `hypr-base.sh` (registrado), não na camada |
 | Vazamento da senha | Segredo exposto | Senha por stdin, hash na VM, credenciais apagadas da ISO, sem `--debug`; cenário 10 do quickstart procura a senha em tudo |

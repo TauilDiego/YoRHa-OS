@@ -223,7 +223,7 @@ acrescenta:
 
 ## R8. Tempo e disco esperados
 
-Estimativas (**a confirmar no spike, com `lab/perf`**), com `NIER_LAB_CPUS=4 NIER_LAB_MEM=4G` pra
+Estimativas (**a confirmar no spike, com `lab/perf`**), com `NIER_LAB_CPUS=2 NIER_LAB_MEM=4G` (teto do dono) pra
 deixar folga pros agentes em paralelo:
 
 | Passo | Tempo estimado | Base da estimativa |
@@ -298,7 +298,7 @@ O que fica registrado:
 ## R11. Recursos da VM durante a instalação
 
 - **Decisão:** a instalação liga a VM com `--soft` (sem 3D: não há tela gráfica a ver) e, por padrão,
-  `NIER_LAB_CPUS=4 NIER_LAB_MEM=4G`. A porta SSH é a primeira livre (`free_port`), e o comando exporta
+  `NIER_LAB_CPUS=2 NIER_LAB_MEM=4G` (teto do dono, 2026-10-27). A porta SSH é a primeira livre (`free_port`), e o comando exporta
   `NIER_LAB_VM=<nome>` pra si, então funciona com outras VMs ligadas.
 - **Motivo:** o archinstall não precisa de mais; sobra CPU e memória pros agentes que estão usando
   `teste-a/b/c` ao mesmo tempo.

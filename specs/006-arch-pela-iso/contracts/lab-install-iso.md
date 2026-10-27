@@ -44,7 +44,7 @@ lab/install-iso [<nome>] [--config <arquivo.json>] [--disk <tamanho>] [--snapsho
 | `--keep-on-fail` | — | Na falha, mantém o disco como `<nome>` **incompleto** (nunca congelado), pra investigar com `lab/up` |
 | `--timeout` | `20` | Limite do passo `install`, em minutos |
 
-Variáveis respeitadas: `NIER_LAB_CPUS` (padrão **4** neste comando), `NIER_LAB_MEM` (padrão **4G**),
+Variáveis respeitadas: `NIER_LAB_CPUS` (padrão **2** neste comando, teto do dono), `NIER_LAB_MEM` (padrão **4G**),
 `NIER_LAB_HOME` e, só pra testar a recusa, `NIER_LAB_ISO=<arquivo>` (usa esse arquivo no lugar da ISO
 fixada, com a mesma verificação contra o `images.lock`). O comando exporta `NIER_LAB_VM=<nome>` pra si: funciona com outras VMs ligadas.
 

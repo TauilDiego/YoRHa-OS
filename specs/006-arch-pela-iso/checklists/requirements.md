@@ -40,5 +40,8 @@
   1. a `arch-iso` entra **ao lado** da `arch-limpo` (não substitui);
   2. a configuração padrão da instalação (FR-011);
   3. sudo sem senha como adaptação do laboratório (FR-014).
-- **Pronta para** `/speckit-plan` depois da aprovação do dono (constituição V). O plano foi escrito
-  junto, a pedido, e também espera aprovação.
+- **Aprovada pelo dono em 2026-10-27** (constituição V), junto com o plano. As três perguntas viraram
+  decisões, registradas na spec ("Decisões do dono"): a `arch-iso` ao lado; systemd-boot, btrfs com
+  subvolumes, zram, NetworkManager e perfil mínimo (Plymouth depois); sudo sem senha marcado como
+  adaptação do lab. Mais duas: pacotes do dia com `--snapshot` opcional, e sem cache de pacotes
+  (medir o download).

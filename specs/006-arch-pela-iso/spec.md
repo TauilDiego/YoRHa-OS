@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-27
 
-**Status**: Rascunho, aguardando a aprovação do dono
+**Status**: Aprovada pelo dono em 2026-10-27, com as decisões abaixo
 
 **Input**: Fase S2 do `PLAN.md`: "Arch completo na VM | ISO + archinstall desassistido (8.5) | Um
 comando entrega um `arch-limpo` instalado pela ISO". Pedido do dono: começar agora, em paralelo com
@@ -30,6 +30,30 @@ boot, sistema de arquivos, swap e rede.
 O instalador da personalização (S3) e os updates (S4) precisam ser testados sobre esse sistema
 realista. Esta fase faz o laboratório produzir, sozinho, um Arch instalado do mesmo jeito que o
 usuário instala.
+
+## Decisões do dono (2026-10-27)
+
+As três perguntas em aberto do rascunho foram respondidas na aprovação:
+
+1. **A camada `arch-iso` fica ao lado da cadeia atual.** Nenhuma camada existente muda. Trocar a base
+   da `hypr-base` pela `arch-iso` é uma tarefa separada, depois.
+2. **Configuração da instalação:**
+   - carregador **systemd-boot** (escolha do dono; sem variante com GRUB);
+   - **btrfs com subvolumes**;
+   - swap em zram, NetworkManager e perfil mínimo;
+   - outras variantes entram depois, pelo `--config`, na S3;
+   - o dono pretende tematizar o boot e o login mais tarde (splash do Plymouth, depois um greeter
+     SDDM ou Quickshell). A configuração fica amigável a acrescentar o Plymouth depois (initramfs do
+     `mkinitcpio` e linha de comando do kernel nas entradas do systemd-boot, sem nada que o impeça),
+     mas o Plymouth **não** entra agora.
+3. **Sudo sem senha pro usuário do lab**, como adaptação do laboratório marcada e removível
+   (FR-014).
+4. **Pacotes do dia**, com a opção `--snapshot <data>` usando o Arch Linux Archive.
+5. **Sem cache de pacotes por enquanto.** O tempo de download é medido, e o relatório diz se um cache
+   compensaria.
+
+Recursos: no máximo **uma VM** desta fase ligada por vez, com **2 núcleos e 4 GB** (teto do dono:
+até 4 VMs no host, 2 núcleos e 4 GB cada).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -188,7 +212,7 @@ no meio; nos dois casos, conferir a mensagem, os logs, o screenshot e a ausênci
   com o archinstall: carregador systemd-boot, kernel `linux`, btrfs com os subvolumes padrão, swap em
   zram, NetworkManager, perfil mínimo (sem desktop), idioma e teclado `en_US`/`us`, fuso UTC.
 - **FR-012**: O comando MUST aceitar outro arquivo de configuração, pra a S3 testar variações (outro
-  sistema de arquivos, outro carregador).
+  sistema de arquivos, por exemplo). O padrão é o systemd-boot, sem variante com GRUB nesta fase.
 - **FR-013**: A configuração MUST ser validada pelo próprio archinstall **antes** de qualquer mudança
   no disco da VM.
 - **FR-014**: Tudo o que o laboratório acrescenta ao que um usuário teria (o acesso por SSH com a chave
@@ -261,12 +285,15 @@ no meio; nos dois casos, conferir a mensagem, os logs, o screenshot e a ausênci
 
 - **Fora do escopo:** o instalador da personalização (S3), updates (S4), testes em hardware real,
   criptografia de disco, boot BIOS/legado e outras distros (S6).
-- **A camada nova não substitui a `arch-limpo` nesta fase.** Ela entra ao lado. Trocar a base da
-  `hypr-base` pela `arch-iso` é uma decisão do dono depois que a US3 passar (pergunta em aberto).
+- **A camada nova não substitui a `arch-limpo` nesta fase.** Ela entra ao lado (decisão 1). Trocar a
+  base da `hypr-base` pela `arch-iso` é uma tarefa separada, depois que a US3 passar.
 - **Pacotes do dia:** a instalação usa os repositórios atuais do Arch, como um usuário faria. Fixar
   os pacotes numa data do arquivo histórico fica como opção, não como padrão.
-- **Sem cache de pacotes nesta fase:** cada instalação baixa os pacotes. O custo é medido; um cache
-  só entra se a medição mostrar que vale (princípio VII).
+- **Sem cache de pacotes nesta fase (decisão 5):** cada instalação baixa os pacotes. O tempo de
+  download é medido e o relatório diz se um cache compensaria; ele só entra se a medição mostrar que
+  vale (princípio VII).
+- **Plymouth e greeter ficam pra depois (decisão 2):** a configuração não pode impedir que entrem, mas
+  não os instala.
 - **Modo de boot:** UEFI, igual às outras VMs do lab.
 - **Rede:** a mesma rede de usuário do emulador que o lab já usa, sem bridge nem mudança de firewall.
 - **Constituição II:** a ISO usada é a oficial, sem modificação. O projeto continua sem ISO ou imagem
