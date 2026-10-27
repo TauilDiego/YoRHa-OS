@@ -30,8 +30,12 @@ def tile(img, bg, box):
 
 def main():
     src, orig, out = sys.argv[1:4]
-    names = sys.argv[4:] or sorted({os.path.basename(p).rsplit(".", 1)[0].split("_0")[0]
-                                    for p in glob.glob(os.path.join(src, "*.svg"))})
+    if sys.argv[4:]:
+        names = sys.argv[4:]
+    else:                                   # every shape, in the table's order
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from cursors import TABLE
+        names = list(TABLE)
     rows = []
     for n in names:
         files = sorted(glob.glob(os.path.join(src, f"{n}.svg"))) or sorted(glob.glob(os.path.join(src, f"{n}_[0-9][0-9].svg")))

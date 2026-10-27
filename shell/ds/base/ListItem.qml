@@ -158,6 +158,7 @@ Item {
         id: mouse
         anchors.fill: parent
         hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor        // clickable: the hand cursor (spec 002)
         onClicked: root.clicked()
     }
 }

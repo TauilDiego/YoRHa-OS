@@ -125,6 +125,7 @@ Item {
         width: root.width
         height: root.bandH
         hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor        // clickable: the hand cursor (spec 002)
         onClicked: root.clicked()
     }
 }
