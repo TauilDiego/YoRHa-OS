@@ -156,7 +156,9 @@ com dados de teste, dois screenshots seguidos saem iguais.
   qualquer escala de tela.
 - **FR-002a**: Superfícies de tela cheia (a galeria e os menus futuros) MUST ter a vinheta do jogo:
   as bordas escurecem até ≈`#A6A18D` e os cantos até ≈`#8B8877`. A vinheta MUST poder ser
-  desligada. O HUD não tem vinheta.
+  desligada. O papel do HUD entra na vinheta do fundo, contínua com ele, sem emenda; abas, régua
+  e textos ficam por cima, sem vinheta (decisão do dono em 2026-10-27: a vinheta pega a tela
+  inteira, mas não as janelas).
 - **FR-003**: O design system MUST oferecer estas peças reutilizáveis, em camadas (cada camada
   só usa as de baixo), com os nomes de `docs/design-system.md`:
   - **tokens:** cores, tipografia, sombras, espaçamentos, durações de animação;

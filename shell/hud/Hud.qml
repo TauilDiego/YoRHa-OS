@@ -75,6 +75,14 @@ PanelWindow {
         anchors.fill: parent
     }
 
+    // The top strip of the desktop's vignette (FR-002a), so bar and background meet without a
+    // seam. Over the paper only: tabs, rule and text stay on top, like windows on the desktop.
+    Vignette {
+        anchors.fill: parent
+        area: Qt.size(root.modelData?.width ?? root.width, root.modelData?.height ?? root.height)
+        enabled: Settings.vignette
+    }
+
     // Tabs + strips + the dotted rule, sitting on the bar's bottom edge.
     TabBar {
         id: tabBar

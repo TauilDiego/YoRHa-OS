@@ -190,7 +190,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 | Sombra do título | 8,8 fixo | Proporcional ao tamanho do texto (≈15%) |
 | Abas da barra | Seletor (pipa) ao lado da aba em foco | **Decidido (2026-10-27):** na barra do HUD, só as abas lado a lado, sem seletor. Nos menus, o seletor continua |
 | Fundo do desktop | Só nos menus | **Decidido (2026-10-27):** o fundo inteiro da área de trabalho é o papel do menu (grid, vinheta, arcos e feixes, com movimento sutil que pode ser desligado), no lugar do wallpaper |
-| Vinheta | Em todos os menus | Como no jogo (bordas `#A6A18D`, cantos `#8B8877`), só nos menus de tela cheia, desligável. O HUD não tem |
+| Vinheta | Em todos os menus | Como no jogo (bordas `#A6A18D`, cantos `#8B8877`), desligável. Nos menus de tela cheia e na tela inteira do desktop: o fundo e o papel da barra do topo formam uma vinheta só, sem emenda (2026-10-27). As janelas, as abas, a régua e os textos ficam por cima, sem vinheta |
 
 ### Escala
 

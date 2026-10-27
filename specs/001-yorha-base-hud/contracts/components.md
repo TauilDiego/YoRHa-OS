@@ -18,7 +18,7 @@ Regras para todos os componentes:
 | `Square` | `size` (padrão 22), `color` | O marcador |
 | `Rule` | `kind`: `"plain"` / `"dotted"` / `"vertical"`, `color` | A pontilhada repete o padrão de pontos (§6) |
 | `GridBackground` | `step` (padrão 7) | Papel + grid a 6% |
-| `Vignette` | `enabled` | FR-002a. Overlay por cima de tudo. Só em tela cheia |
+| `Vignette` | `enabled`, `area` (tamanho da tela inteira; padrão = o próprio item), `offset` (posição do item nela) | FR-002a. Overlay sobre o papel. Com `area`/`offset` pinta só o seu pedaço de uma vinheta maior: o HUD usa a faixa de cima da vinheta do fundo, sem emenda |
 | `PaperDecor` | `phase` (0–1) | FR-019/FR-020. Arcos e feixes diagonais do fundo, desenhados uma vez; `phase` move as camadas sem repintar |
 
 ## Base (`shell/ds/base/`)
