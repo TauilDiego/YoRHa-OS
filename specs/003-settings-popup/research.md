@@ -157,8 +157,9 @@ foi decidido na 001 (escala, fixtures, tokens, adaptador do compositor) vale aqu
   - o escurecimento e o painel entram juntos com `opacity` 0 → 1 em `Tokens.motion.popupFade`
     (150 ms); o fechamento é imediato;
   - com `Tokens.frozen` (fixtures), o fade, a varredura e o blink ficam instantâneos (FR-022);
-  - **movimento reduzido** (caso de borda) ainda não existe como opção. Quando existir, ele passa a
-    ligar a mesma chave que as fixtures usam hoje, num lugar só (`Tokens`).
+  - **movimento reduzido** (caso de borda): a opção `Settings.reduceMotion` entrou junto com a 004.
+    O `shell.qml` liga `Tokens.reduced`, e `Tokens.instant` (= `frozen || reduced`) deixa o fade
+    e o blink instantâneos. A varredura da faixa continua presa só às fixtures.
 - **Motivo:** FR-006, FR-022 e a constituição VII (nada de abstração antes da segunda necessidade).
 
 ## R12. IPC e evidência
