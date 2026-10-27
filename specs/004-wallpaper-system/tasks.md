@@ -87,6 +87,9 @@ hidpi; dois screenshots iguais com fixtures.
 
 ## Phase 4: User Story 2 - Escolher no seletor (Priority: P1)
 
+> **Pendente: depende da 003 (US2).** A implementação das outras fases foi feita antes (branch
+> `004-wallpaper-system`); esta fase e o polimento ligado ao seletor ficam pra quando a 003 entrar.
+>
 > **Depende da implementação da 003** (moldura de popup, linha de opção, seletor de valor, rodapé de
 > teclas, foco em duas colunas). Começa quando a 003 entrar na `004-wallpaper-system`.
 
@@ -95,11 +98,11 @@ colunas, aplica por monitor.
 
 **Independent Test**: `ALT + W` e IPC abrem; teclas reais (SC-004) terminam no estado esperado.
 
-- [ ] T023 [P] [US2] `shell/ds/composites/GroupedList.qml`: a `CursorList` com títulos de grupo sem foco, itens apagados (`dim`), a marca de aplicado à direita (`● ALL` / `● DP`), `focused: false` = pipa clara e parada (estado da 003). Se a 003 já der grupos à `CursorList`, este arquivo vira um alias fino
-- [ ] T024 [P] [US2] `shell/wallpaper/PreviewCard.qml`: `Card` da 001 com o nome, uma `WallpaperView` pequena (cena viva com `s` = 512/1920; imagem com `sourceSize` 512×288 e o filtro; vídeo = "NOT YET") e a descrição
-- [ ] T025 [US2] `shell/wallpaper/WallpaperPicker.qml`: `PanelWindow` `Overlay` no monitor em foco, `keyboardFocus: Exclusive`, com a moldura da 003 (escurecimento + papel), o título `WALLPAPER -Select`, a `GroupedList`, o `PreviewCard` e o card "Options" (linhas `Monitor`, `Transition` e `Paper filter` só pra imagem, mais as informações), o rodapé de teclas por foco, a navegação em duas colunas (FR-008) e o `dump()` do data-model ("Picker"). Abre focado no item aplicado no monitor
-- [ ] T026 [US2] `shell/shell.qml`: `LazyLoader` do `WallpaperPicker` (fechamento em duas fases, como a galeria) e `picker(open|close|toggle)` ligado; `dump` inclui o `picker`
-- [ ] T027 [US2] Validar (`lab/perf begin "004: seletor"`): cenário 4 do quickstart com teclas reais (`lab/key`) e `ALT + W`; screenshot do seletor aberto sobre o fundo escurecido, em 1080 e hidpi; cenário 2 (seletor aberto, `diffshot` = 0); linhas SC-004 no `lab/check-004`
+- [ ] T023 [P] [US2] `shell/ds/composites/GroupedList.qml`: a `CursorList` com títulos de grupo sem foco, itens apagados (`dim`), a marca de aplicado à direita (`● ALL` / `● DP`), `focused: false` = pipa clara e parada (estado da 003). Se a 003 já der grupos à `CursorList`, este arquivo vira um alias fino — **pendente: depende da 003 (US2).**
+- [ ] T024 [P] [US2] `shell/wallpaper/PreviewCard.qml`: `Card` da 001 com o nome, uma `WallpaperView` pequena (cena viva com `s` = 512/1920; imagem com `sourceSize` 512×288 e o filtro; vídeo = "NOT YET") e a descrição — **pendente: depende da 003 (US2).**
+- [ ] T025 [US2] `shell/wallpaper/WallpaperPicker.qml`: `PanelWindow` `Overlay` no monitor em foco, `keyboardFocus: Exclusive`, com a moldura da 003 (escurecimento + papel), o título `WALLPAPER -Select`, a `GroupedList`, o `PreviewCard` e o card "Options" (linhas `Monitor`, `Transition` e `Paper filter` só pra imagem, mais as informações), o rodapé de teclas por foco, a navegação em duas colunas (FR-008) e o `dump()` do data-model ("Picker"). Abre focado no item aplicado no monitor — **pendente: depende da 003 (US2).**
+- [ ] T026 [US2] `shell/shell.qml`: `LazyLoader` do `WallpaperPicker` (fechamento em duas fases, como a galeria) e `picker(open|close|toggle)` ligado; `dump` inclui o `picker` — **pendente: depende da 003 (US2).**
+- [ ] T027 [US2] Validar (`lab/perf begin "004: seletor"`): cenário 4 do quickstart com teclas reais (`lab/key`) e `ALT + W`; screenshot do seletor aberto sobre o fundo escurecido, em 1080 e hidpi; cenário 2 (seletor aberto, `diffshot` = 0); linhas SC-004 no `lab/check-004` — **pendente: depende da 003 (US2).**
 
 **Checkpoint**: o dono escolhe o papel de parede no seletor.
 
@@ -158,13 +161,13 @@ de arquivo.
 
 ## Phase 8: Polish & validação final
 
-- [ ] T041 [P] `shell/gallery/Gallery.qml`: seção "Wallpaper" (FR-022) com as 4 cenas em miniatura, uma imagem de teste com e sem filtro, um quadro congelado de cada transição (`elapsed`/`progress` fixos, `seed = 1`) e a `GroupedList` com e sem foco
-- [ ] T042 [P] `docs/design-system.md`: as cenas (parâmetros), o filtro de papel, as 4 transições (com a camuflagem descrita etapa por etapa) e o layout lista + prévia + opções como composto reutilizável (FR-022)
-- [ ] T043 [P] Conferir FR-023 (nenhum texto fixo fora do `Strings.qml`, por grep) e "nenhuma cor fora do `Tokens.qml`", por grep em `shell/wallpaper/` e `shell/shaders/` (as cores do shader chegam por uniform)
-- [ ] T044 Rodar o quickstart inteiro com o `lab/check-004` numa sessão `lab/perf begin "004: validação" --kind validacao --task 004` (SC-001 a SC-008, bordas, galeria), em `lab/profile 1080` e `hidpi`
-- [ ] T045 Corrigir o que o T044 apontar e repetir só os cenários afetados
-- [ ] T046 Escrever `specs/004-wallpaper-system/relatorio.md` (o que ficou pronto com a evidência, decisões tomadas sozinho, custo somado do `lab/perf`, commits) e montar a imagem final pra o dono (SC-010): as 4 cenas, o seletor aberto, uma imagem com e sem filtro e 6 quadros da camuflagem, ao lado do mockup
-- [ ] T047 Rodar `/speckit-analyze` e resolver as inconsistências entre spec, plano e tarefas
+- [ ] T041 [P] `shell/gallery/Gallery.qml`: seção "Wallpaper" (FR-022) com as 4 cenas em miniatura, uma imagem de teste com e sem filtro, um quadro congelado de cada transição (`elapsed`/`progress` fixos, `seed = 1`) e a `GroupedList` com e sem foco — **pendente: depende da 003 (US2).** A página da galeria já está cheia (três colunas e a barra de abas) e a 003 também vai pôr peças nela; a seção Wallpaper (cenas, filtro, quadros congelados das transições e a `GroupedList`) entra junto com o seletor, quando o layout da galeria for decidido com as peças das duas
+- [ ] T042 [P] `docs/design-system.md`: as cenas (parâmetros), o filtro de papel, as 4 transições (com a camuflagem descrita etapa por etapa) e o layout lista + prévia + opções como composto reutilizável (FR-022) — **parcial:** feito o §7 do `docs/design-system.md` (cenas e parâmetros, imagens, filtro de papel, as 4 transições com a camuflagem etapa por etapa, regras, custo medido, tokens e configuração) e corrigida a linha "Fundo do desktop" do §5 (ainda citava o grid). **Pendente: depende da 003 (US2):** o layout lista + prévia + opções como composto reutilizável
+- [x] T043 [P] Conferir FR-023 (nenhum texto fixo fora do `Strings.qml`, por grep) e "nenhuma cor fora do `Tokens.qml`", por grep em `shell/wallpaper/` e `shell/shaders/` (as cores do shader chegam por uniform) — **feito:** nenhum texto de UI fixo fora do `Strings.qml` em `shell/wallpaper/` e nos serviços novos (só linhas de log e respostas de IPC, em inglês); a única cor literal (um fallback em `Scene.towardTint`) passou a vir do `Tokens`, sem mudar a tela (`dark` = 0 px de diferença); o shader recebe as cores por uniform. Conferido na VM dentro da sessão `lab/perf` 2026-10-27T160835
+- [ ] T044 Rodar o quickstart inteiro com o `lab/check-004` numa sessão `lab/perf begin "004: validação" --kind validacao --task 004` (SC-001 a SC-008, bordas, galeria), em `lab/profile 1080` e `hidpi` — **parcial:** o `lab/check-004` roda tudo o que não depende do seletor: **21 PASS / 0 FAIL** em 1080 e hidpi (SC-001, SC-002 do fundo, SC-003, SC-006, SC-007, SC-008, bordas, FR-017), mais o `lab/check-u1` 15/15 (`lab/perf` 2026-10-27T160835, `out/004-check-004`). **Pendente: depende da 003 (US2):** SC-004, a metade do SC-002 com o seletor aberto e a galeria
+- [ ] T045 Corrigir o que o T044 apontar e repetir só os cenários afetados — **pendente: depende da 003 (US2).**
+- [ ] T046 Escrever `specs/004-wallpaper-system/relatorio.md` (o que ficou pronto com a evidência, decisões tomadas sozinho, custo somado do `lab/perf`, commits) e montar a imagem final pra o dono (SC-010): as 4 cenas, o seletor aberto, uma imagem com e sem filtro e 6 quadros da camuflagem, ao lado do mockup — **pendente: depende da 003 (US2).**
+- [ ] T047 Rodar `/speckit-analyze` e resolver as inconsistências entre spec, plano e tarefas — **pendente: depende da 003 (US2).**
 
 ---
 

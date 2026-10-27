@@ -193,7 +193,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 | Sombra do título | 8,8 fixo | Proporcional ao tamanho do texto (≈15%) |
 | Cursor (pipa) | Parado; pula de um item pro outro | **Decidido (2026-10-27):** parado, e pisca ao trocar de item (some e reaparece com ease in-out, `motion.blink` ≈240 ms) |
 | Abas da barra | Seletor (pipa) ao lado da aba em foco | **Decidido (2026-10-27):** as abas nunca têm seletor, nem no HUD nem nos menus: só as abas lado a lado. A pipa fica só nos itens de lista |
-| Fundo do desktop | Só nos menus | **Decidido (2026-10-27):** o fundo inteiro da área de trabalho é o papel do menu (grid, vinheta, arcos e feixes, com movimento sutil que pode ser desligado), no lugar do wallpaper |
+| Fundo do desktop | Só nos menus | **Decidido (2026-10-27):** o fundo inteiro da área de trabalho é o papel do menu (vinheta, arcos e feixes, sem grid, com movimento sutil que pode ser desligado). Desde a spec 004 ele é um papel de parede do próprio rien-OS, trocável (§7) |
 | Vinheta | Em todos os menus | Como no jogo (bordas `#A6A18D`, cantos `#8B8877`), desligável. Nos menus de tela cheia e na tela inteira do desktop: o fundo e o papel da barra do topo formam uma vinheta só, sem emenda (2026-10-27). As janelas, as abas, a régua e os textos ficam por cima, sem vinheta |
 
 ### Escala
@@ -255,6 +255,116 @@ convertidas pra 1080p (×1,2). As imagens ficam só no repositório privado, pra
 - **Fechar o menu:** a tela se desfaz em estilhaços triangulares, em ≈300–500 ms.
 - **Estado danificado:** aberração cromática e glitch no texto.
 - Os tempos ficam em tokens, pra calibrar depois com gravação a 60 fps no laboratório.
+
+## 7. Papel de parede (spec 004)
+
+O rien-OS desenha o próprio papel de parede, sem ferramenta de fora (`swww`, `hyprpaper`…): um
+fundo por monitor na camada de fundo do Wayland. Cada monitor mostra a escolha dele, ou a de
+"todos os monitores", ou a cena `menu`. A escolha é estado do usuário
+(`$XDG_STATE_HOME/rien-os/wallpaper.json`), nunca a config dele. Há três tipos: **cenas**,
+**imagens** da pasta do usuário e **vídeo** (depois, no U6).
+
+### Cenas
+
+Uma cena é um JSON em `shell/wallpaper/scenes/<id>.json` (formato em
+`specs/004-wallpaper-system/contracts/scene.schema.json`). A geometria fica no componente
+(`Scene` + `PaperDecor`), igual pra todas; o JSON só liga camadas e escolhe cores e movimento.
+
+| Parâmetro | O que faz | `menu` |
+|---|---|---|
+| `paper.center` | Cor do papel | `#C9C5AB` |
+| `paper.edge`, `paper.corner` | Alvos da vinheta (bordas, cantos) | `#A6A18D`, `#8C8978` |
+| `layers.arcs` | 4 arcos com centro fora da tela, 2 duplos (+7 px no raio) | sim |
+| `layers.beams` | 4 feixes de 2–3 linhas a 42°, começos +34 px e fins −60 px por linha | sim |
+| `layers.rules` | Réguas pontilhadas em y 108 e 1012 (tinta a 90%) | não |
+| `layers.dots` | Trama da cena escura: 1 px a cada 4 px, branco a 7% | não |
+| `lineAlpha` | Tinta das linhas | 0,15 |
+| `motion.arcPeriod` / `arcAmplitude` | Os arcos balançam ± graus em torno do próprio centro | 600 s / 9° |
+| `motion.beamPeriod` / `beamAmplitude` | Os feixes deslizam ± px ao longo da direção | 300 s / 70 px |
+
+| Cena | Papel | Arcos | Feixes | Réguas | Trama |
+|---|---|---|---|---|---|
+| `menu` (padrão) | papel | ✓ | ✓ | — | — |
+| `rules` | papel | ✓ | ✓ | ✓ | — |
+| `dark` | `#141414` → `#101010` → `#0A0A0A`, linhas `#96948C` a 20% | ✓ | ✓ | — | ✓ |
+| `plain` | papel | — | — | — | — |
+
+- **Vinheta:** as cenas de papel usam a vinheta medida (§1, "Vinheta"), a mesma da barra do topo,
+  então fundo e barra não têm emenda. A cena escura escurece pro preto com a força que o `edge` e
+  o `corner` dela pedem.
+- **Papel:** o centro é o `dark-yellow` (`#C9C5AB`), a 1–2 níveis do medido no jogo (`#C8C3AC`):
+  é o mesmo papel da barra.
+- **Movimento:** no ciclo de 600 s do shell; para com dados de teste ou com `wallpaperMotion: false`.
+
+### Imagens e filtro de papel
+
+- **Pasta:** `wallpaperFolder` (padrão `~/Pictures/Wallpapers`), só lida e observada: um arquivo
+  novo aparece sem reiniciar. Entram `jpg`, `png` e `webp`; o resto fica de fora, com uma linha no
+  log.
+- **Na tela:** cobre o monitor sem esticar (o excesso é cortado, centralizado), decodificada no
+  tamanho físico do monitor.
+- **Filtro de papel** (de fábrica, desligável por imagem): as cores puxadas pro papel e uma
+  vinheta mais suave por cima, como no mockup.
+  - **cor:** `MultiEffect` com `colorization` 0,85 e `Tokens.wallpaper.filterTint` `#FFFAD9`,
+    que é o matiz do papel em brilho cheio: a colorização do Qt multiplica a luminância pela cor,
+    e com o papel em si a imagem escurecia ≈30 níveis;
+  - **vinheta:** tinta de 0 (a partir de meio raio) a 0,26 nas bordas e 0,35 nos cantos.
+
+### Transições
+
+A troca nunca é um corte seco. A transição é escolha do usuário, e vale pro seletor e pra troca
+por comando. Todas são um shader só (`shell/shaders/transition.frag`), sobre o fundo antigo e o
+novo como texturas vivas; as cores chegam do `Tokens`.
+
+| Transição | Duração | Como é |
+|---|---|---|
+| **Camuflagem** (de fábrica) | 1200 ms + rastro + 450 ms (≈4,3 s de fábrica) | Ver abaixo |
+| **Varredura** | 900 ms, ease in-out | O novo entra da esquerda; a borda é a régua pontilhada em pé (linha na borda, tracinhos e trios do lado novo) e passa 40 px da tela pra sair inteira |
+| **Quadradinhos** | 900 ms, ease in-out | Células de 24 px, da esquerda pra direita com 30% de sorteio; cada uma vira primeiro um quadrado de tinta a 90% com 4 px de margem, depois o novo |
+| **Crossfade** | 900 ms, ease in-out | Um some enquanto o outro aparece |
+
+**Camuflagem, etapa por etapa** (medidas em px do jogo, a 1080p):
+1. **A onda:** sai de um ponto sorteado perto do centro (±15% da tela) e cruza a tela em
+   1200 ms. Cada célula (`cell`: 16, 24 ou 32 px; de fábrica 24) tem o seu momento:
+   1200 ms × (0,85 × distância até a origem ÷ maior distância + 0,15 × sorteio).
+2. **Refração:** nos 200 ms antes da onda, o fundo antigo da célula treme (até 6×4 px) e, na
+   metade final, vira mosaico de 4 px.
+3. **Brilho:** nos primeiros 60 ms, a borda de 2 px da célula fica clara (`glint` a 55%).
+4. **Entrada pixelada:** o novo entra em blocos de 12 px (até 130 ms), 6 px (até 260 ms) e 4 px
+   (até 400 ms), e fica nítido.
+5. **Rastro:** durante `trail` ms (800, 1500 ou 2600; de fábrica 2600), um véu claro (`glint` a 10%)
+   e o contorno de 2 px em tinta a 30% vão sumindo.
+6. **Falhas:** enquanto o rastro dura, uma célula falha por um quadro (33 ms) com chance
+   0 / 0,0008 / 0,006 (`glitch` 0, 1, 2; de fábrica 2, "visíveis") vezes a força do rastro: em 30%
+   das vezes mostra o fundo antigo; senão, o novo deslocado 2 ou 4 px na horizontal.
+7. **Fim:** 450 ms depois do rastro, o efeito sai e só o fundo novo fica.
+
+**Regras de todas:**
+- **instantâneas** com dados de teste (screenshots iguais) ou com `reduceMotion: true`;
+- **uma troca no meio de outra** parte do quadro que está na tela, sem pulo;
+- **sem o shader compilado** (`.qsb`, gerado por `shell/shaders/build.sh` onde a UI roda), viram
+  um crossfade, com um aviso no log;
+- **custo medido na VM** (spec 004, SC-009; sem meta até o U6): 10 camuflagens custaram 0,63 s de
+  CPU do Quickshell por troca, a ≈60 fps; 10 crossfades, 0,18 s. Por segundo animado o CPU é
+  parecido: o extra da camuflagem fica na GPU.
+
+### Lista + prévia + opções
+
+O layout do seletor (lista agrupada à esquerda, prévia ao vivo no meio, opções e informações à
+direita), reaproveitável pros próximos menus, entra com o seletor da spec 004 (US2), que usa as
+peças do popup da spec 003. Pendente.
+
+### Tokens e configuração
+
+- **Tokens** (`Tokens.wallpaper`): `darkLine`, `darkVignette`, `ruleAlpha`, `darkRuleAlpha`,
+  `dotWeave`, `glint` `#E6E1C8`, `inkSquare`, `filterTint`, `filterAmount`, `filterVignette*`,
+  `reveal` 1200, `lead` 200, `settle` 450, `duration` 900.
+- **Configuração** (`config/defaults.json`, sobrescrita pelo `shell.json` do usuário):
+  `wallpaperFolder`, `wallpaperTransition` (`camouflage`), `camouflage` (`cell` 24, `trail` 2600,
+  `glitch` 2) e `reduceMotion`. A última escolha feita (no seletor ou por comando) vale mais que a
+  config e fica no arquivo de estado.
+- **Comandos:** `qs ipc call wallpaper list | set <id> <monitor|all> | next | prev | transition
+  <tipo> | camouflage <cell> <trail> <glitch> | filter <caminho> <true|false> | dump`.
 
 ## Créditos
 

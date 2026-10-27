@@ -96,7 +96,8 @@ Item {
 
     // How much of the vignette's tint turns the paper's center into `target` (mean over channels).
     function towardTint(target: string): real {
-        const c = Qt.lighter(paper.center ?? "#000000", 1), t = Qt.lighter(target ?? "#000000", 1), k = Tokens.wallpaper.darkVignette;
+        const k = Tokens.wallpaper.darkVignette;
+        const c = Qt.lighter(paper.center || k, 1), t = Qt.lighter(target || k, 1);
         let sum = 0, n = 0;
         for (const ch of ["r", "g", "b"]) {
             if (Math.abs(c[ch] - k[ch]) < 1e-6)
