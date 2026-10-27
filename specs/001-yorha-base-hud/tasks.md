@@ -27,14 +27,14 @@ de `lab/perf begin/end`.
 **Purpose**: deixar o laboratório pronto pra fixtures, comparação de screenshots, perfil hidpi e
 agentes paralelos, e criar o esqueleto do `shell/`.
 
-- [ ] T001 Criar a estrutura de pastas do plan.md: `shell/ds/{primitives,base,composites}`, `shell/services`, `shell/strings`, `shell/hud`, `shell/gallery`, `shell/config`, `shell/fixtures`, `shell/assets/fonts` (remover `shell/.gitkeep`)
-- [ ] T002 [P] `lab/sync`: aceitar `--env KEY=VAL` (repetível). Grava `~/nier/ui.env` na VM, instala/atualiza `~/.local/bin/nier-ui-run` a partir de `lab/guest/nier-ui-run` e reinicia o `qs` (`pkill -x qs`) só quando o env ou o runner mudarem
-- [ ] T003 [P] `lab/guest/nier-ui-run`: carregar `~/nier/ui.env` (`set -a; . ~/nier/ui.env; set +a`) antes de cada `qs -p "$ui"`
-- [ ] T004 [P] Criar `lab/diffshot a.png b.png`: imprime o número de pixels diferentes (`magick compare -metric AE`) e sai com 0 só quando for 0
-- [ ] T005 [P] `lab/up` + `lab/profile`: `NIER_LAB_PROFILE=hidpi` liga a VM com tela de 2560x1600; `lab/profile hidpi|1080` aplica a escala 1.25/1 via `lab/ipc hyprctl eval 'hl.monitor({output="",mode="preferred",position="auto",scale=…})'`
-- [ ] T006 `lab/lib.sh`: várias VMs ao mesmo tempo. Com `NIER_LAB_VM=<nome>`, os comandos usam essa VM; a porta SSH sai de `run/<vm>.port` (primeira livre a partir de 2222, gravada pelo `lab/up`); a sessão `lab/perf` fica em `run/perf-<vm>.session`; sem `NIER_LAB_VM`, nada muda. `NIER_LAB_CPUS`/`NIER_LAB_MEM` continuam valendo
-- [ ] T007 Criar as camadas `teste-a`, `teste-b` e `teste-c` (`lab/new teste-x --from hypr-base`) e provar duas VMs ligadas juntas, cada uma com o seu `lab/shot` e o seu relatório `lab/perf`. `shellcheck` (Docker `koalaman/shellcheck:stable`) limpo em todos os scripts mudados
-- [ ] T008 Documentar T002–T007 na seção "Uso no dia a dia" de `lab/README.md`
+- [x] T001 Criar a estrutura de pastas do plan.md: `shell/ds/{primitives,base,composites}`, `shell/services`, `shell/strings`, `shell/hud`, `shell/gallery`, `shell/config`, `shell/fixtures`, `shell/assets/fonts` (remover `shell/.gitkeep`)
+- [x] T002 [P] `lab/sync`: aceitar `--env KEY=VAL` (repetível). Grava `~/nier/ui.env` na VM, instala/atualiza `~/.local/bin/nier-ui-run` a partir de `lab/guest/nier-ui-run` e reinicia o `qs` (`pkill -x qs`) só quando o env ou o runner mudarem
+- [x] T003 [P] `lab/guest/nier-ui-run`: carregar `~/nier/ui.env` (`set -a; . ~/nier/ui.env; set +a`) antes de cada `qs -p "$ui"`
+- [x] T004 [P] Criar `lab/diffshot a.png b.png`: imprime o número de pixels diferentes (`magick compare -metric AE`) e sai com 0 só quando for 0
+- [x] T005 [P] `lab/up` + `lab/profile`: `NIER_LAB_PROFILE=hidpi` liga a VM com tela de 2560x1600; `lab/profile hidpi|1080` aplica a escala 1.25/1 via `lab/ipc hyprctl eval 'hl.monitor({output="",mode="preferred",position="auto",scale=…})'`
+- [x] T006 `lab/lib.sh`: várias VMs ao mesmo tempo. Com `NIER_LAB_VM=<nome>`, os comandos usam essa VM; a porta SSH sai de `run/<vm>.port` (primeira livre a partir de 2222, gravada pelo `lab/up`); a sessão `lab/perf` fica em `run/perf-<vm>.session`; sem `NIER_LAB_VM`, nada muda. `NIER_LAB_CPUS`/`NIER_LAB_MEM` continuam valendo
+- [x] T007 Criar as camadas `teste-a`, `teste-b` e `teste-c` (`lab/new teste-x --from hypr-base`) e provar duas VMs ligadas juntas, cada uma com o seu `lab/shot` e o seu relatório `lab/perf`. `shellcheck` (Docker `koalaman/shellcheck:stable`) limpo em todos os scripts mudados
+- [x] T008 Documentar T002–T007 na seção "Uso no dia a dia" de `lab/README.md`
 
 **Checkpoint**: laboratório pronto pra agentes paralelos.
 
@@ -45,14 +45,14 @@ agentes paralelos, e criar o esqueleto do `shell/`.
 **Purpose**: o contrato que todas as histórias usam. **⚠️ Depois do T016, as interfaces de
 `contracts/` ficam congeladas.**
 
-- [ ] T009 Baixar a M PLUS 1 variável (`MPLUS1[wght].ttf`) e o `OFL.txt` do repositório `google/fonts` (`ofl/mplus1/`) para `shell/assets/fonts/`, e acrescentar o crédito em `CREDITS.md`
-- [ ] T010 Criar `shell/ds/Tokens.qml` (singleton) com os grupos `color`, `type`, `shadow`, `space`, `motion` e `vignette` do data-model.md, mais as funções `line(v, s)` ("≥ 1 e inteiro") e `px(v, s)`. Carrega a fonte por `FontLoader`, usa "FOT-Rodin ProN"/"Helvetica Now Micro" quando estiverem em `Qt.fontFamilies()`, e `motion.frozen` segue `Fixtures.active`
-- [ ] T011 [P] Criar `shell/strings/Strings.qml` (singleton): `CPU`, `MEM`, `VOL`, `BAT`, `SYSTEM` e os nomes da galeria, todos em inglês (FR-018)
-- [ ] T012 [P] Criar `shell/config/defaults.json` (`uiScale` 1, `barHeight` 40, `vignette` true) e `shell/services/Settings.qml` (singleton, `FileView` + `JsonAdapter`), que sobrescreve com `$XDG_CONFIG_HOME/rien-os/shell.json`. Validação do data-model: `uiScale` "0,5–3,0, fora usa o padrão e registra um aviso"; `barHeight` "limitado a 28–48"
-- [ ] T013 [P] Criar `shell/services/Fixtures.qml` (singleton): lê o JSON de `NIER_FIXTURES` (`Quickshell.env`), expõe `active`, `source`, `data`, `load(path)` e `clear()`; um domínio ausente fica `undefined` (contracts/fixtures.schema.json)
-- [ ] T014 [P] Criar as fixtures em `shell/fixtures/`: `hud-default.json` (workspaces 1–3 com o 2 em foco, CPU 23, MEM 41, VOL 64, BAT 87, "kitty — ~/projetos", 2026-10-26T13:37:00), `hud-live-ws.json` (igual, sem `workspaces`), `battery-low.json`, `no-battery.json`, `muted.json`, `long-title.json` e `no-window.json`
-- [ ] T015 Criar `shell/shell.qml`: `ShellRoot` com os `IpcHandler` `gallery` (`open`, `close`, `toggle`, `isOpen`), `fixtures` (`load`, `clear`) e `hud` (`dump`), conforme contracts/ipc.md. `dump` devolve `[]` até a US1
-- [ ] T016 Verificar na VM (`lab/perf begin "U1: contrato"`): carrega com 0 erros e 0 avisos; `qs -p ~/nier/ui ipc call fixtures load ~/nier/ui/fixtures/hud-default.json` responde `ok`; `qmllint` dentro da VM sem erros. **Congela o contrato**
+- [x] T009 Baixar a M PLUS 1 variável (`MPLUS1[wght].ttf`) e o `OFL.txt` do repositório `google/fonts` (`ofl/mplus1/`) para `shell/assets/fonts/`, e acrescentar o crédito em `CREDITS.md`
+- [x] T010 Criar `shell/ds/Tokens.qml` (singleton) com os grupos `color`, `type`, `shadow`, `space`, `motion` e `vignette` do data-model.md, mais as funções `line(v, s)` ("≥ 1 e inteiro") e `px(v, s)`. Carrega a fonte por `FontLoader`, usa "FOT-Rodin ProN"/"Helvetica Now Micro" quando estiverem em `Qt.fontFamilies()`, e `motion.frozen` segue `Fixtures.active`
+- [x] T011 [P] Criar `shell/strings/Strings.qml` (singleton): `CPU`, `MEM`, `VOL`, `BAT`, `SYSTEM` e os nomes da galeria, todos em inglês (FR-018)
+- [x] T012 [P] Criar `shell/config/defaults.json` (`uiScale` 1, `barHeight` 40, `vignette` true) e `shell/services/Settings.qml` (singleton, `FileView` + `JsonAdapter`), que sobrescreve com `$XDG_CONFIG_HOME/rien-os/shell.json`. Validação do data-model: `uiScale` "0,5–3,0, fora usa o padrão e registra um aviso"; `barHeight` "limitado a 28–48"
+- [x] T013 [P] Criar `shell/services/Fixtures.qml` (singleton): lê o JSON de `NIER_FIXTURES` (`Quickshell.env`), expõe `active`, `source`, `data`, `load(path)` e `clear()`; um domínio ausente fica `undefined` (contracts/fixtures.schema.json)
+- [x] T014 [P] Criar as fixtures em `shell/fixtures/`: `hud-default.json` (workspaces 1–3 com o 2 em foco, CPU 23, MEM 41, VOL 64, BAT 87, "kitty — ~/projetos", 2026-10-26T13:37:00), `hud-live-ws.json` (igual, sem `workspaces`), `battery-low.json`, `no-battery.json`, `muted.json`, `long-title.json` e `no-window.json`
+- [x] T015 Criar `shell/shell.qml`: `ShellRoot` com os `IpcHandler` `gallery` (`open`, `close`, `toggle`, `isOpen`), `fixtures` (`load`, `clear`) e `hud` (`dump`), conforme contracts/ipc.md. `dump` devolve `[]` até a US1
+- [x] T016 Verificar na VM (`lab/perf begin "U1: contrato"`): carrega com 0 erros e 0 avisos; `qs -p ~/nier/ui ipc call fixtures load ~/nier/ui/fixtures/hud-default.json` responde `ok`; `qmllint` dentro da VM sem erros. **Congela o contrato**
 - [ ] T017 [P] Primitivas em `shell/ds/primitives/`: `Label.qml`, `Square.qml`, `Rule.qml` (`plain`/`dotted`/`vertical`; a pontilhada segue o padrão do design-system §6), `GridBackground.qml` (passo 7) e `Vignette.qml` (bordas `#A6A18D`, cantos `#8B8877`), seguindo contracts/components.md
 - [ ] T018 [P] Base em `shell/ds/base/` (parte 1): `Selector.qml` (pipa 32×14 com furo + 2 quadradinhos de 5 px a ±10 px, alinhados com a ponta; balanço de ±5 px em 1 s, `InOutSine`, congelado quando `Tokens.motion.frozen`) e `Meter.qml` (`hp-bar` chapado 163×11, anima o valor, `alert` quando `critical`)
 - [ ] T019 [P] Base em `shell/ds/base/` (parte 2): `HeaderButton.qml` (estados `normal`/`hovered`/`selected`/`dimmed`, tinta pintando da esquerda pra direita em `Tokens.motion.highlight`, trilhos, sombra, `Selector` em `hovered`/`selected`, `reachRule` faz a aba selecionada descer até a régua) e `ListItem.qml` (mesmos estados, variantes `opaque`/`plain`, `trailing`)
