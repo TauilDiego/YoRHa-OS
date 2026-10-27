@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rien-os/shell/notifications/1",
+  "title": "spec 008: the notifications fixture domain, the prefs state file and the saved text log",
+  "$defs": {
+    "urgency": { "enum": ["low", "normal", "critical"] },
+    "prefs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "position": { "enum": ["corner", "top", "subtitle"] },
+        "osdPosition": { "enum": ["bottom", "top"] },
+        "voice": { "enum": ["relay", "rienos", "system"] },
+        "log": { "enum": ["session", "saved"] },
+        "logSize": { "enum": [50, 100, 200] },
+        "monitor": { "type": "string", "description": "\"\" = the focused monitor; else an output name" },
+        "onScreen": { "enum": [1, 3, 5] },
+        "duration": { "enum": ["short", "normal", "long"] },
+        "typing": { "type": "boolean" },
+        "fullscreen": { "enum": ["hold", "show"] }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "at"],
+      "properties": {
+        "id": { "type": "integer" },
+        "app": { "type": "string" },
+        "system": { "type": "boolean", "default": false },
+        "title": { "type": "string" },
+        "body": { "type": "string", "description": "May hold <b>, <i>, <u>; everything else is stripped" },
+        "urgency": { "$ref": "#/$defs/urgency", "default": "normal" },
+        "actions": {
+          "type": "array", "description": "Fixture only; never written to the saved log",
+          "items": { "type": "object", "additionalProperties": false, "required": ["id", "label"],
+                     "properties": { "id": { "type": "string" }, "label": { "type": "string" } } }
+        },
+        "hasDefault": { "type": "boolean" },
+        "reply": { "type": ["string", "null"], "description": "Fixture only: the reply button's label" },
+        "image": { "type": "string", "description": "A file path (relative paths resolve against the shell directory)" },
+        "progress": { "type": ["integer", "null"], "minimum": 0, "maximum": 100 },
+        "at": { "type": "string", "format": "date-time", "description": "Local time of arrival" },
+        "read": { "type": "boolean", "default": false },
+        "alive": { "type": "boolean", "default": true },
+        "count": { "type": "integer", "minimum": 1, "description": "Fixture only: the ×N of a transmission on screen" }
+      }
+    },
+    "fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Fixture domain `notifications` (FR-032). Everything is frozen: no typing, no timers",
+      "properties": {
+        "server": { "type": "boolean", "default": true },
+        "dnd": { "type": "boolean", "default": false },
+        "fullscreen": { "type": "boolean", "default": false },
+        "prefs": { "$ref": "#/$defs/prefs" },
+        "log": { "type": "array", "items": { "$ref": "#/$defs/entry" }, "description": "Newest first" },
+        "screen": { "type": "array", "items": { "type": "integer" }, "description": "Ids from `log` on the stack, newest first" },
+        "critical": { "type": "array", "items": { "type": "integer" }, "description": "Ids from `log` on the critical band" },
+        "overflow": { "type": "integer", "minimum": 0 },
+        "osd": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "object", "additionalProperties": false, "required": ["kind", "value"],
+              "properties": { "kind": { "enum": ["volume", "mic", "brightness"] }, "value": { "type": "integer", "minimum": 0 }, "muted": { "type": "boolean" } } }
+          ]
+        }
+      }
+    },
+    "state": {
+      "type": "object",
+      "description": "$XDG_STATE_HOME/rien-os/notifications.json (only the keys the user changed)",
+      "additionalProperties": false,
+      "required": ["version"],
+      "properties": {
+        "version": { "const": 1 },
+        "dnd": { "type": "boolean" },
+        "prefs": { "$ref": "#/$defs/prefs" }
+      }
+    },
+    "savedLog": {
+      "type": "object",
+      "description": "$XDG_STATE_HOME/rien-os/text-log.json, mode 600, only with log = saved",
+      "additionalProperties": false,
+      "required": ["version", "entries"],
+      "properties": {
+        "version": { "const": 1 },
+        "entries": {
+          "type": "array", "maxItems": 200,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["title", "at"],
+            "properties": {
+              "app": { "type": "string" },
+              "system": { "type": "boolean" },
+              "title": { "type": "string" },
+              "body": { "type": "string" },
+              "urgency": { "$ref": "#/$defs/urgency" },
+              "image": { "type": "string", "pattern": "^file://" },
+              "progress": { "type": ["integer", "null"] },
+              "at": { "type": "integer", "description": "ms since the epoch" },
+              "read": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
