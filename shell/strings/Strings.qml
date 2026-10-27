@@ -11,6 +11,8 @@ Singleton {
     readonly property string bat: "BAT"
     readonly property string system: "SYSTEM"
     readonly property string brand: "rien-OS"
+    readonly property string charging: "+"         // after the battery percent while charging
+    readonly property string muted: "MUTE"         // in place of the volume percent
 
     readonly property GalleryStrings gallery: GalleryStrings {}
     component GalleryStrings: QtObject {

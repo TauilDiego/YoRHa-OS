@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Io
 import "ds"
 import "gallery"
+import "hud"
 import "services"
 
 ShellRoot {
@@ -20,11 +21,34 @@ ShellRoot {
 
     property bool galleryOpen: false
 
+    // One HUD per monitor (FR-009).
+    Variants {
+        id: huds
+        model: Quickshell.screens
+
+        Hud {}
+    }
+
     // The design system gallery (US3): created only while open. A single instance; the
-    // compositor puts it on the focused output.
+    // compositor puts it on the focused output. Closing happens in two steps: the gallery
+    // first gives up its exclusive keyboard focus, and is unloaded a moment later, so Qt's
+    // text-input plugin doesn't warn about a focused surface going away.
+    property bool galleryLoaded: false
+    onGalleryOpenChanged: {
+        if (galleryOpen)
+            galleryLoaded = true;
+        else
+            galleryUnload.restart();
+    }
+    Timer {
+        id: galleryUnload
+        interval: 150
+        onTriggered: if (!shell.galleryOpen) shell.galleryLoaded = false
+    }
     LazyLoader {
-        active: shell.galleryOpen
+        active: shell.galleryLoaded
         Gallery {
+            keyboardActive: shell.galleryOpen
             onCloseRequested: shell.galleryOpen = false
         }
     }
@@ -46,6 +70,11 @@ ShellRoot {
 
     IpcHandler {
         target: "hud"
-        function dump(): string { return JSON.stringify([]); }
+        function dump(): string {
+            const out = [];
+            for (const hud of huds.instances)
+                out.push(hud.dumpEntry());
+            return JSON.stringify(out);
+        }
     }
 }

@@ -48,7 +48,9 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "rien-gallery"
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+    // false while closing: drop the exclusive focus before the window goes away (shell.qml).
+    property bool keyboardActive: true
+    WlrLayershell.keyboardFocus: keyboardActive ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     color: Tokens.color.darkYellow
 
     // A named block: the section name (small) above its content.
@@ -383,11 +385,17 @@ PanelWindow {
             y: root.u(880)
             name: Strings.gallery.tabBar
 
-            // TabBar section: wired at merge
-            Item {
-                objectName: "tabBarSlot"
+            // Interactive: hover paints a tab, a click selects it.
+            TabBar {
+                id: galleryTabs
+                property int selected: 2
                 width: root.u(2 * root.colW + root.colGap)
-                height: root.u(100)
+                s: root.s
+                model: Strings.gallery.sampleTabs.map((label, i) => ({
+                    label: label,
+                    state: i === selected ? "selected" : i === hoveredIndex ? "hovered" : "normal"
+                }))
+                onActivated: index => selected = index
             }
         }
 
