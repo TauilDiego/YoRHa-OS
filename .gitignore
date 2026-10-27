@@ -10,3 +10,6 @@
 
 # Agent worktrees (parallel tasks)
 .claude/worktrees/
+
+# Python caches (cursor generators)
+__pycache__/
