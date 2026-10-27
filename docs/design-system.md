@@ -186,7 +186,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 
 | Ponto | No jogo (1080p) | No rien-OS |
 |---|---|---|
-| Altura da barra do topo | Aba de 47px, texto 27px | **Revisado (2026-10-27):** barra de 68px, configurável de 28 a 96. De cima pra baixo: 3px de papel, a aba (33px, `s ≈ 0,70`), um vão de 17px de jogo (12px) e a régua pontilhada **na escala do jogo** (`s × 1,0`: pontos de 4px, padrão de 20px de altura), nítida em pixels físicos inteiros. A aba em foco desce até a régua por uma haste animada (`motion.touch`, 160 ms, logo depois da tinta; recolhe em `motion.untouch`, 120 ms). A versão cheia fica pros menus de tela inteira |
+| Altura da barra do topo | Aba de 47px, texto 27px | **Revisado (2026-10-27):** barra de 68px, configurável de 28 a 96. De cima pra baixo: 3px de folga, a aba (33px, `s ≈ 0,70`), um vão de 17px de jogo (12px) e a régua pontilhada **na escala do jogo** (`s × 1,0`: pontos de 4px, padrão de 20px de altura), nítida em pixels físicos inteiros. A aba em foco desce até a régua por uma haste animada (`motion.touch`, 160 ms, logo depois da tinta; recolhe em `motion.untouch`, 120 ms). A versão cheia fica pros menus de tela inteira |
 | Escala | Fixa em 1080p | Tokens em medidas do jogo × fator da tela × `uiScale` (ver "Escala") |
 | Fontes | Comerciais | M PLUS 1 por padrão; as originais quando estiverem instaladas |
 | Alerta | Não existe | `alert` `#8F3A30`, só pra estados críticos |
@@ -194,7 +194,8 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 | Cursor (pipa) | Parado; pula de um item pro outro | **Decidido (2026-10-27):** parado, e pisca ao trocar de item (some e reaparece com ease in-out, `motion.blink` ≈240 ms) |
 | Abas da barra | Seletor (pipa) ao lado da aba em foco | **Decidido (2026-10-27):** as abas nunca têm seletor, nem no HUD nem nos menus: só as abas lado a lado. A pipa fica só nos itens de lista |
 | Fundo do desktop | Só nos menus | **Decidido (2026-10-27):** o fundo inteiro da área de trabalho é o papel do menu (vinheta, arcos e feixes, sem grid, com movimento sutil que pode ser desligado). Desde a spec 004 ele é um papel de parede do próprio rien-OS, trocável (§8) |
-| Vinheta | Em todos os menus | Como no jogo (bordas `#A6A18D`, cantos `#8B8877`), desligável. Nos menus de tela cheia e na tela inteira do desktop: o fundo e o papel da barra do topo formam uma vinheta só, sem emenda (2026-10-27). As janelas, as abas, a régua e os textos ficam por cima, sem vinheta |
+| Vinheta | Em todos os menus | Como no jogo (bordas `#A6A18D`, cantos `#8B8877`), desligável. Nos menus de tela cheia e na tela inteira do desktop, sem emenda (2026-10-27). As janelas, as abas, a régua e os textos ficam por cima, sem vinheta. Desde a spec 004 (US6) a barra do topo não pinta mais a faixa dela: a vinheta que aparece embaixo da barra é a do próprio papel de parede (§8, "A barra sobre o fundo") |
+| Fundo da barra do topo | O HUD do jogo flutua sobre a cena | **Decidido (2026-10-27, spec 004 US6):** a barra não tem fundo próprio. O papel de parede e as transições passam por baixo dela, e as cores dela seguem o fundo do monitor: tom papel ou tom claro (§8, "A barra sobre o fundo") |
 
 ### Escala
 
@@ -408,11 +409,11 @@ Uma cena é um JSON em `shell/wallpaper/scenes/<id>.json` (formato em
 | `dark` | `#141414` → `#101010` → `#0A0A0A`, linhas `#96948C` a 20% | ✓ | ✓ | — | ✓ |
 | `plain` | papel | — | — | — | — |
 
-- **Vinheta:** as cenas de papel usam a vinheta medida (§1, "Vinheta"), a mesma da barra do topo,
-  então fundo e barra não têm emenda. A cena escura escurece pro preto com a força que o `edge` e
-  o `corner` dela pedem.
+- **Vinheta:** as cenas de papel usam a vinheta medida (§1, "Vinheta"). A barra do topo é
+  transparente (spec 004 US6), então a vinheta do fundo passa embaixo dela, sem emenda. A cena
+  escura escurece pro preto com a força que o `edge` e o `corner` dela pedem.
 - **Papel:** o centro é o `dark-yellow` (`#C9C5AB`), a 1–2 níveis do medido no jogo (`#C8C3AC`):
-  é o mesmo papel da barra.
+  é o mesmo papel do resto do design system.
 - **Movimento:** no ciclo de 600 s do shell; para com dados de teste ou com `wallpaperMotion: false`.
 
 ### Imagens e filtro de papel
@@ -467,14 +468,119 @@ novo como texturas vivas; as cores chegam do `Tokens`.
   CPU do Quickshell por troca, a ≈60 fps; 10 crossfades, 0,18 s. Por segundo animado o CPU é
   parecido: o extra da camuflagem fica na GPU.
 
-### Lista + prévia + opções
+<!-- spec 004 US6 (004-barra-tom): início -->
+### A barra sobre o fundo (US6)
 
-O layout do seletor (lista agrupada à esquerda, prévia ao vivo no meio, opções e informações à
-direita), reaproveitável pros próximos menus, entra com o seletor da spec 004 (US2), que usa as
-peças do popup da spec 003. Pendente.
+A barra do topo não tem fundo próprio (emenda da spec 004, aprovada pelo dono em 2026-10-27): o
+papel de parede de cada monitor, com as transições, passa por baixo dela, e os arcos e os feixes
+cruzam a faixa da barra, como no jogo. As cores da barra seguem o fundo do monitor dela, em dois
+tons:
+
+| Papel | Uso | Tom papel | Tom claro |
+|---|---|---|---|
+| `ink` | texto principal, hora, tinta da aba normal, rótulos das leituras | `#4E4B42` | `#D7D1B3` |
+| `ink2` | título, data, valores, tinta da aba apagada | `#676458` | `#96948C` |
+| `rest` | placa da aba, faixas verticais | `#B1AB93` | `#D7D1B3` a 16% |
+| `sel` / `selInk` | placa e tinta da aba em foco (e da destacada) | `#4E4B42` / `#D7D1B3` | `#D7D1B3` / `#4E4B42` |
+| `track` / `fill` | trilho e preenchimento do medidor | `#B1AB93` / `#4E4B42` | `#D7D1B3` a 22% / `#D7D1B3` |
+| `rule` | régua pontilhada | `#4E4B42` | `#96948C` a 75% |
+| `alert` | estado crítico | `#8F3A30` | `#C0574A` |
+
+O tom papel são os tokens de sempre (§1). Os dois ficam em `Tokens.hudPaper` e `Tokens.hudLight`;
+`Tokens.hudColor(papel, tom)` dá a cor de um papel num tom de 0 (papel) a 1 (claro), misturando
+canal a canal, com alfa. `Label`, `Rule`, `HeaderButton`, `Meter` e `TabBar` recebem `tone` (padrão
+0, que deixa a galeria, o popup e todo o resto como sempre foram).
+
+**Qual tom:**
+- cenas de papel (`menu`, `rules`, `plain`) → papel;
+- cena `dark` → claro;
+- imagem → a luminância média (0,2126 R + 0,7152 G + 0,0722 B) da faixa de cima (a altura da barra
+  mais 12 px) da imagem como aparece, com o filtro de papel, se ligado: abaixo de 0,45
+  (`Tokens.hudLightBelow`), claro; senão, papel. É medida uma vez por imagem, quando ela fica
+  pronta, e guardada por caminho e filtro.
+
+**Na troca:** as cores misturam do tom antigo pro novo enquanto a transição cobre a faixa da barra,
+com `smoothstep`: na camuflagem, a fração das células de cima já reveladas; na varredura, a borda ÷
+a largura; nos quadradinhos, a fração dos de cima já começados; no crossfade, o progresso. Com
+dados de teste ou movimento reduzido, a troca é instantânea. Cada monitor tem o seu tom.
+
+**Limitação:** uma janela flutuante arrastada pra cima da barra aparece por trás das abas e dos
+textos, porque o Hyprland só reserva a faixa da barra pras janelas lado a lado.
+
+<!-- spec 004 US6 (004-barra-tom): fim -->
+
+### Lista + prévia + opções (`PickerLayout`)
+
+O layout da tela ITEMS do jogo, pra qualquer seletor dentro da moldura de popup (§7): uma lista
+agrupada à esquerda, a prévia ao vivo do item em foco no meio e, à direita, o quadro de opções com
+as informações. É o corpo do seletor de papel de parede e serve pros próximos menus do mesmo tipo
+(tema, fonte, som…). Medidas em px do jogo, no quadro de 1612 × 908 da moldura:
+
+| Peça | Onde | Medidas |
+|---|---|---|
+| Lista agrupada | x 48, y 150 | itens de 380 (`space.pickerListW`), depois das faixas e da pipa |
+| Prévia (o que o menu põe no meio) | x 560, y 150 | 560 de largura (`space.pickerPreviewW`) |
+| Quadro "Options" | x 1160, y 150 | 404 de largura (`space.pickerOptionsW`); a pipa das linhas fica no vão de 40 px antes dele |
+| Fim das colunas | 24 px acima da régua do rodapé | a lista rola dali pra baixo |
+
+- **Lista agrupada (`GroupedList`):** a lista de cursor com títulos de grupo.
+  - **título:** texto `small`, `medium-gray`, alinhado com os itens, numa linha de 18 px, com 10 px
+    acima (menos o primeiro) e 2 abaixo; nunca recebe o cursor;
+  - **aviso:** uma linha `small` debaixo de um título vazio (ex.: "Put pictures in ~/Pictures/Wallpapers");
+  - **item:** o item de lista `opaque`, com a marca à direita em `small` (`● ALL`, ou as saídas);
+  - **item apagado:** o estado `dimmed`; com o cursor, a faixa de tinta e o texto claro a 55% (como
+    a linha de opção apagada);
+  - **sem foco:** o item atual fica `selected`, com a pipa clara e parada (§7);
+  - **rolagem:** quando não cabe, rola na hora, por entradas inteiras, mostrando o item atual com os
+    trilhos e, se ele for o primeiro do grupo, o título.
+- **Prévia (`PreviewCard`, no seletor de papel de parede):** o card com o quadrado claro antes do
+  título (`Card` com `mark`), a mídia de 512 × 288 numa moldura de 2 px `medium-gray`, 24 px das
+  bordas, e a descrição embaixo (23 px, peso 500, linhas a 1,45 × o tamanho, no mínimo 100 px).
+- **Quadro de opções:** o `Card` com `mark` e o título "Options"; as linhas de opção (§7) de escolha,
+  `◂ valor ▸`, desenhadas a 0,815 (`space.pickerOptionScale`: rótulo de 22 px, quadrado de 18, valor
+  de 19 num espaço de 155) na mesma faixa de 48 px e com a mesma pipa; uma régua de 2 px
+  `light-gray`; e as linhas de informação: rótulo `small` em caixa alta `medium-gray` à esquerda,
+  valor `small` peso 600 à direita, quebrando linha quando não cabe.
+- **Foco em duas colunas** (a regra do §7, com a lista no lugar das categorias):
+  - **lista:** ↑↓ andam (dando a volta, pulando os títulos); Enter aplica (nada num item apagado);
+    → vai pra primeira opção; Esc fecha;
+  - **opções:** ↑↓ andam; ←→ mudam o valor, sem dar a volta; ← no primeiro valor volta pra lista;
+    Enter avança o valor, dando a volta; Esc volta;
+  - **mouse:** passar por cima move o foco (só com o ponteiro se mexendo de verdade); clicar num
+    item aplica; clicar numa seta muda o valor; clicar no resto da linha avança.
+- **Rodapé de teclas:**
+
+| Foco | Teclas |
+|---|---|
+| lista | `↑↓ Select` `Enter Apply` `→ Options` `Esc Close` (sem `Enter Apply` num item apagado) |
+| opções | `↑↓ Select` `←→ Change` `Esc Back` |
+
+**No seletor de papel de parede** (`WallpaperPicker`, `ALT + W` na VM, `qs ipc call wallpaper picker
+open|close|toggle`):
+- **título:** `WALLPAPER -Select`; rodapé à esquerda: `rien-OS 0.1 · N monitors`;
+- **lista:** SCENES, IMAGES e VIDEO, com `● ALL` (ou as saídas) no que está aplicado; abre com o
+  cursor no papel de parede do monitor em que abriu;
+- **opções:** `Monitor` (All monitors, depois cada saída), `Transition` (as quatro) e, só nas
+  imagens, `Paper filter` (On/Off). A transição e o filtro valem na hora; o monitor é só do seletor e
+  volta pra "All monitors" a cada abertura;
+- **informações:** `TYPE`, `LAYERS`, `MOTION` e `NOW ON`;
+- **Enter** aplica no monitor escolhido (ou em todos), com a transição escolhida, que acontece atrás
+  do escurecimento.
+
+**Peças da 001/003 que ganharam um acréscimo:**
+- `Card.mark`: o quadrado claro de 14 px antes do título (o título que não cabe corta com
+  reticências);
+- `ListItem.trailingRole` (o papel do texto da direita) e `ListItem.contentScale` / `OptionRow.contentScale`
+  (texto, quadrado e valor menores na mesma faixa, trilhos, sombra e pipa).
+
+A galeria mostra tudo isso na página 3 (Tab duas vezes): as quatro cenas, uma imagem com e sem o
+filtro, um quadro parado de cada transição (camuflagem em 700 ms; as outras na metade), a lista
+agrupada com e sem foco e o layout inteiro em miniatura.
 
 ### Tokens e configuração
 
+- **Tokens do layout** (`Tokens.space`): `pickerListW` 380, `pickerPreviewW` 560, `pickerOptionsW`
+  404, `pickerMediaW` × `pickerMediaH` 512 × 288, `pickerOptionScale` 0,815.
 - **Tokens** (`Tokens.wallpaper`): `darkLine`, `darkVignette`, `ruleAlpha`, `darkRuleAlpha`,
   `dotWeave`, `glint` `#E6E1C8`, `inkSquare`, `filterTint`, `filterAmount`, `filterVignette*`,
   `reveal` 1200, `lead` 200, `settle` 450, `duration` 900.
@@ -483,7 +589,8 @@ peças do popup da spec 003. Pendente.
   `glitch` 2) e `reduceMotion`. A última escolha feita (no seletor ou por comando) vale mais que a
   config e fica no arquivo de estado.
 - **Comandos:** `qs ipc call wallpaper list | set <id> <monitor|all> | next | prev | transition
-  <tipo> | camouflage <cell> <trail> <glitch> | filter <caminho> <true|false> | dump`.
+  <tipo> | camouflage <cell> <trail> <glitch> | filter <caminho> <true|false> | picker
+  <open|close|toggle> | dump`.
 
 ## Créditos
 

@@ -17,6 +17,8 @@ import "../../strings"
 // stepped/picked. Clicks: an arrow → stepped(∓1), the slider's track → picked(0–1), anywhere
 // else → activated().
 //   option: an option of the settings catalog (data-model); value: its current value.
+// spec 004: `contentScale` draws the label, the square and the value smaller on the same band,
+// rails and kite (the wallpaper picker's Options card).
 Item {
     id: root
 
@@ -25,6 +27,8 @@ Item {
     property var value: null
     property bool dimmed: false
     property bool focused: false
+    property real contentScale: 1
+    readonly property real cs: s * contentScale
     readonly property bool hovered: item.hovered
     readonly property Item valueItem: type === "slider" ? meter : stepper.visible ? stepper : null
 
@@ -46,12 +50,12 @@ Item {
         return String(option?.text ?? "");
     }
 
-    readonly property int gap: Tokens.px(16, s)
+    readonly property int gap: Tokens.px(16, cs)
     // Free text values (action, info) take at most this share of the row; an action's arrow
     // (11 px + 12 px before it) comes on top of its text.
     readonly property real textShare: 0.45
-    readonly property int arrowRoom: type === "action" ? Tokens.px(11, s) + Tokens.px(12, s) : 0
-    readonly property int numberW: Tokens.px(46, s)          // the slider's number
+    readonly property int arrowRoom: type === "action" ? Tokens.px(11, cs) + Tokens.px(12, cs) : 0
+    readonly property int numberW: Tokens.px(46, cs)         // the slider's number
 
     implicitWidth: Tokens.px(Tokens.space.settingsOptsW, s)     // the parent sets the width
     implicitHeight: item.implicitHeight
@@ -60,6 +64,7 @@ Item {
         id: item
         width: root.width
         s: root.s
+        contentScale: root.contentScale
         variant: "plain"
         text: String(root.option?.label ?? "")
         reserve: valueBox.width + root.gap + pad
@@ -87,7 +92,7 @@ Item {
     Label {
         id: freeMeasure
         visible: false
-        s: root.s
+        s: root.cs
         role: "standard"
         font.weight: Font.Medium
         font.variableAxes: ({ "wght": Font.Medium })
@@ -99,8 +104,8 @@ Item {
         x: root.width - item.pad - width
         // From tokens only: reading the children's sizes here makes a binding loop while a
         // delegate is being set up.
-        width: root.type === "slider" ? Tokens.px(Tokens.space.sliderW, root.s) + Tokens.px(16, root.s) + root.numberW
-             : root.stepping ? 2 * (Tokens.px(11, root.s) + Tokens.px(14, root.s)) + Tokens.px(Tokens.space.stepperValueW, root.s)
+        width: root.type === "slider" ? Tokens.px(Tokens.space.sliderW, root.cs) + Tokens.px(16, root.cs) + root.numberW
+             : root.stepping ? 2 * (Tokens.px(11, root.cs) + Tokens.px(14, root.cs)) + Tokens.px(Tokens.space.stepperValueW, root.cs)
              : Math.min(Math.ceil(freeMeasure.implicitWidth) + root.arrowRoom, Math.round(root.width * root.textShare))
         height: item.bandH
 
@@ -108,7 +113,7 @@ Item {
             id: stepper
             anchors.verticalCenter: parent.verticalCenter
             visible: root.stepping
-            s: root.s
+            s: root.cs
             text: root.valueText
             ink: root.ink
             arrows: root.focused
@@ -124,12 +129,12 @@ Item {
             id: slider
             anchors.verticalCenter: parent.verticalCenter
             visible: root.type === "slider"
-            spacing: Tokens.px(16, root.s)
+            spacing: Tokens.px(16, root.cs)
 
             Meter {
                 id: meter
                 anchors.verticalCenter: parent.verticalCenter
-                s: root.s
+                s: root.cs
                 w: Tokens.space.sliderW
                 value: Number(root.value ?? 0) / 100
                 editable: !root.dimmed
@@ -139,7 +144,7 @@ Item {
             Label {
                 width: root.numberW
                 anchors.verticalCenter: parent.verticalCenter
-                s: root.s
+                s: root.cs
                 role: "standard"
                 font.weight: Font.Medium
                 font.variableAxes: ({ "wght": Font.Medium })
@@ -155,13 +160,13 @@ Item {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             visible: !root.stepping && root.type !== "slider"
-            spacing: Tokens.px(12, root.s)
+            spacing: Tokens.px(12, root.cs)
 
             Label {
                 id: free
                 width: Math.min(Math.ceil(freeMeasure.implicitWidth), valueBox.width - root.arrowRoom)
                 anchors.verticalCenter: parent.verticalCenter
-                s: root.s
+                s: root.cs
                 role: "standard"
                 font.weight: Font.Medium
                 font.variableAxes: ({ "wght": Font.Medium })
@@ -175,8 +180,8 @@ Item {
                 id: arrow
                 visible: root.type === "action"
                 anchors.verticalCenter: parent.verticalCenter
-                width: Tokens.px(11, root.s)
-                height: Tokens.px(16, root.s)
+                width: Tokens.px(11, root.cs)
+                height: Tokens.px(16, root.cs)
                 preferredRendererType: Shape.CurveRenderer
                 ShapePath {
                     fillColor: root.ink

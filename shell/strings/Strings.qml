@@ -54,7 +54,7 @@ Singleton {
         readonly property string samplePageTitle: "Items"
         readonly property string samplePageSubtitle: "All Items"
         // spec 003: the settings pieces, on the gallery's second page (Tab)
-        readonly property string page2Subtitle: "-Design System 2/2"
+        readonly property string page2Subtitle: "-Design System 2/3"
         readonly property string valueStepper: "Value stepper"
         readonly property string stepperMiddle: "middle"
         readonly property string stepperStart: "start"
@@ -68,6 +68,19 @@ Singleton {
         readonly property string cardWithNote: "with note"
         readonly property string cursorListUnfocused: "Cursor list, unfocused"
         readonly property string popupFrame: "Pop-up frame"
+        // spec 004: the wallpaper pieces, on the gallery's third page (Tab)
+        readonly property string page3Subtitle: "-Design System 3/3"
+        readonly property string scenes: "Scenes"
+        readonly property string paperFilter: "Paper filter"
+        readonly property string filterOn: "on"
+        readonly property string filterOff: "off"
+        readonly property string transitions: "Transitions"
+        readonly property string groupedList: "Grouped list"
+        readonly property string groupedListUnfocused: "unfocused"
+        readonly property string pickerLayout: "List + preview + options"
+        readonly property string frameAt: "%1 · %2"           // a transition's still frame: kind · when
+        readonly property string camouflageAt: "700 ms"
+        readonly property string halfway: "50%"
     }
 
     // --- spec 003: settings pop-up ---------------------------------------------------------
@@ -145,6 +158,13 @@ Singleton {
         readonly property string imageText: "A picture from your wallpaper folder. The paper filter pulls its colors toward the paper and adds the vignette; turn it off to see the picture as it is."
         // %1 = the folder
         readonly property string emptyFolder: "Put pictures in %1"
+        // the picker (US2): the applied mark in the list, joins, the footer
+        readonly property string mark: "●"
+        readonly property string separator: " · "
+        readonly property string listSeparator: ", "
+        readonly property string footer: "rien-OS 0.1 · %1"        // %1 = how many monitors
+        readonly property string oneMonitor: "1 monitor"
+        readonly property string manyMonitors: "%1 monitors"
     }
     // --- end spec 004 ----------------------------------------------------------------------------
 }
