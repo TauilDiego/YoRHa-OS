@@ -41,10 +41,9 @@
   - as fontes reais pelo papel delas (atalhos de app do padrão freedesktop, o compositor pelo
     adaptador, o gerenciador de sessão), sem escolher biblioteca nem estrutura de código; os nomes
     concretos (Hyprland IPC, logind) ficam pro plano.
-- **Sem [NEEDS CLARIFICATION]:** o agente não pôde perguntar ao dono. As cinco escolhas que mudam o
-  que se constrói (popup ou tela cheia, teclas de aba, ícones, confirmação de energia, atalhos)
-  entraram como "decisões provisórias" nas Assumptions e vão como perguntas no relatório. Mudar
-  qualquer uma delas muda FRs pontuais (FR-002/FR-008, FR-004/FR-007, FR-009, FR-021/FR-022,
-  FR-001), não a estrutura da spec.
-- **Pronta para** `/speckit-clarify` (se o dono quiser mudar alguma decisão provisória) ou
-  `/speckit-plan`, depois da aprovação do dono (constituição V).
+- **Sem [NEEDS CLARIFICATION]:** as cinco escolhas provisórias do rascunho foram respondidas pelo
+  dono em 2026-10-27 e entraram na spec como "Decisões do dono" (topo e Assumptions), com a regra
+  geral virando a FR-034 (opções em SYSTEM) e o SC-013. Mudaram FR-001, FR-008, FR-009, FR-019,
+  FR-021, FR-022, US1, os casos de borda dos atalhos e SC-001/003/005.
+- **Pronta para** `/speckit-plan` (feito: plan.md, research.md, data-model.md, contracts/,
+  quickstart.md) e `/speckit-tasks` (tasks.md). O plano aguarda a aprovação do dono (constituição V).

@@ -5,7 +5,7 @@ o menu reusa a moldura de popup da 003 e o layout lista + prévia + opções da 
 
 **Created**: 2026-10-27
 
-**Status**: Rascunho, aguardando a aprovação do dono (spec e mockup)
+**Status**: Decisões do dono aplicadas (2026-10-27); plano e tarefas aguardando a aprovação dele
 
 **Input**: Fase U3 do `PLAN.md` (§9): "U3 Menu de pausa | Launcher, janelas, energia | Screenshot de
 cada aba". O §7 diz que a UI NieR põe "menu de pausa no lugar do launcher". As abas são as do
@@ -14,8 +14,22 @@ cabeçalho do mockup aprovado das configurações (`rien-OS-private/lab/mockups/
 ter uma animação substituindo a tela como um todo, mas isso não é muito comum no mundo linux… por
 enquanto vamos fazer o fundo escurecer e essa janela abrir como um popup igual o SUPER+K do
 Serpantinum". Decisão do dono que vale aqui: as abas nunca têm a pipa; ela fica só nos itens de
-lista, parada, com o blink de 240 ms ao trocar de item. Mockup desta spec: publicado pela sessão
-principal (o link entra aqui na aprovação).
+lista, parada, com o blink de 240 ms ao trocar de item. Mockup desta spec:
+https://claude.ai/artifact/QPR6gpmyWMDR9pgwXTLbEb (cópia em `rien-OS-private/lab/mockups/menu-de-pausa/`).
+
+**Decisões do dono (2026-10-27)**, que substituem as suposições provisórias do rascunho:
+- **Regra geral:** toda alternativa de design vira uma opção em SYSTEM (as configurações), trocável
+  na hora, com a recomendação como padrão, mesmo quando o dono acha que não vai usar (FR-034).
+- **Moldura:** só o popup sobre o desktop escurecido. A variante de tela cheia sai de vez.
+- **Troca de aba:** Tab e Shift+Tab, mais o clique numa aba. As abas não têm a pipa.
+- **Ícones dos apps:** em tinta. Pela regra geral, o estilo vira opção: `Ink` (padrão),
+  `Original color` ou `Square only`.
+- **POWER como proposto:** `Lock` e `Suspend` agem na hora; `Log out`, `Reboot` e `Shut down`
+  confirmam, com a pipa começando em `Cancel`.
+- **Atalhos:** só `SUPER + Escape` abre o menu (na última aba usada, APPS na primeira vez);
+  `ALT + Escape` na VM do laboratório. Os atalhos diretos por aba ficam pra depois (fora do
+  escopo). O `SUPER + I` da 003 continua abrindo as configurações; o plano decidiu que ele abre o
+  menu na aba SYSTEM (plan.md, "Decisões").
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -23,15 +37,15 @@ principal (o link entra aqui na aprovação).
 
 O usuário aperta um atalho e o menu de pausa abre por cima do desktop escurecido, como o popup da
 003: o painel de papel no centro do monitor em foco, com a barra de abas do jogo no alto (APPS,
-WINDOWS, SYSTEM, POWER), o título da aba embaixo dela, o corpo da aba e o rodapé de teclas. Há um
-atalho geral (abre na última aba usada) e um atalho direto por aba. Com o menu aberto, Tab e
-Shift+Tab trocam de aba, e o clique numa aba também. A aba aberta é a que desce até a régua
+WINDOWS, SYSTEM, POWER), o título da aba embaixo dela, o corpo da aba e o rodapé de teclas. Um
+atalho só (`SUPER + Escape`) abre o menu na última aba usada; o `SUPER + I` da 003 abre direto em
+SYSTEM. Com o menu aberto, Tab e Shift+Tab trocam de aba, e o clique numa aba também. A aba aberta é a que desce até a régua
 pontilhada; nenhuma aba tem a pipa.
 
 **Why this priority**: É a moldura de todas as outras histórias. Sozinha, com a aba SYSTEM (que já
 existe na 003), já entrega um menu navegável.
 
-**Independent Test**: Na VM, com dados de teste, abrir por cada atalho e por comando de controle,
+**Independent Test**: Na VM, com dados de teste, abrir pelos dois atalhos e por comando de controle,
 trocar de aba por Tab, Shift+Tab e clique, tirar um screenshot de cada aba e fechar pelos três
 caminhos, conferindo o estado exportado e a janela em foco do compositor antes e depois.
 
@@ -43,14 +57,14 @@ caminhos, conferindo o estado exportado e a janela em foco do compositor antes e
 2. **Given** o menu aberto em APPS, **When** o usuário aperta Tab três vezes, **Then** o menu passa
    por WINDOWS, SYSTEM e POWER, nessa ordem; um quarto Tab volta pra APPS; Shift+Tab anda pro outro
    lado.
-3. **Given** o menu aberto em WINDOWS, **When** o usuário aperta o atalho direto de POWER, **Then**
-   o menu troca pra POWER sem fechar; **When** aperta o atalho de POWER de novo, **Then** o menu
-   fecha.
+3. **Given** o menu aberto em WINDOWS, **When** o usuário aperta `SUPER + I`, **Then** o menu
+   troca pra SYSTEM sem fechar; **When** aperta `SUPER + I` de novo, **Then** o menu fecha.
 4. **Given** o menu aberto, **When** o usuário aperta Esc com o foco na primeira coluna da aba,
    aperta o atalho geral ou clica fora do painel, **Then** o menu fecha e o teclado volta pra
    janela que estava em foco.
-5. **Given** o atalho das configurações da 003 (`SUPER + I`), **When** ele é apertado, **Then** o
-   menu abre (ou troca) na aba SYSTEM, com as configurações da 003 dentro dela.
+5. **Given** o menu fechado, **When** o usuário aperta `SUPER + I` (o atalho das configurações da
+   003), **Then** o menu abre na aba SYSTEM, com as configurações da 003 dentro dela, e essa passa
+   a ser a última aba usada.
 6. **Given** qualquer aba, **When** a aba muda, **Then** o título, o corpo, o texto do rodapé à
    esquerda e as teclas do rodapé mudam junto, e a aba nova desce até a régua.
 
@@ -59,15 +73,15 @@ caminhos, conferindo o estado exportado e a janela em foco do compositor antes e
 ### User Story 2 - Abrir um app pela aba APPS (Priority: P1)
 
 APPS é o launcher, no layout da tela de itens do jogo: a lista de apps à esquerda (os fixados
-primeiro, depois todos em ordem alfabética), uma prévia no meio (o ícone do app em tinta, o nome e
-uma descrição) e, à direita, as opções do app (abrir, as ações próprias dele, em que área de
+primeiro, depois todos em ordem alfabética), uma prévia no meio (o ícone do app em tinta, ou no
+estilo escolhido em SYSTEM, o nome e uma descrição) e, à direita, as opções do app (abrir, as ações próprias dele, em que área de
 trabalho abrir, fixar) e as informações. O usuário digita pra filtrar; Enter abre o app e fecha o
 menu.
 
 **Why this priority**: É o que o dono usa várias vezes por hora e o que o §7 do plano pede pra
 substituir. Com a US1, já dá pra usar o menu no lugar do launcher do Serpantinum.
 
-**Independent Test**: Na VM, com o catálogo de teste, abrir APPS pelo atalho, digitar consultas e
+**Independent Test**: Na VM, com o catálogo de teste, abrir APPS pelo atalho geral, digitar consultas e
 conferir a ordem dos resultados no estado exportado; com dados reais, abrir o kitty pelo menu e
 conferir que uma janela nova do kitty apareceu no compositor.
 
@@ -184,8 +198,8 @@ e ver que continua fixado.
 
 ### Edge Cases
 
-- **Atalho de uma aba com o menu aberto em outra:** troca de aba sem fechar; o mesmo atalho de novo
-  fecha (alterna).
+- **`SUPER + I` com o menu aberto em outra aba:** troca pra SYSTEM sem fechar; aberto em SYSTEM,
+  fecha (alterna). O atalho geral sempre fecha um menu aberto.
 - **Atalho com o menu aberto em outro monitor:** o menu fecha (como a 003).
 - **Monitor em foco muda com o menu aberto:** o menu fica onde abriu até fechar.
 - **Troca de aba no meio de uma busca:** a busca de APPS fica guardada enquanto o menu está aberto
@@ -218,6 +232,10 @@ e ver que continua fixado.
   cortam com reticências sem vazar das colunas; a lista rola em linhas inteiras, com a pipa sempre
   visível.
 - **Movimento reduzido ou fixtures ativas:** nada anima (fade, varredura, blink, haste da aba).
+- **Opção do menu mudada em SYSTEM com o menu aberto:** vale na hora, sem fechar nem reabrir (ex.:
+  o estilo dos ícones muda a prévia de APPS assim que o usuário volta pra aba).
+- **Outro popup aberto** (seletor de papel de parede da 004): abrir o menu fecha o seletor, e
+  abrir o seletor fecha o menu; só um popup por vez.
 - **Teclas repetidas rápido:** um blink novo cancela o anterior; a pipa termina sempre no item em
   foco; trocar de aba várias vezes seguidas termina na aba certa.
 
@@ -228,12 +246,15 @@ e ver que continua fixado.
 **Moldura e abas (US1)**
 
 - **FR-001**: O menu MUST abrir e fechar por atalhos da sessão e por comandos de controle:
-  - um atalho geral, que abre na última aba usada na sessão do shell (APPS na primeira vez);
-  - um atalho direto por aba, que abre o menu nela ou troca pra ela;
-  - o atalho das configurações da 003 passa a ser o atalho direto de SYSTEM;
-  - os comandos `open [aba]`, `close`, `toggle [aba]` e `tab <aba>`; os comandos de controle da
-    003 (`settings open|close|toggle`) continuam funcionando e agem na aba SYSTEM.
-  As teclas ficam no plano, na convenção ALT da VM (como na 003 e na 004).
+  - **um atalho geral**, `SUPER + Escape` (`ALT + Escape` na VM, na convenção ALT da 003 e da
+    004), que abre o menu na última aba usada na sessão do shell (APPS na primeira vez) e fecha um
+    menu aberto;
+  - **o atalho das configurações da 003**, `SUPER + I` (`ALT + I` na VM), que abre o menu em SYSTEM,
+    troca pra SYSTEM com o menu aberto em outra aba e fecha com ele aberto em SYSTEM;
+  - os comandos `open`, `close`, `toggle` e `tab <aba>` (abre nela, ou troca pra ela); os
+    comandos de controle da 003 (`settings open|close|toggle|dump|reset`) continuam funcionando e
+    agem na aba SYSTEM.
+  Os atalhos diretos de APPS, WINDOWS e POWER ficam fora do escopo (decisão do dono).
 - **FR-002**: O menu MUST usar a moldura de popup da 003 (`PopupFrame`/`PopupWindow`): o monitor em
   foco escurecido com `color.dim` (sem desfoque), o painel de papel com `popupShare` da tela, a
   vinheta, a sombra `shadow.popup`, o fade de abertura `motion.popupFade` e o fechamento imediato,
@@ -250,7 +271,8 @@ e ver que continua fixado.
   - a régua lisa de baixo, o texto da aba à esquerda (`small`, `medium-gray`) e o rodapé de teclas
     (`KeyHints`) à direita.
 - **FR-004**: As abas MUST NOT ter a pipa nem foco de teclado próprio (decisão do dono): a aba muda
-  por Tab / Shift+Tab (dando a volta), pelo atalho direto ou pelo clique; o mouse sobre uma aba
+  por Tab / Shift+Tab (dando a volta), pelo `SUPER + I` (só pra SYSTEM), pelo comando `tab` ou pelo
+  clique; o mouse sobre uma aba
   mostra o estado `hovered` dela. A pipa fica só nos itens das listas.
 - **FR-005**: Trocar de aba MUST trocar o corpo na hora (sem animação de página); a aba nova faz a
   animação da haste até a régua da 001 (`motion.touch`). Cada aba guarda a posição da pipa enquanto
@@ -263,7 +285,8 @@ e ver que continua fixado.
   - Tab / Shift+Tab trocam de aba em qualquer coluna, e o foco vai pra primeira coluna da aba nova;
   - o mouse só move o foco quando o ponteiro se mexe de verdade.
 - **FR-008**: O layout do corpo MUST ser em colunas proporcionais ao painel (não em posições
-  fixas), pra uma futura versão em tela cheia (pergunta em aberto ao dono) só trocar a moldura.
+  fixas), pra o mesmo layout servir telas 16:9 e 16:10 e o `uiScale`. Não existe versão em tela
+  cheia (decisão do dono).
 
 **APPS (US2)**
 
@@ -271,8 +294,10 @@ e ver que continua fixado.
   - **lista** (`GroupedList` da 004, com a pipa): grupo `PINNED`, depois `ALL APPS` (os não
     fixados, A–Z); cada linha com o quadrado, o nome do app e, à direita, quantas janelas dele estão
     abertas (como a quantidade de um item no jogo), quando houver;
-  - **prévia** (`Card`): o nome, o ícone do app em tinta (o ícone recolorido pro tom do papel) e a
-    descrição;
+  - **prévia** (`Card`): o nome, o ícone do app no estilo da opção `App icons` (FR-034): `Ink`, o
+    padrão, recolore o ícone em tinta sobre o papel; `Original color` mostra as cores do ícone;
+    `Square only` mostra o quadrado do jogo no lugar do ícone; e a descrição. Nas linhas da lista
+    fica sempre o quadrado do jogo;
   - **opções** (`Card` com `OptionRow`): `Open` (ação), as ações próprias do app (ação, uma por
     linha), `Workspace ◂ Current ▸` (escolha: a atual ou 01–10, onde o app abre) e `Pinned ◂ ON ▸`
     (liga/desliga); embaixo, as informações `CATEGORY`, `COMMAND` e `WINDOWS`.
@@ -316,10 +341,12 @@ e ver que continua fixado.
 **SYSTEM**
 
 - **FR-019**: SYSTEM MUST ser a página de configurações da 003 inteira (categorias, opções, quadro
-  de descrição, valores de teste em memória, dependências, avisos), dentro do corpo do menu. O que
-  muda em relação à 003: a página ganha a barra de abas (a FR-008 da 003, "sem abas", deixa de
-  valer), o título fica abaixo das abas, as colunas se ajustam ao corpo menor e o rodapé ganha
-  `Tab Next tab`. O texto à esquerda continua a versão do rien-OS.
+  de descrição, valores de teste em memória, dependências, avisos), dentro do corpo do menu, mais a
+  categoria nova `Pause menu` (FR-034). O que muda em relação à 003: a página ganha a barra de abas
+  (a FR-008 da 003, "sem abas", deixa de valer), o título fica abaixo das abas, as colunas se
+  ajustam ao corpo menor e o rodapé ganha `Tab Next tab`. O texto à esquerda continua a versão do
+  rien-OS. O popup avulso da 003 deixa de existir: `SUPER + I` e o comando `settings` abrem o menu
+  em SYSTEM (FR-001).
 
 **POWER (US4)**
 
@@ -331,14 +358,16 @@ e ver que continua fixado.
   - **status** (o "card de status" do design system §4): pares rótulo/valor da sessão (`USER`,
     `HOST`, `UPTIME`, `BATTERY`, `WINDOWS`), a fileira de quadrados e o rodapé centralizado
     (`NO ERROR`, ou o aviso em `alert`).
-- **FR-021**: `Lock` e `Suspend` MUST agir direto (fechando o menu antes); `Log out`, `Reboot` e
-  `Shut down` MUST abrir um diálogo de confirmação; `Hibernate` age direto quando a máquina suporta
-  e fica apagado (o estado `dimmed`) quando não.
+- **FR-021**: Com a opção `Confirm` no padrão (`Risky ones`, FR-034), `Lock` e `Suspend` MUST agir
+  direto (fechando o menu antes) e `Log out`, `Reboot` e `Shut down` MUST abrir um diálogo de
+  confirmação; com `Every action`, todas confirmam. `Hibernate` age como `Suspend` quando a máquina
+  suporta e fica apagado (o estado `dimmed`) quando não.
 - **FR-022**: O diálogo de confirmação (`ConfirmDialog`, novo) MUST:
   - aparecer centrado por cima do painel, com o painel escurecido por `color.dim`;
   - ser um `Card` com o título (`Shut down?`), o que vai acontecer, os programas que estão
     segurando a ação (em `alert`), e duas linhas `OptionRow` de ação: a ação e `Cancel`;
-  - começar com a pipa em `Cancel`;
+  - começar com a pipa em `Cancel` (o padrão da opção `Dialog starts on`, FR-034; a alternativa
+    é começar na ação);
   - confirmar com Enter ou clique na linha da ação; cancelar com Esc, clique fora dele, Enter em
     `Cancel` ou qualquer perda de foco do menu;
   - ter o próprio rodapé de teclas: `↑↓ Select`, `Enter Confirm`, `Esc Cancel`.
@@ -370,13 +399,31 @@ e ver que continua fixado.
   pra tradução no U5b. Os nomes vindos dos dados aparecem como vierem.
 - **FR-029**: O shell MUST exportar, por comando de controle, o estado do menu: aberto ou não,
   monitor, aba, coluna em foco, item em foco em cada aba, a busca e os resultados de APPS, os
-  grupos de WINDOWS, o diálogo de POWER, a última ação disparada (app aberto, janela focada ou
+  grupos de WINDOWS, o diálogo de POWER, os valores das opções do menu (FR-034), a última ação
+  disparada (app aberto, janela focada ou
   movida, ação de energia), as teclas do rodapé e a geometria do item em foco (pros cliques dos
   testes).
 - **FR-030**: Com fixtures, nada anima (fade, varredura, blink, haste da aba), pra screenshots
   iguais. Com o movimento reduzido (`reduceMotion`), o mesmo.
 - **FR-031**: Abrir, navegar por todas as abas, buscar, abrir o diálogo e fechar MUST deixar o log
   do shell sem erro e sem aviso de QML.
+
+**Opções do menu em SYSTEM (regra geral do dono)**
+
+- **FR-034**: As alternativas de design do menu MUST virar opções de escolha numa categoria nova
+  de SYSTEM, `Pause menu`, trocáveis na hora (o menu aberto muda sem reabrir), com a recomendação
+  como padrão:
+
+  | Opção | Valores (padrão primeiro) | O que muda |
+  |---|---|---|
+  | `App icons` | `Ink`, `Original color`, `Square only` | O ícone na prévia de APPS (FR-009) |
+  | `App order` | `A–Z`, `Most used` | A ordem do grupo ALL APPS sem busca |
+  | `Running app` | `New window`, `Go to window` | Enter num app que já tem janela: abre outra, ou vai pra janela dele (a mais recente) |
+  | `Confirm` | `Risky ones`, `Every action` | Quais ações de POWER pedem confirmação (FR-021) |
+  | `Dialog starts on` | `Cancel`, `Action` | Onde a pipa começa no diálogo de confirmação (FR-022) |
+
+  Os valores valem pela sessão do shell, em memória, como as outras opções da 003; guardar entre
+  sessões segue o mesmo caminho que a opção `Bar contrast` da 004 adotar (plan.md).
 
 **Componentes do design system**
 
@@ -407,24 +454,26 @@ e ver que continua fixado.
   os programas que a seguram.
 - **Estado do menu:** aberto ou fechado, monitor, aba, coluna em foco, busca, diálogo aberto,
   última ação.
+- **Opção do menu:** id, rótulo, valores (o primeiro é o padrão), valor em uso; vive na categoria
+  `Pause menu` das configurações (FR-034).
 
 ## Success Criteria *(mandatory)*
 
 Cada critério diz qual evidência da VM o comprova (constituição IV).
 
 - **SC-001** ("pronto quando" do PLAN): com dados de teste, um screenshot de cada uma das 4 abas,
-  em 1920x1080 @1 e em 2560x1600 @1,25, mais o diálogo de `Shut down` e a busca de APPS com
-  resultado e sem resultado. Evidência: os 12 screenshots e o estado exportado de cada um.
+  do diálogo de `Shut down` e da busca de APPS com resultado e sem resultado (6 telas), em
+  1920x1080 @1 e em 2560x1600 @1,25. Evidência: os 12 screenshots e o estado exportado de cada um.
 - **SC-002**: com fixtures, dois screenshots seguidos de cada aba são idênticos (0 px de diferença).
   Evidência: os screenshots e a diferença.
 - **SC-003**: do desktop até um app aberto, por teclas reais enviadas à VM, bastam no máximo 5
-  teclas (atalho de APPS, três letras, Enter), e a janela nova aparece no compositor em até 2 s.
+  teclas (atalho geral com APPS como última aba, três letras, Enter), e a janela nova aparece no compositor em até 2 s.
   Evidência: as teclas, o tempo medido do host e a lista de janelas antes e depois.
 - **SC-004**: com o catálogo de teste, 10 consultas do roteiro (começo do nome, palavra do meio,
   nome genérico, palavra-chave, acento, maiúscula, sem resultado) trazem o resultado esperado em
   primeiro nas 10. Evidência: o estado exportado de cada consulta.
 - **SC-005**: o menu abre em até 0,3 s depois do atalho, medido do host; uma sequência de teclas
-  reais (abrir, Tab ×4, Shift+Tab, atalho de POWER, atalho de POWER) termina com o estado esperado
+  reais (atalho geral, Tab ×4, Shift+Tab, `SUPER + I`, `SUPER + I`) termina com o estado esperado
   em cada passo e com o menu fechado; os três jeitos de fechar devolvem o teclado à janela
   anterior. Evidência: tempos, estado exportado por tecla e a janela em foco do compositor.
 - **SC-006**: com três janelas de teste reais em duas áreas de trabalho, WINDOWS lista exatamente as
@@ -446,26 +495,27 @@ Cada critério diz qual evidência da VM o comprova (constituição IV).
   da galeria.
 - **SC-012**: o dono aprova o visual comparando os screenshots com o mockup. Evidência: a
   aprovação.
+- **SC-013**: com o menu aberto, mudar cada opção da categoria `Pause menu` em SYSTEM muda o
+  comportamento na hora, sem fechar o menu: os 3 estilos de ícone na prévia de APPS, a ordem de ALL
+  APPS, o Enter num app com janela, quais ações de POWER confirmam e onde a pipa começa no diálogo.
+  Evidência: um screenshot da prévia por estilo e o estado exportado depois de cada mudança.
 
 ## Assumptions
 
 - **Onde roda:** só na VM do laboratório (constituição I). Os atalhos vão na config do Hyprland da
   VM, na convenção ALT; na máquina do dono, entram pelo instalador (S3) ou na troca (U7). Nenhuma
   ação de energia é testada fora da VM, e só a VM reinicia.
-- **Decisões provisórias, tomadas no mockup sem o dono (o relatório pergunta):**
-  - **popup sobre o desktop escurecido**, como a 003, e não a tela cheia do jogo; o layout
-    proporcional (FR-008) deixa a tela cheia pra uma opção futura;
-  - **Tab / Shift+Tab trocam de aba**, e não Q/E (as letras vão pra busca de APPS) nem uma linha de
-    abas focável como no jogo (que custaria um Esc a mais pra fechar);
-  - **ícones dos apps em tinta**, só na prévia; nas linhas, o quadrado do jogo;
-  - **confirmação** só pra `Log out`, `Reboot` e `Shut down`, com a pipa começando em `Cancel`;
-  - **atalhos:** um geral e um por aba; as teclas exatas saem no plano.
-- **Padrões razoáveis (sem pergunta):** Enter em APPS abre uma instância nova mesmo com o app
-  aberto (ir pra janela existente é o WINDOWS); a lista de apps é A–Z (previsível) e a busca é que
-  usa a contagem de usos; WINDOWS ordena as janelas de cada grupo de cima pra baixo e da esquerda
-  pra direita na tela.
+- **Decisões do dono (2026-10-27):** as do topo desta spec. Ficaram de fora, por decisão dele: a
+  tela cheia; Q/E pra trocar de aba (as letras vão pra busca de APPS); a linha de abas focável com
+  ←→ como no jogo (custaria um Esc a mais pra fechar).
+- **Padrões (viraram opções pela regra geral, FR-034):** Enter em APPS abre uma instância nova
+  mesmo com o app aberto (`Running app`); a lista de apps é A–Z, e a busca é que usa a contagem de
+  usos (`App order`); o diálogo começa em `Cancel` (`Dialog starts on`). Sem opção: WINDOWS ordena
+  as janelas de cada grupo de cima pra baixo e da esquerda pra direita na tela.
 - **Fora do escopo:**
-  - a tela cheia substituindo o desktop (pergunta ao dono);
+  - a tela cheia substituindo o desktop (descartada pelo dono);
+  - os atalhos diretos de APPS, WINDOWS e POWER (adiados pelo dono; os comandos `pause tab <aba>`
+    já permitem ligá-los depois sem mudar o shell);
   - miniaturas ao vivo das janelas (o mapa resolve agora; a miniatura entra no U6, quando o custo
     for medido);
   - arrastar janelas no mapa;
@@ -482,3 +532,5 @@ Cada critério diz qual evidência da VM o comprova (constituição IV).
   `PageHeader`, `Card`, `Rule`, fixtures, adaptador do compositor). Se a `GroupedList` da 004 ainda
   não existir quando o plano desta spec for feito, ela entra aqui, no contrato da 004.
 - **Movimento reduzido:** respeita o `reduceMotion` que já existe (003/004).
+- **Laboratório:** no máximo 4 VMs ao mesmo tempo, cada uma com 2 núcleos e 4 GB (limite do dono
+  pra rodada de 2026-10-27); as frentes paralelas do plano cabem nisso.
