@@ -1,8 +1,12 @@
 <!--
 Sync Impact Report
-- Versão: 1.0.1 → 1.1.0 (MINOR: o princípio I passa a aceitar containers no ambiente de testes).
-- Princípio I: o ambiente de testes (VM + containers) é privado e fica fora do repositório público.
-- Fluxo de desenvolvimento: as referências a `lab/` e `docs/lab.md` foram generalizadas.
+- Versão: 1.1.0 → 1.1.1 (PATCH: esclarece a lista de ferramentas do ambiente de testes que rodam
+  no host; nenhuma regra muda).
+- Princípio I: a lista passa a citar o ImageMagick (comparação de screenshots, `lab/diffshot`) e o
+  python3 (o amostrador somente-leitura do `lab/perf` e scripts do laboratório), que já eram
+  usados (achado A1 do `/speckit-analyze` da spec 001, aprovado pelo dono em 2026-10-27).
+- Templates: nenhum muda.
+- Anterior (1.0.1 → 1.1.0): o princípio I passou a aceitar containers no ambiente de testes.
 -->
 # rien-OS Constitution
 
@@ -19,7 +23,9 @@ fixa as regras que nenhuma spec, plano ou tarefa pode violar.
   bruto, e containers sem privilégios especiais, pra UI. Esse ambiente é mantido fora do
   repositório público.
 - **O que pode rodar no sistema do dono:** só as ferramentas do ambiente de testes (QEMU,
-  Docker, `ssh`, `rsync`, `inotifywait`) e as do fluxo de spec (`uv`/Spec Kit, `git`).
+  Docker, `ssh`, `rsync`, `inotifywait`, ImageMagick pra comparar screenshots e `python3` pros
+  scripts do laboratório, como o amostrador somente-leitura do `lab/perf`) e as do fluxo de spec
+  (`uv`/Spec Kit, `git`).
 - **O que não pode ser tocado:** `~/.config`, a config do Hyprland do dono e o Serpantinum.
 - **Instalar qualquer coisa nova no sistema do dono** exige aprovação explícita dele.
 - **A UI só vai pro sistema do dono** quando ele mesmo decidir, depois de homologar na VM.
@@ -126,4 +132,4 @@ Toda fase do `PLAN.md` passa por spec → plan → tasks antes de implementar:
 - **Fontes complementares:** `PLAN.md` (roteiro) e o
   inventário da camada pessoal (num repositório privado).
 
-**Version**: 1.1.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-26
+**Version**: 1.1.1 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-27

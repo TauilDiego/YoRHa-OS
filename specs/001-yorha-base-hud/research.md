@@ -56,12 +56,18 @@ Cada item segue o formato: decisão, motivo e o que foi descartado. As APIs fora
   - **tokens nas medidas do jogo a 1080p**, num singleton (`ds/Tokens.qml`);
   - **cada componente recebe `s`** (propriedade, padrão 1) e multiplica as medidas por ela. A
     superfície decide o `s`:
-    - HUD: `s = tabH / 47`, com `tabH = barHeight × 31/40`;
+    - HUD: `s = tabH / 47`, com `tabH = round(barHeight × 0,485)` (33 px dos 68 padrão; no
+      U1 era `barHeight × 31/40`);
     - tela cheia: `s = altura lógica / 1080`;
   - **`uiScale`** vem da configuração e multiplica tudo;
   - **linhas** usam `Tokens.line(v, s)` = `max(1, round(v·s))`, pra ficar nítidas (FR-002,
     SC-008);
-  - **nada de DPI:** a escala fracionária fica com o Hyprland e o Qt, como no Serpantinum.
+  - **nada de DPI nas medidas:** a escala fracionária fica com o Hyprland e o Qt, como no
+    Serpantinum;
+  - **linhas finas na grade física** (revisto depois do hidpi): o Qt só informa a escala inteira
+    do buffer, então o `Compositor` lê a escala fracionária de cada monitor (`hyprctl monitors -j`)
+    e a publica em `Tokens.monitorScales`. As primitivas com linhas finas usam `Tokens.snap()` e
+    `Tokens.hair()` com essa escala, pra cair em pixel físico inteiro a 1,25.
 - **Motivo:** FR-008b. Com `s` vindo da superfície, o mesmo componente serve ao HUD e aos menus
   sem um segundo conjunto de tamanhos.
 - **Descartado:**
@@ -73,8 +79,9 @@ Cada item segue o formato: decisão, motivo e o que foi descartado. As APIs fora
 
 - **Decisão:** padrões em `shell/config/defaults.json` (gerenciado). O arquivo do usuário fica
   em `$XDG_CONFIG_HOME/rien-os/shell.json` e só sobrescreve as chaves que tiver. São lidos com
-  `FileView` + `JsonAdapter`. Chaves do U1: `uiScale`, `barHeight` (28–48), `vignette`
-  (bool).
+  `FileView` + `JSON.parse`, com validação campo a campo (o `JsonAdapter` foi trocado na
+  implementação). Chaves: `uiScale`, `barHeight` (28–96; no U1 era 28–48), `vignette` (bool) e
+  `wallpaperMotion` (bool, H4).
 - **Motivo:** princípio III (padrões gerenciados separados dos arquivos do usuário).
 - **Descartado:** constantes no código (o usuário não conseguiria mudar).
 
@@ -98,8 +105,10 @@ Cada item segue o formato: decisão, motivo e o que foi descartado. As APIs fora
   - **balanço do seletor:** `SequentialAnimation` em loop, ±5 px, período de 1 s,
     `Easing.InOutSine`. O seletor é um `Item` com a pipa (`Shape`) e os 2 quadradinhos, então
     tudo balança junto;
-  - **screenshots iguais (SC-002):** com fixtures ativas, `Tokens.motion.frozen` pausa o balanço
-    numa posição fixa.
+  - **screenshots iguais (SC-002):** com fixtures ativas, `Tokens.frozen` pausa as animações numa
+    posição fixa.
+  - **revisto em 2026-10-27:** o balanço saiu; a pipa fica parada, como no jogo, e pisca ao trocar
+    de item (`motion.blink`, 240 ms; T054).
 - **Motivo:** a spec pede o tempo como token e calibração depois. Sem o congelamento, o balanço
   quebraria a comparação pixel a pixel.
 

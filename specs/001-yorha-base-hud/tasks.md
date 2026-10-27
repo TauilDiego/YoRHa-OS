@@ -18,7 +18,7 @@ de `lab/perf begin/end`.
 ## Formato: `[ID] [P?] [Story] Descrição`
 
 - **[P]**: pode rodar em paralelo (arquivos diferentes, sem dependência de tarefa incompleta)
-- **[Story]**: história da spec (US1 = H1, US2 = H2, US3 = H3)
+- **[Story]**: história da spec (US1 = H1, US2 = H2, US3 = H3, US4 = H4)
 
 ---
 
@@ -46,16 +46,16 @@ agentes paralelos, e criar o esqueleto do `shell/`.
 `contracts/` ficam congeladas.**
 
 - [x] T009 Baixar a M PLUS 1 variável (`MPLUS1[wght].ttf`) e o `OFL.txt` do repositório `google/fonts` (`ofl/mplus1/`) para `shell/assets/fonts/`, e acrescentar o crédito em `CREDITS.md`
-- [x] T010 Criar `shell/ds/Tokens.qml` (singleton) com os grupos `color`, `type`, `shadow`, `space`, `motion` e `vignette` do data-model.md, mais as funções `line(v, s)` ("≥ 1 e inteiro") e `px(v, s)`. Carrega a fonte por `FontLoader`, usa "FOT-Rodin ProN"/"Helvetica Now Micro" quando estiverem em `Qt.fontFamilies()`, e `motion.frozen` segue `Fixtures.active`
+- [x] T010 Criar `shell/ds/Tokens.qml` (singleton) com os grupos `color`, `type`, `shadow`, `space`, `motion` e `vignette` do data-model.md, mais as funções `line(v, s)` ("≥ 1 e inteiro") e `px(v, s)`. Carrega a fonte por `FontLoader`, usa "FOT-Rodin ProN"/"Helvetica Now Micro" quando estiverem em `Qt.fontFamilies()`, e `Tokens.frozen` (antes `motion.frozen`) segue `Fixtures.active`, definido pelo `shell.qml`. Também guarda `monitorScales` e as funções `snap`/`hair`/`scaleOf` (T048)
 - [x] T011 [P] Criar `shell/strings/Strings.qml` (singleton): `CPU`, `MEM`, `VOL`, `BAT`, `SYSTEM` e os nomes da galeria, todos em inglês (FR-018)
-- [x] T012 [P] Criar `shell/config/defaults.json` (`uiScale` 1, `barHeight` 40, `vignette` true) e `shell/services/Settings.qml` (singleton, `FileView` + `JsonAdapter`), que sobrescreve com `$XDG_CONFIG_HOME/rien-os/shell.json`. Validação do data-model: `uiScale` "0,5–3,0, fora usa o padrão e registra um aviso"; `barHeight` "limitado a 28–48"
+- [x] T012 [P] Criar `shell/config/defaults.json` (hoje: `uiScale` 1, `barHeight` 68, `vignette` true, `wallpaperMotion` true; no U1 era `barHeight` 40) e `shell/services/Settings.qml` (singleton, `FileView` + `JSON.parse`), que sobrescreve com `$XDG_CONFIG_HOME/rien-os/shell.json`. Validação do data-model: `uiScale` "0,5–3,0, fora usa o padrão e registra um aviso"; `barHeight` "limitado a 28–96" (era 28–48)
 - [x] T013 [P] Criar `shell/services/Fixtures.qml` (singleton): lê o JSON de `NIER_FIXTURES` (`Quickshell.env`), expõe `active`, `source`, `data`, `load(path)` e `clear()`; um domínio ausente fica `undefined` (contracts/fixtures.schema.json)
 - [x] T014 [P] Criar as fixtures em `shell/fixtures/`: `hud-default.json` (workspaces 1–3 com o 2 em foco, CPU 23, MEM 41, VOL 64, BAT 87, "kitty — ~/projetos", 2026-10-26T13:37:00), `hud-live-ws.json` (igual, sem `workspaces`), `battery-low.json`, `no-battery.json`, `muted.json`, `long-title.json` e `no-window.json`
 - [x] T015 Criar `shell/shell.qml`: `ShellRoot` com os `IpcHandler` `gallery` (`open`, `close`, `toggle`, `isOpen`), `fixtures` (`load`, `clear`) e `hud` (`dump`), conforme contracts/ipc.md. `dump` devolve `[]` até a US1
 - [x] T016 Verificar na VM (`lab/perf begin "U1: contrato"`): carrega com 0 erros e 0 avisos; `qs -p ~/nier/ui ipc call fixtures load ~/nier/ui/fixtures/hud-default.json` responde `ok`; `qmllint` dentro da VM sem erros. **Congela o contrato**
 - [x] T017 [P] Primitivas em `shell/ds/primitives/`: `Label.qml`, `Square.qml`, `Rule.qml` (`plain`/`dotted`/`vertical`; a pontilhada segue o padrão do design-system §6), `GridBackground.qml` (passo 7) e `Vignette.qml` (bordas `#A6A18D`, cantos `#8B8877`), seguindo contracts/components.md
-- [x] T018 [P] Base em `shell/ds/base/` (parte 1): `Selector.qml` (pipa 32×14 com furo + 2 quadradinhos de 5 px a ±10 px, alinhados com a ponta; balanço de ±5 px em 1 s, `InOutSine`, congelado quando `Tokens.motion.frozen`) e `Meter.qml` (`hp-bar` chapado 163×11, anima o valor, `alert` quando `critical`)
-- [x] T019 [P] Base em `shell/ds/base/` (parte 2): `HeaderButton.qml` (estados `normal`/`hovered`/`selected`/`dimmed`, tinta pintando da esquerda pra direita em `Tokens.motion.highlight`, trilhos, sombra, `Selector` em `hovered`/`selected`, `reachRule` faz a aba selecionada descer até a régua) e `ListItem.qml` (mesmos estados, variantes `opaque`/`plain`, `trailing`)
+- [x] T018 [P] Base em `shell/ds/base/` (parte 1): `Selector.qml` (pipa 32×14 com furo + 2 quadradinhos de 5 px a ±10 px, alinhados com a ponta; balanço de ±5 px em 1 s, `InOutSine`, congelado quando `Tokens.frozen`; revisto no T054: parado, com blink na troca) e `Meter.qml` (`hp-bar` chapado 163×11, anima o valor, `alert` quando `critical`)
+- [x] T019 [P] Base em `shell/ds/base/` (parte 2): `HeaderButton.qml` (estados `normal`/`hovered`/`selected`/`dimmed`, tinta pintando da esquerda pra direita em `Tokens.motion.highlight`, texto invertido, `reachRule` faz a aba selecionada descer até a régua; sem trilhos, sem sombra e, desde o T052, sem `Selector`) e `ListItem.qml` (mesmos estados, variantes `opaque`/`plain`, `trailing`, trilhos, sombra e `Selector`)
 - [x] T020 [P] Base em `shell/ds/base/` (parte 3): `PageHeader.qml` (caixa alta, sombra `text-shadow` em ≈15% do tamanho do texto) e `Card.qml` (cabeçalho de tinta + corpo `lightYellow`)
 
 **Checkpoint**: contrato congelado e peças disponíveis. As histórias podem começar.
@@ -76,7 +76,7 @@ e `hud dump` traz os mesmos valores.
 - [x] T024 [P] [US1] `shell/services/Battery.qml`: `bat` a partir de `UPower.displayDevice`; `available: false` sem bateria; `critical` "value < 0.15 e sem carregar"; `extra: "charging"`; fixture `battery` (null = sem bateria)
 - [x] T025 [P] [US1] `shell/services/Compositor.qml`: o único arquivo que importa `Quickshell.Hyprland`. `workspacesFor(monitorName)` devolve ids de 1 até "max(5, maior id existente, id em foco)", "só ids ≥ 1"; `activeTitle`; `focus(id)` (com a fixture `workspaces`, só atualiza o estado fixo)
 - [x] T026 [US1] `shell/ds/composites/TabBar.qml`: faixas verticais + `HeaderButton` por aba + régua pontilhada; a aba `selected` desce até a régua; sinal `activated(index)`
-- [x] T027 [US1] `shell/hud/Hud.qml`: `PanelWindow` no topo, `exclusiveZone` = altura (`Settings.barHeight`, 40), `s = tabH/47` com `tabH = barHeight × 31/40` × `Settings.uiScale`; da esquerda pra direita: marca (as duas faixas), `TabBar`, título centralizado (`elide`), `CPU`/`MEM`/`VOL`/`BAT` (`Label` + `Meter` + número), data `yyyy.MM.dd` e hora; régua pontilhada embaixo; sem vinheta
+- [x] T027 [US1] `shell/hud/Hud.qml`: `PanelWindow` no topo, `exclusiveZone` = altura (`Settings.barHeight`, hoje 68), `s = tabH/47 × Settings.uiScale` com `tabH = round(barHeight × 0,485)` (no U1 era `barHeight × 31/40`); da esquerda pra direita: marca (as duas faixas), `TabBar`, título centralizado (`elide`), `CPU`/`MEM`/`VOL`/`BAT` (`Label` + `Meter` + número), data `yyyy.MM.dd` e hora; régua pontilhada embaixo, a 17 px de jogo das abas, na escala `s × 1,0`; a faixa do papel entra na vinheta do fundo (revisões nos T049–T051)
 - [x] T028 [US1] Em `shell/shell.qml`: `Variants` sobre `Quickshell.screens` criando um `Hud` por monitor, e `hud.dump()` real (formato de contracts/ipc.md)
 - [x] T029 [US1] Validar no lab (`lab/perf begin "U1: HUD"`): cenários 1–4 da H1 por screenshot + `dump`; casos de borda com `fixtures load` (battery-low, no-battery, muted, long-title, no-window); 0 erros de QML
 
@@ -106,7 +106,7 @@ e `hud dump` traz os mesmos valores.
 FR-004 → `gallery close`.
 
 - [x] T032 [P] [US3] `shell/ds/composites/CursorList.qml`: faixas verticais + `ListItem`s + `Selector` no item atual; sinal `activated(index)`
-- [x] T033 [US3] `shell/gallery/Gallery.qml`: `PanelWindow` de tela cheia na camada `Overlay` (via `LazyLoader` no `shell.qml`), `keyboardFocus` exclusivo (Esc fecha), `GridBackground`, `Vignette` (se `Settings.vignette`), `s = altura/1080`; seções com nome: primitivas, `HeaderButton` e `ListItem` nos 4 estados, `Selector` claro e escuro balançando, `Meter` normal e crítico, `PageHeader`, `Card`, `TabBar` e `CursorList`
+- [x] T033 [US3] `shell/gallery/Gallery.qml`: `PanelWindow` de tela cheia na camada `Overlay` (via `LazyLoader` no `shell.qml`), `keyboardFocus` exclusivo (Esc fecha), `GridBackground`, `Vignette` (se `Settings.vignette`), `s = altura/1080`; seções com nome: primitivas, `HeaderButton` e `ListItem` nos 4 estados, `Selector` claro e escuro, `Meter` normal e crítico, `PageHeader`, `Card`, `TabBar` e `CursorList`
 - [x] T034 [US3] Ligar os `IpcHandler` `gallery` (`open`/`close`/`toggle`/`isOpen`) ao `LazyLoader` em `shell/shell.qml`
 - [x] T035 [US3] Validar no lab (`lab/perf begin "U1: galeria"`): `open` → screenshot → conferir peça por peça (SC-004) → `close` e Esc
 
@@ -114,7 +114,7 @@ FR-004 → `gallery close`.
 
 ---
 
-## Phase 7: User Story 4 - Fundo da área de trabalho (Priority: P4)
+## Phase 6: User Story 4 - Fundo da área de trabalho (Priority: P4)
 
 **Goal**: o fundo inteiro do desktop é o papel do menu, com movimento sutil.
 
@@ -130,15 +130,30 @@ screenshots iguais; `lab/perf` com e sem movimento.
 
 ---
 
-## Phase 6: Polish & validação final
+## Phase 7: Polish & validação final
 
 - [x] T036 Rodar o quickstart.md inteiro numa sessão `lab/perf begin "U1: validação" --kind u1-validacao --task 001`: SC-001 a SC-005, SC-007, SC-008 (`lab/profile hidpi` e `1080`), casos de borda e `qmllint`
 - [x] T037 Corrigir o que o T036 apontar e repetir só os cenários afetados
-- [ ] T038 [P] Polir o visual contra `docs/design-system.md` §6 (régua pontilhada, proporções da aba, título), comparando lado a lado com as referências privadas
-- [ ] T039 [P] Rodar `/speckit-analyze` e resolver as inconsistências entre spec, plano e tarefas
+- [x] T038 [P] Polir o visual contra `docs/design-system.md` §6 (régua pontilhada, proporções da aba, título), comparando lado a lado com as referências privadas. Fechado em 2026-10-27: régua, aba e pipa resolvidas nos T049–T054; a intensidade das abas apagadas ficou como está, aprovada pelo dono junto com o SC-006
+- [x] T039 [P] Rodar `/speckit-analyze` e resolver as inconsistências entre spec, plano e tarefas (análise em 2026-10-27; correções no T055, com as decisões do dono: abas sem trilhos nem sombra, constituição 1.1.1 com ImageMagick e python3 no host, plano retroativo da 002)
 - [x] T040 Escrever `specs/001-yorha-base-hud/relatorio-noite.md` (o que ficou pronto com a evidência, o que faltou, as decisões tomadas sozinho, o custo somado do `lab/perf`, os commits) e montar a imagem final com HUD 1080p + HUD hidpi + galeria
 
 ---
+
+## Phase 8: Revisões do dono depois da noite (2026-10-27)
+
+**Purpose**: registrar as mudanças pedidas pelo dono depois do relatório da noite. Cada uma tem
+commit e sessão `lab/perf` (relatórios em `~/projects/rien-OS-relatorios/runs/`).
+
+- [x] T047 [US1] Abas da barra sem o seletor no HUD (`showSelector: false`); `hud dump` ganha `x`/`w` por aba. Commit `0679ff7`; sessão `2026-10-27T020713-vm-teste-c-u1-abas-da-barra-sem-seletor`
+- [x] T048 Régua nítida no hidpi (marcas na grade física, `Tokens.snap`/`hair` com a escala do `Compositor`) e recarga sem erro na barra. Commit `60e5262`; sessão `2026-10-27T032945-vm-teste-b-regua-nitida-no-hidpi-reload-sem-referen`
+- [x] T049 [US1] Barra de 50 px com vão até a régua, haste animada da aba em foco (`motion.touch` 160 ms, `motion.untouch` 120 ms) e régua maior. Commit `5818be8`; sessões `2026-10-27T100055-vm-teste-c-barra-altura-vao-toque-animado-e-regua-m` e `2026-10-27T101231-vm-teste-a-barra-50-px-check-u1-teste-a-1080`
+- [x] T050 [US4] Vinheta na tela inteira: a faixa de papel da barra entra na vinheta do fundo, sem emenda (FR-002a). Commit `4e91c95`; sessões `2026-10-27T104541-vm-teste-a-vinheta-na-tela-inteira-barra-fundo-chec`, `2026-10-27T104729-vm-teste-a-vinheta-na-tela-inteira-check-u1-apos-co` e `2026-10-27T104908-vm-teste-a-vinheta-na-tela-inteira-check-u1-3a-test`
+- [x] T051 [US1] Barra de 68 px (faixa 28–96), aba de 33 px (`tabShare` 0,485), vão de 17 px de jogo e régua pontilhada na escala do jogo (`s × 1,0`). Commit `ee54c99`; sessão `2026-10-27T110413-vm-teste-a-barra-68-px-regua-na-escala-do-jogo-chec`
+- [x] T052 Abas sem seletor em todo lugar: `showSelector` sai do `HeaderButton` e da `TabBar`; a pipa fica só nos itens de lista. Commit `d17a112`; sessão `2026-10-27T113141-vm-teste-c-u1-abas-sem-seletor-remocao-do-codigo` (check-u1 15/15)
+- [x] T053 CI de lint (F0): `.github/workflows/lint.yml` com `shellcheck` e `qmllint` num container Arch. Commit `accb341`; sessão `2026-10-27T115737-container-f0-ci-de-lint-shellcheck-qmllint-num-con`
+- [x] T054 Pipa parada com blink (`motion.blink` 240 ms) e régua com pontos redondos como no Figma; SC-008 conferido no hidpi a 68 px (85 px físicos). Commit `77fc565`; sessão `2026-10-27T132649-vm-teste-c-u1-pipa-parada-com-blink-regua-com-ponto` (check-u1 15/15)
+- [x] T055 Correções de documentação do T039: spec, plano, research, data-model, contratos, quickstart, relatório, design system, constituição 1.1.1 e plano retroativo da spec 002
 
 ## Dependencies & Execution Order
 
@@ -146,6 +161,9 @@ screenshots iguais; `lab/perf` com e sem movimento.
 - T016 congela o contrato. T017–T020 só começam depois dele.
 - Dentro da US1: os serviços T021–T025 são [P] entre si; T026 depende de T019; T027 depende de T021–T026; T028 depende de T027.
 - US2 depende da US1 (o HUD existe). US3 pode correr em paralelo com a US1 depois do Foundational.
+- **US4** depende do Foundational (Tokens, Settings) e da `Vignette` (T017). Vem depois do HUD, porque a
+  faixa de papel da barra entra na vinheta do fundo (T050).
+- **Phase 8** registra revisões feitas depois de tudo validado; cada tarefa traz commit e sessão `lab/perf`.
 
 ## Parallel Example (agentes, cada um com worktree e VM própria)
 

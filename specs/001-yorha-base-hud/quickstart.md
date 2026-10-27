@@ -26,7 +26,7 @@ O formato está em [contracts/fixtures.schema.json](contracts/fixtures.schema.js
 | # | Prova | Como | Esperado |
 |---|---|---|---|
 | 1 | SC-001 | `lab/shot hud` + `lab/ipc qs -p ~/nier/ui ipc call hud dump` | O screenshot mostra as abas 01–05 (02 invertida e descendo até a régua, 04/05 apagadas), as 4 leituras, o título e "2026.10.26 13:37:00". O `dump` traz os mesmos valores ([contracts/ipc.md](contracts/ipc.md)) |
-| 2 | SC-002 | Dois `lab/shot`, depois `lab/diffshot a.png b.png` | 0 pixels diferentes (o balanço fica congelado com fixtures) |
+| 2 | SC-002 | Dois `lab/shot`, depois `lab/diffshot a.png b.png` | 0 pixels diferentes (as animações ficam congeladas com fixtures) |
 | 3 | SC-003 | Fixture sem o domínio `workspaces`, `lab/key` / clique na aba 03, `hud dump` | O workspace 3 entra em foco e a aba 03 é `selected` em ≤ 0,5 s |
 | 4 | SC-004 | `ipc call gallery open`, `lab/shot galeria`, `ipc call gallery close` | Todas as peças do FR-003 e todos os estados do FR-004 aparecem, com nome, vinheta e seletor com os 2 quadradinhos |
 | 5 | SC-005 / FR-017 | O relatório do `lab/perf end` (seção "Dentro da VM") | 0 erros e 0 avisos no último carregamento |
@@ -34,6 +34,9 @@ O formato está em [contracts/fixtures.schema.json](contracts/fixtures.schema.js
 | 7 | SC-008 | `lab/profile hidpi` + `lab/shot`, depois `lab/profile 1080` + `lab/shot` | A barra tem 68 px lógicos (85 px físicos no hidpi), e o grid e as réguas não têm meio pixel |
 | 8 | Bordas | `ipc call fixtures load` com `battery-low.json`, `no-battery.json`, `muted.json`, `long-title.json` e `no-window.json` | BAT vermelha; BAT some; VOL mudo e vazio; título com reticências; título vazio |
 | 9 | Lint | `lab/ssh 'qmllint -I … ~/nier/ui/**/*.qml'` | Sem erros |
+| 10 | SC-009 | Workspace vazio com fixtures, dois `lab/shot`, `lab/diffshot`; depois `ipc call fixtures clear` e `ipc call wallpaper isMoving` | O fundo aparece no centro da tela (o fundo fiel ao jogo vem na spec 004); 0 pixels diferentes com fixtures; sem fixtures, `isMoving` = `true` |
+| 11 | SC-010 | Duas sessões `lab/perf` de 60 s parado no desktop: uma com o movimento ligado e outra com `ipc call wallpaper motion false` | O custo das duas fica registrado nos relatórios (sem meta; otimizar é da U6) |
+| 12 | Bordas: mais de um monitor | Duas saídas na VM, cada uma com a sua barra e o seu fundo | **Adiado:** o laboratório ainda não liga duas saídas; os perfis 1080 e hidpi são conferidos separadamente (cenário 7) |
 
 ## Fechamento
 
@@ -43,4 +46,6 @@ lab/perf end --result pass --note "U1 validado"
 ```
 
 O relatório (custo no host + guest + screenshots com hash) vai pro `rien-OS-relatorios`. Os
-screenshots e o `dump` são a evidência pra revisão do dono (SC-006).
+screenshots e o `dump` são a evidência pra revisão do dono (SC-006, aprovado em 2026-10-27).
+
+Os cenários 1–5, 7, 8, 10 e o lint estão automatizados em `lab/check-u1` (repositório privado).
