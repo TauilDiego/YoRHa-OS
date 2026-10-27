@@ -44,5 +44,12 @@ Singleton {
         readonly property string sampleItem: "Recovery"
         readonly property var sampleList: ["Recovery", "Enhancements", "Support", "Materials", "Key Items"]
         readonly property var sampleTabs: ["MAP", "QUESTS", "ITEMS", "SYSTEM"]
+        // Added by the gallery (T033).
+        readonly property string squareInk: "ink"
+        readonly property string squareLight: "light"
+        readonly property string variantOpaque: "opaque"
+        readonly property string variantPlain: "plain"
+        readonly property string samplePageTitle: "Items"
+        readonly property string samplePageSubtitle: "All Items"
     }
 }
