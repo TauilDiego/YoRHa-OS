@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-27
 
-**Status**: Rascunho, aguardando a aprovação do dono
+**Status**: Aprovada pelo dono (2026-10-27); implementada (ver `relatorio.md`)
 
 **Input**: Pedido do dono: "o papel de parede eu quero que a gente explore opções pois quero depois
 adicionar um seletor [...] a minha ideia é fazer um sistema próprio pra controlar o papel de parede
@@ -195,7 +195,7 @@ comandos de controle e conferir o estado exportado.
   - **imagens:** os arquivos `jpg`, `png` e `webp` da pasta do usuário (padrão `~/Pictures/Wallpapers`,
     configurável);
   - **vídeos:** só listados, apagados, como "depois".
-- **FR-006**: O seletor MUST abrir por um atalho da sessão (`SUPER + W` na VM) e por comando de
+- **FR-006**: O seletor MUST abrir por um atalho da sessão (`SUPER + W`; na VM, `ALT + W`, research R11) e por comando de
   controle, como o popup da 003:
   - centrado no monitor em foco;
   - resto da tela escurecido, sem desfoque;
@@ -203,8 +203,8 @@ comandos de controle e conferir o estado exportado.
   - fecha com Esc ou com um clique fora.
 - **FR-007**: O layout MUST seguir o mockup aprovado: título `WALLPAPER -Select`; lista à esquerda
   agrupada (SCENES, IMAGES, VIDEO) com a pipa; prévia ao vivo no meio, com o nome e uma descrição;
-  quadro "Options" à direita, com Monitor e Transition, mais Type, Layers, Motion e Now on; rodapé de
-  teclas.
+  quadro "Options" à direita, com Monitor e Transition (e, nas imagens, Paper filter, FR-010), mais
+  Type, Layers, Motion e Now on; rodapé de teclas.
 - **FR-008**: A navegação MUST seguir o padrão de duas colunas da 003:
   - lista: ↑/↓ movem, Enter aplica, → vai pras opções, Esc fecha;
   - opções: ↑/↓ movem, ←/→ mudam o valor, ← no primeiro valor volta pra lista, Esc volta;
@@ -258,7 +258,8 @@ comandos de controle e conferir o estado exportado.
   - o layout de lista + prévia + opções, reutilizável pros próximos menus.
 - **FR-023**: Todo texto fixo MUST ficar em inglês, no lugar central de textos.
 - **FR-024**: Abrir o seletor, navegar, aplicar com cada transição e fechar MUST deixar o log sem erro
-  e sem aviso de QML.
+  e sem aviso de QML. O aviso do Qt 6.12.0 que todo popup loga ao abrir (`qt.qpa.wayland.textinput`,
+  da plataforma, não do QML) conta à parte, como na 003.
 
 ### Key Entities
 

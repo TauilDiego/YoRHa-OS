@@ -102,7 +102,7 @@ regra é: nada de blur; cena parada não repinta; o shader só existe durante a 
 | II. Camada sobre Arch limpo | Nada instalado no sistema. O `qt6-shadertools` entra na VM (camada `hypr-base`/`dev`) e, depois, na lista de pacotes base do instalador (S3) | ✅ |
 | III. Padrões × arquivos do usuário | Os padrões ficam em `config/defaults.json`; o `shell.json` do usuário só é lido; a escolha vai pra um **arquivo de estado** (`$XDG_STATE_HOME`), nunca pra config. A pasta de imagens do usuário só é lida (nem criada) | ✅ |
 | IV. Pronto com evidência da VM | Cada SC tem prova no [quickstart.md](quickstart.md): screenshot com medição, `wallpaper dump`, rajada de quadros, log | ✅ |
-| V. Spec antes de código | Spec aprovada em 2026-10-27; **este plano aguarda a aprovação do dono** antes da implementação. A US1 foi autorizada pelo dono a ir antes ("só a US1 da 004 primeiro") | ✅ |
+| V. Spec antes de código | Spec e plano aprovados pelo dono em 2026-10-27. A US1 foi autorizada pelo dono a ir antes ("só a US1 da 004 primeiro") | ✅ |
 | VI. Paralelizar | Os contratos ([contracts/](contracts/)) vêm antes e congelam. O catálogo de imagens (US4), o estado (US5) e o shader (US3) vão em paralelo, em arquivos separados. O seletor (US2) espera os componentes da 003 | ✅ |
 | VII. Simplicidade | Um shader só pra as quatro transições; o filtro de papel usa o `MultiEffect` do Qt (sem shader próprio); sem ferramenta externa; sem testes unitários | ✅ |
 | Restrições: marcas | As cenas são desenhadas do zero com medidas do jogo; nenhuma imagem do jogo; as de teste são geradas | ✅ |
@@ -160,7 +160,8 @@ shell/
 │   ├── Compositor.qml           # + focusedMonitor (do mesmo hyprctl monitors -j)
 │   └── Fixtures.qml             # + domínio `wallpaper`
 ├── ds/composites/
-│   └── GroupedList.qml          # CursorList com títulos de grupo (SCENES/IMAGES/VIDEO) — ou opção `groups` na CursorList
+│   ├── GroupedList.qml          # lista de cursor com títulos de grupo (SCENES/IMAGES/VIDEO), aviso e itens apagados
+│   └── PickerLayout.qml         # o composto lista + prévia + opções (FR-022), com o foco em duas colunas
 ├── strings/Strings.qml          # + textos do seletor e dos tipos
 ├── config/defaults.json         # + chaves novas
 └── fixtures/
