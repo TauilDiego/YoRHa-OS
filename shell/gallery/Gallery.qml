@@ -95,9 +95,9 @@ PanelWindow {
         focus: true
         Keys.onEscapePressed: root.closeRequested()
 
-        GridBackground {
+        Rectangle {
             anchors.fill: parent
-            s: root.s
+            color: Tokens.color.darkYellow
         }
 
         PageHeader {
@@ -179,15 +179,23 @@ PanelWindow {
                     }
 
                     SampleRow {
-                        name: Strings.gallery.grid
-                        height: root.u(60)
-                        // The page itself is the grid; the swatch frames a piece of it.
+                        name: Strings.gallery.paper
+                        height: root.u(100)
+                        // The desktop background in miniature: paper, arcs, beams and vignette.
                         Item {
-                            width: root.u(200)
+                            width: Math.round(height * 16 / 9)
                             height: parent.height
-                            GridBackground {
+                            clip: true
+                            Rectangle {
                                 anchors.fill: parent
-                                s: root.s
+                                color: Tokens.color.darkYellow
+                            }
+                            PaperDecor {
+                                anchors.fill: parent
+                                s: parent.height / 1080
+                            }
+                            Vignette {
+                                anchors.fill: parent
                             }
                             Repeater {
                                 model: 4

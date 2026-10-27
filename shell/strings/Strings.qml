@@ -24,7 +24,7 @@ Singleton {
         readonly property string rulePlain: "plain"
         readonly property string ruleDotted: "dotted"
         readonly property string ruleVertical: "vertical"
-        readonly property string grid: "Grid background"
+        readonly property string paper: "Paper"
         readonly property string headerButton: "Header button"
         readonly property string listItem: "List item"
         readonly property string selector: "Selector"

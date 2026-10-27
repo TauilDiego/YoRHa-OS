@@ -19,7 +19,6 @@ Singleton {
         readonly property color lightYellow: "#D7D1B3"   // card body, inverted text
         readonly property color boxShadow: Qt.rgba(0x7C / 255, 0x7E / 255, 0x6C / 255, 0.69)
         readonly property color textShadow: Qt.rgba(0x7E / 255, 0x7E / 255, 0x74 / 255, 0.57)
-        readonly property color grid: Qt.rgba(0x4E / 255, 0x4B / 255, 0x42 / 255, 0.06)
         readonly property color alert: "#8F3A30"         // critical states only
     }
 
@@ -102,7 +101,6 @@ Singleton {
         readonly property real railGap: 5                  // rails above/below the selected item
         readonly property real rail: 2
         readonly property real rule: 2
-        readonly property real gridStep: 7
         readonly property real cardW: 538
         readonly property real cardH: 578
         readonly property real cardBodyMarginH: 22
@@ -128,11 +126,14 @@ Singleton {
     // Set by shell.qml while fixtures are active, so screenshots are pixel-identical (SC-002).
     property bool frozen: false
 
-    // --- vignette (FR-002a): ink over the paper, ≈#A6A18D at the edges, ≈#8B8877 at the corners
+    // --- vignette (FR-002a), measured in the game's menus (design-system §6): ink over the paper
+    // on a circle of half the screen's diagonal; clear in the middle (the top and bottom centers
+    // stay paper), #A6A18D at the side edges, #8C8978 in the corners.
     readonly property Vignettes vignette: Vignettes {}
     component Vignettes: QtObject {
-        readonly property real start: 0.42                 // fraction of the corner distance
-        readonly property real edgeAlpha: 0.28
+        readonly property real start: 0.55                 // fractions of half the diagonal
+        readonly property real edgeAt: 0.87                // a 16:9 screen's side edges
+        readonly property real edgeAlpha: 0.29
         readonly property real cornerAlpha: 0.50
     }
 
