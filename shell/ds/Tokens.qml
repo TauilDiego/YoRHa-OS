@@ -160,4 +160,29 @@ Singleton {
     function px(v: real, s: real): int {
         return Math.round(v * s);
     }
+
+    // --- spec 004: wallpaper ---------------------------------------------------------------------
+    // A scene's paper colors live in its JSON (shell/wallpaper/scenes/); these are what the scene,
+    // the paper filter and the transitions draw themselves (values from the approved mockup).
+    readonly property Wallpapers wallpaper: Wallpapers {}
+    component Wallpapers: QtObject {
+        readonly property color darkLine: "#96948C"        // dark scene: arcs and beams (× lineAlpha)
+        readonly property color darkVignette: "#000000"    // dark scene: the vignette darkens to black
+        readonly property real ruleAlpha: 0.9              // dotted rules over the paper
+        readonly property real darkRuleAlpha: 0.55         // dotted rules (darkLine) over the dark paper
+        readonly property color dotWeave: Qt.rgba(1, 1, 1, 0.07)   // dark scene: a 1 px dot every 4 px
+        readonly property color glint: "#E6E1C8"           // camouflage: the front's flash, the trail's veil
+        readonly property real inkSquare: 0.9              // tiles: the ink square before each cell
+        // paper filter (research R7): colors pulled toward the paper, a softer vignette on top
+        readonly property real filterAmount: 0.85
+        readonly property real filterVignetteStart: 0.5
+        readonly property real filterVignetteEdge: 0.26
+        readonly property real filterVignetteCorner: 0.35
+        // transitions (research R4), in ms
+        readonly property int reveal: 1200                 // camouflage: the wave crosses the screen
+        readonly property int lead: 200                    // camouflage: refraction ahead of the front
+        readonly property int settle: 450                  // camouflage: after the trail, until the end
+        readonly property int duration: 900                // wipe, tiles and crossfade (ease in-out)
+    }
+    // --- end spec 004 ----------------------------------------------------------------------------
 }

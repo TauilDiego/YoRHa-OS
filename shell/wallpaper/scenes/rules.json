@@ -1,0 +1,9 @@
+{
+  "name": "Menu + rules",
+  "description": "The menu paper with the dotted rule at the top and bottom, like the edges of the game's menus.",
+  "kind": "paper",
+  "paper": { "center": "#C9C5AB", "edge": "#A6A18D", "corner": "#8C8978" },
+  "layers": { "arcs": true, "beams": true, "rules": true, "dots": false },
+  "lineAlpha": 0.15,
+  "motion": { "arcPeriod": 600, "arcAmplitude": 9, "beamPeriod": 300, "beamAmplitude": 70 }
+}

@@ -5,3 +5,5 @@ singleton Telemetry 1.0 Telemetry.qml
 singleton Audio 1.0 Audio.qml
 singleton Battery 1.0 Battery.qml
 singleton Compositor 1.0 Compositor.qml
+singleton WallpaperCatalog 1.0 WallpaperCatalog.qml
+singleton WallpaperStore 1.0 WallpaperStore.qml

@@ -27,6 +27,19 @@ PanelWindow {
     color: Tokens.color.darkYellow
 
     readonly property real s: height / 1080 * Settings.uiScale
+    readonly property string monitorName: modelData?.name ?? ""
+
+    // For `wallpaper dump` (contracts/ipc.md).
+    function dumpEntry(): var {
+        return {
+            name: monitorName,
+            current: WallpaperStore.resolve(monitorName),
+            own: WallpaperStore.monitors[monitorName] ?? "",
+            transitioning: false,
+            kind: WallpaperStore.transition.kind,
+            elapsed: 0
+        };
+    }
 
     PaperDecor {
         anchors.fill: parent

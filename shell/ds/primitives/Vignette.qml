@@ -14,6 +14,12 @@ Canvas {
     property real s: 1                           // shared interface; the vignette is scale-free
     property size area: Qt.size(width, height)
     property point offset: Qt.point(0, 0)
+    // The measured profile by default; a wallpaper scene or the paper filter (spec 004) tunes it.
+    property color tint: Tokens.color.darkGray
+    property real start: Tokens.vignette.start
+    property real edgeAt: Tokens.vignette.edgeAt
+    property real edgeAlpha: Tokens.vignette.edgeAlpha
+    property real cornerAlpha: Tokens.vignette.cornerAlpha
 
     visible: enabled
 
@@ -21,9 +27,9 @@ Canvas {
         const c = getContext("2d");
         c.reset();
         c.clearRect(0, 0, width, height);        // reset() keeps the pixels: repaints would stack
-        const ink = Tokens.color.darkGray;
+        const ink = root.tint;
         const rgba = a => `rgba(${Math.round(ink.r * 255)},${Math.round(ink.g * 255)},${Math.round(ink.b * 255)},${a})`;
-        const v = Tokens.vignette;
+        const v = root;
         const w = root.area.width, h = root.area.height;
         if (w <= 0 || h <= 0)
             return;
@@ -40,5 +46,10 @@ Canvas {
     onHeightChanged: requestPaint()
     onAreaChanged: requestPaint()
     onOffsetChanged: requestPaint()
+    onTintChanged: requestPaint()
+    onStartChanged: requestPaint()
+    onEdgeAtChanged: requestPaint()
+    onEdgeAlphaChanged: requestPaint()
+    onCornerAlphaChanged: requestPaint()
     onVisibleChanged: if (visible) requestPaint()
 }

@@ -1,0 +1,9 @@
+{
+  "name": "Dark",
+  "description": "The dark backdrop the game shows behind pop-ups: near black, grey arcs and beams, a faint dot weave.",
+  "kind": "dark",
+  "paper": { "center": "#141414", "edge": "#101010", "corner": "#0A0A0A" },
+  "layers": { "arcs": true, "beams": true, "rules": false, "dots": true },
+  "lineAlpha": 0.20,
+  "motion": { "arcPeriod": 600, "arcAmplitude": 9, "beamPeriod": 300, "beamAmplitude": 70 }
+}

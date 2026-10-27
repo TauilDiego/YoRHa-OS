@@ -46,6 +46,50 @@ Singleton {
         return true;
     }
 
+    // --- spec 004: wallpaper (research R12) ---------------------------------------------------
+    // The picture folder (`~` expanded), the transition and the camouflage's fine-tuning. A value
+    // out of range falls back to the default with a warning. The wallpaper's own state (what is
+    // applied, the last transition picked) lives in WallpaperStore, never in the user's config.
+    readonly property string wallpaperFolder: {
+        const v = typeof merged.wallpaperFolder === "string" && merged.wallpaperFolder !== ""
+            ? merged.wallpaperFolder : (defaults.wallpaperFolder ?? "~/Pictures/Wallpapers");
+        return v.startsWith("~/") ? Quickshell.env("HOME") + v.slice(1) : v;
+    }
+    readonly property var transitionKinds: ["camouflage", "wipe", "tiles", "crossfade"]
+    readonly property string wallpaperTransition: {
+        const v = merged.wallpaperTransition;
+        if (transitionKinds.includes(v))
+            return v;
+        if (v !== undefined)
+            console.warn(`settings: wallpaperTransition must be one of ${transitionKinds.join(", ")}, using the default`);
+        return transitionKinds.includes(defaults.wallpaperTransition) ? defaults.wallpaperTransition : "camouflage";
+    }
+    // { cell, trail, glitch }, key by key: the user's value when valid, else the default.
+    readonly property var camouflage: {
+        const d = Object.assign({ cell: 24, trail: 2600, glitch: 2 }, defaults.camouflage ?? {});
+        const u = merged.camouflage && typeof merged.camouflage === "object" ? merged.camouflage : {};
+        const out = {};
+        for (const k of ["cell", "trail", "glitch"]) {
+            const err = u[k] === undefined ? "" : camouflageError(k, u[k]);
+            if (err)
+                console.warn(`settings: camouflage.${err}, using the default`);
+            out[k] = u[k] !== undefined && !err ? u[k] : d[k];
+        }
+        return out;
+    }
+
+    // "" when `value` is valid for camouflage key `key`, else what is wrong (data-model.md).
+    function camouflageError(key: string, value: var): string {
+        if (key === "cell" && ![16, 24, 32].includes(value))
+            return "cell must be 16, 24 or 32";
+        if (key === "trail" && !(Number.isInteger(value) && value >= 400 && value <= 4000))
+            return "trail must be a whole number of ms between 400 and 4000";
+        if (key === "glitch" && ![0, 1, 2].includes(value))
+            return "glitch must be 0, 1 or 2";
+        return "";
+    }
+    // --- end spec 004 ----------------------------------------------------------------------------
+
     FileView {
         id: defaultsFile
         path: Qt.resolvedUrl("../config/defaults.json").toString().replace("file://", "")

@@ -1,0 +1,9 @@
+{
+  "name": "Menu",
+  "description": "The game's menu paper: radial vignette, double arcs and short diagonal beams that breathe slowly. No grid.",
+  "kind": "paper",
+  "paper": { "center": "#C9C5AB", "edge": "#A6A18D", "corner": "#8C8978" },
+  "layers": { "arcs": true, "beams": true, "rules": false, "dots": false },
+  "lineAlpha": 0.15,
+  "motion": { "arcPeriod": 600, "arcAmplitude": 9, "beamPeriod": 300, "beamAmplitude": 70 }
+}

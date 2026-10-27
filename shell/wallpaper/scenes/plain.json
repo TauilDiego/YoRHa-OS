@@ -1,0 +1,9 @@
+{
+  "name": "Plain",
+  "description": "Only the paper and the vignette. The quietest option.",
+  "kind": "paper",
+  "paper": { "center": "#C9C5AB", "edge": "#A6A18D", "corner": "#8C8978" },
+  "layers": { "arcs": false, "beams": false, "rules": false, "dots": false },
+  "lineAlpha": 0.15,
+  "motion": { "arcPeriod": 600, "arcAmplitude": 9, "beamPeriod": 300, "beamAmplitude": 70 }
+}

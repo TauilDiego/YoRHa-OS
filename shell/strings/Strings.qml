@@ -54,4 +54,56 @@ Singleton {
         readonly property string samplePageTitle: "Items"
         readonly property string samplePageSubtitle: "All Items"
     }
+
+    // --- spec 004: wallpaper (picker, catalog, transitions) --------------------------------------
+    readonly property WallpaperStrings wallpaper: WallpaperStrings {}
+    component WallpaperStrings: QtObject {
+        readonly property string title: "WALLPAPER"
+        readonly property string subtitle: "-Select"
+        // list groups
+        readonly property string scenes: "SCENES"
+        readonly property string images: "IMAGES"
+        readonly property string video: "VIDEO"
+        // options card
+        readonly property string options: "Options"
+        readonly property string monitor: "Monitor"
+        readonly property string allMonitors: "All monitors"
+        readonly property string transition: "Transition"
+        readonly property var transitionLabels: ({ camouflage: "Camouflage", wipe: "Wipe", tiles: "Tiles", crossfade: "Crossfade" })
+        readonly property string paperFilter: "Paper filter"
+        readonly property string on: "On"
+        readonly property string off: "Off"
+        // information
+        readonly property string type: "Type"
+        readonly property string layers: "Layers"
+        readonly property string motion: "Motion"
+        readonly property string nowOn: "Now on"
+        readonly property string all: "ALL"
+        readonly property string none: "—"
+        readonly property var typeLabels: ({ scene: "Scene", image: "Image", video: "Video" })
+        readonly property string layerPaper: "Paper · Vignette"
+        readonly property string layerDark: "Dark paper"
+        readonly property string layerPicture: "Picture · Paper filter"
+        readonly property string layerPictureRaw: "Picture"
+        readonly property string layerArcs: "Arcs"
+        readonly property string layerBeams: "Beams"
+        readonly property string layerRules: "Rules"
+        readonly property string motionSlow: "Slow"
+        readonly property string motionNone: "None"
+        // key hints
+        readonly property string keySelect: "Select"
+        readonly property string keyApply: "Apply"
+        readonly property string keyOptions: "Options"
+        readonly property string keyChange: "Change"
+        readonly property string keyBack: "Back"
+        readonly property string keyClose: "Close"
+        // catalog entries without a JSON of their own
+        readonly property string videoName: "Videos"
+        readonly property string videoText: "Video wallpapers come later, once the optimization phase (U6) measures what they cost."
+        readonly property string notYet: "NOT YET"
+        readonly property string imageText: "A picture from your wallpaper folder. The paper filter pulls its colors toward the paper and adds the vignette; turn it off to see the picture as it is."
+        // %1 = the folder
+        readonly property string emptyFolder: "Put pictures in %1"
+    }
+    // --- end spec 004 ----------------------------------------------------------------------------
 }

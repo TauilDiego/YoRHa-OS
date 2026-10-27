@@ -16,6 +16,12 @@ Item {
 
     property real s: 1
     property real phase: 0
+    // A scene (spec 004, wallpaper/Scene.qml) picks the layers, the line color and the breathing:
+    // how many swings per `phase` cycle and how far.
+    property bool showArcs: true
+    property bool showBeams: true
+    property real arcCycles: 1                      // the arcs swing once per cycle (600 s)
+    property real beamCycles: 2                     // the beams slide twice per cycle (300 s)
 
     clip: true
 
@@ -40,13 +46,13 @@ Item {
     readonly property real dx: Math.cos(angle)
     readonly property real dy: Math.sin(angle)
     readonly property real doubleGap: 7             // game px between the two circles of a double arc
-    readonly property real swing: 9                 // degrees, each way
-    readonly property real slide: 70                // game px, each way
-    readonly property color ink: Qt.rgba(Tokens.color.darkGray.r, Tokens.color.darkGray.g, Tokens.color.darkGray.b, 0.15)
+    property real swing: 9                          // degrees, each way
+    property real slide: 70                         // game px, each way
+    property color ink: Qt.rgba(Tokens.color.darkGray.r, Tokens.color.darkGray.g, Tokens.color.darkGray.b, 0.15)
     readonly property real stroke: Tokens.hair(Tokens.line(2, s), dpr)
 
     function arcStart(i: int): real {
-        return arcs[i].start + swing * Math.sin(2 * Math.PI * phase + i * 1.7);
+        return arcs[i].start + swing * Math.sin(2 * Math.PI * phase * arcCycles + i * 1.7);
     }
     // Second circle of a double arc; a single arc gets an empty sweep.
     function outerSweep(i: int): real {
@@ -55,6 +61,7 @@ Item {
 
     Shape {
         anchors.fill: parent
+        visible: root.showArcs
         preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
@@ -103,13 +110,13 @@ Item {
 
     // One shape per bundle, so each slides on its own.
     Repeater {
-        model: root.bundles
+        model: root.showBeams ? root.bundles : []
 
         Shape {
             id: bundle
             required property var modelData
             required property int index
-            readonly property real drift: root.slide * root.s * Math.sin(4 * Math.PI * root.phase + index * 2.1)
+            readonly property real drift: root.slide * root.s * Math.sin(2 * Math.PI * root.phase * root.beamCycles + index * 2.1)
             // Line j starts staggered along the bundle and is shorter; a missing third line is empty.
             function from(j: int): point {
                 const b = bundle.modelData, s = root.s, g = b.gap * j, st = 34 * j;

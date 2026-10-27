@@ -43,6 +43,7 @@ ShellRoot {
         onTriggered: shell.wallpaperPhase = (shell.wallpaperPhase + 1 / 6000) % 1
     }
     Variants {
+        id: wallpapers      // spec 004: read by `wallpaper dump`
         model: Quickshell.screens
 
         Wallpaper {
@@ -101,6 +102,39 @@ ShellRoot {
         target: "wallpaper"
         function motion(on: bool): void { shell.wallpaperMotionOverride = on; }
         function isMoving(): string { return shell.wallpaperMoving ? "true" : "false"; }
+
+        // --- spec 004 (contracts/ipc.md): the catalog, the choice per monitor, the transition --
+        function list(): string {
+            return JSON.stringify(WallpaperCatalog.items.map(w => ({
+                id: w.id, type: w.type, name: w.name, group: w.group, available: w.available
+            })));
+        }
+        function set(id: string, monitor: string): string { return WallpaperStore.set(id, monitor); }
+        function next(monitor: string): string { return WallpaperStore.step(monitor, 1); }
+        function prev(monitor: string): string { return WallpaperStore.step(monitor, -1); }
+        function transition(kind: string): string { return WallpaperStore.setTransition(kind); }
+        function camouflage(cell: int, trail: int, glitch: int): string {
+            return WallpaperStore.setCamouflage(cell, trail, glitch);
+        }
+        function filter(path: string, on: bool): string { return WallpaperStore.setPaperFilter(path, on); }
+        // The picker arrives with US2 (it needs spec 003's pop-up pieces).
+        function picker(action: string): string { return "ok"; }
+        function dump(): string {
+            return JSON.stringify({
+                all: WallpaperStore.all,
+                monitors: wallpapers.instances.map(w => w.dumpEntry()),
+                transition: Object.assign({}, WallpaperStore.transition, { instant: WallpaperStore.instant }),
+                catalog: {
+                    count: WallpaperCatalog.count,
+                    folder: WallpaperCatalog.folder,
+                    folderMissing: WallpaperCatalog.folderMissing,
+                    ready: WallpaperCatalog.ready
+                },
+                paperFilterOff: WallpaperStore.paperFilterOff,
+                picker: null
+            });
+        }
+        // --- end spec 004 ------------------------------------------------------------------
     }
 
     IpcHandler {
