@@ -84,17 +84,25 @@ Item {
                 onHoveredChanged: {
                     const i = index, on = hovered;
                     Qt.callLater(() => {
-                        if (on)
-                            hover.index = i;
-                        else if (hover.index === i)
-                            hover.index = -1;
+                        try {
+                            if (on)
+                                hover.index = i;
+                            else if (hover.index === i)
+                                hover.index = -1;
+                        } catch (e) {
+                            // the bar itself was torn down meanwhile (live reload): nothing to do
+                        }
                     });
                 }
                 Component.onDestruction: {
                     const i = index;
                     Qt.callLater(() => {
-                        if (hover.index === i && i >= tabs.count)
-                            hover.index = -1;
+                        try {
+                            if (hover.index === i && i >= tabs.count)
+                                hover.index = -1;
+                        } catch (e) {
+                            // the bar itself was torn down meanwhile (live reload): nothing to do
+                        }
                     });
                 }
             }

@@ -19,11 +19,11 @@
 
 ## Cursores
 
-- **NieR Cursors**, de **Beinsezii** ([github.com/Beinsezii/NieR-Cursors](https://github.com/Beinsezii/NieR-Cursors)):
-  - licença: MIT (Copyright (c) 2020 Beinsezii);
-  - não é copiado pro repositório: o release `2020-08-25` é baixado e conferido por sha256
-    (`system/cursors/nier-cursors.lock`), e o `LICENSE` vai junto do tema instalado;
-  - uso: tema de cursor padrão (spec 002).
+- **rien-OS Cursors** (`system/cursors/`): desenho próprio, vetorial, com os 39 formatos e a
+  composição do **NieR Cursors**, de **Beinsezii**
+  ([github.com/Beinsezii/NieR-Cursors](https://github.com/Beinsezii/NieR-Cursors)), licença MIT
+  (Copyright (c) 2020 Beinsezii). O aviso MIT vai junto do tema instalado (`NOTICE`). A seta segue
+  a "nave" do minigame de hacking de NieR:Automata; nenhum arquivo do jogo é usado.
 
 ## Código de terceiros
 

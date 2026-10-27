@@ -14,6 +14,7 @@ Item {
 
     property real s: 1
     property string kind: "plain"
+    property bool crisp: true                    // dotted: marks as solid squares of whole physical px (the Canvas path blurs at fractional scales)
     property color color: kind === "vertical" ? Tokens.color.lightGray : Tokens.color.darkGray
 
     readonly property int thickness: Tokens.line(Tokens.space.rule, s)
@@ -45,7 +46,7 @@ Item {
 
     Canvas {
         id: pattern
-        visible: root.kind === "dotted"
+        visible: root.kind === "dotted" && !root.crisp
         anchors.fill: parent
         onPaint: {
             const c = getContext("2d");
@@ -95,6 +96,92 @@ Item {
             function onColorChanged(): void { pattern.requestPaint(); }
             function onSChanged(): void { pattern.requestPaint(); }
             function onDprChanged(): void { pattern.requestPaint(); }
+        }
+    }
+
+    // crisp: the same pattern as scene-graph rectangles. A Canvas is rasterized at logical size
+    // and upscaled at fractional scales (grey edges); rectangles land on the physical grid.
+    // Sizes are whole physical pixels and every mark's absolute position is snapped.
+    Item {
+        id: marks
+        visible: root.kind === "dotted" && root.crisp
+        anchors.fill: parent
+
+        readonly property real d: root.dpr
+        property point o: Qt.point(0, 0)        // absolute origin, for the snap
+        function place(): void {
+            o = mapToItem(null, 0, 0);
+        }
+        function ph(v: real): real {            // a game length as whole physical px
+            return Math.max(1, Math.round(v * root.s * d)) / d;
+        }
+        function g(v: real): real {             // a logical length on the physical grid
+            return Math.round(v * d) / d;
+        }
+        function sx(v: real): real {
+            return Math.round((o.x + v) * d) / d - o.x;
+        }
+        function sy(v: real): real {
+            return Math.round((o.y + v) * d) / d - o.y;
+        }
+
+        readonly property real dz: ph(root.dot)
+        readonly property real tw: ph(root.tickW)
+        readonly property real th: ph(root.tickH)
+        readonly property real step: g(root.period * root.s)
+        readonly property real tOff: g(root.tickX * root.s - tw / 2)
+        readonly property real cOff: g(root.trioX * root.s - dz / 2)
+        readonly property real dx: g(root.trioSpread * root.s)
+        readonly property real ty: sy(root.thickness)
+        readonly property real yMax: Math.floor(height * d) / d - dz
+        readonly property real y1: Math.min(yMax, sy(root.thickness / 2 + root.trioRow1 * root.s - dz / 2))
+        readonly property real y2: Math.min(yMax, sy(root.thickness / 2 + root.trioRow2 * root.s - dz / 2))
+
+        Component.onCompleted: Qt.callLater(place)
+        onWidthChanged: Qt.callLater(place)
+        Connections {
+            target: root
+            function onXChanged(): void { Qt.callLater(marks.place); }
+            function onYChanged(): void { Qt.callLater(marks.place); }
+        }
+
+        Repeater {
+            model: marks.visible && marks.step > 0 ? Math.ceil(marks.width / marks.step) + 1 : 0
+
+            Item {
+                id: cell
+                required property int index
+                readonly property real x0: index * marks.step
+                readonly property real tx: x0 + marks.tOff
+                readonly property real cx: x0 + marks.cOff
+                // Only whole marks: a sliver cut by the edge reads as a glitch.
+                readonly property bool trio: cx - marks.dx >= 0 && cx + marks.dx + marks.dz <= marks.width
+
+                Rectangle {
+                    visible: cell.tx >= 0 && cell.tx + marks.tw <= marks.width
+                    x: marks.sx(cell.tx); y: marks.ty
+                    width: marks.tw; height: marks.th
+                    color: root.color
+                }
+                Rectangle {
+                    visible: cell.trio
+                    x: marks.sx(cell.cx - marks.dx); y: marks.y1
+                    width: marks.dz; height: marks.dz
+                    color: root.color
+                }
+                Rectangle {
+                    visible: cell.trio
+                    x: marks.sx(cell.cx + marks.dx); y: marks.y1
+                    width: marks.dz; height: marks.dz
+                    color: root.color
+                }
+                Rectangle {
+                    visible: cell.trio
+                    x: marks.sx(cell.cx); y: marks.y2
+                    width: marks.dz; height: marks.dz
+                    color: root.color
+                }
+            }
         }
     }
 
