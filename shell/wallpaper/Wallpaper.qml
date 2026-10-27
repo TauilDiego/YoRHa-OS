@@ -2,12 +2,12 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import "../ds"
-import "../ds/primitives"
 import "../services"
 
-// The desktop background (US4, FR-019–FR-021): the menu paper on the Wayland background layer,
-// behind every window, one per monitor: the game's menu background (spec 004 US1): paper,
-// arcs and diagonal bundles that breathe slowly, and the vignette. No grid, no grain. `phase` comes from shell.qml so every monitor moves together.
+// The desktop background, one per monitor, on the Wayland background layer behind every window
+// (spec 001 US4, spec 004). It shows the wallpaper WallpaperStore resolves for this monitor: a
+// scene (the default is the game's menu paper, spec 004 US1) or a picture. `phase` comes from
+// shell.qml, so every monitor breathes together.
 PanelWindow {
     id: root
 
@@ -28,12 +28,14 @@ PanelWindow {
 
     readonly property real s: height / 1080 * Settings.uiScale
     readonly property string monitorName: modelData?.name ?? ""
+    readonly property real dpr: Tokens.scaleOf(monitorName)
+    readonly property string current: WallpaperStore.resolve(monitorName)
 
     // For `wallpaper dump` (contracts/ipc.md).
     function dumpEntry(): var {
         return {
             name: monitorName,
-            current: WallpaperStore.resolve(monitorName),
+            current: current,
             own: WallpaperStore.monitors[monitorName] ?? "",
             transitioning: false,
             kind: WallpaperStore.transition.kind,
@@ -41,14 +43,11 @@ PanelWindow {
         };
     }
 
-    PaperDecor {
+    WallpaperView {
         anchors.fill: parent
+        wallpaper: WallpaperCatalog.byId(root.current)
         s: root.s
         phase: root.phase
-    }
-
-    Vignette {
-        anchors.fill: parent
-        enabled: Settings.vignette
+        screenSize: Qt.size(Math.round(root.width * root.dpr), Math.round(root.height * root.dpr))
     }
 }
