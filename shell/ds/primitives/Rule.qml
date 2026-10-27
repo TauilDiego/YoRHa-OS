@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import ".."
 
 // Rules (design-system §2, §6).
@@ -16,6 +17,7 @@ Item {
     property color color: kind === "vertical" ? Tokens.color.lightGray : Tokens.color.darkGray
 
     readonly property int thickness: Tokens.line(Tokens.space.rule, s)
+    readonly property real dpr: Tokens.scaleOf(QsWindow.window?.screen?.name ?? "")
 
     // Dotted pattern geometry (game px, measured on 1080p captures).
     readonly property real period: 77
@@ -46,6 +48,16 @@ Item {
             const c = getContext("2d");
             c.reset();
             c.fillStyle = root.color;
+            // Marks snap to the monitor's physical pixels (absolute position included), so the
+            // pattern stays crisp at fractional scales (SC-008).
+            const d = root.dpr;
+            const o = pattern.mapToItem(null, 0, 0);
+            const sx = v => Tokens.snap(o.x + v, d) - o.x;
+            const sy = v => Tokens.snap(o.y + v, d) - o.y;
+            const rect = (x, y, w, h) => {
+                const x0 = sx(x), y0 = sy(y);
+                c.fillRect(x0, y0, Math.max(1 / d, sx(x + w) - x0), Math.max(1 / d, sy(y + h) - y0));
+            };
             const s = root.s;
             const step = root.period * s;
             const r = Math.max(1, root.dot * s / 2);
@@ -57,14 +69,18 @@ Item {
             for (let x0 = 0; x0 < width + step; x0 += step) {
                 const tx = Math.round(x0 + root.tickX * s - tw / 2);
                 if (tx >= 0 && tx + tw <= width)
-                    c.fillRect(tx, root.thickness, tw, th);
+                    rect(tx, root.thickness, tw, th);
                 const cx = Math.round(x0 + root.trioX * s);
                 const dx = Math.round(root.trioSpread * s);
                 if (cx - dx - r < 0 || cx + dx + r > width)
                     continue;
                 for (const [x, y] of [[cx - dx, y1], [cx + dx, y1], [cx, y2]]) {
+                    if (r * d < 2.5) {          // a few physical pixels: a crisp square reads as a dot
+                        rect(x - r, y - r, 2 * r, 2 * r);
+                        continue;
+                    }
                     c.beginPath();
-                    c.arc(x, y, r, 0, 2 * Math.PI);
+                    c.arc(sx(x), sy(y), r, 0, 2 * Math.PI);
                     c.fill();
                 }
             }
@@ -75,6 +91,7 @@ Item {
             target: root
             function onColorChanged(): void { pattern.requestPaint(); }
             function onSChanged(): void { pattern.requestPaint(); }
+            function onDprChanged(): void { pattern.requestPaint(); }
         }
     }
 

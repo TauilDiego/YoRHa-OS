@@ -135,6 +135,20 @@ Singleton {
         readonly property real cornerAlpha: 0.50
     }
 
+    // Fractional scale per monitor name, set by shell.qml from the compositor adapter.
+    property var monitorScales: ({})
+    function scaleOf(monitorName: string): real {
+        return monitorScales[monitorName] ?? 1;
+    }
+    // Snap a logical coordinate to the physical pixel grid of a `dpr` display.
+    function snap(v: real, dpr: real): real {
+        return Math.round(v * dpr) / dpr;
+    }
+    // A hairline `v` logical px thick, as a whole number of physical pixels (≥ 1), in logical px.
+    function hair(v: real, dpr: real): real {
+        return Math.max(1, Math.round(v * dpr)) / dpr;
+    }
+
     // --- helpers ----------------------------------------------------------------------------
     // Hairlines: whole pixels, never thinner than 1 (FR-002, SC-008).
     function line(v: real, s: real): int {

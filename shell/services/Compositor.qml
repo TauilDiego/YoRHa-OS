@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 
 // Compositor adapter (research R1): the ONLY file that imports Quickshell.Hyprland, so Niri
 // (S5) is a new Compositor.qml. Fixtures: "workspaces" { existing, focused } (same on every
@@ -18,9 +19,50 @@ Singleton {
     property int fixedFocus: 0          // focus(id) under the fixture; 0 = the fixture's own
     property int revision: 0
 
+    // Each monitor's fractional scale ({ name: scale }): Qt reports only the integer buffer
+    // scale, so hairline primitives snap to physical pixels with this (via Tokens.monitorScales).
+    // Read from `hyprctl monitors -j`: Quickshell's Hyprland.monitors stays empty on Hyprland
+    // 0.56 with a Lua config. Refreshed at start and on monitor/config events.
+    property var monitorScales: ({})
+
+    Process {
+        id: monitorQuery
+        command: ["hyprctl", "monitors", "-j"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const out = {};
+                    for (const m of JSON.parse(text))
+                        out[m.name] = m.scale;
+                    root.monitorScales = out;
+                } catch (e) {
+                    // keep the last known scales
+                }
+            }
+        }
+    }
+
     readonly property string activeTitle: Fixtures.has("activeWindow")
         ? String(Fixtures.get("activeWindow") ?? "")
-        : (Hyprland.activeToplevel?.title ?? "")
+        : (Hyprland.activeToplevel?.title ?? startupTitle)
+
+    // Hyprland.activeToplevel stays empty until the first focus event after a (re)start, so
+    // the title at startup comes from `hyprctl activewindow -j`.
+    property string startupTitle: ""
+
+    Process {
+        id: activeWindowQuery
+        command: ["hyprctl", "activewindow", "-j"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    root.startupTitle = JSON.parse(text).title ?? "";
+                } catch (e) {
+                    root.startupTitle = "";
+                }
+            }
+        }
+    }
 
     // Tabs for one monitor: ids 1..max(5, highest existing id, focused id), only ids ≥ 1.
     function workspacesFor(monitorName: string): var {
@@ -87,9 +129,20 @@ Singleton {
         }
     }
 
+    // Don't call Hyprland.refreshMonitors()/refreshWorkspaces() here: with a Lua config they
+    // empty Quickshell's lists instead of refreshing them.
+    Component.onCompleted: {
+        monitorQuery.running = true;
+        activeWindowQuery.running = true;
+    }
+
     // Quickshell updates its objects while handling the event, so bump after it.
     Connections {
         target: Hyprland
-        function onRawEvent(event) { Qt.callLater(root.bump); }
+        function onRawEvent(event) {
+            Qt.callLater(root.bump);
+            if (event.name.startsWith("monitor") || event.name === "configreloaded")
+                monitorQuery.running = true;
+        }
     }
 }

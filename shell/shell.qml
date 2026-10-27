@@ -19,6 +19,12 @@ ShellRoot {
         value: Fixtures.active
     }
 
+    Binding {
+        target: Tokens
+        property: "monitorScales"
+        value: Compositor.monitorScales
+    }
+
     property bool galleryOpen: false
 
     // One HUD per monitor (FR-009).
