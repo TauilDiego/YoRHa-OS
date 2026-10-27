@@ -44,7 +44,7 @@ menu (`SettingsModel.choiceId`).
 
 1. **`SUPER + I` abre o menu na aba SYSTEM**, e o popup avulso da 003 sai (research R2). Há uma
    superfície só pras configurações, com um estado só. O alvo `settings` continua, como alias, com
-   o `dump` no formato da 003. Custo: o `lab/check-003` é adaptado (T019).
+   o `dump` no formato da 003. Custo: o `lab/check-003` é adaptado (T021).
 2. **As opções da regra geral** ficam numa categoria nova, `menu` ("Pause menu"), com o campo
    opcional `ids` nas escolhas (research R10):
    - `App icons`: `Ink` / `Original color` / `Square only`;

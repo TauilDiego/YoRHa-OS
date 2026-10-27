@@ -42,7 +42,7 @@ reusada dentro do menu. O alvo IPC `settings` continua, como um alias:
   único atalho direto não cria atalho novo.
 
 **Custo:** os screenshots de referência da 003 mudam (a página ganha as abas, o título desce e o
-rodapé ganha `Tab Next tab`), então o `lab/check-003` é adaptado (T019): as checagens de teclas e
+rodapé ganha `Tab Next tab`), então o `lab/check-003` é adaptado (T021): as checagens de teclas e
 valores ficam iguais, as de geometria passam a ler o `dump`.
 
 **Alternativa:** manter o popup avulso pro `SUPER + I` e a SYSTEM do menu como segunda entrada. Sai

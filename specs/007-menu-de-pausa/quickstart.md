@@ -40,7 +40,7 @@ lab/sync --src <worktree>/shell --env NIER_FIXTURES=~/nier/ui/fixtures/pause-def
 | 13 ⚙ | SC-013 | Menu aberto; pra cada opção de `Pause menu`: `tab system`, ir até a opção, `right`; `tab` de volta pra aba que ela muda; shot + `dump` | `options` muda no `dump`; a prévia de APPS nos 3 estilos (3 shots); ALL APPS reordena; Enter num app com janela vai pra ela (`lastAction.kind: window`); `Every action` faz Lock pedir confirmação; `Action` começa o diálogo na ação |
 | 14 | SC-012 | Imagem final: as 12 telas do cenário 1 + os 3 estilos de ícone, ao lado do mockup | O dono aprova |
 | 15 ⚙ | Bordas | `pause-empty.json` (WINDOWS vazio, rodapé só com `Tab` e `Esc`), `pause-long.json` (rolagem com a pipa visível, reticências, dois monitores, SPECIAL), `pause-broken.json` (erro curto por aba, SYSTEM funciona), a recusa (`session.refuse`), app com comando inexistente (`WARN` no log, sem uso a mais), `wallpaper picker open` com o menu aberto (o menu fecha) | Como na spec (Edge Cases) |
-| 16 ⚙ | 003 | `lab/check-003` adaptado (T019) | Continua passando com as configurações dentro da aba SYSTEM |
+| 16 ⚙ | 003 | `lab/check-003` adaptado (T021) | Continua passando com as configurações dentro da aba SYSTEM |
 
 ## Fechamento
 
