@@ -1,0 +1,6 @@
+# NieR Cursors (XCursor theme), by Beinsezii — MIT License. The loading cursors use its frames,
+# recolored (gen/fam_loading.py). Not vendored: build.sh fetches the release and checks sha256.
+version=2020-08-25
+url=https://github.com/Beinsezii/NieR-Cursors/releases/download/2020-08-25/NieR_Cursors_2020-08-25.tar.xz
+sha256=4a691ffc0f870ee27ce5fdddc7558843ee291f256926f8bf03c699a05292f324
+source=https://github.com/Beinsezii/NieR-Cursors

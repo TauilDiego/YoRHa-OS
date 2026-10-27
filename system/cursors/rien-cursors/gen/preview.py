@@ -1,6 +1,6 @@
 """Contact sheet: each of our shapes next to the original (NieR Cursors), at 128 and 48 px, on
-the paper and on a terminal. Animated shapes show 4 frames. Needs rsvg-convert and Pillow
-(run it in the build container).
+the paper and on a terminal. Animated shapes show 4 frames; raster shapes (fam_loading) use
+their own 128 and 48 px frames. Needs rsvg-convert and Pillow (run it in the build container).
 
 Usage: preview.py <src-dir> <orig-dir> <out.png> [names...]
   orig-dir holds the original 128 px frames as <Name>.png (from xcur2png).
@@ -39,6 +39,8 @@ def main():
     rows = []
     for n in names:
         files = sorted(glob.glob(os.path.join(src, f"{n}.svg"))) or sorted(glob.glob(os.path.join(src, f"{n}_[0-9][0-9].svg")))
+        raster = sorted(glob.glob(os.path.join(src, f"{n}_128_[0-9][0-9].png")))     # fam_loading
+        files = files or raster
         if not files:
             continue
         pick = files if len(files) == 1 else [files[i * len(files) // 4] for i in range(4)]
@@ -48,9 +50,10 @@ def main():
             oi = Image.open(o).convert("RGBA")
             cells += [tile(oi, PAPER, 136), tile(oi, TERM, 136)]
         for fpath in pick:
-            big = render(fpath, 128)
+            big = Image.open(fpath).convert("RGBA") if raster else render(fpath, 128)
             cells += [tile(big, PAPER, 136), tile(big, TERM, 136)]
-        small = render(pick[0], 48)
+        small = (Image.open(pick[0].replace("_128_", "_048_")).convert("RGBA") if raster
+                 else render(pick[0], 48))
         cells += [tile(small, PAPER, 64).resize((136, 136), Image.NEAREST), tile(small, TERM, 64).resize((136, 136), Image.NEAREST)]
         rows.append((n, cells))
     width = 150 + max(len(c) for _, c in rows) * 140

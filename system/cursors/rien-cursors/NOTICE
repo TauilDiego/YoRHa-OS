@@ -1,7 +1,8 @@
 rien-OS Cursors — vector cursors in the rien-OS dark palette.
 
-The shapes follow "NieR Cursors" by Beinsezii (https://github.com/Beinsezii/NieR-Cursors),
-released under the MIT License:
+The shapes follow "NieR Cursors" by Beinsezii (https://github.com/Beinsezii/NieR-Cursors), and the
+two loading cursors (Loading_Circle, Cursor_Loading) use its rendered frames, recolored. NieR
+Cursors is released under the MIT License:
 
   Copyright (c) 2020 Beinsezii
   Permission is hereby granted, free of charge, to any person obtaining a copy of this software

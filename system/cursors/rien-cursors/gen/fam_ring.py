@@ -1,12 +1,10 @@
 """Family F: rings. The crosshair (a ring broken in three arcs, with a dot on the hotspot), the
 targeter (three thin arcs around the hotspot and three dots at the gaps; the original's red
-becomes the style's light plates, and each dot a small round plate with a core) and the big
-wait spinner (a round plate, a raised inner ring and a dark arc running around between them,
-24 frames like Cursor_Loading)."""
+becomes the style's light plates, and each dot a small round plate with a core). The wait
+ring is the original's own frames, recolored: see fam_loading."""
 import math
 
-from style import (Canvas, CORE, OUTLINE, DETAIL_W, DEPTH, SIDE_RIGHT, SIDE_BOTTOM, fmt, annulus_sector,
-                   pts_path, circle_pts)
+from style import Canvas, OUTLINE, DETAIL_W, DEPTH, SIDE_RIGHT, SIDE_BOTTOM, fmt, circle_pts
 
 ATTRIBUTION = "rien-OS cursor ({}). Shapes after NieR Cursors by Beinsezii (MIT)."
 
@@ -57,26 +55,7 @@ def targeter():
     return [(c.svg(), 0)]
 
 
-def _dark_arc(c: Canvas, center, r_out, r_in, a0, a1):
-    arc = annulus_sector(center, r_out, r_in, a0, a1, 24)
-    c.raw(f'<path d="{pts_path(arc)}" fill="{CORE}" stroke="{OUTLINE}" stroke-width="{fmt(DETAIL_W)}"/>')
-
-
-def loading_circle():
-    frames = []
-    n = 24
-    for i in range(n):
-        c = Canvas(ATTRIBUTION.format("Loading_Circle"))
-        disc(c, CENTER, 57, n=96)
-        a = 360 * i / n
-        _dark_arc(c, CENTER, 52, 37, a, a + 100)
-        disc(c, CENTER, 30, grooves=(18,))
-        frames.append((c.svg(), 1000 // n))
-    return frames
-
-
 SHAPES = {
     "Crosshair": crosshair,
     "Targeter": targeter,
-    "Loading_Circle": loading_circle,
 }

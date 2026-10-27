@@ -3,7 +3,8 @@ the 128 grid) and the XCursor/CSS aliases. Shapes, hotspots and aliases follow N
 Beinsezii (MIT), build.sh; the pointers' hotspots are their tips.
 
 Each family module exposes SHAPES = {name: fn}, where fn() returns a list of frames
-[(svg_text, delay_ms)] (one frame and delay 0 for static shapes).
+[(content, delay_ms)] (one frame and delay 0 for static shapes). The content is SVG text (drawn
+at any size), or {size_px: PIL image} for raster frames (fam_loading).
 """
 import os
 import sys
@@ -24,7 +25,7 @@ TABLE = {
     "Cursor_D": ("fam_pointer", ship.hotspot("down"), "sb_down_arrow"),
     "Cursor_Help": ("fam_pointer", ship.hotspot("up_left"),
                     "question_arrow help left_ptr_help 5c6cd98b3f3ebcb1f9c7f1c204630408 d9ce0ab605698f320427677b458ad60b"),
-    "Cursor_Loading": ("fam_pointer", ship.hotspot("up_left"),
+    "Cursor_Loading": ("fam_loading", ship.hotspot("up_left"),
                        "left_ptr_watch progress 08e8e1c95fe2fc01f976f1e063a24ccd 3ecb610c1bf2410f44200f48c40d3599"),
     "Cursor_Error": ("fam_pointer", ship.hotspot("up_left"), "crossed_circle not-allowed 03b6e0fcb3499374a867c041f52298f0"),
     # B. text
@@ -66,12 +67,13 @@ TABLE = {
     # F. rings
     "Crosshair": ("fam_ring", (0.5, 0.5), "cross crosshair cross_reverse diamond_cross tcross cell"),
     "Targeter": ("fam_ring", (0.5, 0.5675), "dotbox dot_box_mask icon target"),
-    "Loading_Circle": ("fam_ring", (0.5, 0.5), "watch wait"),
+    "Loading_Circle": ("fam_loading", (0.5, 0.5), "watch wait"),
 }
 
 
 def generate(src_dir, shapes_dir, only=None):
-    """Write src/<name>[_NN].svg and shapes/<name>/meta.hl for every shape (or `only`)."""
+    """Write src/<name>[_NN].svg (or <name>_<size>_<NN>.png) and shapes/<name>/meta.hl for every
+    shape (or `only`)."""
     import importlib
     os.makedirs(src_dir, exist_ok=True)
     done = []
@@ -80,16 +82,28 @@ def generate(src_dir, shapes_dir, only=None):
             continue
         try:
             fn = importlib.import_module(module).SHAPES[name]
-        except (ImportError, KeyError):
+        except ModuleNotFoundError as e:
+            if e.name != module:            # a missing dependency is an error, not a skip
+                raise
+            print(f"skip {name}: {module} not drawn yet", file=sys.stderr)
+            continue
+        except KeyError:
             print(f"skip {name}: {module} not drawn yet", file=sys.stderr)
             continue
         frames = fn()
-        files = []
-        for i, (svg, delay) in enumerate(frames):
-            fname = f"{name}.svg" if len(frames) == 1 else f"{name}_{i:02d}.svg"
-            with open(os.path.join(src_dir, fname), "w") as f:
-                f.write(svg)
-            files.append((fname, delay))
+        files = []                          # (size, file, delay); size 0 = vector, any size
+        for i, (content, delay) in enumerate(frames):
+            if isinstance(content, str):
+                fname = f"{name}.svg" if len(frames) == 1 else f"{name}_{i:02d}.svg"
+                with open(os.path.join(src_dir, fname), "w") as f:
+                    f.write(content)
+                files.append((0, fname, delay))
+            else:
+                for size, img in content.items():
+                    fname = f"{name}_{size:03d}_{i:02d}.png"
+                    img.save(os.path.join(src_dir, fname))
+                    files.append((size, fname, delay))
+        files.sort(key=lambda f: f[0])      # each size's frames together, in order
         sdir = os.path.join(shapes_dir, name)
         os.makedirs(sdir, exist_ok=True)
         with open(os.path.join(sdir, "meta.hl"), "w") as f:
@@ -97,8 +111,9 @@ def generate(src_dir, shapes_dir, only=None):
             f.write("resize_algorithm = bilinear\n")
             f.write(f"hotspot_x = {hx}\nhotspot_y = {hy}\n")
             f.write(f"define_override = {';'.join(aliases.split())}\n")
-            for fname, delay in files:
-                f.write(f"define_size = 0, {fname}" + (f", {delay}" if len(files) > 1 else "") + "\n")
+            animated = len(frames) > 1
+            for size, fname, delay in files:
+                f.write(f"define_size = {size}, {fname}" + (f", {delay}" if animated else "") + "\n")
         done.append(name)
     return done
 

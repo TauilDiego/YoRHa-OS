@@ -1,10 +1,11 @@
-"""Family A: pointers. The approved ship in six directions, plus help (a "?"), progress (a small
-spinning ring) and not-allowed (the original's glitch, slices shifted sideways)."""
+"""Family A: pointers. The approved ship in six directions, plus help (a "?") and not-allowed (the
+original's glitch, slices shifted sideways). Progress (the ship with a loading ring) is in
+fam_loading."""
 import math
 import random
 
 import ship
-from style import Canvas, CORE, OUTLINE, DETAIL_W, fmt, annulus_sector, pts_path
+from style import Canvas
 
 ATTRIBUTION = "rien-OS cursor ({}). Shapes after NieR Cursors by Beinsezii (MIT); the ship from NieR:Automata's hacking game."
 
@@ -35,24 +36,6 @@ def help_():
     ship.draw(c, "up_left")
     _question(c, (102, 22), 14)
     return [(c.svg(), 0)]
-
-
-def _spinner(c: Canvas, center, r, angle):
-    """A small ring (plate) with a dark arc running inside it."""
-    c.ring(center, r, r * 0.62, 0, 360, n=48)
-    arc = annulus_sector(center, r * 0.93, r * 0.69, angle, angle + 110, 20)
-    c.raw(f'<path d="{pts_path(arc)}" fill="{CORE}" stroke="{OUTLINE}" stroke-width="{fmt(DETAIL_W * 0.6)}"/>')
-
-
-def loading():
-    frames = []
-    n = 24
-    for i in range(n):
-        c = Canvas(ATTRIBUTION.format("Cursor_Loading"))
-        ship.draw(c, "up_left")
-        _spinner(c, (104, 24), 17, 360 * i / n - 90)
-        frames.append((c.svg(), 1000 // n))
-    return frames
 
 
 def error():
@@ -93,6 +76,5 @@ SHAPES = {
     "Cursor": _ship("up", "Cursor"),
     "Cursor_D": _ship("down", "Cursor_D"),
     "Cursor_Help": help_,
-    "Cursor_Loading": loading,
     "Cursor_Error": error,
 }

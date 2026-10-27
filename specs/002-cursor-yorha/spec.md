@@ -42,9 +42,10 @@ aba da barra e dentro do texto do kitty, em 1080p e no perfil hidpi.
 
 ## Requirements *(mandatory)*
 
-- **FR-001**: O tema de cursor padrão MUST ser o **rien-OS Cursors**: desenho próprio, vetorial
-  (SVG), com os **39 formatos** do NieR Cursors de Beinsezii (MIT), os mesmos aliases e hotspots
-  do original, e o Adwaita de reserva pro que faltar.
+- **FR-001**: O tema de cursor padrão MUST ser o **rien-OS Cursors**, com os **39 formatos** do
+  NieR Cursors de Beinsezii (MIT), os mesmos aliases e hotspots do original, e o Adwaita de
+  reserva pro que faltar. 37 formatos são desenho próprio, vetorial (SVG). Os dois de carregamento
+  seguem a FR-007.
 - **FR-002**: O estilo MUST ser o aprovado pelo dono na seta (2026-10-27), aplicado a todos os
   formatos por um módulo único (`system/cursors/rien-cursors/gen/style.py`):
   - **forma:** a nave do minigame de hacking do jogo, inclinada pra cima e pra esquerda, com a
@@ -59,11 +60,22 @@ aba da barra e dentro do texto do kitty, em 1080p e no perfil hidpi.
   de reserva gerado dos mesmos SVGs. O tamanho padrão é **48** lógicos
   (`system/cursors/defaults.conf`).
 - **FR-004**: Os fontes (geradores Python + SVG) MUST ficar no repositório, pequenos; o tema é
-  montado por `system/cursors/build.sh` num container. Nada é baixado de terceiros.
+  montado por `system/cursors/build.sh` num container. O único download é o release do NieR
+  Cursors pra FR-007, conferido pelo sha256 de `rien-cursors/upstream.lock`.
 - **FR-005**: O crédito ao Beinsezii (MIT) MUST ficar em `CREDITS.md` e no `NOTICE` instalado
   junto do tema.
 - **FR-006**: Os formatos animados (espera, progresso, proibido) MUST manter a animação no
   hyprcursor e no XCursor.
+- **FR-007** (pedido do dono, 2026-10-27): O carregamento MUST ser o do NieR Cursors 1:1, só
+  com a paleta trocada, porque é idêntico ao loading do jogo.
+  - **`Loading_Circle`** (`wait`): os 90 quadros dela a 60 fps, nos 8 tamanhos (24 a 128), com
+    o alfa intacto. A cor passa por uma rampa de claridade: os escuros dela viram `#2F2D28` e
+    `#4B4A43`; os claros mantêm a claridade e ganham o tom da paleta.
+  - **`Cursor_Loading`** (`progress`): a nossa nave com o círculo pequeno dela, recolorido, por
+    cima, na posição e no tamanho dela. A borda de fora do círculo, onde a seta e o losango dela
+    passavam por baixo, é refeita a partir do lado limpo dessa mesma borda.
+  - **Formato:** os dois são raster (PNG por tamanho), não vetoriais
+    (`system/cursors/rien-cursors/gen/fam_loading.py`).
 
 ## Success Criteria *(mandatory)*
 
