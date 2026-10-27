@@ -166,6 +166,84 @@ ShellRoot {
         }
     }
 
+    // --- spec 004: wallpaper picker (US2) ------------------------------------------------------
+    // Like the settings pop-up: it opens on the focused monitor (re-read first) and stays there
+    // until it closes; closing is two-step. Only one of the two pop-ups is open at a time.
+    property bool pickerOpen: false
+    property bool pickerOpening: false
+    property bool pickerLoaded: false
+    property string pickerMonitor: ""
+    readonly property var pickerScreen: {
+        for (const sc of Quickshell.screens)
+            if (sc.name === pickerMonitor)
+                return sc;
+        return Quickshell.screens[0] ?? null;
+    }
+
+    function openPicker(): void {
+        if (pickerOpen || pickerOpening)
+            return;
+        closeSettings();
+        pickerOpening = true;
+        Compositor.refreshFocusedMonitor();
+        pickerFallback.restart();
+    }
+    function showPicker(): void {
+        if (!pickerOpening)
+            return;
+        pickerOpening = false;
+        pickerFallback.stop();
+        pickerMonitor = Compositor.focusedMonitor;
+        pickerOpen = true;
+    }
+    function closePicker(): void {
+        pickerOpening = false;
+        pickerOpen = false;
+    }
+    Connections {
+        target: Compositor
+        function onMonitorScalesChanged(): void {
+            shell.showPicker();
+        }
+    }
+    Connections {
+        target: shell
+        function onSettingsOpenChanged(): void {
+            if (shell.settingsOpen)
+                shell.closePicker();
+        }
+    }
+    Timer {
+        id: pickerFallback
+        interval: 250
+        onTriggered: shell.showPicker()
+    }
+
+    onPickerOpenChanged: {
+        if (pickerOpen) {
+            pickerUnload.stop();
+            pickerLoaded = true;
+        } else {
+            pickerUnload.restart();
+        }
+    }
+    Timer {
+        id: pickerUnload
+        interval: 150
+        onTriggered: if (!shell.pickerOpen) shell.pickerLoaded = false
+    }
+    LazyLoader {
+        id: pickerLoader
+        active: shell.pickerLoaded
+        WallpaperPicker {
+            screen: shell.pickerScreen
+            keyboardActive: shell.pickerOpen
+            phase: shell.wallpaperPhase
+            onCloseRequested: shell.closePicker()
+        }
+    }
+    // --- end spec 004 ---------------------------------------------------------------------------
+
     // --- IPC (contracts/ipc.md) ---------------------------------------------------------------
     IpcHandler {
         target: "gallery"
@@ -200,8 +278,23 @@ ShellRoot {
             return WallpaperStore.setCamouflage(cell, trail, glitch);
         }
         function filter(path: string, on: bool): string { return WallpaperStore.setPaperFilter(path, on); }
-        // The picker arrives with US2 (it needs spec 003's pop-up pieces).
-        function picker(action: string): string { return "ok"; }
+        function picker(action: string): string {
+            switch (action) {
+            case "open":
+                shell.openPicker();
+                return "ok";
+            case "close":
+                shell.closePicker();
+                return "ok";
+            case "toggle":
+                if (shell.pickerOpen || shell.pickerOpening)
+                    shell.closePicker();
+                else
+                    shell.openPicker();
+                return "ok";
+            }
+            return "error: picker takes open, close or toggle";
+        }
         function dump(): string {
             return JSON.stringify({
                 all: WallpaperStore.all,
@@ -214,7 +307,7 @@ ShellRoot {
                     ready: WallpaperCatalog.ready
                 },
                 paperFilterOff: WallpaperStore.paperFilterOff,
-                picker: null
+                picker: shell.pickerOpen ? (pickerLoader.item?.dumpState() ?? null) : null
             });
         }
         // --- end spec 004 ------------------------------------------------------------------

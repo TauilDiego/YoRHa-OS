@@ -126,6 +126,15 @@ Singleton {
         readonly property real settingsCardW: 440
         readonly property real stepperValueW: 190          // text between ◂ and ▸
         readonly property real sliderW: 220                // editable meter's track
+        // --- spec 004: the wallpaper picker's list + preview + options layout (PickerLayout), in
+        // the same 1612×908 frame: list at x 48, preview card at 560, Options card at 1160
+        readonly property real pickerListW: 380            // list items (after the strips and the kite)
+        readonly property real pickerPreviewW: 560
+        readonly property real pickerOptionsW: 404
+        readonly property real pickerMediaW: 512           // the live preview inside its card
+        readonly property real pickerMediaH: 288
+        readonly property real pickerOptionScale: 0.815    // option rows' text and values (22/27 px), to fit the card
+        // --- end spec 004
     }
 
     // --- motion -----------------------------------------------------------------------------

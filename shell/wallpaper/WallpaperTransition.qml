@@ -181,6 +181,17 @@ Item {
             bId = id;
     }
 
+    // --- spec 004 T041: a still frame for the gallery ----------------------------------------------
+    // Holds the running change at `ms`, with seed 1 and the origin in the middle, so the frame is
+    // the same every time.
+    function hold(ms: real): void {
+        anim.pause();
+        seed = 1;
+        origin = Qt.point(0.5, 0.5);
+        elapsed = ms;
+    }
+    // --- end spec 004 T041
+
     function change(): void {
         const id = current;
         if (id === "" || freezing)

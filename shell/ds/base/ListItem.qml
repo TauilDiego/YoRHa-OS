@@ -21,6 +21,12 @@ Item {
     // spec 003: px kept free on the right for a value the parent draws (OptionRow). The label is
     // cut with an ellipsis before it, or before the trailing text, or at the band's padding.
     property real reserve: 0
+    // spec 004: the trailing text's role ("small" for the picker's "● ALL" mark), and a smaller
+    // content — text, square and paddings at contentScale × s — on the same band, rails, shadow and
+    // kite (the picker's option rows, to fit their card).
+    property string trailingRole: "listButton"
+    property real contentScale: 1
+    readonly property real cs: s * contentScale
 
     readonly property bool hovered: mouse.containsMouse
     readonly property int selectorRoom: Tokens.px(Tokens.space.selectorW + Tokens.space.selectorGap, s)
@@ -37,13 +43,13 @@ Item {
 
     readonly property bool inked: state === "hovered" || state === "selected"
     readonly property int bandH: Tokens.px(Tokens.space.listItemH, s)
-    readonly property int pad: Tokens.px(16, s)          // band edge → square, and trailing → edge
-    readonly property int gap: Tokens.px(16, s)          // square → label (approved mockup)
+    readonly property int pad: Tokens.px(16, cs)         // band edge → square, and trailing → edge
+    readonly property int gap: Tokens.px(16, cs)         // square → label (approved mockup)
     readonly property int rail: Tokens.line(Tokens.space.rail, s)
     readonly property int railGap: Tokens.px(Tokens.space.railGap, s)
 
     implicitHeight: bandH
-    implicitWidth: pad + Tokens.px(Tokens.space.square, s) + gap + Math.ceil(dark.labelWidth)
+    implicitWidth: pad + Tokens.px(Tokens.space.square, cs) + gap + Math.ceil(dark.labelWidth)
                    + (trailing !== "" ? gap + Math.ceil(dark.trailingWidth) : 0) + pad
 
     // Ink sweep, as in HeaderButton.
@@ -78,16 +84,16 @@ Item {
         Square {
             x: root.pad
             anchors.verticalCenter: parent.verticalCenter
-            s: root.s
+            s: root.cs
             color: parent.ink
         }
         Label {
             id: label
-            x: root.pad + Tokens.px(Tokens.space.square, root.s) + root.gap
+            x: root.pad + Tokens.px(Tokens.space.square, root.cs) + root.gap
             width: Math.max(0, Math.min(implicitWidth, root.width - x - Math.max(root.pad, root.reserve)
                                                         - (root.trailing !== "" ? root.gap + Math.ceil(tail.implicitWidth) + root.pad : 0)))
             anchors.verticalCenter: parent.verticalCenter
-            s: root.s
+            s: root.cs
             role: "listButton"
             text: root.text
             elide: Text.ElideRight
@@ -99,8 +105,8 @@ Item {
             anchors.rightMargin: root.pad
             anchors.verticalCenter: parent.verticalCenter
             visible: root.trailing !== ""
-            s: root.s
-            role: "listButton"
+            s: root.cs
+            role: root.trailingRole
             text: root.trailing
             color: parent.ink
         }

@@ -101,7 +101,7 @@ tela atual.
 | `focus` | `"list"` / `"options"` | Duas colunas (padrão da 003) |
 | `index` | int | Item em foco na lista (pula os títulos de grupo) |
 | `option` | int | 0 Monitor, 1 Transition, 2 Paper filter (só imagens) |
-| `monitor` | int | 0 = All monitors, depois as saídas em ordem |
+| `monitor` | int | 0 = All monitors, depois as saídas em ordem. Só do seletor: volta pra 0 a cada abertura. No `wallpaper dump` sai o rótulo (`All monitors` ou a saída) |
 
 ## Settings (acréscimos, `services/Settings.qml`)
 
