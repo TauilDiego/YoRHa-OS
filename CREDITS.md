@@ -17,6 +17,14 @@
     [google/fonts](https://github.com/google/fonts/tree/main/ofl/mplus1));
   - uso: fonte padrão da UI, no lugar das fontes comerciais do jogo.
 
+## Cursores
+
+- **NieR Cursors**, de **Beinsezii** ([github.com/Beinsezii/NieR-Cursors](https://github.com/Beinsezii/NieR-Cursors)):
+  - licença: MIT (Copyright (c) 2020 Beinsezii);
+  - não é copiado pro repositório: o release `2020-08-25` é baixado e conferido por sha256
+    (`system/cursors/nier-cursors.lock`), e o `LICENSE` vai junto do tema instalado;
+  - uso: tema de cursor padrão (spec 002).
+
 ## Código de terceiros
 
 Código de outros projetos só entra com licença compatível com a AGPL-3.0 e com crédito aqui e no
