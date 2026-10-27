@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rien-os/specs/005/run.schema.json",
+  "title": "U2 study run record",
+  "description": "One pass of one scenario on one install method (spec 005, data-model 'Execução'). Written by the lab harness to ~/.local/share/nier-lab/out/u2/<method>/<scenario>-<n>.json and attached to the lab/perf report.",
+  "type": "object",
+  "required": ["schema", "method", "scenario", "repeat", "from", "to", "vm", "payload_commit", "started", "dur_s", "result", "user_config_unchanged", "perf_run_id"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": 1 },
+    "method": { "enum": ["A", "B", "C", "D", "B-ref"] },
+    "scenario": { "type": "string", "pattern": "^S(1[0-3]|[1-9])[a-c]?$" },
+    "repeat": { "type": "integer", "minimum": 0, "description": "0 = validation pass, not counted" },
+    "from": { "type": ["string", "null"], "description": "installed version before the run, null if none" },
+    "to": { "type": ["string", "null"], "description": "target version, null for uninstall" },
+    "vm": { "type": "string" },
+    "payload_commit": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+    "mirror_date": { "type": "string", "format": "date" },
+    "started": { "type": "number", "description": "epoch seconds" },
+    "dur_s": { "type": "number", "description": "command start to command end" },
+    "ui_s": { "type": ["number", "null"], "description": "command start to the first IPC answer of the UI; null if the UI never came up" },
+    "net": {
+      "type": "object",
+      "properties": {
+        "payload_bytes": { "type": "integer", "description": "from the lab distribution server log" },
+        "deps_bytes": { "type": "integer", "description": "VM NIC rx_bytes delta minus payload_bytes" },
+        "requests": { "type": "integer" }
+      }
+    },
+    "privilege": {
+      "type": "object",
+      "properties": {
+        "sudo_calls": { "type": "integer" },
+        "manual_steps": { "type": "integer", "description": "commands the user types, including editing system files" }
+      }
+    },
+    "disk": {
+      "type": "object",
+      "properties": {
+        "payload_mb": { "type": "number" },
+        "kept_versions": { "type": "integer" }
+      }
+    },
+    "result": { "enum": ["ok", "failed", "recovered", "refused"], "description": "refused = the method correctly rejected the input (S7, S8)" },
+    "live_version": { "type": ["string", "null"], "description": "version whose UI answers at the end" },
+    "state_format": { "type": ["integer", "null"], "description": "'format' of wallpaper.json at the end" },
+    "migrations_ran": { "type": "array", "items": { "type": "string" } },
+    "user_config_unchanged": { "type": "boolean", "description": "sha256 of every file under ~/.config equal before and after (gate G1)" },
+    "backups": { "type": "array", "items": { "type": "string" } },
+    "recovery": {
+      "type": ["object", "null"],
+      "properties": {
+        "steps": { "type": "array", "items": { "type": "string" } },
+        "dur_s": { "type": "number" },
+        "automatic": { "type": "boolean" }
+      }
+    },
+    "message": { "type": "string", "description": "last line the user saw (errors in S7/S8)" },
+    "leftovers": { "type": "array", "items": { "type": "string" }, "description": "S11: paths left after uninstall" },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "screenshots": { "type": "array", "items": { "type": "object", "required": ["path", "sha256"], "properties": { "path": { "type": "string" }, "sha256": { "type": "string" } } } },
+        "ui_log_excerpt": { "type": "string" },
+        "qml_errors": { "type": "integer" }
+      }
+    },
+    "perf_run_id": { "type": "string", "description": "lab/perf run id (rien-OS-relatorios/runs/<id>)" },
+    "redone": { "type": ["string", "null"], "description": "why this run replaced an earlier one (prototype bug), if it did" },
+    "notes": { "type": "string" }
+  }
+}
