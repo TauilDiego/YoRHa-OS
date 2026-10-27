@@ -6,8 +6,8 @@ import "../ds/primitives"
 import "../services"
 
 // The desktop background (US4, FR-019–FR-021): the menu paper on the Wayland background layer,
-// behind every window, one per monitor. Grid, slowly drifting arcs and diagonal bundles, and
-// the vignette. `phase` comes from shell.qml so every monitor moves together.
+// behind every window, one per monitor: the game's menu background (spec 004 US1): paper,
+// arcs and diagonal bundles that breathe slowly, and the vignette. No grid, no grain. `phase` comes from shell.qml so every monitor moves together.
 PanelWindow {
     id: root
 
@@ -27,10 +27,6 @@ PanelWindow {
     color: Tokens.color.darkYellow
 
     readonly property real s: height / 1080 * Settings.uiScale
-
-    GridBackground {
-        anchors.fill: parent
-    }
 
     PaperDecor {
         anchors.fill: parent

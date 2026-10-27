@@ -71,8 +71,9 @@ PanelWindow {
     }
 
     // --- surface ------------------------------------------------------------------------------
-    GridBackground {
+    Rectangle {
         anchors.fill: parent
+        color: Tokens.color.darkYellow
     }
 
     // The top strip of the desktop's vignette (FR-002a), so bar and background meet without a
