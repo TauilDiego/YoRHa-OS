@@ -186,7 +186,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 
 | Ponto | No jogo (1080p) | No rien-OS |
 |---|---|---|
-| Altura da barra do topo | Aba de 47px, texto 27px | **Revisado (2026-10-27):** barra de 68px, configurável de 28 a 96. De cima pra baixo: 3px de papel, a aba (33px, `s ≈ 0,70`), um vão de 17px de jogo (12px) e a régua pontilhada **na escala do jogo** (`s × 1,0`: pontos de 4px, padrão de 20px de altura), nítida em pixels físicos inteiros. A aba em foco desce até a régua por uma haste animada (`motion.touch`, 160 ms, logo depois da tinta; recolhe em `motion.untouch`, 120 ms). A versão cheia fica pros menus de tela inteira |
+| Altura da barra do topo | Aba de 47px, texto 27px | **Revisado (2026-10-27):** barra de 68px, configurável de 28 a 96. De cima pra baixo: 3px de folga, a aba (33px, `s ≈ 0,70`), um vão de 17px de jogo (12px) e a régua pontilhada **na escala do jogo** (`s × 1,0`: pontos de 4px, padrão de 20px de altura), nítida em pixels físicos inteiros. A aba em foco desce até a régua por uma haste animada (`motion.touch`, 160 ms, logo depois da tinta; recolhe em `motion.untouch`, 120 ms). A versão cheia fica pros menus de tela inteira |
 | Escala | Fixa em 1080p | Tokens em medidas do jogo × fator da tela × `uiScale` (ver "Escala") |
 | Fontes | Comerciais | M PLUS 1 por padrão; as originais quando estiverem instaladas |
 | Alerta | Não existe | `alert` `#8F3A30`, só pra estados críticos |
@@ -194,7 +194,8 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 | Cursor (pipa) | Parado; pula de um item pro outro | **Decidido (2026-10-27):** parado, e pisca ao trocar de item (some e reaparece com ease in-out, `motion.blink` ≈240 ms) |
 | Abas da barra | Seletor (pipa) ao lado da aba em foco | **Decidido (2026-10-27):** as abas nunca têm seletor, nem no HUD nem nos menus: só as abas lado a lado. A pipa fica só nos itens de lista |
 | Fundo do desktop | Só nos menus | **Decidido (2026-10-27):** o fundo inteiro da área de trabalho é o papel do menu (vinheta, arcos e feixes, sem grid, com movimento sutil que pode ser desligado). Desde a spec 004 ele é um papel de parede do próprio rien-OS, trocável (§8) |
-| Vinheta | Em todos os menus | Como no jogo (bordas `#A6A18D`, cantos `#8B8877`), desligável. Nos menus de tela cheia e na tela inteira do desktop: o fundo e o papel da barra do topo formam uma vinheta só, sem emenda (2026-10-27). As janelas, as abas, a régua e os textos ficam por cima, sem vinheta |
+| Vinheta | Em todos os menus | Como no jogo (bordas `#A6A18D`, cantos `#8B8877`), desligável. Nos menus de tela cheia e na tela inteira do desktop, sem emenda (2026-10-27). As janelas, as abas, a régua e os textos ficam por cima, sem vinheta. Desde a spec 004 (US6) a barra do topo não pinta mais a faixa dela: a vinheta que aparece embaixo da barra é a do próprio papel de parede (§8, "A barra sobre o fundo") |
+| Fundo da barra do topo | O HUD do jogo flutua sobre a cena | **Decidido (2026-10-27, spec 004 US6):** a barra não tem fundo próprio. O papel de parede e as transições passam por baixo dela, e as cores dela seguem o fundo do monitor: tom papel ou tom claro (§8, "A barra sobre o fundo") |
 
 ### Escala
 
@@ -408,11 +409,11 @@ Uma cena é um JSON em `shell/wallpaper/scenes/<id>.json` (formato em
 | `dark` | `#141414` → `#101010` → `#0A0A0A`, linhas `#96948C` a 20% | ✓ | ✓ | — | ✓ |
 | `plain` | papel | — | — | — | — |
 
-- **Vinheta:** as cenas de papel usam a vinheta medida (§1, "Vinheta"), a mesma da barra do topo,
-  então fundo e barra não têm emenda. A cena escura escurece pro preto com a força que o `edge` e
-  o `corner` dela pedem.
+- **Vinheta:** as cenas de papel usam a vinheta medida (§1, "Vinheta"). A barra do topo é
+  transparente (spec 004 US6), então a vinheta do fundo passa embaixo dela, sem emenda. A cena
+  escura escurece pro preto com a força que o `edge` e o `corner` dela pedem.
 - **Papel:** o centro é o `dark-yellow` (`#C9C5AB`), a 1–2 níveis do medido no jogo (`#C8C3AC`):
-  é o mesmo papel da barra.
+  é o mesmo papel do resto do design system.
 - **Movimento:** no ciclo de 600 s do shell; para com dados de teste ou com `wallpaperMotion: false`.
 
 ### Imagens e filtro de papel
@@ -466,6 +467,47 @@ novo como texturas vivas; as cores chegam do `Tokens`.
 - **custo medido na VM** (spec 004, SC-009; sem meta até o U6): 10 camuflagens custaram 0,63 s de
   CPU do Quickshell por troca, a ≈60 fps; 10 crossfades, 0,18 s. Por segundo animado o CPU é
   parecido: o extra da camuflagem fica na GPU.
+
+<!-- spec 004 US6 (004-barra-tom): início -->
+### A barra sobre o fundo (US6)
+
+A barra do topo não tem fundo próprio (emenda da spec 004, aprovada pelo dono em 2026-10-27): o
+papel de parede de cada monitor, com as transições, passa por baixo dela, e os arcos e os feixes
+cruzam a faixa da barra, como no jogo. As cores da barra seguem o fundo do monitor dela, em dois
+tons:
+
+| Papel | Uso | Tom papel | Tom claro |
+|---|---|---|---|
+| `ink` | texto principal, hora, tinta da aba normal, rótulos das leituras | `#4E4B42` | `#D7D1B3` |
+| `ink2` | título, data, valores, tinta da aba apagada | `#676458` | `#96948C` |
+| `rest` | placa da aba, faixas verticais | `#B1AB93` | `#D7D1B3` a 16% |
+| `sel` / `selInk` | placa e tinta da aba em foco (e da destacada) | `#4E4B42` / `#D7D1B3` | `#D7D1B3` / `#4E4B42` |
+| `track` / `fill` | trilho e preenchimento do medidor | `#B1AB93` / `#4E4B42` | `#D7D1B3` a 22% / `#D7D1B3` |
+| `rule` | régua pontilhada | `#4E4B42` | `#96948C` a 75% |
+| `alert` | estado crítico | `#8F3A30` | `#C0574A` |
+
+O tom papel são os tokens de sempre (§1). Os dois ficam em `Tokens.hudPaper` e `Tokens.hudLight`;
+`Tokens.hudColor(papel, tom)` dá a cor de um papel num tom de 0 (papel) a 1 (claro), misturando
+canal a canal, com alfa. `Label`, `Rule`, `HeaderButton`, `Meter` e `TabBar` recebem `tone` (padrão
+0, que deixa a galeria, o popup e todo o resto como sempre foram).
+
+**Qual tom:**
+- cenas de papel (`menu`, `rules`, `plain`) → papel;
+- cena `dark` → claro;
+- imagem → a luminância média (0,2126 R + 0,7152 G + 0,0722 B) da faixa de cima (a altura da barra
+  mais 12 px) da imagem como aparece, com o filtro de papel, se ligado: abaixo de 0,45
+  (`Tokens.hudLightBelow`), claro; senão, papel. É medida uma vez por imagem, quando ela fica
+  pronta, e guardada por caminho e filtro.
+
+**Na troca:** as cores misturam do tom antigo pro novo enquanto a transição cobre a faixa da barra,
+com `smoothstep`: na camuflagem, a fração das células de cima já reveladas; na varredura, a borda ÷
+a largura; nos quadradinhos, a fração dos de cima já começados; no crossfade, o progresso. Com
+dados de teste ou movimento reduzido, a troca é instantânea. Cada monitor tem o seu tom.
+
+**Limitação:** uma janela flutuante arrastada pra cima da barra aparece por trás das abas e dos
+textos, porque o Hyprland só reserva a faixa da barra pras janelas lado a lado.
+
+<!-- spec 004 US6 (004-barra-tom): fim -->
 
 ### Lista + prévia + opções
 

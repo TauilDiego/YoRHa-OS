@@ -210,4 +210,63 @@ Singleton {
         readonly property int duration: 900                // wipe, tiles and crossfade (ease in-out)
     }
     // --- end spec 004 ----------------------------------------------------------------------------
+
+    // --- spec 004 US6: the bar over the wallpaper (tone) -------------------------------------------
+    // The top bar has no background of its own, so its colors follow the wallpaper under it: the
+    // paper tone (today's tokens) over paper, the light tone over the dark scene and dark pictures
+    // (spec 004 FR-028, the approved mockup). Components of the bar take `tone` (0 paper → 1 light)
+    // and paint each role with hudColor(role, tone).
+    //   ink: main text, time, a normal tab's ink, readings' labels · ink2: title, date, values, a
+    //   dimmed tab's ink · rest: tab plate, vertical strips · sel / selInk: the selected (and
+    //   hovered) tab's plate and ink · track / fill: meter · rule: the dotted rule · alert: critical
+    component HudTone: QtObject {
+        property color ink
+        property color ink2
+        property color rest
+        property color sel
+        property color selInk
+        property color track
+        property color fill
+        property color rule
+        property color alert
+    }
+    readonly property HudTone hudPaper: HudTone {
+        ink: root.color.darkGray
+        ink2: root.color.mediumGray
+        rest: root.color.lightGray
+        sel: root.color.darkGray
+        selInk: root.color.lightYellow
+        track: root.color.lightGray
+        fill: root.color.darkGray
+        rule: root.color.darkGray
+        alert: root.color.alert
+    }
+    readonly property HudTone hudLight: HudTone {
+        ink: Qt.rgba(215 / 255, 209 / 255, 179 / 255, 1)
+        ink2: Qt.rgba(150 / 255, 148 / 255, 140 / 255, 1)
+        rest: Qt.rgba(215 / 255, 209 / 255, 179 / 255, 0.16)
+        sel: Qt.rgba(215 / 255, 209 / 255, 179 / 255, 1)
+        selInk: Qt.rgba(78 / 255, 75 / 255, 66 / 255, 1)
+        track: Qt.rgba(215 / 255, 209 / 255, 179 / 255, 0.22)
+        fill: Qt.rgba(215 / 255, 209 / 255, 179 / 255, 1)
+        rule: Qt.rgba(150 / 255, 148 / 255, 140 / 255, 0.75)
+        alert: "#C0574A"
+    }
+    // Below this mean luma (0–1) of a picture's top band, the bar takes the light tone.
+    readonly property real hudLightBelow: 0.45
+
+    // a → b by t (0–1), channel by channel, alpha included (as the mockup's rgba mix). At the ends
+    // it returns a or b untouched, so tone 0 paints exactly today's colors.
+    function toneMix(a: color, b: color, t: real): color {
+        if (!(t > 0))
+            return a;
+        if (t >= 1)
+            return b;
+        return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, a.a + (b.a - a.a) * t);
+    }
+    // The bar's color for one role (a HudTone property name) at tone t.
+    function hudColor(role: string, t: real): color {
+        return toneMix(hudPaper[role], hudLight[role], t);
+    }
+    // --- end spec 004 US6 --------------------------------------------------------------------------
 }
