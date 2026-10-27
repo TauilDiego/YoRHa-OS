@@ -7,8 +7,9 @@ import "../services"
 
 // A procedural scene (spec 004, research R1), drawn from its JSON (contracts/scene.schema.json):
 // the paper and its vignette, the arcs and beams that breathe (PaperDecor, the measured layout),
-// the dotted rules at y 108 and 1012 and the dark variant's dot weave. Nothing repaints while the
-// scene is still: the dots are painted once, the lines only move with `phase`.
+// the dotted rule at y 1012 (the top one is the bar's own, so the scene leaves it out) and the dark
+// variant's dot weave. Nothing repaints while the scene is still: the dots are painted once, the
+// lines only move with `phase`.
 Item {
     id: root
 
@@ -70,7 +71,7 @@ Item {
     }
 
     Repeater {
-        model: root.layers.rules === true ? [108, 1012] : []
+        model: root.layers.rules === true ? [1012] : []
 
         Rule {
             required property real modelData

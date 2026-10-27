@@ -1,6 +1,6 @@
 {
   "name": "Menu + rules",
-  "description": "The menu paper with the dotted rule at the top and bottom, like the edges of the game's menus.",
+  "description": "The menu paper with a dotted rule along the bottom; the bar's own rule closes the top, like the edges of the game's menus.",
   "kind": "paper",
   "paper": { "center": "#C9C5AB", "edge": "#A6A18D", "corner": "#8C8978" },
   "layers": { "arcs": true, "beams": true, "rules": true, "dots": false },

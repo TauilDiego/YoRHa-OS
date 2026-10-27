@@ -276,7 +276,7 @@ Uma cena é um JSON em `shell/wallpaper/scenes/<id>.json` (formato em
 | `paper.edge`, `paper.corner` | Alvos da vinheta (bordas, cantos) | `#A6A18D`, `#8C8978` |
 | `layers.arcs` | 4 arcos com centro fora da tela, 2 duplos (+7 px no raio) | sim |
 | `layers.beams` | 4 feixes de 2–3 linhas a 42°, começos +34 px e fins −60 px por linha | sim |
-| `layers.rules` | Réguas pontilhadas em y 108 e 1012 (tinta a 90%) | não |
+| `layers.rules` | Régua pontilhada em y 1012 (tinta a 90%); a de cima é a da barra | não |
 | `layers.dots` | Trama da cena escura: 1 px a cada 4 px, branco a 7% | não |
 | `lineAlpha` | Tinta das linhas | 0,15 |
 | `motion.arcPeriod` / `arcAmplitude` | Os arcos balançam ± graus em torno do próprio centro | 600 s / 9° |

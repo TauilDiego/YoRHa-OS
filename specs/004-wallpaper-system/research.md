@@ -21,7 +21,7 @@ os algoritmos abaixo são a tradução do JavaScript dele pro shell.
     - **arcos e feixes:** a camada de linhas (o `PaperDecor` refeito na US1), com a geometria do
       mockup: 4 arcos, 2 duplos (+7 px no raio), e 4 feixes de 2–3 linhas a 42°, com começos e fins
       escalonados (34 px e 60 px por linha);
-    - **réguas:** `Rule { kind: "dotted" }` da 001 em y = 108 e y = 1012 (px do jogo);
+    - **réguas:** `Rule { kind: "dotted" }` da 001 em y = 1012 (px do jogo); a de cima é a da barra (y 108 fazia régua dupla, tirada a pedido do dono);
     - **trama escura:** um `Canvas` pintado uma vez com pontos de 1 px a cada 4 px, em branco a 7%;
   - **as quatro cenas de fábrica:**
     - `menu`: papel, arcos e feixes;

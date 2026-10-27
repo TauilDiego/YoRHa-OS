@@ -32,7 +32,7 @@ vídeo por último.
 | `paper` | `{ center, edge, corner }` | `#C8C3AC`, `#A6A18D`, `#8C8978` | Medidas do design system §6. `dark`: `#141414`, `#101010`, `#0A0A0A` |
 | `layers.arcs` | bool | true | 4 arcos, 2 duplos |
 | `layers.beams` | bool | true | 4 feixes de 2–3 linhas a 42° |
-| `layers.rules` | bool | false | Réguas pontilhadas em y 108 e 1012 (px do jogo) |
+| `layers.rules` | bool | false | Régua pontilhada em y 1012 (px do jogo); a de cima é a da barra |
 | `layers.dots` | bool | false | Trama de pontos (só `dark`) |
 | `lineAlpha` | real | 0.15 | Tinta das linhas (`dark`: 0.20 de cinza claro) |
 | `motion.arcPeriod` | s | 600 | Período da oscilação dos arcos |
