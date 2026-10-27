@@ -1,0 +1,43 @@
+# F0: lint on every push and pull request. Nothing here runs the UI; it only reads the sources.
+name: lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    # Arch, like the target system: quickshell and qt6 come from the same repos the users get.
+    container: archlinux:latest
+    steps:
+      - name: Install tools
+        run: pacman -Syu --noconfirm --needed git shellcheck qt6-declarative quickshell
+
+      - uses: actions/checkout@v4
+
+      - name: Trust the checkout
+        # The container runs as root over a workspace owned by the runner user.
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: shellcheck
+        run: |
+          # .specify/ is Spec Kit's vendored tooling, not ours.
+          mapfile -t files < <(git ls-files '*.sh' ':!:.specify/')
+          if ((${#files[@]})); then shellcheck "${files[@]}"; fi
+        shell: bash
+
+      - name: qmllint
+        # Known Quickshell false positives: its singletons are not declared in qmldir and
+        # some of its types are reported as not creatable.
+        run: |
+          cd shell
+          mapfile -t files < <(git ls-files '*.qml')
+          /usr/lib/qt6/bin/qmllint "${files[@]}" > ../qmllint.txt 2>&1 || true
+          cat ../qmllint.txt
+          if grep -E '^(Warning|Error)' ../qmllint.txt \
+              | grep -v -E 'not declared as singleton in qmldir|is not creatable'; then
+            echo "::error::qmllint found problems"
+            exit 1
+          fi
+        shell: bash
