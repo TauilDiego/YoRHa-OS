@@ -17,7 +17,10 @@ Item {
     property color color: kind === "vertical" ? Tokens.color.lightGray : Tokens.color.darkGray
 
     readonly property int thickness: Tokens.line(Tokens.space.rule, s)
-    readonly property real dpr: Tokens.scaleOf(QsWindow.window?.screen?.name ?? "")
+    // The window's monitor decides the snap. QsWindow.window is typed QObject, so go through
+    // a `var` (qmllint can't see `screen` on QObject).
+    readonly property var window: QsWindow.window
+    readonly property real dpr: Tokens.scaleOf(window?.screen?.name ?? "")
 
     // Dotted pattern geometry (game px, measured on 1080p captures).
     readonly property real period: 77

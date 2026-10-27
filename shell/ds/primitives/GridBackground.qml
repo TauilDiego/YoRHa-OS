@@ -11,7 +11,10 @@ Rectangle {
     property real step: Tokens.space.gridStep      // game px
 
     readonly property int pitch: Math.max(2, Tokens.px(step, s))
-    readonly property real dpr: Tokens.scaleOf(QsWindow.window?.screen?.name ?? "")
+    // The window's monitor decides the snap. QsWindow.window is typed QObject, so go through
+    // a `var` (qmllint can't see `screen` on QObject).
+    readonly property var window: QsWindow.window
+    readonly property real dpr: Tokens.scaleOf(window?.screen?.name ?? "")
 
     color: Tokens.color.darkYellow
 
