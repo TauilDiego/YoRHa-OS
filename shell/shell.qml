@@ -60,11 +60,16 @@ ShellRoot {
     }
 
     // One HUD per monitor (FR-009).
+    // spec 004 US6: `hud visible false` takes the bars off for a moment, so a test can photograph the
+    // wallpaper alone under them (the bar's empty area and the contrast of its texts, SC-011/012).
+    property bool hudShown: true
     Variants {
         id: huds
         model: Quickshell.screens
 
-        Hud {}
+        Hud {
+            visible: shell.hudShown
+        }
     }
 
     // The design system gallery (US3): created only while open. A single instance; the
@@ -361,5 +366,8 @@ ShellRoot {
                 out.push(hud.dumpEntry());
             return JSON.stringify(out);
         }
+        // spec 004 US6: hide or show the bars (tests only; nothing remembers it). Not `show`:
+        // the qs command line takes that word for its own `ipc show`.
+        function visible(on: bool): void { shell.hudShown = on; }
     }
 }

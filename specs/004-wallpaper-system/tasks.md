@@ -169,6 +169,40 @@ de arquivo.
 
 ---
 
+<!-- emenda US6 (004-barra-tom): início -->
+## Phase 9: User Story 6 - A barra sobre o fundo (Priority: P1, emenda de 2026-10-27)
+
+> Emenda aprovada pelo dono em 2026-10-27, pelo plano e pelo mockup. Branch `004-barra-tom` (sai
+> da `004-wallpaper-system` em `e39f26d`), VM `teste-a`, em paralelo com o seletor (US2).
+
+**Goal**: a barra do topo sem fundo próprio, sobre o papel de parede e as transições, com o tom
+(papel ou claro) que o fundo do monitor pede, trocando junto com a transição.
+
+**Independent Test**: com fixtures, cada cena e imagem de teste com o `hud dump` (tom), o contraste
+medido e a área vazia contra a cena sem a barra; sem fixtures, rajadas da camuflagem e da varredura.
+
+- [x] T048 [US6] Emenda da spec antes do código: história US6, FR-004 revista, FR-025–FR-029, SC-011–SC-013 e bordas no `spec.md`; seção da emenda no `plan.md`; `contracts/` (`hud dump` com `tone`, `toneMix` e `texts`; `wallpaper dump` com `luma`; serviços e componentes); `data-model.md` (tom da barra); nota na spec 001 de que a FR-002a (a barra pinta a faixa da vinheta) e a FR-008 (sem transparência) ficam superadas na barra — **feito**, antes do código
+- [x] T049 [US6] `shell/ds/Tokens.qml` (bloco marcado): `Tokens.hudPaper` (os tokens de hoje), `Tokens.hudLight` (a paleta aprovada, FR-028), `Tokens.toneMix(a, b, t)` e `Tokens.hudColor(papel, t)`; com `t = 0`, a cor de papel sem conta — **feito** (mais `Tokens.hudLightBelow` 0,45)
+- [x] T050 [US6] `property real tone: 0` em `Label`, `Rule`, `HeaderButton`, `Meter` (mantendo o modo editável e o `inverted` da 003) e `TabBar`, com as cores de `Tokens.hudColor`. Provar com `lab/diffshot` (antes × depois, com fixtures, 1080 e hidpi) que a galeria e o popup de configurações ficam idênticos — **feito:** `lab/diffshot` da `e39f26d` × a versão final, no mesmo estado da VM: galeria **0 px** em 1080 e hidpi; popup **0 px** fora da faixa da barra (a faixa muda de propósito: os arcos agora passam embaixo dela) (`lab/perf` 2026-10-27T193148 e 2026-10-27T200001)
+- [x] T051 [US6] `shell/services/WallpaperStore.qml` (`toneMix`, `setToneMix`, `toneOf`) e `shell/services/WallpaperCatalog.qml` (`lumas`, `lumaOf`, `setLuma`, limpeza quando o arquivo sai da pasta) — **feito**
+- [x] T052 [US6] `shell/wallpaper/WallpaperView.qml`: a luminância da faixa de cima de cada imagem, medida uma vez quando ela fica pronta (`grabToImage` da vista com o filtro + `Canvas.getImageData`), guardada no catálogo; sem aviso de QML — **feito:** spike na VM (`lab/perf` 2026-10-27T192747): `grabToImage` a 480 px + `Canvas.loadImage` do URL do grab (guardando o resultado vivo) + `getImageData` lê os pixels no virgl; medido: `ruins.jpg` 0,631, `dunes.png` 0,692, nome difícil 0,470, `night.jpg` 0,087 (com filtro)
+- [x] T053 [US6] `shell/wallpaper/WallpaperTransition.qml`: `topProgress` em JS com as contas do `transition.frag` (camuflagem com o mesmo hash, varredura, quadradinhos, crossfade) e o sinal `begun()` — **feito.** Quadradinhos contam os já começados (o quadrado de tinta), como no mockup
+- [x] T054 [US6] `shell/wallpaper/Wallpaper.qml`: publica o tom do monitor (`de + (para − de) × smoothstep(topProgress)`, segurando enquanto a imagem carrega ou não foi medida); `wallpaper dump` com `luma` — **feito.** Troca interrompida: o tom segura no quadro parado e volta suave, sem pulo (`lab/perf` 2026-10-27T200303). Pra isso, `tryBegin`/`interrupt` mantêm `running` verdadeiro na passagem (sem mudar o comportamento da transição)
+- [x] T055 [US6] `shell/hud/Hud.qml`: `color: "transparent"`, sem o `Rectangle` e a `Vignette`; o tom do monitor passado pros componentes; `hud dump` com `tone`, `toneMix` e `texts` — **feito**, mais `hud visible(on)` (só pra testes: fotografar o fundo sem a barra)
+- [x] T056 [P] [US6] Laboratório (privado): `night.jpg` (escura, gerada do zero, < 300 KB) no `lab/make-test-wallpapers` e em `shell/fixtures/wallpapers/`; `lab/check-u1` sem supor papel fixo na faixa da barra; bloco marcado no `lab/check-004` (tom no `hud dump`, contraste medido, área vazia × cena sem a barra) — **feito:** `night.jpg` 31 KB (`lab/perf` 2026-10-27T193907, container); o `check-u1` limpa o estado do papel de parede no começo e confere `tone: paper`; o `check-004` ganha o bloco US6 e as rajadas
+- [x] T057 [US6] Validar na `teste-a` (`lab/perf`, `--kind 004-barra`): screenshots com fixtures em 1080 e hidpi da barra sobre as 4 cenas e as imagens de teste; `hud dump`; rajadas da camuflagem Menu → Dark e da varredura; `lab/check-u1`, `lab/check-003 --profile 1080` e `lab/check-004` passando; log sem WARN/ERROR; `qmllint` limpo — **feito, com uma pendência do dono (SC-011):**
+  - `lab/check-004` (`lab/perf` 2026-10-27T200341, `out/004-barra-check-004-final`): **27 PASS, 3 FAIL**. Passam SC-012 (área vazia = o fundo sem a barra, **0 níveis** nos 8 fundos, 1080 e hidpi), SC-013 (tom certo no `hud dump` nos 8, 1080 e hidpi; rajada da camuflagem), SC-008 (log 0 erros e 0 avisos, `qmllint` limpo) e todo o resto da 004. A rajada da varredura saiu curta demais nessa rodada (40 quadros acabaram antes da borda); com 60×20 ms ela passa, junto com a da camuflagem (`lab/perf` 2026-10-27T200840, `out/004-barra-rajadas`: desvio do tom pra `smoothstep(cobertura)` ≤ 0,04 e ≤ 0,10, e o tom nunca vira antes de a troca chegar na faixa)
+  - **SC-011 falha nas paletas aprovadas** (contraste p05 de cada texto contra o fundo sem a barra): no tom papel, que são as cores de sempre, a aba normal dá 3,78:1 (tinta sobre a placa), a apagada 2,57, título e valores (`ink2`) 3,41 no papel, e a data e a hora caem pra 2,1–2,6 na vinheta do canto; nas imagens claras fica pior (nome difícil, luminância 0,47: 1,14). No tom claro, tudo passa de 4,5 menos as abas apagadas (3,6–4,2). **Precisa de decisão do dono** (ver relatório)
+  - `lab/check-u1` 15/15 (`lab/perf` 2026-10-27T195530); `lab/check-003 --profile 1080` 25/25 (2026-10-27T195655)
+  - screenshots com fixtures da barra sobre as 4 cenas e as 4 imagens, com e sem a barra, em 1080 e hidpi: `out/004-barra-check-004-final/us6-*`
+- [x] T058 [P] [US6] `docs/design-system.md`: a barra transparente, as duas paletas e as regras do tom (§5 e §8, blocos marcados) — **feito**
+- [x] T059 [US6] Imagem de revisão pro dono: a barra sobre cada papel de parede, empilhada (`~/.local/share/nier-lab/out/004-barra-revisao.png`) — **feito:** as 8 barras (1080, fixtures) com tom, área vazia e pior contraste, mais os quadros da rajada da camuflagem em que o tom vira
+
+**Checkpoint**: a barra fica sobre o fundo, com o tom certo, e a troca de tom acompanha a transição.
+<!-- emenda US6 (004-barra-tom): fim -->
+
+---
+
 ## Dependencies & Execution Order
 
 - **Setup (T001–T007):** o T001 vem primeiro e pode parar tudo (sem shader na VM, sem camuflagem).

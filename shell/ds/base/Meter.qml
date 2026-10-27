@@ -5,6 +5,7 @@ import ".."
 // Value changes animate (instantly while frozen); `critical` paints the fill in `alert`.
 // spec 003, the settings slider: `editable` turns a press or a drag on the track into
 // picked(0–1); `inverted` is for an ink band (mediumGray track, lightYellow fill).
+// spec 004 US6: `tone` is the top bar's tone (0 paper → 1 light) for track, fill and alert.
 Rectangle {
     id: root
 
@@ -15,6 +16,7 @@ Rectangle {
     property real h: Tokens.space.meterH
     property bool editable: false
     property bool inverted: false
+    property real tone: 0
 
     signal picked(real value)
 
@@ -22,12 +24,13 @@ Rectangle {
 
     implicitWidth: Tokens.px(w, s)
     implicitHeight: Tokens.px(h, s)
-    color: inverted ? Tokens.color.mediumGray : Tokens.color.lightGray
+    color: inverted ? Tokens.color.mediumGray : Tokens.hudColor("track", tone)
 
     Rectangle {
         height: parent.height
         width: Math.round(root.width * root.clamped)
-        color: root.critical ? Tokens.color.alert : root.inverted ? Tokens.color.lightYellow : Tokens.color.darkGray
+        color: root.critical ? Tokens.hudColor("alert", root.tone)
+                             : root.inverted ? Tokens.color.lightYellow : Tokens.hudColor("fill", root.tone)
 
         Behavior on width {
             enabled: !Tokens.frozen

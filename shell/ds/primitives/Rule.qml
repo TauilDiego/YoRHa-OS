@@ -10,13 +10,15 @@ import ".."
 //             The line sits at the top of the item.
 //   vertical: the double strips at the left of tab bars and lists (3 px + 4 gap + 6 px);
 //             the parent sets the height.
+// `tone` (spec 004 US6): the top bar's tone, 0 paper → 1 light; the default color follows it.
 Item {
     id: root
 
     property real s: 1
     property string kind: "plain"
     property bool crisp: true                    // dotted: marks as solid squares of whole physical px (the Canvas path blurs at fractional scales)
-    property color color: kind === "vertical" ? Tokens.color.lightGray : Tokens.color.darkGray
+    property real tone: 0
+    property color color: Tokens.hudColor(kind === "vertical" ? "rest" : "rule", tone)
 
     readonly property int thickness: Tokens.line(Tokens.space.rule, s)
     // The window's monitor decides the snap. QsWindow.window is typed QObject, so go through

@@ -18,7 +18,7 @@ Regras para todos os componentes:
 | `Square` | `size` (padrão 22), `color` | O marcador |
 | `Rule` | `kind`: `"plain"` / `"dotted"` / `"vertical"`, `color` | A pontilhada repete o padrão de pontos (§6) |
 | `GridBackground` | `step` (padrão 7) | Papel + grid a 6% |
-| `Vignette` | `enabled`, `area` (tamanho da tela inteira; padrão = o próprio item), `offset` (posição do item nela) | FR-002a. Overlay sobre o papel. Com `area`/`offset` pinta só o seu pedaço de uma vinheta maior: o HUD usa a faixa de cima da vinheta do fundo, sem emenda |
+| `Vignette` | `enabled`, `area` (tamanho da tela inteira; padrão = o próprio item), `offset` (posição do item nela) | FR-002a. Overlay sobre o papel. Com `area`/`offset` pinta só o seu pedaço de uma vinheta maior (o HUD usava a faixa de cima da vinheta do fundo; desde a spec 004, US6, a barra é transparente e não usa mais) |
 | `PaperDecor` | `phase` (0–1) | FR-019/FR-020. Arcos e feixes diagonais do fundo, desenhados uma vez; `phase` move as camadas sem repintar |
 
 ## Base (`shell/ds/base/`)
@@ -43,6 +43,6 @@ Regras para todos os componentes:
 
 | Componente | Propriedades | Notas |
 |---|---|---|
-| `Hud` | `screen` (`ShellScreen`) | Um por monitor (`Variants` sobre `Quickshell.screens`). `PanelWindow` no topo com `exclusiveZone` = altura (FR-009) |
+| `Hud` | `screen` (`ShellScreen`) | Um por monitor (`Variants` sobre `Quickshell.screens`). `PanelWindow` no topo com `exclusiveZone` = altura (FR-009). Desde a spec 004 (US6): transparente, sobre o papel de parede, com o tom do monitor (`tone` nos componentes) |
 | `Wallpaper` | `screen` (`ShellScreen`) | Um por monitor, camada Background, `GridBackground` + `PaperDecor` + `Vignette` (FR-019–FR-021) |
 | `Gallery` | — | Tela cheia, `Overlay`, `Vignette` ligada se `Settings.vignette` (FR-002a). Abre e fecha por IPC; Esc fecha |

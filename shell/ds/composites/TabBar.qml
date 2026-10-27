@@ -10,10 +10,12 @@ import "../base"
 //   model: [{ label, state }], state = "normal" | "hovered" | "selected" | "dimmed".
 // The parent owns the states: map `hoveredIndex` into the model to show the hover.
 // The rule spans the bar's whole width; the tabs start at the left.
+// `tone` (spec 004 US6): the top bar's tone, 0 paper → 1 light, handed to strips, tabs and rule.
 Item {
     id: root
 
     property real s: 1
+    property real tone: 0
     property var model: []
     property real ruleGap: 10                    // game px between the tabs and the rule
     property real ruleScale: s                   // scale of the rule's dotted pattern
@@ -63,6 +65,7 @@ Item {
         id: strips
         kind: "vertical"
         s: root.s
+        tone: root.tone
         height: root.bandH
     }
 
@@ -82,6 +85,7 @@ Item {
                 readonly property var entry: root.model[index] ?? ({})
 
                 s: root.s
+                tone: root.tone
                 text: entry.label ?? ""
                 state: entry.state ?? "normal"
                 reachRule: true
@@ -98,6 +102,7 @@ Item {
         kind: "dotted"
         y: root.ruleY
         s: root.ruleScale
+        tone: root.tone
         width: root.width
     }
 }

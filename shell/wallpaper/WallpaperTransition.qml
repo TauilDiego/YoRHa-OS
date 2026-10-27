@@ -63,6 +63,7 @@ Item {
         phase: root.phase
         screenSize: root.physical
         paperFilter: !root.paperFilterOff.includes(wallpaper?.path ?? "")
+        measureLuma: true                        // spec 004 US6: the bar's tone
         onReadyChanged: root.tryBegin()
     }
     WallpaperView {
@@ -75,6 +76,7 @@ Item {
         phase: root.phase
         screenSize: root.physical
         paperFilter: !root.paperFilterOff.includes(wallpaper?.path ?? "")
+        measureLuma: true                        // spec 004 US6: the bar's tone
         onReadyChanged: root.tryBegin()
     }
 
@@ -166,6 +168,86 @@ Item {
         onFinished: root.finish()
     }
 
+    // --- spec 004 US6: how much of the bar's band the change has covered ---------------------------
+    // The same sums as shaders/transition.frag, over the cells under the bar only (the top `band`
+    // logical px): camouflage, the share of those cells already revealed (elapsed ≥ their time);
+    // wipe, the edge's x over the width; tiles, the share of those tiles already started (progress
+    // past their threshold: the ink square, then the new picture); crossfade, the eased progress.
+    signal begun()
+    readonly property string shownItem: shownIsA ? aId : bId
+    readonly property string incomingItem: toIsA ? aId : bId
+    readonly property real band: Settings.barHeight
+    property var topCells: []                   // sorted: reveal times (ms) or tile thresholds
+    readonly property real topProgress: {
+        if (!animating)
+            return 0;
+        if (runKind === "wipe")
+            return width > 0 ? Math.min(1, progress * (width + 40 * s) / width) : 1;
+        if (runKind === "crossfade")
+            return progress;
+        const n = topCells.length;
+        if (n === 0)
+            return 1;
+        return countBelow(topCells, runKind === "camouflage" ? elapsed : progress) / n;
+    }
+
+    // How many of the sorted values are ≤ v (camouflage: revealed at age ≥ 0) or < v (tiles:
+    // started once progress > threshold); the difference is one sample, so one rule serves both.
+    function countBelow(sorted: var, v: real): int {
+        let lo = 0, hi = sorted.length;
+        while (lo < hi) {
+            const mid = (lo + hi) >> 1;
+            if (sorted[mid] <= v)
+                lo = mid + 1;
+            else
+                hi = mid;
+        }
+        return lo;
+    }
+
+    // The shader's hash ("Hash without Sine", D. Hoskins, MIT; CREDITS.md), in float32 steps.
+    function hash3(x: real, y: real, z: real): real {
+        const f = Math.fround, k = f(0.1031), c = f(31.32);
+        let px = f(x * k), py = f(y * k), pz = f(z * k);
+        px = f(px - Math.floor(px));
+        py = f(py - Math.floor(py));
+        pz = f(pz - Math.floor(pz));
+        const d = f(f(f(px * f(pz + c)) + f(py * f(py + c))) + f(pz * f(px + c)));
+        px = f(px + d);
+        py = f(py + d);
+        pz = f(pz + d);
+        const v = f(f(px + py) * pz);
+        return v - Math.floor(v);
+    }
+
+    // The per-cell values for the change about to run (seed and origin already drawn).
+    function topThresholds(): var {
+        const out = [];
+        if (runKind === "camouflage") {
+            const cl = cell * s;
+            if (cl <= 0)
+                return out;
+            const ox = origin.x * width, oy = origin.y * height;
+            const maxD = Math.hypot(Math.max(ox, width - ox), Math.max(oy, height - oy));
+            const cols = Math.ceil(width / cl), rows = Math.ceil(band / cl);
+            for (let j = 0; j < rows; j++)
+                for (let i = 0; i < cols; i++) {
+                    const d = Math.hypot((i + 0.5) * cl - ox, (j + 0.5) * cl - oy);
+                    out.push(Tokens.wallpaper.reveal * (0.85 * d / maxD + 0.15 * hash3(i, j, seed)));
+                }
+        } else if (runKind === "tiles") {
+            const size = 24 * s;
+            if (size <= 0)
+                return out;
+            const cols = Math.ceil(width / size), rows = Math.ceil(band / size);
+            for (let j = 0; j < rows; j++)
+                for (let i = 0; i < cols; i++)
+                    out.push(0.7 * (i / cols) + 0.3 * hash3(i, j, seed));
+        }
+        return out.sort((a, b) => a - b);
+    }
+    // --- end spec 004 US6 --------------------------------------------------------------------------
+
     // --- changes ---------------------------------------------------------------------------------
     onCurrentChanged: Qt.callLater(change)
     Component.onCompleted: change()
@@ -226,8 +308,8 @@ Item {
     function tryBegin(): void {
         if (!waiting || !toSlot.ready || (toIsA ? aId : bId) === "")
             return;
-        waiting = false;
         if (instant) {
+            waiting = false;
             finish();
             return;
         }
@@ -239,7 +321,12 @@ Item {
         seed = Math.floor(Math.random() * 1000) + 1;
         origin = Qt.point(0.5 + (Math.random() - 0.5) * 0.3, 0.5 + (Math.random() - 0.5) * 0.3);
         elapsed = 0;
+        topCells = topThresholds();
+        // spec 004 US6: `begun` first (the bar's tone starts from where it is), and `running`
+        // stays true from `waiting` to the animation, so the tone never sees an idle moment.
+        begun();
         anim.restart();
+        waiting = false;
     }
     property bool warnedShader: false
 
@@ -263,7 +350,6 @@ Item {
         freezing = true;
         const ok = root.grabToImage(result => {
             frozen.source = result.url;
-            freezing = false;
             fromFrozen = true;
             anim.stop();
             elapsed = 0;
@@ -272,7 +358,10 @@ Item {
             toIsA = bId === id ? false : true;
             setSlot(!toIsA, "");
             setSlot(toIsA, id);
+            // `freezing` only drops once `waiting` holds, so `running` never does (spec 004 US6:
+            // the bar's tone holds through the hand-over).
             waiting = true;
+            freezing = false;
             tryBegin();
         }, physical);
         if (!ok) {                                                  // no grab: jump to the end

@@ -17,6 +17,14 @@ adicionou". Decisões tomadas no mockup aprovado
 - **primeiro corte:** as quatro cenas e as imagens da pasta do usuário;
 - **vídeo:** fica pro U6.
 
+**Emenda de 2026-10-27, "A barra sobre o fundo" (US6):** o dono viu a 004 na VM e pediu que o efeito
+pegasse a tela inteira: "o efeito não se propaga pro fundo como um todo, o fundo da topbar não é
+afetado". A barra do topo deixa de pintar o próprio papel e passa a mostrar o papel de parede por
+baixo, com um tom que acompanha o fundo. Aprovada pelo dono em 2026-10-27, pelo plano e pelo mockup
+(`rien-OS-private/lab/mockups/papel-de-parede/index.html`, seção "the bar over the desktop"). Ela
+substitui a FR-004 desta spec e a FR-002a da 001 na parte da barra (o HUD pintava a faixa de cima da
+vinheta).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Um fundo igual ao dos menus do jogo (Priority: P1)
@@ -155,6 +163,41 @@ comandos de controle e conferir o estado exportado.
 3. **Given** um monitor que nunca recebeu escolha (recém-conectado), **When** ele aparece, **Then** usa a
    escolha "todos os monitores" ou, se não houver, a cena padrão.
 
+---
+
+### User Story 6 - A barra sobre o fundo (Priority: P1)
+
+> Emenda aprovada pelo dono em 2026-10-27, pelo plano e pelo mockup.
+
+A barra do topo não tem fundo próprio: o papel de parede (a cena, a imagem e as transições) aparece
+embaixo dela, e os arcos e os feixes cruzam a faixa da barra, como no jogo. A cor da barra acompanha
+o fundo do monitor dela:
+- **tom papel** (as cores de hoje) nas cenas de papel e nas imagens claras;
+- **tom claro** (texto claro, placas claras translúcidas) na cena Dark e nas imagens escuras.
+
+Quando o fundo troca, a barra muda de tom junto com a transição, no momento em que ela passa pela
+faixa da barra.
+
+**Why this priority**: É o pedido do dono depois de ver a 004 na VM. Sem ela, a troca de fundo para
+na barra e a faixa dela fica papel em cima de um fundo escuro.
+
+**Independent Test**: Na VM, com dados de teste, aplicar cada cena e cada imagem de teste e conferir
+pelo `hud dump` (tom) e por screenshots (a área vazia da barra igual ao fundo; o contraste do texto
+medido nos pixels). Sem dados de teste, gravar rajadas da camuflagem Menu → Dark e da varredura.
+
+**Acceptance Scenarios**:
+
+1. **Given** a cena Menu, **When** o desktop aparece, **Then** os arcos e os feixes passam por baixo da
+   barra, e a barra fica no tom papel.
+2. **Given** a cena Menu, **When** o fundo troca pra Dark, **Then** a barra fica no tom claro, e a troca
+   de tom acontece enquanto a transição cobre a faixa da barra.
+3. **Given** uma imagem escura, **When** ela é aplicada, **Then** a barra fica no tom claro; numa imagem
+   clara, no tom papel.
+4. **Given** o movimento reduzido ou dados de teste ativos, **When** o fundo troca, **Then** o tom troca
+   na hora.
+5. **Given** dois monitores com fundos diferentes, **When** um deles troca, **Then** só a barra dele
+   muda de tom.
+
 ### Edge Cases
 
 - **Pasta de imagens inexistente ou vazia:** o grupo de imagens mostra só um aviso de onde pôr as
@@ -168,6 +211,12 @@ comandos de controle e conferir o estado exportado.
   2560x1600 @1,25).
 - **Movimento desligado** (`wallpaperMotion: false`): as cenas ficam paradas; as transições
   continuam, a não ser que o movimento reduzido esteja ligado.
+- **Imagem ainda não medida** (US6): até a luminância da faixa de cima sair (alguns quadros depois de
+  a imagem carregar), a barra fica no tom que tinha; depois segue a regra.
+- **Troca no meio de outra** (US6): o tom parte de onde a barra estava e vai pro tom do fundo novo.
+- **Janela flutuante arrastada pra cima da barra** (US6): aparece por trás das abas e dos textos,
+  porque a barra fica na camada de cima e o Hyprland só reserva a faixa dela pras janelas lado a
+  lado. Limitação aceita; a barra não pinta nada pra esconder a janela.
 
 ## Requirements *(mandatory)*
 
@@ -185,7 +234,9 @@ comandos de controle e conferir o estado exportado.
 - **FR-003**: As linhas MUST respirar devagar (os arcos giram e os feixes deslizam pouco, num ciclo de
   minutos), seguindo a configuração `wallpaperMotion` que já existe, e param com dados de teste.
 - **FR-004**: A barra do topo MUST continuar dentro da mesma vinheta do fundo, sem emenda (decisão da
-  001).
+  001). **Revisto pela emenda da US6 (2026-10-27):** a barra não pinta mais papel nem vinheta; o que
+  aparece embaixo dela é o próprio papel de parede (FR-025), então a continuidade vale por
+  construção.
 
 **Catálogo e seletor (US2, US4)**
 
@@ -261,12 +312,55 @@ comandos de controle e conferir o estado exportado.
   e sem aviso de QML. O aviso do Qt 6.12.0 que todo popup loga ao abrir (`qt.qpa.wayland.textinput`,
   da plataforma, não do QML) conta à parte, como na 003.
 
+**A barra sobre o fundo (US6, emenda de 2026-10-27)**
+
+- **FR-025**: A barra do topo MUST NOT ter fundo próprio: o papel de parede do monitor e as
+  transições aparecem embaixo dela. Abas, faixas, medidores, textos e a régua pontilhada ficam por
+  cima. Isso revê a FR-002a e a FR-008 da 001 só na barra (a barra era papel opaco com a faixa da
+  vinheta).
+- **FR-026**: O tom da barra MUST seguir o papel de parede do monitor dela:
+  - cenas de papel (`menu`, `rules`, `plain`) → tom **papel**;
+  - cena com `kind: "dark"` → tom **claro**;
+  - imagem → a luminância média (0,2126 R + 0,7152 G + 0,0722 B, sRGB/255) da faixa de cima (a altura
+    da barra mais 12 px, ≈40/540 da tela a 1080), medida na imagem como aparece (com o filtro de
+    papel, se ligado), uma vez por imagem; abaixo de 0,45 → tom claro, senão papel.
+- **FR-027**: Durante uma transição, as cores da barra MUST misturar do tom de antes pro tom novo
+  (0 → 1, com `smoothstep`) no intervalo em que a transição cobre a faixa da barra:
+  - camuflagem: a fração das células da faixa de cima já reveladas;
+  - varredura: a posição da borda ÷ a largura;
+  - quadradinhos: a fração dos quadradinhos das linhas de cima já começados;
+  - crossfade: o progresso com ease.
+
+  Com movimento reduzido ou dados de teste, a troca de tom MUST ser instantânea.
+- **FR-028**: As duas paletas, em [r, g, b, a] (cada papel de cor da barra):
+
+  | Papel | Uso | Papel (tom papel) | Claro (tom claro) |
+  |---|---|---|---|
+  | `ink` | texto principal, hora, tinta da aba normal, rótulos das leituras | 78,75,66,1 | 215,209,179,1 |
+  | `ink2` | título, data, valores, tinta da aba apagada | 103,100,88,1 | 150,148,140,1 |
+  | `rest` | placa da aba, faixas verticais | 177,171,147,1 | 215,209,179,0,16 |
+  | `sel` | placa da aba em foco (e destacada) | 78,75,66,1 | 215,209,179,1 |
+  | `selInk` | tinta da aba em foco | 215,209,179,1 | 78,75,66,1 |
+  | `track` | trilho do medidor | 177,171,147,1 | 215,209,179,0,22 |
+  | `fill` | preenchimento do medidor | 78,75,66,1 | 215,209,179,1 |
+  | `rule` | régua pontilhada | 78,75,66,1 | 150,148,140,0,75 |
+  | `alert` | estado crítico | `#8F3A30` | `#C0574A` |
+
+  O tom papel é igual aos tokens de hoje. Os componentes da barra (aba, barra de abas, medidor,
+  régua e texto) recebem o tom como parâmetro, com 0 (papel) de padrão: a galeria, o popup da 003 e
+  tudo que não é a barra MUST continuar idênticos, pixel a pixel.
+- **FR-029**: O `hud dump` MUST mostrar, por monitor, o `tone` (`"paper"` ou `"light"`) e o `toneMix`
+  (0 = papel, 1 = claro); o `wallpaper dump`, a luminância medida da imagem de cada monitor.
+
 ### Key Entities
 
 - **Papel de parede:** id, tipo (cena, imagem, vídeo), nome, descrição; cena: parâmetros (cores,
   camadas, movimento); imagem: caminho e filtro de papel ligado/desligado.
 - **Escolha:** pra cada monitor (pelo nome) e pra "todos", o id do papel de parede.
 - **Transição:** o tipo e, pra camuflagem, célula, rastro e intensidade das falhas.
+- **Tom da barra** (US6): por monitor, a mistura de 0 (papel) a 1 (claro) que a barra mostra agora;
+  o tom de destino sai do papel de parede (cena) ou da luminância medida (imagem, guardada por
+  caminho e por filtro ligado/desligado).
 
 ## Success Criteria *(mandatory)*
 
@@ -294,6 +388,15 @@ Cada critério diz qual evidência da VM o comprova (constituição IV).
 - **SC-009**: O custo de uma transição de camuflagem fica registrado no `lab/perf` (sem meta; a meta
   vem no U6). Evidência: o relatório da sessão.
 - **SC-010**: O dono aprova o visual comparando com o mockup. Evidência: a aprovação.
+- **SC-011** (US6): Todo texto da barra tem contraste ≥ 4,5:1 contra os pixels atrás dele, nas 4 cenas
+  e nas imagens de teste. Evidência: medição nos screenshots (a cor do texto contra o fundo sem a
+  barra, com a placa da aba por cima quando é uma aba), em 1080 e hidpi.
+- **SC-012** (US6): A área vazia da barra (sem abas, textos, medidores e régua) fica a ≤ 2 níveis (em
+  255) da cena que está embaixo. Evidência: o mesmo fundo fotografado com a barra e sem ela, nas 4
+  cenas e nas imagens de teste.
+- **SC-013** (US6): O `hud dump` mostra `tone: "light"` na cena Dark e numa imagem de teste escura, e
+  `"paper"` nas outras; as rajadas da camuflagem Menu → Dark e da varredura mostram a troca passando
+  por baixo da barra e o tom virando quando ela chega na faixa. Evidência: os `dump`s e as rajadas.
 
 ## Assumptions
 

@@ -227,6 +227,53 @@ componentes de popup e de opção vêm da 003 e não são duplicados aqui.
    - o roteiro inteiro do quickstart dentro de `lab/perf`;
    - screenshots pro dono (SC-010).
 
+## Emenda: a barra sobre o fundo (US6, 2026-10-27)
+
+Aprovada pelo dono em 2026-10-27, pelo plano e pelo mockup. Feita na branch `004-barra-tom` (sai da
+`004-wallpaper-system` em `e39f26d`), em paralelo com o seletor (US2), que fica em outra branch. Nos
+arquivos que os dois mexem (`Tokens.qml`, `docs/design-system.md`, `tasks.md`, `lab/check-004`), as
+mudanças desta emenda ficam em blocos marcados, pra facilitar o merge.
+
+**Como funciona:**
+- **A barra** (`shell/hud/Hud.qml`): `color: "transparent"`; saem o `Rectangle` de papel e a
+  `Vignette` da faixa. O papel de parede já cobre o monitor inteiro (ancorado nos 4 lados, com
+  `ExclusionMode.Ignore`, na camada de fundo), então ele aparece embaixo. A barra lê o tom do monitor
+  dela em `WallpaperStore.toneMix[monitor]`.
+- **Paletas** (`shell/ds/Tokens.qml`): `Tokens.hudPaper` (os tokens de hoje) e `Tokens.hudLight` (a
+  proposta aprovada), com os papéis `ink`, `ink2`, `rest`, `sel`, `selInk`, `track`, `fill`, `rule` e
+  `alert`; `Tokens.toneMix(a, b, t)` mistura duas cores canal a canal (com alfa, como o mockup) e
+  `Tokens.hudColor(papel, t)` dá a cor de um papel no tom `t`. Com `t = 0` as funções devolvem a cor
+  de papel sem conta nenhuma, então nada que não é a barra muda.
+- **Componentes:** `Label`, `Rule`, `HeaderButton`, `Meter` e `TabBar` ganham `property real tone: 0`
+  e pintam com `Tokens.hudColor(…, tone)`. A barra passa o tom dela pra todos.
+- **Tom por monitor** (`shell/services/WallpaperStore.qml`): `toneMix` (monitor → 0..1), escrito por
+  cada `Wallpaper`; `toneOf(id)` dá o tom de destino de um item: cena `dark` → 1, outras cenas → 0,
+  imagem → luminância < 0,45 ? 1 : 0, ou −1 enquanto a imagem não foi medida.
+- **Luminância** (`shell/wallpaper/WallpaperView.qml`): quando a imagem fica pronta e ainda não foi
+  medida, a vista se fotografa (`grabToImage` em 480 px de largura, com o filtro de papel, se ligado)
+  e um `Canvas` invisível lê a faixa de cima com `getImageData` (o `putImageData` não pinta neste
+  Quickshell, mas o `getImageData` lê; conferido na VM, `lab/perf` 2026-10-27T192747). O resultado
+  fica no `WallpaperCatalog.lumas`, por caminho e por filtro ligado/desligado.
+- **Cobertura da faixa** (`shell/wallpaper/WallpaperTransition.qml`): `topProgress` (0..1), em JS, com
+  as mesmas contas do `transition.frag` (origem, `reveal`, célula e o mesmo hash pra camuflagem;
+  posição da borda pra varredura; sorteio por quadradinho pra quadradinhos; progresso pra
+  crossfade), só nas células que ficam embaixo da barra.
+- **Mistura** (`shell/wallpaper/Wallpaper.qml`): parado, o tom é o do fundo na tela; numa transição,
+  `de + (para − de) × smoothstep(topProgress)`, com `de` = o tom no instante em que ela começou (numa
+  troca no meio de outra, o tom do quadro parado). Enquanto a imagem nova carrega, ou o tom dela não
+  é conhecido, a barra segura o tom que tinha. Com `instant` não há transição: o tom troca na hora.
+- **`hud dump`:** ganha `tone`, `toneMix` e `texts` (cada texto com a caixa e a cor, pros testes de
+  contraste); o `wallpaper dump` ganha a `luma` medida por monitor.
+
+**Constitution Check da emenda:** sem violações. A barra transparente revê a FR-008 da 001 ("sem
+transparência sobre o desktop") só na barra, por decisão do dono; nada de blur (VII). Os testes
+rodam na `teste-a`, dentro de `lab/perf` (I, IV). A spec foi emendada antes do código (V).
+
+**Verificação:** `lab/check-004` ganha um bloco marcado (tom no `hud dump`, contraste medido nos
+pixels, área vazia contra a cena sem a barra) e o `lab/check-u1` deixa de supor papel fixo na faixa
+da barra. Rajadas da camuflagem Menu → Dark e da varredura. A imagem escura de teste (`night.jpg`)
+entra no `lab/make-test-wallpapers`.
+
 ## Complexity Tracking
 
 Sem violações da constituição a justificar.

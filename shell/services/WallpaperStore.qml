@@ -4,6 +4,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../ds"
 
 // What each monitor shows (spec 004, contracts/services.md): the "all monitors" choice, each
 // monitor's own choice, the transition and the pictures shown without the paper filter.
@@ -55,6 +56,32 @@ Singleton {
         }
         return fallback;
     }
+
+    // --- spec 004 US6: the bar's tone, per monitor ---------------------------------------------------
+    // What each monitor's bar shows now, 0 (paper tone) → 1 (light tone); written by that monitor's
+    // Wallpaper, read by its Hud.
+    property var toneMix: ({})
+    function setToneMix(monitorName: string, value: real): void {
+        if (toneMix[monitorName] === value)
+            return;
+        const m = Object.assign({}, toneMix);
+        m[monitorName] = value;
+        toneMix = m;
+    }
+    // The tone a wallpaper asks for (FR-026): 1 light (the dark scene, a dark picture), 0 paper,
+    // -1 not known yet (a picture not measured yet).
+    function toneOf(id: string): real {
+        const w = WallpaperCatalog.byId(id);
+        if (!w)
+            return -1;
+        if (w.type === "scene")
+            return w.scene?.kind === "dark" ? 1 : 0;
+        if (w.type !== "image")
+            return -1;
+        const luma = WallpaperCatalog.lumaOf(w.path, !paperFilterOff.includes(w.path));
+        return luma < 0 ? -1 : luma < Tokens.hudLightBelow ? 1 : 0;
+    }
+    // --- end spec 004 US6 --------------------------------------------------------------------------
 
     function hasScreen(name: string): bool {
         return Quickshell.screens.some(s => s.name === name);
