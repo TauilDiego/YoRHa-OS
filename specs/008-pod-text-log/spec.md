@@ -5,7 +5,8 @@ da 003, o layout de lista + prévia + opções da 004 e a barra transparente da 
 
 **Created**: 2026-10-27
 
-**Status**: Rascunho, aguardando a aprovação do dono (spec e mockup)
+**Status**: Decisões do dono de 2026-10-27 aplicadas (seção "Clarifications"); spec e plano aguardando a
+aprovação do dono
 
 **Input**: Fase U4 do `PLAN.md` (§9): "U4 Pod e text log | Notificações e OSD | Uma notificação de
 teste vira transmissão do Pod". O shell passa a ser o servidor de notificações do desktop, no lugar
@@ -21,8 +22,33 @@ principal; arquivo de trabalho `mock008/index.html` no scratchpad da sessão).
 - **Faixa:** o material das superfícies passageiras desta fase (transmissão, faixa crítica, OSD):
   tinta translúcida com retícula e arcos finos, texto claro, como a faixa de tutorial do jogo.
 - **Quem fala:** o rótulo da transmissão. É o nome do app; as mensagens do próprio rien-OS falam
-  como **Relay 01** (nome nosso, não o do jogo; ver as perguntas em aberto).
-- **Text log:** o histórico das transmissões, num popup.
+  com a **voz do sistema**, `Relay 01` de fábrica (nome nosso, não o do jogo; trocável nas
+  configurações).
+- **Text log:** o histórico das transmissões. É uma tela só, que aparece num popup próprio agora e
+  numa aba do menu de pausa quando o U3 (spec 007) chegar.
+- **Opções de notificações:** a categoria "Notifications" das configurações (spec 003), onde ficam as
+  alternativas de desenho desta fase, trocáveis ao vivo.
+
+## Clarifications
+
+### Session 2026-10-27 (decisões do dono)
+
+- **Regra geral:** alternativa de desenho vira opção nas configurações do sistema, trocável ao vivo, com
+  a recomendada de fábrica, mesmo quando o dono acha que não vai usar. → Nova categoria
+  **Notifications** no catálogo da 003 (US7, FR-038 a FR-043).
+- Q: Onde aparecem as transmissões normais? → A: as três, como opção `Position`: **Corner** (de
+  fábrica), **Top band** e **Subtitle** (FR-004).
+- Q: Onde fica o OSD? → A: opção `OSD position`: **Bottom** (de fábrica) ou **Top** (FR-028).
+- Q: O text log vai pro disco? → A: opção `Text log`: **Session only** (de fábrica) ou **Saved** (as
+  últimas 100 no estado do usuário) (FR-019).
+- Q: Como o rien-OS se chama quando fala? → A: opção `System voice`: **Relay 01** (de fábrica),
+  **rien-OS** ou **System** (FR-003).
+- Q: O text log é popup ou aba do menu de pausa? → A: **os dois**: popup agora e aba do menu de pausa
+  quando o U3 chegar, com a mesma tela (FR-020, FR-044).
+- Q: Atalhos? → A: **adiados pelo dono.** `SUPER + N` (log) e `SUPER + CTRL + N` (não perturbe), com
+  ALT na VM, ficam como proposta, pendentes de confirmação (FR-020, FR-026).
+- Pela regra geral, também viram opção as outras escolhas únicas que tinham alternativa razoável:
+  monitor, quantas na tela, duração, digitação, tamanho do log e o que fazer em tela cheia (FR-039).
 - **OSD:** o aviso curto que aparece ao mudar volume, microfone ou brilho.
 
 ## User Scenarios & Testing *(mandatory)*
@@ -30,7 +56,8 @@ principal; arquivo de trabalho `mock008/index.html` no scratchpad da sessão).
 ### User Story 1 - Uma notificação vira transmissão (Priority: P1)
 
 Um app manda uma notificação (ou o usuário roda `notify-send` no terminal). No monitor em foco,
-abaixo da barra do topo e encostada na direita, aparece uma transmissão:
+abaixo da barra do topo e encostada na direita (na posição de fábrica, `Corner`; US7), aparece uma
+transmissão:
 - a faixa entra varrendo da borda;
 - em cima, um quadradinho e quem fala ("Firefox", "Relay 01") com a hora à direita;
 - embaixo, o título em peso forte e o texto, que vai sendo digitado com um cursor de bloco no fim.
@@ -126,14 +153,16 @@ um cliente de teste que aceita resposta e conferir o texto recebido.
 ### User Story 4 - O text log (Priority: P2)
 
 O usuário aperta um atalho (ou clica no contador da barra) e abre o text log: um popup no centro do
-monitor em foco, com o resto da tela escurecido, no layout de lista + prévia + opções da 004:
+monitor em foco, com o resto da tela escurecido, no layout de lista + prévia + opções da 004. A mesma
+tela vira a aba de log do menu de pausa quando o U3 (spec 007) chegar:
 - **à esquerda:** as transmissões da sessão, da mais nova pra mais velha, agrupadas em NOW
   (última hora) e EARLIER, com a pipa;
 - **no meio:** a transmissão em foco, inteira, na faixa, digitada de novo ao receber o foco, com as
   ações que ainda valem;
 - **à direita:** as opções (Do not disturb, o filtro Show e Clear all) e as contagens.
 
-Abrir o log marca tudo como lido.
+Abrir o log marca tudo como lido. Com a opção `Text log` em `Saved`, o log também mostra as
+transmissões das sessões anteriores (as últimas 100), sem ações.
 
 **Why this priority**: É a metade "text log" da fase e o lugar pra ler o que passou rápido, o que
 chegou em não perturbe e o que foi cortado numa enxurrada. As transmissões já funcionam sem ele.
@@ -157,13 +186,18 @@ e por screenshots.
 6. **Given** o foco na lista, **When** o usuário aperta →, **Then** o foco vai pras opções; ←/→ mudam
    Do not disturb e o filtro; Enter em "Clear all" esvazia o log; Esc volta; um segundo Esc fecha.
 7. **Given** transmissões não lidas, **When** o log abre, **Then** o contador da barra zera.
+8. **Given** a opção `Text log` em `Saved` e entradas no log, **When** o usuário sai da sessão e entra
+   de novo, **Then** o log abre com as mesmas entradas (as últimas 100), marcadas como de uma sessão
+   anterior, com as ações apagadas.
+9. **Given** a tela do log desenhada num corpo de outro tamanho (o do menu de pausa), **When** ela
+   aparece, **Then** as três colunas se ajustam ao corpo, sem cortar nem vazar, com as mesmas teclas.
 
 ---
 
 ### User Story 5 - OSD de volume, microfone e brilho (Priority: P2)
 
 Ao mudar o volume (pelas teclas, por outro app ou por comando), aparece na parte de baixo do monitor
-em foco, centralizado, um aviso curto na faixa: quadradinho, o nome (VOLUME), o medidor do design
+em foco, centralizado (de fábrica; `OSD position` muda pro topo, US7), um aviso curto na faixa: quadradinho, o nome (VOLUME), o medidor do design
 system em versão invertida e o número. Mudo mostra MUTE e o medidor apagado. O mesmo vale pro brilho
 da tela (BRIGHTNESS) e pro microfone (MIC ON / MIC OFF, sem medidor). Apertar várias vezes atualiza o
 mesmo aviso, que some ≈1,2 s depois da última mudança.
@@ -210,6 +244,44 @@ no log, cinco não lidas na barra.
 4. **Given** uma janela em tela cheia em foco, **When** chega uma notificação normal, **Then** ela vai
    direto pro log; ao sair da tela cheia, nada aparece de uma vez (o contador da barra avisa).
 
+---
+
+### User Story 7 - As opções de notificações (Priority: P2)
+
+O usuário abre as configurações do sistema (popup da 003, ou a aba SYSTEM do menu de pausa quando o
+U3 chegar) e encontra a categoria **Notifications**, com as alternativas desta fase: não perturbe,
+posição das transmissões (Corner, Top band, Subtitle), posição do OSD (Bottom, Top), o log no disco
+(Session only, Saved), a voz do sistema (Relay 01, rien-OS, System) e as outras escolhas (monitor,
+quantas na tela, duração, digitação, tamanho do log, tela cheia). Cada mudança vale na hora, sem
+reiniciar nada: a próxima transmissão (e as que estão na tela) já aparece do jeito novo. As escolhas
+ficam guardadas como estado do usuário e sobrevivem a reiniciar o shell.
+
+**Why this priority**: É a regra geral do dono (alternativa vira opção). As US1–US6 funcionam com os
+valores de fábrica sem ela.
+
+**Independent Test**: Na VM, abrir as configurações, ir em Notifications, trocar `Position` pras três
+posições mandando um `notify-send` em cada, trocar `OSD position` mudando o volume, trocar `System
+voice` disparando uma mensagem do rien-OS, trocar `Text log` pra `Saved`, reiniciar o shell e conferir
+o log; tudo por screenshots e pelo estado exportado.
+
+**Acceptance Scenarios**:
+
+1. **Given** as configurações abertas, **When** o usuário vai pra categoria Notifications, **Then** ela
+   mostra as opções da FR-039 com os valores atuais e, no quadro de descrição, o que cada uma faz e o
+   padrão.
+2. **Given** `Position` em `Corner` e uma transmissão na tela, **When** o usuário troca pra `Top band`,
+   **Then** a transmissão na tela passa pra faixa no topo na hora, e as próximas chegam lá.
+3. **Given** `Position` em `Subtitle`, **When** chega uma notificação, **Then** ela aparece embaixo, no
+   centro do monitor, como as falas do Pod, acima do OSD; as mais novas embaixo.
+4. **Given** `OSD position` em `Top`, **When** o volume muda, **Then** o OSD aparece no topo, logo abaixo
+   da barra (ou da faixa crítica, se houver uma).
+5. **Given** `System voice` em `System`, **When** o rien-OS manda uma mensagem própria, **Then** quem fala
+   é `System`; as notificações dos apps não mudam.
+6. **Given** `Text log` em `Saved`, **When** o usuário troca pra `Session only`, **Then** o arquivo do log
+   é apagado na hora e o log da sessão continua na memória.
+7. **Given** uma escolha feita, **When** o shell reinicia, **Then** ela continua valendo; a config do
+   usuário (`shell.json`) nunca é escrita.
+
 ### Edge Cases
 
 - **Enxurrada** (um app manda 5 em 1 s, ou um script manda 100): transmissões seguidas do mesmo app se
@@ -245,6 +317,22 @@ no log, cinco não lidas na barra.
 - **Volume acima de 100%:** o medidor fica cheio e o número mostra o valor real (ex.: 120).
 - **Tela pequena ou escala alta:** as larguras são em medidas do jogo × escala da tela; nada vaza do
   monitor.
+- **`Top band` com a faixa crítica:** a crítica fica em cima, logo abaixo da barra; as faixas normais
+  empilham embaixo dela, cada uma da largura do monitor, a mais nova em cima.
+- **`Subtitle` com o OSD embaixo:** a pilha fica acima da área do OSD, que nunca é coberta; a mais nova
+  fica embaixo, mais perto do centro de baixo.
+- **OSD no topo com a faixa crítica:** o OSD desce pra logo abaixo da faixa crítica.
+- **Troca de posição com transmissões na tela:** elas mudam de lugar na hora, sem animação, e mantêm o
+  tempo restante.
+- **Log salvo e privacidade:** o arquivo só pode ser lido pelo usuário; as passageiras nunca entram;
+  imagens só entram como caminho de arquivo (imagem enviada em dados não é gravada); ações e respostas
+  não são gravadas.
+- **Log salvo ilegível ou de outra versão:** o log começa vazio, o arquivo vai pra um backup ao lado e
+  o log do shell registra o motivo.
+- **Diminuir o tamanho do log:** as entradas mais velhas além do novo limite saem na hora (e do
+  arquivo, com `Saved`).
+- **Monitor fixo que não existe mais:** as transmissões vão pro monitor em foco até ele voltar; a opção
+  continua mostrando o nome dele.
 
 ## Requirements *(mandatory)*
 
@@ -263,16 +351,20 @@ no log, cinco não lidas na barra.
 - **FR-003**: Cada notificação MUST aparecer como uma transmissão na faixa (tinta translúcida com
   retícula, texto claro, cantos retos, sem desfoque), com:
   - um bloco de 14 px na esquerda, na cor da urgência (FR-010);
-  - quem fala: quadradinho + nome do app (ou `Relay 01`, pras mensagens do rien-OS), `small`, e a hora
-    de chegada à direita;
+  - quem fala: quadradinho + nome do app (ou a voz do sistema, `Relay 01` de fábrica, pras mensagens
+    do rien-OS; FR-039), `small`, e a hora de chegada à direita;
   - o título, uma linha, peso forte;
   - o texto, até 4 linhas, digitando;
   - opcionalmente: imagem (à direita), medidor de progresso e botões de ação (embaixo);
   - uma linha fina embaixo que encolhe com o tempo restante.
-- **FR-004**: A pilha MUST ficar no monitor em foco na hora da chegada, abaixo da barra do topo e
-  encostada na direita (posição configurável: canto, faixa no topo ou legenda embaixo; de fábrica,
-  canto), com até 3 transmissões, a mais nova em cima. O monitor também é configurável: o em foco (de
-  fábrica) ou um monitor fixo pelo nome.
+- **FR-004**: A pilha MUST ficar no monitor escolhido (de fábrica, o em foco na hora da chegada; ou um
+  monitor fixo pelo nome), com até 3 transmissões (opção `On screen`), numa das três posições da opção
+  `Position`, todas como no mockup:
+  - **Corner** (de fábrica): abaixo da barra do topo, encostada na direita, 540 de largura, a mais nova
+    em cima;
+  - **Top band**: faixas da largura do monitor logo abaixo da barra, o texto numa coluna centrada,
+    separadas por 2 px, a mais nova em cima;
+  - **Subtitle**: embaixo, no centro, 1100 de largura, acima da área do OSD, a mais nova embaixo.
 - **FR-005**: A transmissão MUST entrar com uma varredura da faixa a partir da borda (≈150 ms, o
   `motion.highlight`) e sair com um fade (≈150 ms). As outras da pilha deslizam pro lugar novo.
 - **FR-006**: O texto MUST ser digitado: título e quem fala aparecem inteiros; o corpo entra a ≈90
@@ -325,12 +417,19 @@ no log, cinco não lidas na barra.
 
 **Text log (US4)**
 
-- **FR-019**: O log MUST guardar as transmissões da sessão (as 100 mais novas; configurável), menos as
-  passageiras, em memória: sobrevive a recarregar o shell, não a sair da sessão, e nada vai pro disco.
-- **FR-020**: O log MUST abrir por um atalho da sessão (`SUPER + N`; na VM, `ALT + N`), por comando de
-  controle e por clique no contador da barra, como o popup da 003: centrado no monitor em foco, resto
-  escurecido sem desfoque, teclado só pra ele, fecha com Esc ou clique fora.
-- **FR-021**: O layout MUST seguir o mockup: título `LOG -Transmissions`; lista à esquerda agrupada em
+- **FR-019**: O log MUST guardar as transmissões (as 100 mais novas; opção `Log size`), menos as
+  passageiras, conforme a opção `Text log`:
+  - **Session only** (de fábrica): em memória; sobrevive a recarregar o shell, não a sair da sessão;
+    nada vai pro disco;
+  - **Saved**: também num arquivo no estado do usuário (`$XDG_STATE_HOME/rien-os/`), legível só por
+    ele, regravado a cada mudança; ao entrar na sessão, o log volta com as entradas salvas, marcadas
+    como de uma sessão anterior e sem ações. Voltar pra `Session only` apaga o arquivo na hora.
+- **FR-020**: O log MUST abrir por um atalho da sessão (proposta: `SUPER + N`; na VM, `ALT + N`;
+  **pendente de confirmação do dono**), por comando de controle e por clique no contador da barra, como
+  o popup da 003: centrado no monitor em foco, resto escurecido sem desfoque, teclado só pra ele, fecha
+  com Esc ou clique fora.
+- **FR-021**: O layout MUST seguir o mockup (no popup; no menu de pausa, o título e o rodapé são os
+  da moldura do menu, FR-044): título `LOG -Transmissions`; lista à esquerda agrupada em
   NOW e EARLIER, cada linha com quadradinho, quem fala, título e hora, mais `×N` e a etiqueta `NEW`
   quando for o caso; no meio, o quadro com a transmissão em foco na faixa, inteira, com as ações, e
   APP, RECEIVED, URGENCY e STATUS embaixo; à direita, o quadro "Options" com Do not disturb, Show (All,
@@ -351,17 +450,21 @@ no log, cinco não lidas na barra.
 
 **Não perturbe (US6)**
 
-- **FR-026**: O não perturbe MUST ligar e desligar por atalho (`SUPER + CTRL + N`; na VM,
-  `ALT + CTRL + N`), por comando e pelas opções do log, e ser guardado como estado do usuário
-  (sobrevive a reiniciar o shell), fora dos arquivos de configuração dele.
-- **FR-027**: Com o não perturbe ligado, ou com uma janela em tela cheia em foco, as notificações
+- **FR-026**: O não perturbe MUST ligar e desligar por atalho (proposta: `SUPER + CTRL + N`; na VM,
+  `ALT + CTRL + N`; **pendente de confirmação do dono**), por comando, pelas opções do log e pela
+  categoria Notifications das configurações, e ser guardado como estado do usuário (sobrevive a
+  reiniciar o shell), fora dos arquivos de configuração dele. Os quatro caminhos mostram sempre o
+  mesmo valor.
+- **FR-027**: Com o não perturbe ligado, ou com uma janela em tela cheia em foco (com a opção
+  `In fullscreen` em `Hold`, de fábrica; em `Show`, a tela cheia não segura nada), as notificações
   baixas e normais MUST ir direto pro log como não lidas; as críticas aparecem. Com o log aberto, as
   novas entram direto na lista dele, marcadas como novas, em vez de aparecer na pilha.
 
 **OSD (US5)**
 
 - **FR-028**: Mudar o volume, o mudo, o mudo do microfone ou o brilho da tela, por qualquer caminho, MUST
-  mostrar o OSD no monitor em foco, centralizado na parte de baixo: faixa, quadradinho, nome, medidor
+  mostrar o OSD no monitor em foco, centralizado, na posição da opção `OSD position` (de fábrica,
+  `Bottom`, a 110 da borda de baixo; `Top`, logo abaixo da barra ou da faixa crítica): faixa, quadradinho, nome, medidor
   invertido (largura 300, os 11 px do `hp-bar`) e número com algarismos tabulares; MUTE com o medidor
   apagado; MIC ON / MIC OFF sem medidor.
 - **FR-029**: Um OSD MUST ficar ≈1,2 s depois da última mudança e atualizar no lugar; nunca há dois. O
@@ -374,12 +477,13 @@ no log, cinco não lidas na barra.
   sem fade, texto inteiro de uma vez e sem cursor, sem a linha de tempo.
 - **FR-032**: Com dados de teste, o log e a pilha MUST vir de um arquivo de fixtures do shell
   (`notifications-default.json`), com horas fixas, pros screenshots saírem iguais. Um comando de
-  controle MUST disparar as notificações de exemplo do mockup (normal, com ações, crítica, enxurrada de
-  5, texto longo, com imagem, com progresso).
+  controle MUST disparar as notificações de exemplo do mockup (normal, com ações, com resposta e
+  imagem, crítica, enxurrada de 5, texto longo, com progresso, baixa, 100 de um script), mandando-as
+  pelo caminho real de um app.
 - **FR-033**: Comandos de controle MUST permitir: abrir e fechar o log, ligar e desligar o não
   perturbe, dispensar tudo da tela, limpar o log, mostrar um OSD com um valor (pra testes e pra VM sem
-  brilho) e exportar o estado (servidor, não perturbe, transmissões na tela com tempo restante, log,
-  não lidas, OSD visível).
+  brilho), mudar as opções de notificações e exportar o estado (servidor, não perturbe, opções,
+  transmissões na tela com posição e tempo restante, log, não lidas, OSD visível).
 
 **Design system, textos e qualidade**
 
@@ -391,13 +495,50 @@ no log, cinco não lidas na barra.
   - o **OSD**, com medidor, mudo e sem medidor;
   - o contador da barra.
   O log reusa a moldura da 003, `CursorList`, `KeyHints`, `OptionRow` e o layout de lista + prévia +
-  opções da 004.
+  opções da 004. As três posições da pilha e as duas do OSD aparecem na galeria.
 - **FR-035**: Todo texto fixo MUST ficar em inglês, no lugar central de textos (`Strings`); o texto
   das notificações aparece como o app mandou.
 - **FR-036**: Nenhum texto de notificação MUST passar por um interpretador de comandos, nem ser lido
   como marcação além de negrito, itálico e sublinhado (ver "Marcação no texto" nos casos de borda).
 - **FR-037**: O roteiro inteiro (todas as histórias) MUST deixar o log do shell sem erro e sem aviso de
   QML.
+
+**Opções de notificações (US7)**
+
+- **FR-038**: As configurações da 003 MUST ganhar a categoria **Notifications** (depois de Sound), com
+  as opções da FR-039. Diferente das outras categorias da 003 (que continuam dados de teste), estas
+  valem de verdade: mudar uma opção muda o comportamento na hora, sem reiniciar o shell nem recarregar
+  nada.
+- **FR-039**: As opções, com o valor de fábrica primeiro:
+  - `Do not disturb`: Off / On (o mesmo estado da FR-026);
+  - `Position`: Corner / Top band / Subtitle (FR-004);
+  - `OSD position`: Bottom / Top (FR-028);
+  - `System voice`: Relay 01 / rien-OS / System (FR-003);
+  - `Text log`: Session only / Saved (FR-019);
+  - `Log size`: 100 / 50 / 200 (FR-019);
+  - `Monitor`: Focused / cada saída pelo nome (FR-004);
+  - `On screen`: 3 / 1 / 5 (FR-004, FR-018);
+  - `Duration`: Normal / Short (×0,66) / Long (×1,5), sobre os tempos da FR-007 (o tempo pedido pelo
+    app não muda);
+  - `Typing`: On / Off (Off: o texto aparece inteiro, como com movimento reduzido, FR-006);
+  - `In fullscreen`: Hold / Show (FR-027).
+- **FR-040**: As escolhas MUST ser guardadas como estado do usuário (`$XDG_STATE_HOME/rien-os/`),
+  nunca na config dele. A ordem de quem vale: a escolha guardada, depois o `shell.json` do usuário,
+  depois os padrões do projeto (como o papel de parede da 004).
+- **FR-041**: Uma troca de `Position`, `OSD position`, `Monitor` ou `On screen` MUST valer também pro
+  que já está na tela: as transmissões mudam de lugar na hora (sem animação) e mantêm o tempo
+  restante; o que passar do novo limite sai pro log.
+- **FR-042**: O quadro de descrição de cada opção MUST dizer o que ela faz e o padrão; `Text log` diz
+  que `Saved` grava as mensagens no disco e que voltar pra `Session only` apaga o arquivo.
+- **FR-043**: Com dados de teste, as opções MUST valer só em memória (nada é gravado), pra os testes
+  não mexerem no estado do usuário.
+
+**O log em dois lugares**
+
+- **FR-044**: A tela do log MUST ser uma peça só, que funciona em qualquer corpo de painel: no popup
+  próprio (agora) e como aba do menu de pausa (spec 007, quando ela chegar), sem cópia. Ela se ajusta
+  ao tamanho que recebe e expõe o título, o texto do rodapé e as teclas pra moldura que a hospeda
+  desenhar.
 
 ### Key Entities
 
@@ -410,6 +551,8 @@ no log, cinco não lidas na barra.
   fechada.
 - **Estado de notificações:** servidor ativo, não perturbe, não lidas, filtro do log.
 - **OSD:** tipo (volume, microfone, brilho), valor, mudo, monitor, tempo restante.
+- **Opções de notificações:** os valores da FR-039, de onde cada um veio (escolha guardada, config do
+  usuário, padrão).
 
 ## Success Criteria *(mandatory)*
 
@@ -449,6 +592,15 @@ Cada critério diz qual evidência da VM o comprova (constituição IV). Os test
 - **SC-012**: O log do shell fica sem erro e sem aviso de QML depois do roteiro inteiro, e o lint fica
   limpo. Evidência: o trecho do log e o lint.
 - **SC-013**: O dono aprova o visual comparando os screenshots com o mockup. Evidência: a aprovação.
+- **SC-014** (US7): Cada valor de `Position` e de `OSD position`, trocado pelas configurações com teclas
+  reais, muda o lugar da transmissão (ou do OSD) já na tela e o da próxima, sem reiniciar o shell e sem
+  aviso de QML. Evidência: screenshots antes e depois de cada troca e o estado exportado.
+- **SC-015** (US7): Com `Text log` em `Saved`, 5 entradas sobrevivem a reiniciar o shell e a reiniciar a
+  sessão da VM; o arquivo tem permissão só do usuário; voltar pra `Session only` apaga o arquivo; nada é
+  escrito no `~/.config`. Evidência: o estado exportado, `stat` do arquivo e a lista do `~/.config` antes
+  e depois.
+- **SC-016** (FR-044): A tela do log desenhada num corpo do tamanho do menu de pausa (na galeria) fica
+  sem corte e sem vazamento em 1080 e hidpi. Evidência: screenshots da galeria.
 
 ## Assumptions
 
@@ -461,10 +613,10 @@ Cada critério diz qual evidência da VM o comprova (constituição IV). Os test
   mudanças (FR-028), não muda nada.
 - **Sem sons:** as transmissões não tocam som nesta fase (nada de sons do jogo, e o rien-OS ainda não
   tem sons próprios).
-- **Histórico sem disco:** o log vive só na sessão, por privacidade (mensagens de chat e e-mail).
-  Gravar em disco é uma das perguntas em aberto.
-- **Nome de quem fala:** o nome do app, como ele mesmo se apresenta; o rien-OS fala como `Relay 01`.
-  O formato "nome + número" lembra o do jogo sem copiar o texto dele.
+- **Histórico no disco:** de fábrica, o log vive só na sessão, por privacidade (mensagens de chat e
+  e-mail); `Saved` é escolha do usuário (FR-019).
+- **Nome de quem fala:** o nome do app, como ele mesmo se apresenta; o rien-OS fala com a voz do sistema
+  (`Relay 01` de fábrica). O formato "nome + número" lembra o do jogo sem copiar o texto dele.
 - **Medidas e cores:** a faixa (tinta ≈84%, retícula, arcos) e os tempos são estimativas, em tokens,
   calibráveis na VM. O material vem da faixa de tutorial medida no §6; nenhuma imagem do jogo entra no
   repositório.
@@ -472,17 +624,19 @@ Cada critério diz qual evidência da VM o comprova (constituição IV). Os test
   - ações com ícone, sons e notificações com vídeo;
   - regras por app (silenciar um app, mudar urgência);
   - OSD de luz do teclado, layout do teclado e Caps Lock (o componente serve pra eles depois);
-  - o log como aba do menu de pausa (U3), que pode reusar a mesma tela depois;
+  - pôr a aba de log no menu de pausa: é trabalho da 007 (a 008 entrega a tela pronta pra isso, FR-044);
+  - as configurações de outras categorias da 003 passarem a valer de verdade (só Notifications vale aqui);
   - tradução (U5b).
 - **Dependências:** a moldura de popup, `CursorList`, `OptionRow`, `DescriptionCard`, `KeyHints`,
   `Meter` (inverted) e o movimento reduzido da 003; o layout de lista + prévia + opções da 004; a barra
-  transparente com o tom do fundo (emenda da 004, em andamento), onde entra o contador.
+  transparente com o tom do fundo (emenda da 004, já na base), onde entra o contador; o catálogo de
+  configurações da 003, que ganha a categoria Notifications; a opção "Bar contrast" da 004, em
+  andamento em paralelo, que também é uma opção que vale de verdade (as duas usam o mesmo jeito de
+  ligar uma opção do catálogo a um valor real); a moldura do menu de pausa da 007, pra aba de log.
 - **Desempenho:** implementar antes de otimizar (constituição VII). A retícula e os arcos são desenho
   estático da faixa, sem desfoque; a digitação é o único movimento contínuo. O custo de uma enxurrada é
   medido aqui (SC-005); a meta vem no U6.
-- **Perguntas em aberto pro dono** (a spec já usa o padrão recomendado; trocar muda só a FR citada):
-  1. posição das transmissões normais: canto (padrão), faixa no topo ou legenda embaixo (FR-004);
-  2. posição do OSD: embaixo, centralizado (padrão), ou no topo, sob a barra (FR-028);
-  3. o log no disco: só na sessão (padrão) ou as últimas 100 no estado do usuário, desligável (FR-019);
-  4. o nome da voz do rien-OS: `Relay 01` (padrão), `rien-OS` ou `System` (FR-003);
-  5. o log em popup próprio (padrão, agora), em aba do menu de pausa (U3) ou nos dois (FR-020).
+- **Atalhos:** `SUPER + N` e `SUPER + CTRL + N` (ALT na VM) são proposta; o dono adiou as decisões de
+  atalho. Na VM eles entram como provisórios, pra os testes; trocar é só mudar a config.
+- **Perguntas em aberto:** as cinco da versão anterior foram respondidas pelo dono em 2026-10-27
+  (ver "Clarifications").

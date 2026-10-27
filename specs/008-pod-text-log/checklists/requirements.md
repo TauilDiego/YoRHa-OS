@@ -40,12 +40,12 @@
     configuração `reduceMotion`.
 
   Não escolhe tecnologia nem estrutura de código.
-- **Sem [NEEDS CLARIFICATION]:** o dono não pôde ser consultado durante a escrita. As decisões que
-  mudam o resultado ficaram com um padrão razoável na spec e viraram perguntas em aberto no relatório
-  e no mockup (posição das transmissões, posição do OSD, histórico em disco, nome da voz do rien-OS,
-  log em popup próprio ou aba do menu de pausa). Trocar qualquer uma muda só a FR correspondente.
+- **Sem [NEEDS CLARIFICATION]:** as cinco perguntas em aberto foram respondidas pelo dono em
+  2026-10-27 (seção "Clarifications" da spec). Pela regra geral dele, as alternativas viraram opções da
+  categoria Notifications das configurações (US7, FR-038 a FR-044), com a recomendada de fábrica.
 - **Suposições calibráveis por token:** tinta da faixa (≈84%), velocidade de digitação (≈90 caracteres
   por segundo, no máximo ≈0,7 s), tempos por urgência, tempo do OSD (≈1,2 s).
-- **Atalhos (`SUPER + N`, `SUPER + CTRL + N`; ALT na VM):** suposições, trocáveis na config.
-- **Pronta para** `/speckit-clarify` (se o dono quiser responder as perguntas antes) ou `/speckit-plan`,
-  depois da aprovação do dono (constituição V).
+- **Atalhos (`SUPER + N`, `SUPER + CTRL + N`; ALT na VM):** proposta, pendente de confirmação do dono
+  (ele adiou as decisões de atalho); trocáveis na config.
+- **Atualizada em 2026-10-27** com as decisões do dono; plano e tarefas escritos, aguardando a
+  aprovação do dono (constituição V).
