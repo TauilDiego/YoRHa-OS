@@ -1,8 +1,11 @@
 // rien-OS shell: YoRHa design system + HUD (spec 001).
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Quickshell
 import Quickshell.Io
 import "ds"
+import "gallery"
 import "services"
 
 ShellRoot {
@@ -16,6 +19,15 @@ ShellRoot {
     }
 
     property bool galleryOpen: false
+
+    // The design system gallery (US3): created only while open. A single instance; the
+    // compositor puts it on the focused output.
+    LazyLoader {
+        active: shell.galleryOpen
+        Gallery {
+            onCloseRequested: shell.galleryOpen = false
+        }
+    }
 
     // --- IPC (contracts/ipc.md) ---------------------------------------------------------------
     IpcHandler {
