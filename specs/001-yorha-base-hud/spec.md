@@ -196,10 +196,10 @@ com dados de teste, dois screenshots seguidos saem iguais.
 **HUD**
 
 - **FR-009**: O HUD MUST ocupar uma faixa no topo de cada monitor e reservar o espaço dela, pra
-  que as janelas não fiquem por baixo. A faixa MUST ter 50px lógicos por padrão (aba de 33px),
-  configurável entre 28 e 56px, com a barra de abas do jogo, um vão visível entre as abas e a
-  régua pontilhada embaixo (revisado pelo dono em 2026-10-27: era 40px, com vão de ≈2px e régua
-  menor).
+  que as janelas não fiquem por baixo. A faixa MUST ter 68px lógicos por padrão (aba de 33px),
+  configurável entre 28 e 96px, com a barra de abas do jogo, um vão visível entre as abas e a
+  régua pontilhada embaixo, na escala do jogo (revisado pelo dono em 2026-10-27: era 40px, com
+  vão de ≈2px e régua bem menor).
 - **FR-010**: O HUD MUST mostrar, da esquerda pra direita:
   1. a marca do sistema: as duas faixas verticais do jogo, sem nome nem logo (o nome rien-OS
      aparece só na galeria e nos menus);
@@ -280,7 +280,7 @@ com dados de teste, dois screenshots seguidos saem iguais.
   pedir mudanças estruturais: no máximo ajustes de cor, tamanho ou espaçamento.
 - **SC-007**: Uma mudança num arquivo da UI aparece na VM em até 3 s, com a recarga ao vivo do
   laboratório.
-- **SC-008**: Na VM, nos perfis 1920x1080 @1 e 2560x1600 @1,25, a barra mede a altura padrão em px lógicos (50) e o
+- **SC-008**: Na VM, nos perfis 1920x1080 @1 e 2560x1600 @1,25, a barra mede a altura padrão em px lógicos (68) e o
   grid e as réguas aparecem nítidos (sem borrado de meio pixel) nos screenshots.
 
 - **SC-009**: Num workspace vazio, o screenshot mostra o fundo (papel e grid no centro da tela);

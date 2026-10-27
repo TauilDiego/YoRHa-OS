@@ -183,7 +183,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 
 | Ponto | No jogo (1080p) | No rien-OS |
 |---|---|---|
-| Altura da barra do topo | Aba de 47px, texto 27px | **Revisado (2026-10-27):** barra de 50px, configurável de 28 a 56. De cima pra baixo: um pouco de papel, a aba (66% da altura: 33px), um vão de 8px de jogo (≈6px) e a régua pontilhada em `s × 0,42` (≈1,9× a anterior). A aba em foco desce até a régua por uma haste animada (`motion.touch`, 160 ms, logo depois da tinta; recolhe em `motion.untouch`, 120 ms). A versão cheia fica pros menus de tela inteira |
+| Altura da barra do topo | Aba de 47px, texto 27px | **Revisado (2026-10-27):** barra de 68px, configurável de 28 a 96. De cima pra baixo: 3px de papel, a aba (33px, `s ≈ 0,70`), um vão de 17px de jogo (12px) e a régua pontilhada **na escala do jogo** (`s × 1,0`: pontos de 4px, padrão de 20px de altura), nítida em pixels físicos inteiros. A aba em foco desce até a régua por uma haste animada (`motion.touch`, 160 ms, logo depois da tinta; recolhe em `motion.untouch`, 120 ms). A versão cheia fica pros menus de tela inteira |
 | Escala | Fixa em 1080p | Tokens em medidas do jogo × fator da tela × `uiScale` (ver "Escala") |
 | Fontes | Comerciais | M PLUS 1 por padrão; as originais quando estiverem instaladas |
 | Alerta | Não existe | `alert` `#8F3A30`, só pra estados críticos |
@@ -200,7 +200,7 @@ Segue o modelo do Serpantinum, que funciona bem com monitores de escalas diferen
 - **Tudo em pixels lógicos.** A escala fracionária do monitor fica com o Hyprland e o Qt; a UI
   não calcula DPI nem lê a resolução física.
 - **Tokens nas medidas do jogo a 1080p** (as desta página). Cada tela aplica um fator `s`:
-  - HUD: `s = alturaDaAba / 47`. Com a barra padrão de 50px, a aba tem 33px e `s ≈ 0,70`;
+  - HUD: `s = alturaDaAba / 47`. Com a barra padrão de 68px, a aba tem 33px e `s ≈ 0,70`;
   - menus de tela inteira: `s = alturaLógicaDoMonitor / 1080`, pra ocupar a tela como no jogo.
 - **`uiScale`** (padrão 1) multiplica tudo, pra quem quiser a UI maior ou menor sem mexer na
   escala do monitor.

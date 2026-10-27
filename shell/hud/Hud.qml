@@ -31,9 +31,9 @@ PanelWindow {
 
     // Layout, top to bottom: a little paper, the tabs, a visible gap, then the dotted rule.
     // The tab takes a fixed share of the bar; s (research R5) scales the game's 47 px tab to it.
-    readonly property real tabShare: 0.66
-    readonly property real ruleGap: 8                    // game px between the tabs and the rule
-    readonly property real ruleShare: 0.42               // the rule's pattern, relative to s
+    readonly property real tabShare: 0.485             // 33 px of the default 68
+    readonly property real ruleGap: 17                   // game px between the tabs and the rule
+    readonly property real ruleShare: 1.0                // the rule's pattern, relative to s: the game's own size
     readonly property real tabH: Math.round(Settings.barHeight * tabShare)
     readonly property real s: tabH / Tokens.space.tabH * Settings.uiScale
     readonly property int margin: Tokens.px(14, s)

@@ -22,7 +22,7 @@ Fonte única dos valores do `docs/design-system.md`. Todos os tamanhos estão em
 | Campo | Tipo | Padrão | Validação |
 |---|---|---|---|
 | `uiScale` | real | 1.0 | 0,5–3,0. Fora da faixa, usa o padrão e registra um aviso |
-| `barHeight` | int | 50 | Limitado a 28–56 |
+| `barHeight` | int | 68 | Limitado a 28–96 |
 | `vignette` | bool | true | — |
 
 Origem: `shell/config/defaults.json`, sobrescrito por `$XDG_CONFIG_HOME/rien-os/shell.json`.
