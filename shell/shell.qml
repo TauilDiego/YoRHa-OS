@@ -4,6 +4,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 import "ds"
 import "gallery"
 import "hud"
@@ -24,6 +25,13 @@ ShellRoot {
         target: Tokens
         property: "monitorScales"
         value: Compositor.monitorScales
+    }
+
+    // spec 003: reduced motion (fades and the selector blink become instant).
+    Binding {
+        target: Tokens
+        property: "reduced"
+        value: Settings.reduceMotion
     }
 
     property bool galleryOpen: false
@@ -82,6 +90,87 @@ ShellRoot {
         }
     }
 
+    // --- spec 003: settings pop-up -------------------------------------------------------------
+    // Opens on the focused monitor and stays there until it closes; opening re-reads the
+    // focused monitor first (research R3). Closing is two-step, like the gallery (research R2):
+    // the pop-up hides and drops its keyboard focus at once, and is unloaded a moment later.
+    property bool settingsOpen: false
+    property bool settingsOpening: false
+    property bool settingsLoaded: false
+    property string settingsMonitor: ""
+    property var settingsLast: ({})              // the closed pop-up's last state, for `dump`
+    readonly property var settingsScreen: {
+        for (const sc of Quickshell.screens)
+            if (sc.name === settingsMonitor)
+                return sc;
+        return Quickshell.screens[0] ?? null;
+    }
+
+    function openSettings(): void {
+        if (settingsOpen || settingsOpening)
+            return;
+        settingsOpening = true;
+        Compositor.refreshFocusedMonitor();
+        settingsFallback.restart();
+    }
+    // Called when the monitor query is back (or after the fallback, if it never comes).
+    function showSettings(): void {
+        if (!settingsOpening)
+            return;
+        settingsOpening = false;
+        settingsFallback.stop();
+        settingsMonitor = Compositor.focusedMonitor;
+        settingsOpen = true;
+    }
+    function closeSettings(): void {
+        settingsOpening = false;
+        settingsOpen = false;
+    }
+    Connections {
+        target: Compositor
+        function onMonitorScalesChanged(): void {
+            shell.showSettings();
+        }
+    }
+    Timer {
+        id: settingsFallback
+        interval: 250
+        onTriggered: shell.showSettings()
+    }
+
+    onSettingsOpenChanged: {
+        if (settingsOpen) {
+            settingsUnload.stop();
+            settingsLoaded = true;
+        } else {
+            settingsUnload.restart();
+        }
+    }
+    Timer {
+        id: settingsUnload
+        interval: 150
+        onTriggered: if (!shell.settingsOpen) shell.settingsLoaded = false
+    }
+    LazyLoader {
+        id: settingsLoader
+        active: shell.settingsLoaded
+        // Placeholder until the pop-up exists (T012); replaced by SettingsPopup (T023).
+        PanelWindow {
+            screen: shell.settingsScreen
+            anchors {
+                top: true
+                left: true
+            }
+            implicitWidth: 200
+            implicitHeight: 100
+            exclusionMode: ExclusionMode.Ignore
+            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.namespace: "rien-popup"
+            WlrLayershell.keyboardFocus: shell.settingsOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+            color: Tokens.color.darkGray
+        }
+    }
+
     // --- IPC (contracts/ipc.md) ---------------------------------------------------------------
     IpcHandler {
         target: "gallery"
@@ -101,6 +190,37 @@ ShellRoot {
         target: "wallpaper"
         function motion(on: bool): void { shell.wallpaperMotionOverride = on; }
         function isMoving(): string { return shell.wallpaperMoving ? "true" : "false"; }
+    }
+
+    // spec 003 (specs/003-settings-popup/contracts/ipc.md)
+    IpcHandler {
+        target: "settings"
+        function open(): void { shell.openSettings(); }
+        function close(): void { shell.closeSettings(); }
+        function toggle(): void {
+            if (shell.settingsOpen || shell.settingsOpening)
+                shell.closeSettings();
+            else
+                shell.openSettings();
+        }
+        function isOpen(): string { return shell.settingsOpen ? "true" : "false"; }
+        function reset(): void { SettingsModel.reset(); }
+        function dump(): string {
+            const page = shell.settingsLast;
+            return JSON.stringify({
+                open: shell.settingsOpen,
+                monitor: shell.settingsMonitor,
+                focus: page.focus ?? "categories",
+                category: page.category ?? (SettingsModel.categories[0]?.id ?? ""),
+                option: page.option ?? null,
+                busy: SettingsModel.busy,
+                error: SettingsModel.error,
+                keys: page.keys ?? [],
+                card: page.card ?? { title: "", note: "" },
+                values: SettingsModel.dumpValues(),
+                dimmed: SettingsModel.dimmedIds()
+            });
+        }
     }
 
     IpcHandler {

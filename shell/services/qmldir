@@ -5,3 +5,4 @@ singleton Telemetry 1.0 Telemetry.qml
 singleton Audio 1.0 Audio.qml
 singleton Battery 1.0 Battery.qml
 singleton Compositor 1.0 Compositor.qml
+singleton SettingsModel 1.0 SettingsModel.qml

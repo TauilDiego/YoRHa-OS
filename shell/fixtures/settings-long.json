@@ -1,0 +1,10 @@
+{
+  "clock": "2026-10-26T13:37:00",
+  "cpu": 23,
+  "mem": 41,
+  "volume": { "percent": 64, "muted": false },
+  "battery": { "percent": 87, "charging": false },
+  "workspaces": { "existing": [1, 2, 3], "focused": 2 },
+  "activeWindow": "kitty — ~/projetos",
+  "settings": "fixtures/settings-catalog-long.json"
+}

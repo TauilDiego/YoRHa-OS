@@ -53,5 +53,46 @@ Singleton {
         readonly property string variantPlain: "plain"
         readonly property string samplePageTitle: "Items"
         readonly property string samplePageSubtitle: "All Items"
+        // spec 003: the settings pieces, on the gallery's second page (Tab)
+        readonly property string page2Subtitle: "-Design System 2/2"
+        readonly property string valueStepper: "Value stepper"
+        readonly property string stepperMiddle: "middle"
+        readonly property string stepperStart: "start"
+        readonly property string stepperEnd: "end"
+        readonly property string meterEditable: "editable"
+        readonly property string meterInverted: "inverted"
+        readonly property string keyHints: "Key hints"
+        readonly property string optionRow: "Option row"
+        readonly property string stateFocused: "focused"
+        readonly property string descriptionCard: "Description card"
+        readonly property string cardWithNote: "with note"
+        readonly property string cursorListUnfocused: "Cursor list, unfocused"
+        readonly property string popupFrame: "Pop-up frame"
+    }
+
+    // --- spec 003: settings pop-up ---------------------------------------------------------
+    readonly property SettingsStrings settings: SettingsStrings {}
+    component SettingsStrings: QtObject {
+        readonly property string title: "SYSTEM"
+        readonly property string subtitle: "-Settings"
+        readonly property string categories: "CATEGORIES"
+        readonly property string count: "SETTINGS"        // "5 SETTINGS" and the card's SETTINGS row
+        readonly property string defaultLabel: "DEFAULT"
+        readonly property string nowLabel: "NOW"
+        readonly property string on: "ON"
+        readonly property string off: "OFF"
+        readonly property string version: "rien-OS 0.1 · Hyprland"
+        readonly property string error: "Settings data unavailable."
+        // key hints: the key, then what it does
+        readonly property string keyUpDown: "↑↓"
+        readonly property string keyRight: "→"
+        readonly property string keyLeftRight: "←→"
+        readonly property string keyEnter: "Enter"
+        readonly property string keyEsc: "Esc"
+        readonly property string select: "Select"
+        readonly property string open: "Open"
+        readonly property string close: "Close"
+        readonly property string change: "Change"
+        readonly property string back: "Back"
     }
 }

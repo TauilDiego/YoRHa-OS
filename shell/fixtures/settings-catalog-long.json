@@ -1,0 +1,29 @@
+{
+  "categories": [
+    {
+      "id": "overflow", "label": "Overflow with a very long category name",
+      "about": "Fourteen options with long labels and values: the column scrolls with the focus and the texts are cut with an ellipsis.",
+      "options": [
+        {"id": "item-01", "label": "Option 01 with a label far too long for the column", "type": "choice", "desc": "A long description that has to wrap over several lines inside the description card without leaking out of it, so the card grows or cuts the text instead of covering the footer.", "values": ["A value that is much wider than the stepper", "Short"], "value": 0, "default": 1},
+        {"id": "item-02", "label": "Option 02 toggle", "type": "toggle", "desc": "A toggle in a long list.", "value": true, "default": false},
+        {"id": "item-03", "label": "Option 03 slider with a long label", "type": "slider", "desc": "A slider in a long list.", "value": 35, "default": 50, "step": 5},
+        {"id": "item-04", "label": "Option 04 action", "type": "action", "desc": "An action in a long list.", "text": "Start something long", "busy": "Working on it for a little while, with a note long enough to wrap…"},
+        {"id": "item-05", "label": "Option 05 info", "type": "info", "desc": "Read-only text in a long list.", "text": "An information text that does not fit"},
+        {"id": "item-06", "label": "Option 06 with a label far too long for the column", "type": "choice", "desc": "A long description that has to wrap over several lines inside the description card without leaking out of it, so the card grows or cuts the text instead of covering the footer.", "values": ["A value that is much wider than the stepper", "Short"], "value": 0, "default": 1},
+        {"id": "item-07", "label": "Option 07 toggle", "type": "toggle", "desc": "A toggle in a long list.", "value": true, "default": false},
+        {"id": "item-08", "label": "Option 08 slider with a long label", "type": "slider", "desc": "A slider in a long list.", "value": 35, "default": 50, "step": 5},
+        {"id": "item-09", "label": "Option 09 action", "type": "action", "desc": "An action in a long list.", "text": "Start something long", "busy": "Working on it for a little while, with a note long enough to wrap…"},
+        {"id": "item-10", "label": "Option 10 info", "type": "info", "desc": "Read-only text in a long list.", "text": "An information text that does not fit"},
+        {"id": "item-11", "label": "Option 11 with a label far too long for the column", "type": "choice", "desc": "A long description that has to wrap over several lines inside the description card without leaking out of it, so the card grows or cuts the text instead of covering the footer.", "values": ["A value that is much wider than the stepper", "Short"], "value": 0, "default": 1},
+        {"id": "item-12", "label": "Option 12 toggle", "type": "toggle", "desc": "A toggle in a long list.", "value": true, "default": false},
+        {"id": "item-13", "label": "Option 13 slider with a long label", "type": "slider", "desc": "A slider in a long list.", "value": 35, "default": 50, "step": 5},
+        {"id": "item-14", "label": "Option 14 action", "type": "action", "desc": "An action in a long list.", "text": "Start something long", "busy": "Working on it for a little while, with a note long enough to wrap…"}
+      ]
+    },
+    {
+      "id": "empty", "label": "Empty",
+      "about": "A category without options: the column shows only its header.",
+      "options": []
+    }
+  ]
+}

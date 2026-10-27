@@ -30,13 +30,23 @@ Formato do `settings dump`:
     "display": { "resolution": "2560 × 1600", "refresh": "120 Hz", "scale": "1.25×", "brightness": "70", "night": "OFF" },
     "bluetooth": { "bluetooth": "OFF", "keyboard": "Connected", "headphones": "Paired", "pair": "Search" }
   },
-  "dimmed": ["bluetooth.keyboard", "bluetooth.headphones", "bluetooth.pair"]
+  "dimmed": ["bluetooth.keyboard", "bluetooth.headphones", "bluetooth.pair"],
+  "geometry": {
+    "s": 1.0,
+    "panel": { "x": 154, "y": 87, "w": 1612, "h": 906 },
+    "item": { "x": 672, "y": 437, "w": 557, "h": 48 },
+    "value": null
+  }
 }
 ```
 
 - `focus`: `"categories"` ou `"options"`. Com o foco nas categorias, `option` é `null`.
 - `keys` é o que o rodapé mostra (FR-015), `"<tecla> <rótulo>"`.
 - `card.note` é `""` quando o quadro não tem aviso.
+- `busy` é a opção com ação em andamento, como `"cat.opt"`.
+- `geometry` (px lógicos da tela, pros cliques dos testes): o fator `s`, o painel, o item em foco
+  (categoria ou opção) e o controle do valor da opção em foco (o seletor `◂ valor ▸` ou a trilha do
+  slider; `null` nos outros tipos). Com o popup fechado, `null`.
 - Com o popup fechado, `open` é `false` e o resto mostra o último estado (os valores ficam em memória).
 
 ## Atalho
