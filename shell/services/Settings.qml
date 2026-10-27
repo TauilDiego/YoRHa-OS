@@ -13,8 +13,10 @@ Singleton {
     readonly property int barHeight: Math.round(Math.max(28, Math.min(96, Number(merged.barHeight) || defaults.barHeight)))
     readonly property bool vignette: typeof merged.vignette === "boolean" ? merged.vignette : defaults.vignette
     readonly property bool wallpaperMotion: typeof merged.wallpaperMotion === "boolean" ? merged.wallpaperMotion : defaults.wallpaperMotion
+    // Reduced motion: fades, the selector blink and wallpaper transitions become instant.
+    readonly property bool reduceMotion: typeof merged.reduceMotion === "boolean" ? merged.reduceMotion : defaults.reduceMotion
 
-    readonly property var defaults: parse(defaultsFile.text(), "defaults.json") ?? ({ uiScale: 1.0, barHeight: 68, vignette: true, wallpaperMotion: true })
+    readonly property var defaults: parse(defaultsFile.text(), "defaults.json") ?? ({ uiScale: 1.0, barHeight: 68, vignette: true, wallpaperMotion: true, reduceMotion: false })
     readonly property var user: userFile.loaded ? (parse(userFile.text(), userFile.path) ?? ({})) : ({})
     readonly property var merged: Object.assign({}, defaults, user)
 

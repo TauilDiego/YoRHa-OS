@@ -25,6 +25,18 @@ Singleton {
     // 0.56 with a Lua config. Refreshed at start and on monitor/config events.
     property var monitorScales: ({})
 
+    // The output that has the focus, from the same query (field `focused`). Pop-ups open there.
+    // With fixtures, the first screen, so screenshots don't depend on where the pointer is.
+    property string liveFocusedMonitor: ""
+    readonly property string focusedMonitor: Fixtures.active
+        ? (Quickshell.screens[0]?.name ?? "")
+        : liveFocusedMonitor
+
+    // Re-read the monitors now (e.g. right before opening a pop-up).
+    function refreshFocusedMonitor(): void {
+        monitorQuery.running = true;
+    }
+
     Process {
         id: monitorQuery
         command: ["hyprctl", "monitors", "-j"]
@@ -32,8 +44,11 @@ Singleton {
             onStreamFinished: {
                 try {
                     const out = {};
-                    for (const m of JSON.parse(text))
+                    for (const m of JSON.parse(text)) {
                         out[m.name] = m.scale;
+                        if (m.focused)
+                            root.liveFocusedMonitor = m.name;
+                    }
                     root.monitorScales = out;
                 } catch (e) {
                     // keep the last known scales
@@ -141,7 +156,7 @@ Singleton {
         target: Hyprland
         function onRawEvent(event) {
             Qt.callLater(root.bump);
-            if (event.name.startsWith("monitor") || event.name === "configreloaded")
+            if (event.name.startsWith("monitor") || event.name.startsWith("focusedmon") || event.name === "configreloaded")
                 monitorQuery.running = true;
         }
     }
