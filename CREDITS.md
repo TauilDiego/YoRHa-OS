@@ -8,6 +8,15 @@
   - uso: tokens (cores, tipografia, sombras, espaçamentos) e anatomia dos componentes descritos
     em [`docs/design-system.md`](docs/design-system.md), adaptados pro desktop.
 
+## Fontes
+
+- **M PLUS 1**, de The M+ FONTS Project Authors
+  ([github.com/coz-m/MPLUS_FONTS](https://github.com/coz-m/MPLUS_FONTS)):
+  - licença: [SIL Open Font License 1.1](shell/assets/fonts/OFL.txt);
+  - arquivo: `shell/assets/fonts/MPLUS1[wght].ttf` (fonte variável, tirada de
+    [google/fonts](https://github.com/google/fonts/tree/main/ofl/mplus1));
+  - uso: fonte padrão da UI, no lugar das fontes comerciais do jogo.
+
 ## Código de terceiros
 
 Código de outros projetos só entra com licença compatível com a AGPL-3.0 e com crédito aqui e no

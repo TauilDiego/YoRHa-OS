@@ -1,0 +1,9 @@
+{
+  "clock": "2026-10-26T13:37:00",
+  "cpu": 23,
+  "mem": 41,
+  "volume": { "percent": 64, "muted": true },
+  "battery": { "percent": 87, "charging": true },
+  "workspaces": { "existing": [1, 2, 3], "focused": 2 },
+  "activeWindow": "kitty — ~/projetos"
+}

@@ -1,0 +1,9 @@
+{
+  "clock": "2026-10-26T13:37:00",
+  "cpu": 23,
+  "mem": 41,
+  "volume": { "percent": 64, "muted": false },
+  "battery": { "percent": 87, "charging": false },
+  "workspaces": { "existing": [1, 2, 3, 4, 5, 6, 7], "focused": 7 },
+  "activeWindow": "Mozilla Firefox — A very long window title that keeps going and going far beyond the space the bar can give it in the middle"
+}
