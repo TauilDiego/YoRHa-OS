@@ -7,6 +7,7 @@ import Quickshell.Io
 import "ds"
 import "gallery"
 import "hud"
+import "wallpaper"
 import "services"
 
 ShellRoot {
@@ -26,6 +27,28 @@ ShellRoot {
     }
 
     property bool galleryOpen: false
+
+    // The desktop background, one per monitor (US4). The arcs and bundles drift through one
+    // cycle every ~10 min, advanced 10 times a second; the layers only move on whole pixels,
+    // so most steps change nothing on screen. Stopped by fixtures, by `wallpaperMotion: false`
+    // in shell.json, or over IPC.
+    property var wallpaperMotionOverride: null   // IPC: true/false; null = follow Settings
+    readonly property bool wallpaperMoving: !Tokens.frozen
+        && (wallpaperMotionOverride ?? Settings.wallpaperMotion)
+    property real wallpaperPhase: 0
+    Timer {
+        running: shell.wallpaperMoving
+        repeat: true
+        interval: 100
+        onTriggered: shell.wallpaperPhase = (shell.wallpaperPhase + 1 / 6000) % 1
+    }
+    Variants {
+        model: Quickshell.screens
+
+        Wallpaper {
+            phase: shell.wallpaperPhase
+        }
+    }
 
     // One HUD per monitor (FR-009).
     Variants {
@@ -72,6 +95,12 @@ ShellRoot {
         target: "fixtures"
         function load(path: string): string { return Fixtures.load(path); }
         function clear(): void { Fixtures.clear(); }
+    }
+
+    IpcHandler {
+        target: "wallpaper"
+        function motion(on: bool): void { shell.wallpaperMotionOverride = on; }
+        function isMoving(): string { return shell.wallpaperMoving ? "true" : "false"; }
     }
 
     IpcHandler {

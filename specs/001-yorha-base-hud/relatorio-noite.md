@@ -121,3 +121,16 @@ lab/up teste-c && lab/check-u1          # roda tudo de novo e junta a evidência
 lab/ipc 'qs -p ~/nier/ui ipc call gallery open' && lab/shot galeria
 lab/up teste-c --window                 # ou ver numa janela (ALT+Enter abre o kitty)
 ```
+
+## Depois da noite (2026-10-27, com o dono acordado)
+
+- **Abas da barra sem seletor** (pedido do dono): só as abas lado a lado; hover continua.
+  `hud dump` ganhou `x`/`w` por aba.
+- **História 4 — fundo da área de trabalho** (pedido do dono): papel + grid + vinheta + arcos
+  e feixes diagonais na camada de fundo, com movimento sutil (desligável). `check-u1` 14/14.
+  Custo do movimento (SC-010, 60 s parado no desktop): QEMU 9,8% vs 6,1% de 1 núcleo, host
+  3,4% vs 2,6%.
+- **Binding loop corrigido** na `TabBar` quando o número de abas muda (aparecia ao trocar de
+  workspace).
+- **Laboratório:** resolução fixa no `lab/profile` (a janela do QEMU não muda mais a VM) e
+  fuso do host no `lab/sync`.

@@ -19,6 +19,7 @@ Regras para todos os componentes:
 | `Rule` | `kind`: `"plain"` / `"dotted"` / `"vertical"`, `color` | A pontilhada repete o padrão de pontos (§6) |
 | `GridBackground` | `step` (padrão 7) | Papel + grid a 6% |
 | `Vignette` | `enabled` | FR-002a. Overlay por cima de tudo. Só em tela cheia |
+| `PaperDecor` | `phase` (0–1) | FR-019/FR-020. Arcos e feixes diagonais do fundo, desenhados uma vez; `phase` move as camadas sem repintar |
 
 ## Base (`shell/ds/base/`)
 
@@ -43,4 +44,5 @@ Regras para todos os componentes:
 | Componente | Propriedades | Notas |
 |---|---|---|
 | `Hud` | `screen` (`ShellScreen`) | Um por monitor (`Variants` sobre `Quickshell.screens`). `PanelWindow` no topo com `exclusiveZone` = altura (FR-009) |
+| `Wallpaper` | `screen` (`ShellScreen`) | Um por monitor, camada Background, `GridBackground` + `PaperDecor` + `Vignette` (FR-019–FR-021) |
 | `Gallery` | — | Tela cheia, `Overlay`, `Vignette` ligada se `Settings.vignette` (FR-002a). Abre e fecha por IPC; Esc fecha |

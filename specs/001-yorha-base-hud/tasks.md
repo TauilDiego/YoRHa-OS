@@ -114,6 +114,22 @@ FR-004 → `gallery close`.
 
 ---
 
+## Phase 7: User Story 4 - Fundo da área de trabalho (Priority: P4)
+
+**Goal**: o fundo inteiro do desktop é o papel do menu, com movimento sutil.
+
+**Independent Test**: workspace vazio → screenshot mostra o fundo; com fixtures, dois
+screenshots iguais; `lab/perf` com e sem movimento.
+
+- [x] T041 [US4] Spec (História 4, FR-019–FR-021, SC-009/SC-010), design system §2/§5 e contratos atualizados
+- [x] T042 [US4] `shell/ds/primitives/PaperDecor.qml`: arcos e feixes desenhados uma vez num Canvas (linhas na grade física), `phase` 0–1 movendo as camadas por transformação, sem repintar
+- [x] T043 [US4] `shell/wallpaper/Wallpaper.qml`: `PanelWindow` por monitor na camada Background (namespace `rien-wallpaper`), `GridBackground` + `PaperDecor` + `Vignette`; `Timer` de 10 passos/s parado com `Tokens.frozen` ou `Settings.wallpaperMotion: false`
+- [x] T044 [US4] `Settings.wallpaperMotion` (padrão true), `Variants` no `shell.qml` e IPC `wallpaper` (`motion(on)`, `isMoving()`)
+- [x] T045 [US4] `lab/check-u1`: SC-009 (workspace vazio + dois screenshots iguais)
+- [x] T046 [US4] Validar no lab: check-u1 completo, hidpi nítido, e duas sessões `lab/perf` de 60 s (com e sem movimento) pro SC-010
+
+---
+
 ## Phase 6: Polish & validação final
 
 - [x] T036 Rodar o quickstart.md inteiro numa sessão `lab/perf begin "U1: validação" --kind u1-validacao --task 001`: SC-001 a SC-005, SC-007, SC-008 (`lab/profile hidpi` e `1080`), casos de borda e `qmllint`

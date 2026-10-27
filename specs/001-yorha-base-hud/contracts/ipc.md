@@ -12,6 +12,8 @@ laboratório, isso vira `lab/ipc qs -p ~/nier/ui ipc call …`. Cada alvo é um 
 | `gallery` | `isOpen()` | `"true"` / `"false"` | Verificação |
 | `fixtures` | `load(path: string)` | `"ok"` ou a mensagem de erro | Troca de cenário sem reiniciar |
 | `fixtures` | `clear()` | — | Volta aos dados reais |
+| `wallpaper` | `motion(on: bool)` | — | Liga ou desliga o movimento do fundo (sobrepõe o `wallpaperMotion` até reiniciar) |
+| `wallpaper` | `isMoving()` | `"true"` / `"false"` | Verificação |
 | `hud` | `dump()` | JSON (abaixo) | "Comando que responde" (princípio IV) |
 
 Formato do `hud dump`, com uma entrada por monitor:

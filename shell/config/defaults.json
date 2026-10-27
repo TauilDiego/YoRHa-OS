@@ -1,5 +1,6 @@
 {
   "uiScale": 1.0,
   "barHeight": 40,
-  "vignette": true
+  "vignette": true,
+  "wallpaperMotion": true
 }

@@ -78,13 +78,25 @@ Item {
                 selectorTone: "dark"                 // the selector always hangs over the paper
                 showSelector: root.showSelector
                 onClicked: root.activated(index)
+                // Deferred: these fire while the parent re-evaluates `model` (tabs added or
+                // removed under a still pointer), and a synchronous write to hoveredIndex, which
+                // `model` reads, is a binding loop.
                 onHoveredChanged: {
-                    if (hovered)
-                        hover.index = index;
-                    else if (hover.index === index)
-                        hover.index = -1;
+                    const i = index, on = hovered;
+                    Qt.callLater(() => {
+                        if (on)
+                            hover.index = i;
+                        else if (hover.index === i)
+                            hover.index = -1;
+                    });
                 }
-                Component.onDestruction: if (hover.index === index) hover.index = -1
+                Component.onDestruction: {
+                    const i = index;
+                    Qt.callLater(() => {
+                        if (hover.index === i && i >= tabs.count)
+                            hover.index = -1;
+                    });
+                }
             }
         }
     }

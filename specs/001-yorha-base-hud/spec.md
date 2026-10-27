@@ -92,6 +92,27 @@ peça e cada estado aparecem.
 
 ---
 
+### User Story 4 - Fundo da área de trabalho (Priority: P4)
+
+No lugar do wallpaper, a área de trabalho inteira mostra o papel dos menus do jogo: bege com o
+grid fino, a vinheta nas bordas e, bem apagados, arcos de círculo grandes e feixes de linhas
+diagonais, que se movem muito devagar.
+
+**Why this priority**: Completa a imersão: com janelas fechadas, a tela inteira parece um menu
+YoRHa. Pedido do dono depois de ver a UI rodando (2026-10-27).
+
+**Independent Test**: Num workspace sem janelas, tirar um screenshot na VM e conferir o fundo;
+com dados de teste, dois screenshots seguidos saem iguais.
+
+**Acceptance Scenarios**:
+
+1. **Given** um workspace vazio, **When** a sessão está aberta, **Then** o fundo mostra papel,
+   grid, vinheta, arcos e feixes diagonais em todos os monitores, nítidos em qualquer escala.
+2. **Given** `wallpaperMotion: false` no `shell.json` (ou dados de teste ativos), **When** o
+   tempo passa, **Then** o fundo fica parado.
+
+---
+
 ### Edge Cases
 
 - **Sem bateria** (desktop ou VM sem bateria): a leitura de bateria some, em vez de mostrar 0%.
@@ -219,6 +240,16 @@ peça e cada estado aparecem.
   internacionalização (i18n) vem numa fase futura. Por isso os textos fixos ficam reunidos num
   lugar só, e não espalhados pelas telas.
 
+**Fundo da área de trabalho**
+
+- **FR-019**: Cada monitor MUST ter um fundo desenhado na camada de fundo do Wayland (atrás de
+  todas as janelas), com papel, grid, vinheta, arcos de círculo e feixes de linhas diagonais.
+  Nada de imagem: o fundo é desenhado e fica nítido em qualquer resolução e escala.
+- **FR-020**: Os arcos e os feixes MUST se mover de forma sutil e contínua (uma volta a cada
+  vários minutos), sem redesenhar a cena a cada quadro. O movimento MUST poder ser desligado
+  (`wallpaperMotion` no `shell.json`) e MUST parar quando há dados de teste.
+- **FR-021**: A vinheta do fundo MUST seguir a configuração `vignette`.
+
 ### Key Entities
 
 - **Paleta/tokens:** o conjunto nomeado de cores, tamanhos de texto, espaçamentos e durações de
@@ -246,6 +277,11 @@ peça e cada estado aparecem.
   laboratório.
 - **SC-008**: Na VM, nos perfis 1920x1080 @1 e 2560x1600 @1,25, a barra mede 40px lógicos e o
   grid e as réguas aparecem nítidos (sem borrado de meio pixel) nos screenshots.
+
+- **SC-009**: Num workspace vazio, o screenshot mostra o fundo (papel e grid no centro da tela);
+  com dados de teste, dois screenshots seguidos são idênticos.
+- **SC-010**: O custo do fundo com e sem movimento fica registrado no `lab/perf` (sem meta no
+  U1: otimizar é da U6).
 
 ## Assumptions
 

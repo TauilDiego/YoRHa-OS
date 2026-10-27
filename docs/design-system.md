@@ -104,6 +104,13 @@ Cantos sempre retos (raio 0).
     e no rodapé;
   - **vertical:** as faixas duplas na lateral das listas.
 - **Fundo:** papel `dark-yellow`, grid a 6%, arcos de círculo e feixes de linhas diagonais finas.
+  Medido nas capturas do jogo (§6):
+  - **arcos:** círculos grandes (raio ≈ 600–1100 px a 1080p) com centro fora da tela, traço de
+    2 px em tinta a ~10%;
+  - **feixes:** 2 a 4 linhas paralelas (≈12 px entre elas), descendo da esquerda pra direita a
+    ~35°, traço de 1–2 px em tinta a ~8%;
+  - **movimento:** no jogo, o fundo "respira" devagar. No desktop, os arcos giram e os feixes
+    deslizam bem lentamente (uma volta a cada ~10 min), em passos de pixel inteiro.
 
 ## 3. Peças base
 
@@ -182,6 +189,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 | Alerta | Não existe | `alert` `#8F3A30`, só pra estados críticos |
 | Sombra do título | 8,8 fixo | Proporcional ao tamanho do texto (≈15%) |
 | Abas da barra | Seletor (pipa) ao lado da aba em foco | **Decidido (2026-10-27):** na barra do HUD, só as abas lado a lado, sem seletor. Nos menus, o seletor continua |
+| Fundo do desktop | Só nos menus | **Decidido (2026-10-27):** o fundo inteiro da área de trabalho é o papel do menu (grid, vinheta, arcos e feixes, com movimento sutil que pode ser desligado), no lugar do wallpaper |
 | Vinheta | Em todos os menus | Como no jogo (bordas `#A6A18D`, cantos `#8B8877`), só nos menus de tela cheia, desligável. O HUD não tem |
 
 ### Escala
