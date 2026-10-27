@@ -13,6 +13,9 @@ import "../strings"
 // The HUD (FR-009–FR-014): one bar at the top of each monitor, reserving its height.
 // Left → right: the brand (the TabBar's vertical strips), workspace tabs, the active window's
 // title (centered), CPU/MEM/VOL/BAT readings, date and time; the dotted rule along the bottom.
+// spec 004 US6: the bar has no background of its own. The monitor's wallpaper (and its
+// transitions) shows under it, and its colors follow that wallpaper: `tone`, 0 paper → 1 light,
+// from WallpaperStore.toneMix (set by the monitor's Wallpaper), handed to every piece.
 PanelWindow {
     id: root
 
@@ -27,9 +30,9 @@ PanelWindow {
     implicitHeight: Settings.barHeight
     exclusiveZone: implicitHeight
     WlrLayershell.namespace: "rien-os-hud"
-    color: Tokens.color.darkYellow
+    color: "transparent"
 
-    // Layout, top to bottom: a little paper, the tabs, a visible gap, then the dotted rule.
+    // Layout, top to bottom: a little room, the tabs, a visible gap, then the dotted rule.
     // The tab takes a fixed share of the bar; s (research R5) scales the game's 47 px tab to it.
     readonly property real tabShare: 0.485             // 33 px of the default 68
     readonly property real ruleGap: 17                   // game px between the tabs and the rule
@@ -50,6 +53,9 @@ PanelWindow {
 
     readonly property var readings: [Telemetry.cpu, Telemetry.mem, Audio.vol, Battery.bat]
 
+    // spec 004 US6: this monitor's tone (0 paper → 1 light).
+    readonly property real tone: WallpaperStore.toneMix[monitorName] ?? 0
+
     // What the bar shows, for `hud dump` (contracts/ipc.md).
     function dumpEntry(): var {
         return {
@@ -66,23 +72,62 @@ PanelWindow {
                 available: r.available
             })),
             date: Clock.dateText,
-            time: Clock.timeText
+            time: Clock.timeText,
+            // spec 004 US6 (contracts/ipc.md of spec 004): the tone, and every text's box and
+            // color, so the contrast can be measured on the pixels.
+            tone: tone >= 0.5 ? "light" : "paper",
+            toneMix: Math.round(tone * 1000) / 1000,
+            texts: textBoxes()
         };
     }
 
-    // --- surface ------------------------------------------------------------------------------
-    Rectangle {
-        anchors.fill: parent
-        color: Tokens.color.darkYellow
+    // --- spec 004 US6: the texts, for `hud dump` -------------------------------------------------
+    function hex(c: color): string {
+        const h = v => Math.round(v * 255).toString(16).padStart(2, "0");
+        return "#" + h(c.r) + h(c.g) + h(c.b) + h(c.a);
     }
-
-    // The top strip of the desktop's vignette (FR-002a), so bar and background meet without a
-    // seam. Over the paper only: tabs, rule and text stay on top, like windows on the desktop.
-    Vignette {
-        anchors.fill: parent
-        area: Qt.size(root.modelData?.width ?? root.width, root.modelData?.height ?? root.height)
-        enabled: Settings.vignette
+    function textBox(role: string, label: Label): var {
+        const p = label.mapToItem(null, 0, 0);
+        const dx = label.horizontalAlignment === Text.AlignHCenter ? (label.width - label.paintedWidth) / 2 : 0;
+        return {
+            role: role,
+            text: label.text,
+            x: Math.round(p.x + dx),
+            y: Math.round(p.y),
+            w: Math.round(label.paintedWidth),
+            h: Math.round(label.paintedHeight),
+            color: hex(label.color),
+            plate: ""
+        };
     }
+    function textBoxes(): var {
+        const out = [];
+        root.tabs.forEach((t, i) => {
+            const g = tabBar.tabGeometry(i);
+            const inked = t.state === "selected" || i === tabBar.hoveredIndex;
+            out.push({
+                role: "tab",
+                text: t.label,
+                x: g.x,
+                y: Math.round(tabBar.y),
+                w: g.w,
+                h: tabBar.bandH,
+                color: hex(Tokens.hudColor(inked ? "selInk" : t.state === "dimmed" ? "ink2" : "ink", root.tone)),
+                plate: hex(Tokens.hudColor(inked ? "sel" : "rest", root.tone))
+            });
+        });
+        if (title.visible && title.text !== "")
+            out.push(textBox("title", title));
+        for (let i = 0; i < readingViews.count; i++) {
+            const v = readingViews.itemAt(i) as ReadingView;
+            if (!v || !v.visible)
+                continue;
+            out.push(textBox("label", v.labelText), textBox("value", v.valueText));
+        }
+        out.push(textBox("date", dateText), textBox("time", timeText));
+        return out;
+    }
+    // --- end spec 004 US6 --------------------------------------------------------------------------
 
     // Tabs + strips + the dotted rule, sitting on the bar's bottom edge.
     TabBar {
@@ -91,6 +136,7 @@ PanelWindow {
         y: root.height - implicitHeight
         width: root.width - 2 * root.margin
         s: root.s
+        tone: root.tone
         ruleGap: root.ruleGap
         ruleScale: root.s * root.ruleShare
         model: root.tabs.map((t, i) => ({
@@ -123,8 +169,9 @@ PanelWindow {
             width: Math.round(2 * half)
             anchors.verticalCenter: parent.verticalCenter
             s: root.s
+            tone: root.tone
             role: "small"
-            color: Tokens.color.mediumGray
+            color: Tokens.hudColor("ink2", root.tone)
             text: Compositor.activeTitle
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
@@ -140,6 +187,7 @@ PanelWindow {
             spacing: Tokens.px(26, root.s)
 
             Repeater {
+                id: readingViews
                 model: root.readings.length
 
                 ReadingView {
@@ -154,15 +202,19 @@ PanelWindow {
                 spacing: Tokens.px(14, root.s)
 
                 Label {
+                    id: dateText
                     anchors.verticalCenter: parent.verticalCenter
                     s: root.s
+                    tone: root.tone
                     role: "headerButton"
-                    color: Tokens.color.mediumGray
+                    color: Tokens.hudColor("ink2", root.tone)
                     text: Clock.dateText
                 }
                 Label {
+                    id: timeText
                     anchors.verticalCenter: parent.verticalCenter
                     s: root.s
+                    tone: root.tone
                     role: "headerButton"
                     text: Clock.timeText
                 }
@@ -176,30 +228,37 @@ PanelWindow {
         property var reading: ({})
         readonly property bool muted: reading.extra === "muted"
         readonly property bool charging: reading.extra === "charging"
+        readonly property Label labelText: readingLabel      // for `hud dump` (spec 004 US6)
+        readonly property Label valueText: readingValue
 
         visible: reading.available === true
         spacing: Tokens.px(8, root.s)
 
         Label {
+            id: readingLabel
             anchors.verticalCenter: parent.verticalCenter
             s: root.s
+            tone: root.tone
             role: "small"
             text: view.reading.label ?? ""
         }
         Meter {
             anchors.verticalCenter: parent.verticalCenter
             s: root.s
+            tone: root.tone
             w: 82
             value: view.reading.value ?? 0
             critical: view.reading.critical === true
         }
         Label {
+            id: readingValue
             anchors.verticalCenter: parent.verticalCenter
             // Fixed room for "100", so live values never shift their neighbours.
             width: Math.max(implicitWidth, widest.implicitWidth)
             s: root.s
+            tone: root.tone
             role: "small"
-            color: view.reading.critical ? Tokens.color.alert : Tokens.color.mediumGray
+            color: Tokens.hudColor(view.reading.critical ? "alert" : "ink2", root.tone)
             text: view.muted ? Strings.muted
                              : Math.round((view.reading.value ?? 0) * 100) + (view.charging ? Strings.charging : "")
             Label {

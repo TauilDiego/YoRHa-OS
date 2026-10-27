@@ -10,6 +10,7 @@ import "../ds/composites"
 import "../popup"
 import "../services"
 import "../strings"
+import "../wallpaper"
 
 // Design system gallery (US3, FR-016): every piece in every state, each with its name, laid out
 // like a NieR menu page. Full screen on the Overlay layer; opened and closed over IPC
@@ -75,6 +76,24 @@ PanelWindow {
         color: Tokens.color.mediumGray
     }
 
+    // spec 004: a miniature 16:9 screen with a hairline frame (page 3).
+    component Tile: Item {
+        default property alias content: tileBody.data
+        width: root.u(270)
+        height: root.u(152)
+        Item {
+            id: tileBody
+            anchors.fill: parent
+            clip: true
+        }
+        Rectangle {
+            anchors.fill: parent
+            color: "transparent"
+            border.width: Tokens.line(1, root.s)
+            border.color: Tokens.color.darkGray
+        }
+    }
+
     // One row of the primitives table: name on the left, sample on the right.
     component SampleRow: Item {
         id: sampleRow
@@ -97,7 +116,7 @@ PanelWindow {
         anchors.fill: parent
         focus: true
         Keys.onEscapePressed: root.closeRequested()
-        Keys.onTabPressed: root.page = (root.page + 1) % 2     // spec 003: the second page
+        Keys.onTabPressed: root.page = (root.page + 1) % 3     // spec 003: page 2; spec 004: page 3
 
         Rectangle {
             anchors.fill: parent
@@ -630,6 +649,256 @@ PanelWindow {
                                 subtitle: Strings.settings.subtitle
                                 footerLeft: Strings.settings.version
                                 keys: page2.keysCategories
+                            }
+                        }
+                    }
+                }
+            }
+
+            Vignette {
+                anchors.fill: parent
+                s: root.s
+                enabled: Settings.vignette
+            }
+        }
+
+        // --- spec 004: page 3 (Tab), the wallpaper pieces (FR-022) -----------------------------------
+        // Loaded only while shown: the scenes, the paper filter, a still frame of each transition, the
+        // grouped list and the list + preview + options layout of the picker, in miniature.
+        Loader {
+            anchors.fill: parent
+            active: root.page === 2
+            sourceComponent: page3
+        }
+    }
+
+    Component {
+        id: page3
+
+        Rectangle {
+            id: p3
+            color: Tokens.color.darkYellow
+
+            // QsWindow.window is typed QObject: go through a var (as Rule does) to read its screen.
+            readonly property var window: QsWindow.window
+            readonly property real dpr: Tokens.scaleOf(window?.screen?.name ?? "")
+            readonly property var ws: Strings.wallpaper
+            readonly property var scenes: WallpaperCatalog.items.filter(w => w.type === "scene")
+            readonly property string picturePath: Quickshell.shellPath("fixtures/wallpapers/ruins.jpg")
+            readonly property var picture: ({
+                id: "image:" + picturePath,
+                type: "image",
+                name: "ruins.jpg",
+                url: WallpaperCatalog.fileUrl(picturePath),
+                path: picturePath
+            })
+            // [kind, ms held at, when]: camouflage at 700 ms; the others halfway (450 of 900 ms).
+            readonly property var frames: [
+                ["camouflage", 700, Strings.gallery.camouflageAt], ["wipe", 450, Strings.gallery.halfway],
+                ["tiles", 450, Strings.gallery.halfway], ["crossfade", 450, Strings.gallery.halfway]
+            ]
+            readonly property var listSample: [
+                { group: ws.scenes }, { label: scenes[0]?.name ?? "", trailing: ws.mark + " " + ws.all }, { label: scenes[2]?.name ?? "" },
+                { group: ws.video }, { label: ws.videoName, dim: true }
+            ]
+
+            PageHeader {
+                x: root.u(Tokens.space.pageMarginH)
+                y: root.u(Tokens.space.pageMarginV)
+                s: root.s
+                title: Strings.gallery.title
+                subtitle: Strings.gallery.page3Subtitle
+            }
+
+            Rule {
+                x: root.u(Tokens.space.pageMarginH)
+                y: root.u(128)
+                width: parent.width - 2 * x
+                s: root.s
+            }
+
+            // --- column 1: the four scenes
+            Section {
+                x: root.u(Tokens.space.pageMarginH)
+                y: root.u(root.bodyY)
+                name: Strings.gallery.scenes
+
+                Grid {
+                    columns: 2
+                    columnSpacing: root.u(20)
+                    rowSpacing: root.u(14)
+                    Repeater {
+                        model: p3.scenes
+                        Column {
+                            id: sceneTile
+                            required property var modelData
+                            spacing: root.u(8)
+                            Tile {
+                                WallpaperView {
+                                    anchors.fill: parent
+                                    wallpaper: sceneTile.modelData
+                                    s: height / 1080
+                                }
+                            }
+                            Caption { text: sceneTile.modelData.name }
+                        }
+                    }
+                }
+            }
+
+            // --- column 2: a still frame of each transition, from "Menu" to "Dark"
+            Section {
+                x: root.u(Tokens.space.pageMarginH + root.colW + root.colGap)
+                y: root.u(root.bodyY)
+                name: Strings.gallery.transitions
+
+                Grid {
+                    columns: 2
+                    columnSpacing: root.u(20)
+                    rowSpacing: root.u(14)
+                    Repeater {
+                        model: p3.frames
+                        Column {
+                            id: frameTile
+                            required property var modelData
+                            spacing: root.u(8)
+                            Tile {
+                                WallpaperTransition {
+                                    id: still
+                                    property bool held: false
+                                    anchors.fill: parent
+                                    current: "scene:menu"
+                                    s: height / 1080
+                                    dpr: p3.dpr
+                                    kind: frameTile.modelData[0]
+                                    instant: false
+                                    Component.onCompleted: Qt.callLater(() => still.current = "scene:dark")
+                                    onAnimatingChanged: {
+                                        if (animating && !held) {
+                                            held = true;
+                                            Qt.callLater(() => still.hold(frameTile.modelData[1]));
+                                        }
+                                    }
+                                }
+                            }
+                            Caption {
+                                text: Strings.gallery.frameAt.arg(p3.ws.transitionLabels[frameTile.modelData[0]]).arg(frameTile.modelData[2])
+                            }
+                        }
+                    }
+                }
+            }
+
+            // --- column 3: a picture with and without the paper filter
+            Column {
+                x: root.u(Tokens.space.pageMarginH + 2 * (root.colW + root.colGap))
+                y: root.u(root.bodyY)
+                spacing: root.u(root.sectionGap)
+
+                Section {
+                    name: Strings.gallery.paperFilter
+                    Row {
+                        spacing: root.u(20)
+                        Repeater {
+                            model: [true, false]
+                            Column {
+                                id: filterTile
+                                required property bool modelData
+                                spacing: root.u(8)
+                                Tile {
+                                    WallpaperView {
+                                        anchors.fill: parent
+                                        wallpaper: p3.picture
+                                        s: height / 1080
+                                        screenSize: Qt.size(Math.round(width * p3.dpr), Math.round(height * p3.dpr))
+                                        paperFilter: filterTile.modelData
+                                    }
+                                }
+                                Caption {
+                                    text: Strings.gallery.frameAt.arg(Strings.gallery.paperFilter).arg(filterTile.modelData ? Strings.gallery.filterOn : Strings.gallery.filterOff)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // --- bottom right: the grouped list, with and without the focus
+            Section {
+                x: root.u(840)
+                y: root.u(600)
+                name: Strings.gallery.groupedList
+                Row {
+                    spacing: root.u(40)
+                    Repeater {
+                        model: [true, false]
+                        Column {
+                            id: listCol
+                            required property bool modelData
+                            spacing: root.u(8)
+                            GroupedList {
+                                width: root.u(470)
+                                height: implicitHeight
+                                s: root.s
+                                keysEnabled: false
+                                focused: listCol.modelData
+                                model: p3.listSample
+                                currentIndex: 0
+                            }
+                            Caption {
+                                text: listCol.modelData ? Strings.gallery.stateFocused : Strings.gallery.groupedListUnfocused
+                            }
+                        }
+                    }
+                }
+            }
+
+            // --- bottom: the list + preview + options layout, in a pop-up frame over the menu scene
+            Section {
+                x: root.u(Tokens.space.pageMarginH)
+                y: root.u(600)
+                name: Strings.gallery.pickerLayout
+
+                Item {
+                    width: root.u(720)
+                    height: root.u(405)
+                    clip: true
+                    WallpaperView {
+                        anchors.fill: parent
+                        wallpaper: WallpaperCatalog.byId("scene:menu")
+                        s: height / 1080
+                    }
+                    PopupFrame {
+                        id: miniFrame
+                        anchors.fill: parent
+                        title: p3.ws.title
+                        subtitle: p3.ws.subtitle
+                        footerLeft: p3.ws.footer.arg(p3.ws.oneMonitor)
+                        keys: miniLayout.keys
+
+                        PickerLayout {
+                            id: miniLayout
+                            anchors.fill: parent
+                            s: miniFrame.s
+                            entries: [{ group: p3.ws.scenes }].concat(p3.scenes.map((w, i) => ({
+                                label: w.name, trailing: i === 0 ? p3.ws.mark + " " + p3.ws.all : ""
+                            })), [{ group: p3.ws.video }, { label: p3.ws.videoName, dim: true }])
+                            index: 2
+                            options: [
+                                { id: "monitor", label: p3.ws.monitor, values: [p3.ws.allMonitors] },
+                                { id: "transition", label: p3.ws.transition, values: Settings.transitionKinds.map(k => p3.ws.transitionLabels[k]) }
+                            ]
+                            values: ({ monitor: 0, transition: 0 })
+                            info: [
+                                { label: p3.ws.type, value: p3.ws.typeLabels.scene },
+                                { label: p3.ws.motion, value: p3.ws.motionSlow }
+                            ]
+
+                            PreviewCard {
+                                width: miniLayout.previewWidth
+                                s: miniFrame.s
+                                wallpaper: p3.scenes[2] ?? null
+                                dpr: p3.dpr
                             }
                         }
                     }

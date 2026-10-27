@@ -26,6 +26,7 @@ Ela inclui os domínios da `hud-default.json`, pra barra também ficar fixa. O f
 - `dunes.png` (4:3);
 - `parede 'teste' #1 (larga).png` (21:9, nome difícil);
 - `quebrada.jpg` (corrompida).
+- `night.jpg` (16:9, escura: a barra fica no tom claro; emenda da US6).
 
 ## Cenários
 
