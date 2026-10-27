@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rien-os/pause-fixtures",
+  "title": "Arquivos de teste do menu de pausa (spec 007)",
+  "description": "Os domínios `apps`, `windows` e `session` de uma fixture apontam (caminho relativo à pasta da UI) pra um arquivo em um destes formatos. Textos em inglês, aparecem como estão.",
+  "oneOf": [
+    { "$ref": "#/$defs/appsFile" },
+    { "$ref": "#/$defs/windowsFile" },
+    { "$ref": "#/$defs/sessionFile" }
+  ],
+  "$defs": {
+    "appsFile": {
+      "type": "object",
+      "required": ["apps"],
+      "additionalProperties": false,
+      "properties": {
+        "apps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "command"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "\\.desktop$" },
+              "name": { "type": "string", "minLength": 1 },
+              "genericName": { "type": "string" },
+              "description": { "type": "string" },
+              "category": { "enum": ["System", "Network", "Media", "Office", "Development", "Graphics", "Game", "Other"] },
+              "icon": { "type": "string", "description": "Caminho relativo à pasta da UI (fixtures/pause/icons/x.svg) ou \"\" (ícone genérico)" },
+              "command": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+              "keywords": { "type": "array", "items": { "type": "string" } },
+              "terminal": { "type": "boolean" },
+              "windowClass": { "type": "string" },
+              "actions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["name", "command"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": { "type": "string" },
+                    "command": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+                  }
+                }
+              },
+              "pinned": { "type": "boolean" },
+              "uses": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "windowsFile": {
+      "type": "object",
+      "required": ["monitors", "windows"],
+      "additionalProperties": false,
+      "properties": {
+        "monitors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "w", "h"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "w": { "type": "integer", "minimum": 1 },
+              "h": { "type": "integer", "minimum": 1 },
+              "focused": { "type": "boolean" }
+            }
+          }
+        },
+        "windows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["address", "class", "title", "workspace", "monitor", "x", "y", "w", "h"],
+            "additionalProperties": false,
+            "properties": {
+              "address": { "type": "string", "pattern": "^0x[0-9a-f]+$" },
+              "class": { "type": "string" },
+              "title": { "type": "string" },
+              "workspace": { "type": "integer", "description": "1–10, ou -1 pra área especial" },
+              "workspaceName": { "type": "string" },
+              "monitor": { "type": "string" },
+              "x": { "type": "integer" },
+              "y": { "type": "integer" },
+              "w": { "type": "integer", "minimum": 1 },
+              "h": { "type": "integer", "minimum": 1 },
+              "floating": { "type": "boolean" },
+              "focused": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "sessionFile": {
+      "type": "object",
+      "required": ["user", "host", "uptime", "can"],
+      "additionalProperties": false,
+      "properties": {
+        "user": { "type": "string" },
+        "host": { "type": "string" },
+        "uptime": { "type": "integer", "minimum": 0, "description": "Segundos" },
+        "can": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "suspend": { "enum": ["yes", "no", "na", "challenge"] },
+            "hibernate": { "enum": ["yes", "no", "na", "challenge"] },
+            "reboot": { "enum": ["yes", "no", "na", "challenge"] },
+            "poweroff": { "enum": ["yes", "no", "na", "challenge"] }
+          }
+        },
+        "inhibitors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["what", "who", "why", "mode"],
+            "additionalProperties": false,
+            "properties": {
+              "what": { "type": "string", "description": "Lista separada por ':' (shutdown:sleep:idle…), como o logind" },
+              "who": { "type": "string" },
+              "why": { "type": "string" },
+              "mode": { "enum": ["block", "delay"] }
+            }
+          }
+        },
+        "refuse": {
+          "type": "array",
+          "items": { "enum": ["lock", "logout", "suspend", "hibernate", "reboot", "poweroff"] },
+          "description": "Ações que, com esta fixture, respondem como recusadas (caso de borda da recusa)"
+        }
+      }
+    }
+  }
+}

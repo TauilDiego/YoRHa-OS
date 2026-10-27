@@ -371,9 +371,12 @@ e ver que continua fixado.
   - confirmar com Enter ou clique na linha da ação; cancelar com Esc, clique fora dele, Enter em
     `Cancel` ou qualquer perda de foco do menu;
   - ter o próprio rodapé de teclas: `↑↓ Select`, `Enter Confirm`, `Esc Cancel`.
-- **FR-023**: Uma ação de energia MUST fechar o menu antes de executar. Com dados de teste, nada
-  executa: a ação fica registrada no estado exportado. Uma recusa do sistema (falta de permissão)
-  mantém o menu aberto, com o erro no quadro.
+- **FR-023**: `Lock`, `Suspend` e `Hibernate` MUST fechar o menu antes de executar (a tela tem que
+  estar limpa); `Log out`, `Reboot` e `Shut down` executam depois da confirmação e fecham o menu
+  quando o sistema aceita. Uma recusa do sistema (falta de permissão, um programa bloqueando)
+  mantém o menu aberto, com o erro no quadro; a recusa de uma ação que já fechou o menu vai pro log
+  e aparece no quadro de POWER na próxima abertura. Com dados de teste, nada executa: a ação fica
+  registrada no estado exportado. (Precisão feita no plano, 2026-10-27.)
 - **FR-024**: O rodapé de POWER MUST mostrar: `↑↓ Select`, `Enter <ação>` (nada numa ação
   apagada), `Tab Next tab`, `Esc Close`; o texto à esquerda: `Up <tempo>`.
 
