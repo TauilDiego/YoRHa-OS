@@ -29,7 +29,7 @@ os algoritmos abaixo são a tradução do JavaScript dele pro shell.
     - `dark`: `#141414`, linhas cinza a 20%, trama;
     - `plain`: só papel e vinheta;
   - **o movimento** segue o mockup (velocidade "real"):
-    - os arcos oscilam ±9° em torno do próprio centro, com período de 420 s;
+    - os arcos oscilam ±9° em torno do próprio centro, com período de 600 s (o ciclo do `wallpaperPhase`; o mockup usava 420 s, imperceptível);
     - os feixes deslizam ±70 px ao longo da direção, com período de 300 s;
     - cada elemento tem uma defasagem própria;
     - a fase vem do `Timer` que já existe no `shell.qml`, que para com fixtures, com

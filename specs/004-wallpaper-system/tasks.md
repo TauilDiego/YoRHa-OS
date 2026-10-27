@@ -65,9 +65,8 @@ teste e as ferramentas de evidência (rajada, roteiro).
 
 ## Phase 3: User Story 1 - Um fundo igual ao dos menus do jogo (Priority: P1) 🎯 MVP
 
-> **Em implementação na branch `004-us1-fundo` (sessão principal).** As tarefas T017–T020 estão sendo
-> feitas lá. Quando a branch entrar na `004-wallpaper-system`, elas são marcadas com a evidência
-> dela, e a T021–T022 transformam o fundo na cena `menu`.
+> **T017–T020 feitas na branch `004-us1-fundo` e integradas (`a87e37b`).** Falta a T021–T022,
+> que transformam o fundo na cena `menu`.
 
 **Goal**: o desktop mostra o fundo dos menus do jogo, medido: sem grid, sem grão, vinheta medida,
 arcos duplos e feixes em segmentos que respiram.
@@ -75,10 +74,10 @@ arcos duplos e feixes em segmentos que respiram.
 **Independent Test**: workspace vazio, screenshot medido (cores e ausência de grid) em 1080 e
 hidpi; dois screenshots iguais com fixtures.
 
-- [ ] T017 [US1] Tirar o grid do fundo e da barra: `shell/wallpaper/Wallpaper.qml` e `shell/hud/Hud.qml` deixam de usar o `GridBackground`. O primitivo sai de `shell/ds/primitives/` e da galeria se mais nada o usar (com `Tokens.color.grid`)
-- [ ] T018 [US1] `shell/ds/primitives/PaperDecor.qml` refeito com a geometria do mockup: 4 arcos (2 duplos, +7 px), 4 feixes de 2–3 linhas a 42° que começam e terminam na tela (começos escalonados 34 px, fins 60 px por linha), linhas em tinta a 15%, respiração (arcos ±9° em 420 s, feixes ±70 px em 300 s, com defasagem por elemento), linhas nítidas na grade física
-- [ ] T019 [US1] Calibrar o papel + a `Vignette` pras medidas: centro `#C8C3AC`, bordas `#A6A18D`, cantos `#8C8978` (design system §6), sem emendar com a barra (FR-004)
-- [ ] T020 [US1] Validar (`lab/perf begin "004: US1 fundo"`): cenário 1 do quickstart (cores ≤ 4 níveis e sem grid, em 1080 e hidpi), cenário 2 (fundo), `lab/check-u1` ainda 15/15
+- [x] T017 [US1] Tirar o grid do fundo e da barra: `shell/wallpaper/Wallpaper.qml` e `shell/hud/Hud.qml` deixam de usar o `GridBackground`. O primitivo sai de `shell/ds/primitives/` e da galeria se mais nada o usar (com `Tokens.color.grid`)
+- [x] T018 [US1] `shell/ds/primitives/PaperDecor.qml` refeito com a geometria do mockup: 4 arcos (2 duplos, +7 px), 4 feixes de 2–3 linhas a 42° que começam e terminam na tela (começos escalonados 34 px, fins 60 px por linha), linhas em tinta a 15%, respiração (arcos ±9° em 600 s, feixes ±70 px em 300 s, os dois no ciclo de 600 s do `wallpaperPhase`, com defasagem por elemento), linhas nítidas na grade física
+- [x] T019 [US1] Calibrar o papel + a `Vignette` pras medidas: centro `#C8C3AC`, bordas `#A6A18D`, cantos `#8C8978` (design system §6), sem emendar com a barra (FR-004)
+- [x] T020 [US1] Validar (`lab/perf begin "004: US1 fundo"`): cenário 1 do quickstart (cores ≤ 4 níveis e sem grid, em 1080 e hidpi), cenário 2 (fundo), `lab/check-u1` ainda 15/15 — **feito** em `a87e37b` (branch `004-us1-fundo`, já integrada): check-u1 15/15; cores a ≤ 4 níveis do jogo em 1080 e 2560x1600 @1,25; `lab/perf` 2026-10-27T144633
 - [ ] T021 [US1] Extrair o fundo da US1 pra `shell/wallpaper/Scene.qml`, guiado pelos parâmetros (`params` do contracts/components.md): papel com as cores, camadas `arcs`/`beams`/`rules` (com `Rule` dotted em y 108 e 1012) e `dots` (`Canvas` com pontos de 1 px a cada 4 px, pintado uma vez), `lineAlpha`, `motion`. A cena `menu.json` tem que dar o mesmo screenshot da T020 (`lab/diffshot` = 0)
 - [ ] T022 [US1] `shell/wallpaper/WallpaperView.qml` (cena por enquanto; imagem na US4) e `shell/wallpaper/Wallpaper.qml` mostrando `WallpaperStore.resolve(screen.name)`, com troca seca. Validar: `ipc call wallpaper set` com cada cena muda o fundo (screenshot + `dump`)
 

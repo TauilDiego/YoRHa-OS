@@ -35,7 +35,7 @@ vídeo por último.
 | `layers.rules` | bool | false | Réguas pontilhadas em y 108 e 1012 (px do jogo) |
 | `layers.dots` | bool | false | Trama de pontos (só `dark`) |
 | `lineAlpha` | real | 0.15 | Tinta das linhas (`dark`: 0.20 de cinza claro) |
-| `motion.arcPeriod` | s | 420 | Período da oscilação dos arcos |
+| `motion.arcPeriod` | s | 600 | Período da oscilação dos arcos |
 | `motion.arcAmplitude` | graus | 9 | ± em torno do centro de cada arco |
 | `motion.beamPeriod` | s | 300 | Período do deslize dos feixes |
 | `motion.beamAmplitude` | px do jogo | 70 | ± ao longo da direção |
