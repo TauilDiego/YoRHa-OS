@@ -8,8 +8,9 @@ import "../primitives"
 //   state: "normal" | "hovered" | "selected" | "dimmed". The parent drives it, usually from
 //   `hovered` and its own selection; the button never changes its own state.
 //   On entering hovered/selected the ink sweeps left→right (Tokens.motion.highlight).
-//   With selected + reachRule, the ink grows down to `ruleY` (px from the button's top) to
-//   merge with the rule under the bar; the button's own height does not change.
+//   With selected + reachRule, a stem of ink grows down to `ruleY` (px from the button's top)
+//   to touch the rule under the bar, right after the sweep (Tokens.motion.touch), and retracts
+//   when the tab is deselected (Tokens.motion.untouch). The button's own height does not change.
 // The Selector hangs to the LEFT, outside the box, at x = -selectorRoom: the parent must keep
 // `selectorRoom` px free before the button (e.g. Row spacing or a leading spacer).
 Item {
@@ -55,7 +56,47 @@ Item {
         else
             sweep = inked ? 1 : 0;
     }
-    Component.onCompleted: sweep = inked ? 1 : 0
+    Component.onCompleted: {
+        sweep = inked ? 1 : 0;
+        reach = touching ? 1 : 0;
+    }
+
+    // Stem: 0 → 1 down to the rule once selected, after what is left of the sweep.
+    property real reach: 0
+    readonly property bool touching: state === "selected" && reachRule
+    onTouchingChanged: {
+        touchAnim.stop();
+        untouchAnim.stop();
+        if (Tokens.frozen)
+            reach = touching ? 1 : 0;
+        else if (touching) {
+            touchDelay.duration = Math.round(Tokens.motion.highlight * (1 - sweep));
+            touchAnim.start();
+        } else
+            untouchAnim.start();
+    }
+
+    SequentialAnimation {
+        id: touchAnim
+        PauseAnimation {
+            id: touchDelay
+        }
+        NumberAnimation {
+            target: root
+            property: "reach"
+            to: 1
+            duration: Tokens.motion.touch
+            easing.type: Easing.OutCubic
+        }
+    }
+    NumberAnimation {
+        id: untouchAnim
+        target: root
+        property: "reach"
+        to: 0
+        duration: Tokens.motion.untouch
+        easing.type: Easing.InCubic
+    }
 
     NumberAnimation {
         id: sweepAnim
@@ -90,20 +131,37 @@ Item {
         }
     }
 
+    // The resting face, hidden once the ink covers it all: the ink is clipped, and at a half
+    // physical pixel the clip and this rectangle can round apart (a 1 px light sliver).
     Rectangle {
         width: root.width
         height: root.bandH
+        visible: root.fill < 1
         color: Tokens.color.lightGray
     }
 
     Face {
         id: dark
+        visible: root.fill < 1
         ink: root.state === "dimmed" ? Tokens.color.mediumGray : Tokens.color.darkGray
+    }
+
+    // The stem, from the band's bottom to the rule. While inked it is part of the ink itself:
+    // one rectangle, so at fractional scales its edges round together with the band's (two
+    // rectangles at a half physical pixel can round apart and leave a 1 px burr). Only the
+    // retracting stem of a deselected tab, with no ink above it, is drawn on its own.
+    readonly property int stemH: Math.round(Math.max(0, ruleY - bandH) * reach)
+    Rectangle {
+        y: root.bandH
+        width: root.width
+        height: root.stemH
+        visible: !root.inked && height > 0
+        color: Tokens.color.darkGray
     }
 
     Rectangle {
         width: Math.round(root.width * root.fill)
-        height: root.state === "selected" && root.reachRule ? Math.max(root.bandH, Math.round(root.ruleY)) : root.bandH
+        height: root.bandH + root.stemH
         visible: width > 0
         clip: true
         color: Tokens.color.darkGray

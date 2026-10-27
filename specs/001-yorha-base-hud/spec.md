@@ -194,9 +194,10 @@ com dados de teste, dois screenshots seguidos saem iguais.
 **HUD**
 
 - **FR-009**: O HUD MUST ocupar uma faixa no topo de cada monitor e reservar o espaço dela, pra
-  que as janelas não fiquem por baixo. A faixa MUST ter 40px lógicos por padrão (aba de 31px),
-  configurável entre 28 e 48px, com as proporções da barra de abas do jogo e a régua pontilhada
-  embaixo.
+  que as janelas não fiquem por baixo. A faixa MUST ter 50px lógicos por padrão (aba de 33px),
+  configurável entre 28 e 56px, com a barra de abas do jogo, um vão visível entre as abas e a
+  régua pontilhada embaixo (revisado pelo dono em 2026-10-27: era 40px, com vão de ≈2px e régua
+  menor).
 - **FR-010**: O HUD MUST mostrar, da esquerda pra direita:
   1. a marca do sistema: as duas faixas verticais do jogo, sem nome nem logo (o nome rien-OS
      aparece só na galeria e nos menus);
@@ -206,7 +207,9 @@ com dados de teste, dois screenshots seguidos saem iguais.
   5. a data e a hora.
 - **FR-011**: As abas MUST mostrar números com dois dígitos (01, 02…), de 1 até o maior entre 5,
   o maior workspace existente e o workspace em foco, nestes estados:
-  - **em foco:** invertida, descendo até a régua de baixo e se fundindo com ela;
+  - **em foco:** invertida, descendo até a régua de baixo e se fundindo com ela. A descida é
+    animada: logo depois da tinta, uma haste desce até a régua (`motion.touch`), e recolhe
+    quando a aba perde o foco (`motion.untouch`). Com dados de teste, é instantâneo;
   - **existente:** normal;
   - **inexistente:** apagada.
 
@@ -275,7 +278,7 @@ com dados de teste, dois screenshots seguidos saem iguais.
   pedir mudanças estruturais: no máximo ajustes de cor, tamanho ou espaçamento.
 - **SC-007**: Uma mudança num arquivo da UI aparece na VM em até 3 s, com a recarga ao vivo do
   laboratório.
-- **SC-008**: Na VM, nos perfis 1920x1080 @1 e 2560x1600 @1,25, a barra mede 40px lógicos e o
+- **SC-008**: Na VM, nos perfis 1920x1080 @1 e 2560x1600 @1,25, a barra mede a altura padrão em px lógicos (50) e o
   grid e as réguas aparecem nítidos (sem borrado de meio pixel) nos screenshots.
 
 - **SC-009**: Num workspace vazio, o screenshot mostra o fundo (papel e grid no centro da tela);

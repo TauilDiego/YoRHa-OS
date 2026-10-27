@@ -10,11 +10,11 @@ Singleton {
     id: root
 
     readonly property real uiScale: valid(merged.uiScale, 0.5, 3.0, "uiScale") ? merged.uiScale : defaults.uiScale
-    readonly property int barHeight: Math.round(Math.max(28, Math.min(48, Number(merged.barHeight) || defaults.barHeight)))
+    readonly property int barHeight: Math.round(Math.max(28, Math.min(56, Number(merged.barHeight) || defaults.barHeight)))
     readonly property bool vignette: typeof merged.vignette === "boolean" ? merged.vignette : defaults.vignette
     readonly property bool wallpaperMotion: typeof merged.wallpaperMotion === "boolean" ? merged.wallpaperMotion : defaults.wallpaperMotion
 
-    readonly property var defaults: parse(defaultsFile.text(), "defaults.json") ?? ({ uiScale: 1.0, barHeight: 40, vignette: true, wallpaperMotion: true })
+    readonly property var defaults: parse(defaultsFile.text(), "defaults.json") ?? ({ uiScale: 1.0, barHeight: 50, vignette: true, wallpaperMotion: true })
     readonly property var user: userFile.loaded ? (parse(userFile.text(), userFile.path) ?? ({})) : ({})
     readonly property var merged: Object.assign({}, defaults, user)
 

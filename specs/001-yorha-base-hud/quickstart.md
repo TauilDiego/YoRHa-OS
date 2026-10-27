@@ -31,7 +31,7 @@ O formato está em [contracts/fixtures.schema.json](contracts/fixtures.schema.js
 | 4 | SC-004 | `ipc call gallery open`, `lab/shot galeria`, `ipc call gallery close` | Todas as peças do FR-003 e todos os estados do FR-004 aparecem, com nome, vinheta e seletor com os 2 quadradinhos |
 | 5 | SC-005 / FR-017 | O relatório do `lab/perf end` (seção "Dentro da VM") | 0 erros e 0 avisos no último carregamento |
 | 6 | SC-007 | Editar um arquivo em `shell/` com `lab/sync --watch` ligado, depois `lab/shot` | A mudança aparece em ≤ 3 s |
-| 7 | SC-008 | `lab/profile hidpi` + `lab/shot`, depois `lab/profile 1080` + `lab/shot` | A barra tem 40 px lógicos (50 px físicos no hidpi), e o grid e as réguas não têm meio pixel |
+| 7 | SC-008 | `lab/profile hidpi` + `lab/shot`, depois `lab/profile 1080` + `lab/shot` | A barra tem 50 px lógicos (62 px físicos no hidpi), e o grid e as réguas não têm meio pixel |
 | 8 | Bordas | `ipc call fixtures load` com `battery-low.json`, `no-battery.json`, `muted.json`, `long-title.json` e `no-window.json` | BAT vermelha; BAT some; VOL mudo e vazio; título com reticências; título vazio |
 | 9 | Lint | `lab/ssh 'qmllint -I … ~/nier/ui/**/*.qml'` | Sem erros |
 

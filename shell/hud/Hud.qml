@@ -29,8 +29,12 @@ PanelWindow {
     WlrLayershell.namespace: "rien-os-hud"
     color: Tokens.color.darkYellow
 
-    // Surface factor (research R5): the tab is 31/40 of the bar, the game's tab is 47.
-    readonly property real tabH: Settings.barHeight * 31 / 40
+    // Layout, top to bottom: a little paper, the tabs, a visible gap, then the dotted rule.
+    // The tab takes a fixed share of the bar; s (research R5) scales the game's 47 px tab to it.
+    readonly property real tabShare: 0.66
+    readonly property real ruleGap: 8                    // game px between the tabs and the rule
+    readonly property real ruleShare: 0.42               // the rule's pattern, relative to s
+    readonly property real tabH: Math.round(Settings.barHeight * tabShare)
     readonly property real s: tabH / Tokens.space.tabH * Settings.uiScale
     readonly property int margin: Tokens.px(14, s)
 
@@ -71,16 +75,15 @@ PanelWindow {
         anchors.fill: parent
     }
 
-    // Tabs + strips + the dotted rule, sitting on the bar's bottom edge. The rule's pattern is
-    // scaled down to fit under a 31 px tab inside the 40 px bar.
+    // Tabs + strips + the dotted rule, sitting on the bar's bottom edge.
     TabBar {
         id: tabBar
         x: root.margin
         y: root.height - implicitHeight
         width: root.width - 2 * root.margin
         s: root.s
-        ruleGap: 3
-        ruleScale: root.s * 0.3
+        ruleGap: root.ruleGap
+        ruleScale: root.s * root.ruleShare
         showSelector: false                      // the owner's call: just the tabs, no Pod cursor
         model: root.tabs.map((t, i) => ({
             label: t.label,

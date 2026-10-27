@@ -24,6 +24,22 @@ Item {
     QtObject {
         id: hover
         property int index: -1
+        // Which tab is under the pointer, from scratch. Called deferred (Qt.callLater): `model`
+        // reads hoveredIndex, and tabs come and go while it is re-evaluated, so a synchronous
+        // write is a binding loop. As a method of this object, a call still queued when the bar
+        // is torn down (live reload, monitor change) is dropped by Qt; and since it recomputes
+        // everything, several calls coalesced into one lose nothing.
+        function sync(): void {
+            let h = -1;
+            for (let i = 0; i < tabs.count; i++) {
+                const t = tabs.itemAt(i) as HeaderButton;
+                if (t && t.hovered) {
+                    h = i;
+                    break;
+                }
+            }
+            index = h;
+        }
     }
 
     signal activated(int index)
@@ -78,33 +94,8 @@ Item {
                 selectorTone: "dark"                 // the selector always hangs over the paper
                 showSelector: root.showSelector
                 onClicked: root.activated(index)
-                // Deferred: these fire while the parent re-evaluates `model` (tabs added or
-                // removed under a still pointer), and a synchronous write to hoveredIndex, which
-                // `model` reads, is a binding loop.
-                onHoveredChanged: {
-                    const i = index, on = hovered;
-                    Qt.callLater(() => {
-                        try {
-                            if (on)
-                                hover.index = i;
-                            else if (hover.index === i)
-                                hover.index = -1;
-                        } catch (e) {
-                            // the bar itself was torn down meanwhile (live reload): nothing to do
-                        }
-                    });
-                }
-                Component.onDestruction: {
-                    const i = index;
-                    Qt.callLater(() => {
-                        try {
-                            if (hover.index === i && i >= tabs.count)
-                                hover.index = -1;
-                        } catch (e) {
-                            // the bar itself was torn down meanwhile (live reload): nothing to do
-                        }
-                    });
-                }
+                onHoveredChanged: Qt.callLater(hover.sync)
+                Component.onDestruction: Qt.callLater(hover.sync)
             }
         }
     }

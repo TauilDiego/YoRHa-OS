@@ -25,7 +25,7 @@ Regras para todos os componentes:
 
 | Componente | Propriedades | Sinais | Notas |
 |---|---|---|---|
-| `HeaderButton` | `text`, `state`: `"normal"` / `"hovered"` / `"selected"` / `"dimmed"`, `reachRule: bool`, `ruleY` | `clicked()` | 214×47·s. Com `selected` + `reachRule`, desce até a régua (FR-011). Mostra o `Selector` em `hovered`/`selected`, a menos que `showSelector: false` |
+| `HeaderButton` | `text`, `state`: `"normal"` / `"hovered"` / `"selected"` / `"dimmed"`, `reachRule: bool`, `ruleY` | `clicked()` | 214×47·s. Com `selected` + `reachRule`, uma haste desce até a régua logo depois da tinta (`motion.touch`) e recolhe ao perder a seleção (`motion.untouch`) (FR-011). Mostra o `Selector` em `hovered`/`selected`, a menos que `showSelector: false` |
 | `ListItem` | `text`, `state` (os mesmos 4), `variant`: `"opaque"` / `"plain"`, `trailing: string` | `clicked()` | Faixa de tinta que pinta da esquerda pra direita + trilhos + sombra (FR-004) |
 | `Selector` | `tone`: `"dark"` / `"light"`, `bobbing: bool` | — | Pipa + 2 quadradinhos, balançando juntos (FR-005). Congela quando `Tokens.motion.frozen` |
 | `Meter` | `value` (0–1), `critical: bool`, `w` (padrão 163), `h` (padrão 11) | — | `hp-bar` chapado. Anima a mudança de valor. `critical` → `alert` (FR-007) |

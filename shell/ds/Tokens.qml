@@ -120,6 +120,8 @@ Singleton {
     readonly property Motions motion: Motions {}
     component Motions: QtObject {
         readonly property int highlight: 150               // ink sweep (FR-004), calibrate later
+        readonly property int touch: 160                   // selected tab's stem down to the rule
+        readonly property int untouch: 120                 // the stem back up, when deselected
         readonly property int bobPeriod: 1000              // selector bob (FR-005)
         readonly property real bobAmplitude: 5
         readonly property int meter: 250                   // meter value change
