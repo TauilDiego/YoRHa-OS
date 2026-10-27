@@ -37,3 +37,7 @@
   como requisito.
 - **Nome do Quickshell:** aparece só no texto original do pedido (Input) e nas premissas
   (Assumptions) como contexto; nenhum requisito depende dele.
+- **Revisão de 2026-10-27** (spec atualizada com `docs/design-system.md`): os itens continuam
+  valendo. Os nomes de token (`dark-gray`, `alert`…), as fontes (M PLUS 1) e a regra de pixels
+  lógicos com `uiScale` (FR-008b) são decisões de design tomadas pelo dono, não escolhas de
+  implementação. A paleta antiga só sobra no texto original do pedido (Input), que é registro.

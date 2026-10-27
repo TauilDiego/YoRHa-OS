@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rien-os/shell/fixtures/1",
+  "title": "HUD test data (every domain is optional; a missing domain means real data)",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "clock": { "type": "string", "format": "date-time", "description": "Fixed local time, e.g. 2026-10-26T13:37:00" },
+    "cpu": { "type": "number", "minimum": 0, "maximum": 100 },
+    "mem": { "type": "number", "minimum": 0, "maximum": 100 },
+    "volume": {
+      "type": "object", "additionalProperties": false,
+      "properties": { "percent": { "type": "number", "minimum": 0, "maximum": 100 }, "muted": { "type": "boolean" } },
+      "required": ["percent"]
+    },
+    "battery": {
+      "oneOf": [
+        { "type": "null", "description": "No battery: the reading disappears" },
+        {
+          "type": "object", "additionalProperties": false,
+          "properties": { "percent": { "type": "number", "minimum": 0, "maximum": 100 }, "charging": { "type": "boolean" } },
+          "required": ["percent"]
+        }
+      ]
+    },
+    "workspaces": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "existing": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+        "focused": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["existing", "focused"]
+    },
+    "activeWindow": { "type": "string", "description": "Empty string = no active window" }
+  }
+}

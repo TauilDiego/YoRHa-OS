@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-26
 
-**Status**: Draft (clarificações resolvidas)
+**Status**: Aprovada pelo dono em 2026-10-27 (alinhada com o design system em `docs/design-system.md`)
 
 **Input**: User description: "U1 — Base visual: design system YoRHa (inspirado na UI de NieR:Automata) e o HUD (barra do topo) da UI rien-OS, rodando no Quickshell dentro da VM do laboratório. Design system: paleta papel/tinta (#D1CDB7 fundo, #BAB5A1 fraco, #DCD8C0 claro, #454138 tinta, um vermelho só pra alerta), grid fino no fundo, quadrado como marcador, item de menu que pinta da esquerda pra direita com trilhos acima/abaixo e sombra deslocada, cursor que balança, títulos em caixa alta com sombra, painel com faixa de cabeçalho escura, medidor estilo barra de HP, linha dupla. HUD: barra no topo com workspaces como abas do menu de pausa (01, 02...; ativo invertido, vazios apagados, clique troca), telemetria CPU/MEM/VOL/BAT com medidores, relógio e data, título da janela ativa. Os dados vêm de serviços que aceitam fixtures (relógio fixo, bateria 87%, etc.) pra screenshots determinísticos. Sem blur. Verificação por screenshot no lab."
 
@@ -13,7 +13,7 @@
 ### User Story 1 - Ver o estado do sistema numa barra com cara de NieR (Priority: P1)
 
 Ao entrar na sessão, o usuário vê no topo da tela uma barra no estilo da interface dos androides
-YoRHa: papel bege com um grid fino, tinta escura e uma linha dupla embaixo. De um relance, a barra
+YoRHa: papel bege com um grid fino, tinta escura e uma régua pontilhada embaixo. De um relance, a barra
 mostra:
 - em qual workspace ele está e quais workspaces têm janelas;
 - o título da janela ativa;
@@ -36,7 +36,8 @@ conferir que todos os elementos aparecem com a aparência descrita.
    **When** a barra aparece, **Then** cada leitura mostra o rótulo, um medidor preenchido na
    proporção certa e o número.
 3. **Given** uma janela ativa com o título "kitty — ~/projetos", **When** a barra aparece,
-   **Then** o título aparece no centro, cortado com reticências se não couber.
+   **Then** o título aparece no centro, cortado com reticências se não couber. O título é dado do
+   usuário e aparece como vier; os textos fixos da UI continuam em inglês (FR-018).
 4. **Given** o relógio de teste fixo em 2026-10-26 13:37:00, **When** a barra aparece,
    **Then** ela mostra "2026.10.26" e "13:37:00".
 
@@ -67,14 +68,13 @@ workspace mudou e que a aba nova está destacada.
 
 O dono do projeto (e os agentes que vão construir as próximas telas) abre uma tela de galeria com
 todas as peças do design system lado a lado, cada uma nos seus estados:
-- item de menu: normal, destacado, selecionado e apagado;
-- painel com cabeçalho;
-- título grande;
+- primitivas: marcador quadrado, réguas (lisa, pontilhada e vertical), fundo com grid;
+- botão-aba e item de lista: normal, destacado, selecionado e apagado;
+- seletor balançando (claro e escuro);
 - medidor (normal e crítico);
-- cursor balançando;
-- marcador quadrado;
-- linha dupla;
-- fundo com grid.
+- título de página;
+- card;
+- compostos: barra de abas e lista com cursor.
 
 **Why this priority**: As próximas fases (menu de pausa, notificações, lock) são construídas com
 essas peças. Ver todas juntas evita que cada tela reinvente o visual e serve de referência pra
@@ -102,12 +102,14 @@ peça e cada estado aparecem.
   foco. Workspaces especiais ou com número negativo não aparecem.
 - **Nenhuma janela ativa:** a área do título fica vazia, sem texto de erro.
 - **Título muito longo:** é cortado com reticências e nunca empurra as outras áreas.
-- **Fonte original do jogo ausente:** a UI usa uma fonte aberta substituta sem quebrar o layout.
-  Se o usuário tiver a fonte original instalada, ela é usada.
+- **Fonte original do jogo ausente:** a UI usa a M PLUS 1 sem quebrar o layout. Se o usuário
+  tiver a original instalada (FOT-Rodin ProN, Helvetica Now Micro), ela é usada.
 - **Dados de sistema indisponíveis** (ex.: leitura de CPU falha): o medidor fica em 0 e a UI não
   trava nem mostra erro.
 - **Mais de um monitor:** cada monitor tem a sua barra, mostrando o workspace em foco daquele
   monitor.
+- **Monitores com escalas diferentes** (ex.: 1920x1080 @1 ao lado de 2560x1600 @1,25): a barra
+  tem a mesma altura lógica nos dois, e as linhas finas continuam nítidas.
 
 ## Requirements *(mandatory)*
 
@@ -115,58 +117,75 @@ peça e cada estado aparecem.
 
 **Design system**
 
-- **FR-001**: A UI MUST usar uma paleta única com estas cores:
+- **FR-001**: A UI MUST usar só os tokens de cor do design system (`docs/design-system.md` §1,
+  tirados do Figma de tyleo):
 
-  | Papel | Cor |
-  |---|---|
-  | Fundo | `#D1CDB7` |
-  | Grid | Um tom levemente mais escuro que o fundo |
-  | Fraco | `#BAB5A1` |
-  | Claro | `#DCD8C0` |
-  | Tinta | `#454138` |
-  | Tinta secundária | Mais clara que a tinta |
-  | Alerta | Um vermelho, a única cor fora da paleta sépia, usado só pra estados críticos |
+  | Token | Cor | Papel |
+  |---|---|---|
+  | `dark-gray` | `#4E4B42` | Tinta: texto, item selecionado, cabeçalho de card |
+  | `medium-gray` | `#676458` | Tinta secundária |
+  | `light-gray` | `#B1AB93` | Aba/botão em repouso, medidor, faixas |
+  | `dark-yellow` | `#C9C5AB` | Fundo (papel) |
+  | `light-yellow` | `#D7D1B3` | Corpo de card, texto invertido |
+  | `box-shadow` | `#7C7E6C` a 69% | Sombra de caixa |
+  | `text-shadow` | `#7E7E74` a 57% | Sombra de título |
+  | `grid` | `#4E4B42` a 6% | Grid do fundo |
+  | `alert` | `#8F3A30` | Só estados críticos; a única cor fora da sépia |
 - **FR-002**: Superfícies de fundo MUST mostrar um grid fino e regular, com linhas nítidas em
   qualquer escala de tela.
-- **FR-003**: O design system MUST oferecer estas peças reutilizáveis:
-  - marcador quadrado;
-  - texto com a tipografia do sistema;
-  - item de menu;
-  - cursor;
-  - título grande;
-  - painel com cabeçalho;
-  - medidor;
-  - linha dupla;
-  - fundo com grid.
-- **FR-004**: O item de menu MUST ter os estados normal, destacado (ao passar o mouse ou com o
+- **FR-002a**: Superfícies de tela cheia (a galeria e os menus futuros) MUST ter a vinheta do jogo:
+  as bordas escurecem até ≈`#A6A18D` e os cantos até ≈`#8B8877`. A vinheta MUST poder ser
+  desligada. O HUD não tem vinheta.
+- **FR-003**: O design system MUST oferecer estas peças reutilizáveis, em camadas (cada camada
+  só usa as de baixo), com os nomes de `docs/design-system.md`:
+  - **tokens:** cores, tipografia, sombras, espaçamentos, durações de animação;
+  - **primitivas:** texto, marcador quadrado, régua (lisa, pontilhada e vertical), fundo com grid;
+  - **base:** botão-aba, item de lista, seletor (variantes clara e escura), medidor, título de
+    página, card;
+  - **compostos:** barra de abas e lista com cursor.
+- **FR-004**: O botão-aba e o item de lista MUST ter os estados normal, destacado (ao passar o mouse ou com o
   cursor do teclado), selecionado (persistente) e apagado. Ao destacar:
   - a tinta pinta o item da esquerda pra direita;
   - o texto inverte de cor;
   - aparecem trilhos finos acima e abaixo;
   - aparece uma sombra deslocada.
 
-  A transição dura em torno de 0,2 s.
-- **FR-005**: O cursor de seleção MUST balançar lateralmente de forma contínua e suave enquanto
-  está visível.
-- **FR-006**: Títulos grandes MUST aparecer em caixa alta, com espaçamento largo entre letras e
-  uma sombra deslocada no tom fraco.
-- **FR-007**: O medidor MUST ter contorno, preencher na proporção do valor (0 a 100%), animar
-  quando o valor muda e ficar vermelho no estado crítico.
+  A duração da transição é um token, começando em 0,15 s (a análise do jogo estima ≈100–150 ms);
+  o valor final é calibrado depois.
+- **FR-005**: O cursor de seleção MUST ser a pipa (seletor) + 2 quadradinhos empilhados entre a
+  ponta dela e o item, e MUST balançar lateralmente como um bloco só, de forma contínua e suave,
+  enquanto está visível. Ele aparece no item destacado e no selecionado.
+- **FR-006**: Títulos de página MUST aparecer em caixa alta, com espaçamento largo entre letras
+  e a sombra `text-shadow` chapada, deslocada pra baixo e pra direita em ≈15% do tamanho do
+  texto.
+- **FR-007**: O medidor MUST ser uma barra chapada sem borda (o `hp-bar` do Figma): trilho
+  `light-gray`, preenchimento em tinta na proporção do valor (0 a 100%), animação quando o valor
+  muda e preenchimento `alert` no estado crítico. É o mesmo medidor nos menus e no HUD.
 - **FR-008**: Nenhuma peça MUST usar desfoque (blur) nem transparência sobre o desktop.
+- **FR-008a**: A tipografia MUST usar a M PLUS 1 (OFL) por padrão, com pesos mais fortes nos
+  títulos. Se FOT-Rodin ProN ou Helvetica Now Micro estiverem instaladas, MUST usá-las nos
+  papéis delas, sem mudar o layout.
+- **FR-008b**: Todas as medidas MUST estar em pixels lógicos, sem cálculo de DPI: os tokens guardam
+  as medidas do jogo a 1080p, e cada tela multiplica por um fator `s` (no HUD, `alturaDaAba/47`)
+  e por um `uiScale` do usuário (padrão 1). Linhas finas arredondam pra pixel inteiro, com
+  mínimo de 1px.
 
 **HUD**
 
 - **FR-009**: O HUD MUST ocupar uma faixa no topo de cada monitor e reservar o espaço dela, pra
-  que as janelas não fiquem por baixo.
+  que as janelas não fiquem por baixo. A faixa MUST ter 40px lógicos por padrão (aba de 31px),
+  configurável entre 28 e 48px, com as proporções da barra de abas do jogo e a régua pontilhada
+  embaixo.
 - **FR-010**: O HUD MUST mostrar, da esquerda pra direita:
-  1. a marca do sistema;
+  1. a marca do sistema: as duas faixas verticais do jogo, sem nome nem logo (o nome rien-OS
+     aparece só na galeria e nos menus);
   2. as abas de workspace;
   3. o título da janela ativa (centralizado);
   4. as leituras de CPU, memória, volume e bateria;
   5. a data e a hora.
 - **FR-011**: As abas MUST mostrar números com dois dígitos (01, 02…), de 1 até o maior entre 5,
   o maior workspace existente e o workspace em foco, nestes estados:
-  - **em foco:** invertida;
+  - **em foco:** invertida, descendo até a régua de baixo e se fundindo com ela;
   - **existente:** normal;
   - **inexistente:** apagada.
 - **FR-012**: Clicar numa aba MUST levar o desktop pra aquele workspace.
@@ -222,6 +241,8 @@ peça e cada estado aparecem.
   pedir mudanças estruturais: no máximo ajustes de cor, tamanho ou espaçamento.
 - **SC-007**: Uma mudança num arquivo da UI aparece na VM em até 3 s, com a recarga ao vivo do
   laboratório.
+- **SC-008**: Na VM, nos perfis 1920x1080 @1 e 2560x1600 @1,25, a barra mede 40px lógicos e o
+  grid e as réguas aparecem nítidos (sem borrado de meio pixel) nos screenshots.
 
 ## Assumptions
 
@@ -229,17 +250,18 @@ peça e cada estado aparecem.
   sistema do dono é a fase U7.
 - **Compositor:** só o Hyprland neste U1. O Niri fica pra S5, mas a leitura de workspaces e da
   janela ativa fica isolada pra facilitar a troca depois.
-- **Fonte:** a fonte original (FOT-Rodin) não é distribuída. O padrão é uma fonte aberta, e a
-  original é usada se o usuário a tiver instalado.
-- **Referência de tela:** 1920x1080 em escala 1 (a VM). A UI precisa funcionar também em
-  telas maiores com escala fracionária (por exemplo 2560x1600 em 1,25), mas isso só é conferido
-  na homologação.
+- **Fonte:** as originais (FOT-Rodin, Helvetica Now Micro) não são distribuídas. O padrão é a
+  M PLUS 1, e as originais são usadas se o usuário as tiver instalado.
+- **Referência de tela:** 1920x1080 em escala 1 e 2560x1600 em escala 1,25 (2048x1280
+  lógicos), os dois monitores do dono. Os dois perfis são conferidos na VM.
 - **Fora do escopo do U1:**
   - painéis que abrem ao clicar na telemetria;
   - controle de volume pela barra;
   - bandeja do sistema (tray);
   - menu de pausa, notificações, OSD e lock (fases seguintes);
   - otimização de desempenho (U6).
-- **Sem desempenho:** o U1 não mede desempenho. Vale só a regra de não usar blur.
-- **Paleta:** a referência é o projeto comunitário `metakirby5/yorha`, não uma especificação
-  oficial do jogo.
+- **Desempenho:** o U1 não otimiza a UI (isso fica pra U6). Vale só a regra de não usar blur. O
+  custo de cada teste na máquina do dono é medido sempre, pelo `lab/perf` do ambiente privado.
+- **Paleta e anatomia:** a referência é o Figma "NieR: Automata - UI" de tyleo (CC BY 4.0,
+  crédito em `CREDITS.md`), com correções vindas da observação dos menus do jogo
+  (`docs/design-system.md` §6). Não é uma especificação oficial.
