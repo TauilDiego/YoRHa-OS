@@ -188,6 +188,36 @@ Singleton {
         sniffSoon.restart();               // files that arrived meanwhile
     }
 
+    // --- spec 004 US6: the bar's tone over pictures ------------------------------------------------
+    // The mean luma of each picture's top band as shown (WallpaperView measures it once, when the
+    // picture is ready), by path and by paper filter on/off. Dropped when the file leaves the folder.
+    property var lumas: ({})
+    function lumaKey(path: string, filtered: bool): string {
+        return (filtered ? "1:" : "0:") + path;
+    }
+    function lumaOf(path: string, filtered: bool): real {
+        return lumas[lumaKey(path, filtered)] ?? -1;
+    }
+    function setLuma(path: string, filtered: bool, value: real): void {
+        const l = Object.assign({}, lumas);
+        l[lumaKey(path, filtered)] = value;
+        lumas = l;
+    }
+    onImagesChanged: {
+        const here = new Set(images.map(w => w.path));
+        const keep = {};
+        let dropped = false;
+        for (const k in lumas) {
+            if (here.has(k.slice(2)))
+                keep[k] = lumas[k];
+            else
+                dropped = true;
+        }
+        if (dropped)
+            lumas = keep;
+    }
+    // --- end spec 004 US6 --------------------------------------------------------------------------
+
     // Does the folder exist? Its parent is listed (directories only) and watched, so a folder
     // created later is picked up too.
     readonly property string parentDir: folder.replace(/\/+$/, "").replace(/\/[^/]*$/, "") || "/"

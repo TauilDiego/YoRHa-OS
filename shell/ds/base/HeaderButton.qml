@@ -12,10 +12,12 @@ import "../primitives"
 //   to touch the rule under the bar, right after the sweep (Tokens.motion.touch), and retracts
 //   when the tab is deselected (Tokens.motion.untouch). The button's own height does not change.
 // Tabs have no Selector (the owner's call): only list items carry the Pod cursor.
+// `tone` (spec 004 US6): the top bar's tone, 0 paper → 1 light (plate, ink and the selected ink).
 Item {
     id: root
 
     property real s: 1
+    property real tone: 0
     property string text
     property bool reachRule: false
     property real ruleY: 0
@@ -133,13 +135,13 @@ Item {
         width: root.width
         height: root.bandH
         visible: root.fill < 1
-        color: Tokens.color.lightGray
+        color: Tokens.hudColor("rest", root.tone)
     }
 
     Face {
         id: dark
         visible: root.fill < 1
-        ink: root.state === "dimmed" ? Tokens.color.mediumGray : Tokens.color.darkGray
+        ink: Tokens.hudColor(root.state === "dimmed" ? "ink2" : "ink", root.tone)
     }
 
     // The stem, from the band's bottom to the rule. While inked it is part of the ink itself:
@@ -152,7 +154,7 @@ Item {
         width: root.width
         height: root.stemH
         visible: !root.inked && height > 0
-        color: Tokens.color.darkGray
+        color: Tokens.hudColor("sel", root.tone)
     }
 
     Rectangle {
@@ -160,9 +162,9 @@ Item {
         height: root.bandH + root.stemH
         visible: width > 0
         clip: true
-        color: Tokens.color.darkGray
+        color: Tokens.hudColor("sel", root.tone)
 
-        Face { ink: Tokens.color.lightYellow }
+        Face { ink: Tokens.hudColor("selInk", root.tone) }
     }
 
     MouseArea {

@@ -19,6 +19,13 @@ A UI lê o papel de parede **só** por estes serviços. As entidades estão em
   nas pontas.
 - **Ids inválidos:** `set` com um id que não está no catálogo devolve erro e não muda nada.
 
+**Emenda da US6 (2026-10-27): o tom da barra**
+
+| Serviço | Acréscimo | Notas |
+|---|---|---|
+| `WallpaperStore` | `toneMix` (`{ monitor: 0..1 }`), `setToneMix(monitor, v)`, `toneOf(id)` → `1` claro, `0` papel, `-1` ainda não se sabe | `toneMix` é escrito por cada `Wallpaper` (o tom que a barra mostra agora); `toneOf` aplica a FR-026 ao item: cena `dark` → 1, outras cenas → 0, imagem → luminância medida < 0,45 |
+| `WallpaperCatalog` | `lumas` (`{ chave: 0..1 }`), `lumaOf(path, filtered)`, `setLuma(path, filtered, v)` | A luminância da faixa de cima de cada imagem, medida uma vez pela `WallpaperView` e guardada por caminho e por filtro ligado/desligado. Some quando o arquivo sai da pasta |
+
 ## Acréscimos
 
 | Serviço | Acréscimo | Fonte |

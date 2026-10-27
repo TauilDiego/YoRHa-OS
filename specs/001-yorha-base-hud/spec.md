@@ -167,6 +167,10 @@ com dados de teste, dois screenshots seguidos saem iguais.
   desligada. O papel do HUD entra na vinheta do fundo, contínua com ele, sem emenda; abas, régua
   e textos ficam por cima, sem vinheta (decisão do dono em 2026-10-27: a vinheta pega a tela
   inteira, mas não as janelas).
+  **Superada na parte da barra pela spec 004 (US6, FR-025, aprovada pelo dono em 2026-10-27):** a
+  barra não pinta mais o papel nem a faixa da vinheta; ela é transparente e mostra o papel de parede
+  do monitor por baixo, com um tom que acompanha o fundo. A vinheta da galeria e dos menus de tela
+  cheia continua valendo.
 - **FR-003**: O design system MUST oferecer estas peças reutilizáveis, em camadas (cada camada
   só usa as de baixo), com os nomes de `docs/design-system.md`:
   - **tokens:** cores, tipografia, sombras, espaçamentos, durações de animação;
@@ -194,7 +198,9 @@ com dados de teste, dois screenshots seguidos saem iguais.
 - **FR-007**: O medidor MUST ser uma barra chapada sem borda (o `hp-bar` do Figma): trilho
   `light-gray`, preenchimento em tinta na proporção do valor (0 a 100%), animação quando o valor
   muda e preenchimento `alert` no estado crítico. É o mesmo medidor nos menus e no HUD.
-- **FR-008**: Nenhuma peça MUST usar desfoque (blur) nem transparência sobre o desktop.
+- **FR-008**: Nenhuma peça MUST usar desfoque (blur) nem transparência sobre o desktop. **Revista
+  pela spec 004 (US6, 2026-10-27):** a barra do topo é a exceção, sem fundo próprio, sobre o papel
+  de parede (e, no tom claro, com placas translúcidas); blur continua proibido.
 - **FR-008a**: A tipografia MUST usar a M PLUS 1 (OFL) por padrão, com pesos mais fortes nos
   títulos. Se FOT-Rodin ProN ou Helvetica Now Micro estiverem instaladas, MUST usá-las nos
   papéis delas, sem mudar o layout.
