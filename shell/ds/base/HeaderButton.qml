@@ -11,8 +11,7 @@ import "../primitives"
 //   With selected + reachRule, a stem of ink grows down to `ruleY` (px from the button's top)
 //   to touch the rule under the bar, right after the sweep (Tokens.motion.touch), and retracts
 //   when the tab is deselected (Tokens.motion.untouch). The button's own height does not change.
-// The Selector hangs to the LEFT, outside the box, at x = -selectorRoom: the parent must keep
-// `selectorRoom` px free before the button (e.g. Row spacing or a leading spacer).
+// Tabs have no Selector (the owner's call): only list items carry the Pod cursor.
 Item {
     id: root
 
@@ -21,11 +20,8 @@ Item {
     property bool reachRule: false
     property real ruleY: 0
     property real fixedWidth: 0                  // game px; 0 = fit the label
-    property string selectorTone: ""             // "dark" / "light"; "" = light when selected
-    property bool showSelector: true             // false: no Pod cursor (e.g. the HUD's tabs)
 
     readonly property bool hovered: mouse.containsMouse
-    readonly property int selectorRoom: Tokens.px(Tokens.space.selectorW + Tokens.space.selectorGap, s)
 
     signal clicked()
 
@@ -167,15 +163,6 @@ Item {
         color: Tokens.color.darkGray
 
         Face { ink: Tokens.color.lightYellow }
-    }
-
-    Selector {
-        x: -root.selectorRoom
-        y: Math.round((root.bandH - height) / 2)
-        s: root.s
-        visible: root.inked && root.showSelector
-        tone: root.selectorTone || (root.state === "selected" ? "light" : "dark")
-        bobbing: true
     }
 
     MouseArea {

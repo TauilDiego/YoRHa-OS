@@ -177,7 +177,8 @@ com dados de teste, dois screenshots seguidos saem iguais.
   o valor final é calibrado depois.
 - **FR-005**: O cursor de seleção MUST ser a pipa (seletor) + 2 quadradinhos empilhados entre a
   ponta dela e o item, e MUST balançar lateralmente como um bloco só, de forma contínua e suave,
-  enquanto está visível. Ele aparece no item destacado e no selecionado.
+  enquanto está visível. Ele aparece no item de lista destacado e no selecionado; as abas não têm seletor
+  (decisão do dono em 2026-10-27).
 - **FR-006**: Títulos de página MUST aparecer em caixa alta, com espaçamento largo entre letras
   e a sombra `text-shadow` chapada, deslocada pra baixo e pra direita em ≈15% do tamanho do
   texto.
@@ -215,7 +216,7 @@ com dados de teste, dois screenshots seguidos saem iguais.
   - **existente:** normal;
   - **inexistente:** apagada.
 
-  No HUD, as abas ficam lado a lado e **não** mostram o seletor (decisão do dono em
+  As abas ficam lado a lado e **não** têm seletor, nem no HUD nem nos menus (decisão do dono em
   2026-10-27); o destaque ao passar o mouse continua.
 - **FR-012**: Clicar numa aba MUST levar o desktop pra aquele workspace.
 - **FR-013**: Cada leitura de telemetria MUST mostrar o rótulo, um medidor e o valor numérico

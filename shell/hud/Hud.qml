@@ -92,7 +92,6 @@ PanelWindow {
         s: root.s
         ruleGap: root.ruleGap
         ruleScale: root.s * root.ruleShare
-        showSelector: false                      // the owner's call: just the tabs, no Pod cursor
         model: root.tabs.map((t, i) => ({
             label: t.label,
             state: i === tabBar.hoveredIndex && t.state !== "selected" ? "hovered" : t.state

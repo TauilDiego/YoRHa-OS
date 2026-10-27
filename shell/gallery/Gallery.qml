@@ -216,19 +216,12 @@ PanelWindow {
 
                     Repeater {
                         model: root.states4
-                        Item {
-                            id: cell
+                        HeaderButton {
                             required property string modelData
-                            width: button.selectorRoom + button.width
-                            height: button.height
-                            HeaderButton {
-                                id: button
-                                x: selectorRoom
-                                s: root.s
-                                fixedWidth: Tokens.space.tabW
-                                text: root.stateNames[cell.modelData]
-                                state: cell.modelData
-                            }
+                            s: root.s
+                            fixedWidth: Tokens.space.tabW
+                            text: root.stateNames[modelData]
+                            state: modelData
                         }
                     }
                 }

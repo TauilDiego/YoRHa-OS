@@ -5,8 +5,8 @@ import ".."
 import "../primitives"
 import "../base"
 
-// The game's tab bar: the double vertical strips, one HeaderButton per tab, each with the
-// selector's room before it, and the dotted rule underneath. The selected tab reaches the rule.
+// The game's tab bar: the double vertical strips, the HeaderButtons side by side, and the
+// dotted rule underneath. The selected tab reaches the rule.
 //   model: [{ label, state }], state = "normal" | "hovered" | "selected" | "dimmed".
 // The parent owns the states: map `hoveredIndex` into the model to show the hover.
 // The rule spans the bar's whole width; the tabs start at the left.
@@ -17,7 +17,6 @@ Item {
     property var model: []
     property real ruleGap: 10                    // game px between the tabs and the rule
     property real ruleScale: s                   // scale of the rule's dotted pattern
-    property bool showSelector: true             // false: tabs side by side, no Pod cursor (HUD)
 
     // Index of the tab under the pointer, or -1.
     readonly property int hoveredIndex: hover.index
@@ -70,11 +69,7 @@ Item {
     Row {
         id: row
         x: strips.implicitWidth + root.stripGap
-        // The selector hangs at x = -selectorRoom: keep that room free before every tab.
-        // Without it the tabs sit side by side, 10 game px apart (bar A2).
-        readonly property int room: Tokens.px(Tokens.space.selectorW + Tokens.space.selectorGap, root.s)
-        leftPadding: root.showSelector ? room : 0
-        spacing: root.showSelector ? room : Tokens.px(10, root.s)
+        spacing: Tokens.px(10, root.s)               // 10 game px between tabs (bar A2)
 
         // The model is indexed, not handed to the Repeater: a new array with the same length
         // (e.g. a hover change) keeps the delegates, so the pointer never loses its tab.
@@ -91,8 +86,6 @@ Item {
                 state: entry.state ?? "normal"
                 reachRule: true
                 ruleY: root.ruleY
-                selectorTone: "dark"                 // the selector always hangs over the paper
-                showSelector: root.showSelector
                 onClicked: root.activated(index)
                 onHoveredChanged: Qt.callLater(hover.sync)
                 Component.onDestruction: Qt.callLater(hover.sync)

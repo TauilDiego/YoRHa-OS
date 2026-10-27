@@ -116,8 +116,8 @@ Cantos sempre retos (raio 0).
 
 ### Botão-aba (`header-button`)
 
-Tem ícone (quadrado) + texto e mede 214×47. São 7px entre o quadrado e o texto, e a borda
-esquerda reserva espaço pro cursor.
+Tem ícone (quadrado) + texto e mede 214×47. São 7px entre o quadrado e o texto. No Figma, a
+borda esquerda reserva espaço pro cursor; no rien-OS, as abas não têm seletor (ver §5).
 
 | Estado | Fundo | Quadrado e texto | Cursor |
 |---|---|---|---|
@@ -170,8 +170,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 
 - **Barra de abas:**
   - uma faixa vertical à esquerda;
-  - as abas;
-  - o seletor na aba em foco;
+  - as abas (o Figma põe o seletor na aba em foco; no rien-OS, não, ver §5);
   - a régua pontilhada embaixo.
 - **Lista com cursor:** faixas verticais + itens + barra de rolagem + seletor.
 - **Card de status:** pares rótulo/valor alinhados, medidor, fileira de quadrados vazios e um
@@ -188,7 +187,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 | Fontes | Comerciais | M PLUS 1 por padrão; as originais quando estiverem instaladas |
 | Alerta | Não existe | `alert` `#8F3A30`, só pra estados críticos |
 | Sombra do título | 8,8 fixo | Proporcional ao tamanho do texto (≈15%) |
-| Abas da barra | Seletor (pipa) ao lado da aba em foco | **Decidido (2026-10-27):** na barra do HUD, só as abas lado a lado, sem seletor. Nos menus, o seletor continua |
+| Abas da barra | Seletor (pipa) ao lado da aba em foco | **Decidido (2026-10-27):** as abas nunca têm seletor, nem no HUD nem nos menus: só as abas lado a lado. A pipa fica só nos itens de lista |
 | Fundo do desktop | Só nos menus | **Decidido (2026-10-27):** o fundo inteiro da área de trabalho é o papel do menu (grid, vinheta, arcos e feixes, com movimento sutil que pode ser desligado), no lugar do wallpaper |
 | Vinheta | Em todos os menus | Como no jogo (bordas `#A6A18D`, cantos `#8B8877`), desligável. Nos menus de tela cheia e na tela inteira do desktop: o fundo e o papel da barra do topo formam uma vinheta só, sem emenda (2026-10-27). As janelas, as abas, a régua e os textos ficam por cima, sem vinheta |
 

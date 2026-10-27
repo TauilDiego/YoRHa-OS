@@ -77,10 +77,8 @@ Evidência em `~/.local/share/nier-lab/out/check-u1-20261027-015500/`, mais a se
 
 ## Pendências
 
-1. **T038 polimento visual, depende de você:**
-   - a pipa duplicada da sua imagem: não reproduzi em 6 quadros; preciso saber de onde veio;
-   - a pipa clara;
-   - a intensidade das abas apagadas.
+1. **T038 polimento visual, depende de você:** a intensidade das abas apagadas. (A pipa
+   duplicada e a pipa clara saíram: as abas não têm mais seletor, decisão do dono.)
 2. **WARN do Qt ao fechar a galeria:** `qt.qpa.wayland.textinput … disableSurface`, 1 por
    fechamento. É interno do Qt, aparece só ao **fechar** (não no carregamento) e não afeta nada.
    Já testei e não resolveu:
