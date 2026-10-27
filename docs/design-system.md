@@ -181,6 +181,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 | Fontes | Comerciais | M PLUS 1 por padrão; as originais quando estiverem instaladas |
 | Alerta | Não existe | `alert` `#8F3A30`, só pra estados críticos |
 | Sombra do título | 8,8 fixo | Proporcional ao tamanho do texto (≈15%) |
+| Abas da barra | Seletor (pipa) ao lado da aba em foco | **Decidido (2026-10-27):** na barra do HUD, só as abas lado a lado, sem seletor. Nos menus, o seletor continua |
 | Vinheta | Em todos os menus | Como no jogo (bordas `#A6A18D`, cantos `#8B8877`), só nos menus de tela cheia, desligável. O HUD não tem |
 
 ### Escala

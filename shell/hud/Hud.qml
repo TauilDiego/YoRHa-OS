@@ -51,7 +51,7 @@ PanelWindow {
         return {
             monitor: monitorName,
             height: height,
-            tabs: tabs.map(t => ({ label: t.label, state: t.state })),
+            tabs: tabs.map((t, i) => Object.assign({ label: t.label, state: t.state }, tabBar.tabGeometry(i))),
             title: Compositor.activeTitle,
             readings: readings.map(r => ({
                 key: r.key,
@@ -81,6 +81,7 @@ PanelWindow {
         s: root.s
         ruleGap: 3
         ruleScale: root.s * 0.3
+        showSelector: false                      // the owner's call: just the tabs, no Pod cursor
         model: root.tabs.map((t, i) => ({
             label: t.label,
             state: i === tabBar.hoveredIndex && t.state !== "selected" ? "hovered" : t.state

@@ -188,6 +188,9 @@ peça e cada estado aparecem.
   - **em foco:** invertida, descendo até a régua de baixo e se fundindo com ela;
   - **existente:** normal;
   - **inexistente:** apagada.
+
+  No HUD, as abas ficam lado a lado e **não** mostram o seletor (decisão do dono em
+  2026-10-27); o destaque ao passar o mouse continua.
 - **FR-012**: Clicar numa aba MUST levar o desktop pra aquele workspace.
 - **FR-013**: Cada leitura de telemetria MUST mostrar o rótulo, um medidor e o valor numérico
   inteiro, e se atualizar sozinha:

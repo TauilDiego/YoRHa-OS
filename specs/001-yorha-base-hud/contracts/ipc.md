@@ -20,7 +20,7 @@ Formato do `hud dump`, com uma entrada por monitor:
 [{
   "monitor": "Virtual-1",
   "height": 40,
-  "tabs": [{ "label": "01", "state": "normal" }, { "label": "02", "state": "selected" }],
+  "tabs": [{ "label": "01", "state": "normal", "x": 31, "w": 63 }, { "label": "02", "state": "selected", "x": 101, "w": 63 }],
   "title": "kitty — ~/projetos",
   "readings": [{ "key": "cpu", "label": "CPU", "value": 23, "critical": false, "extra": "none", "available": true }],
   "date": "2026.10.26",
@@ -28,4 +28,5 @@ Formato do `hud dump`, com uma entrada por monitor:
 }]
 ```
 
-Os estados de aba no `dump` são `selected` (em foco), `normal` (existe) e `dimmed` (apagada).
+`x` e `w` são a posição e a largura da aba na janela, em px lógicos (servem pros testes de
+clique). Os estados de aba no `dump` são `selected` (em foco), `normal` (existe) e `dimmed` (apagada).

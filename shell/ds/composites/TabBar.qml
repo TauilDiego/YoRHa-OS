@@ -17,6 +17,7 @@ Item {
     property var model: []
     property real ruleGap: 10                    // game px between the tabs and the rule
     property real ruleScale: s                   // scale of the rule's dotted pattern
+    property bool showSelector: true             // false: tabs side by side, no Pod cursor (HUD)
 
     // Index of the tab under the pointer, or -1.
     readonly property int hoveredIndex: hover.index
@@ -26,6 +27,15 @@ Item {
     }
 
     signal activated(int index)
+
+    // Where tab `i` is, in window coordinates (logical px), for tests: { x, w }.
+    function tabGeometry(i: int): var {
+        const tab = tabs.itemAt(i);
+        if (!tab)
+            return { x: -1, w: 0 };
+        const p = tab.mapToItem(null, 0, 0);
+        return { x: Math.round(p.x), w: Math.round(tab.width) };
+    }
 
     readonly property int bandH: Tokens.px(Tokens.space.tabH, s)
     readonly property int ruleY: bandH + Tokens.px(ruleGap, s)
@@ -45,9 +55,10 @@ Item {
         id: row
         x: strips.implicitWidth + root.stripGap
         // The selector hangs at x = -selectorRoom: keep that room free before every tab.
+        // Without it the tabs sit side by side, 10 game px apart (bar A2).
         readonly property int room: Tokens.px(Tokens.space.selectorW + Tokens.space.selectorGap, root.s)
-        leftPadding: room
-        spacing: room
+        leftPadding: root.showSelector ? room : 0
+        spacing: root.showSelector ? room : Tokens.px(10, root.s)
 
         // The model is indexed, not handed to the Repeater: a new array with the same length
         // (e.g. a hover change) keeps the delegates, so the pointer never loses its tab.
@@ -65,6 +76,7 @@ Item {
                 reachRule: true
                 ruleY: root.ruleY
                 selectorTone: "dark"                 // the selector always hangs over the paper
+                showSelector: root.showSelector
                 onClicked: root.activated(index)
                 onHoveredChanged: {
                     if (hovered)

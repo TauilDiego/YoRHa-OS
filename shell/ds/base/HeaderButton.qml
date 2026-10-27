@@ -21,6 +21,7 @@ Item {
     property real ruleY: 0
     property real fixedWidth: 0                  // game px; 0 = fit the label
     property string selectorTone: ""             // "dark" / "light"; "" = light when selected
+    property bool showSelector: true             // false: no Pod cursor (e.g. the HUD's tabs)
 
     readonly property bool hovered: mouse.containsMouse
     readonly property int selectorRoom: Tokens.px(Tokens.space.selectorW + Tokens.space.selectorGap, s)
@@ -114,7 +115,7 @@ Item {
         x: -root.selectorRoom
         y: Math.round((root.bandH - height) / 2)
         s: root.s
-        visible: root.inked
+        visible: root.inked && root.showSelector
         tone: root.selectorTone || (root.state === "selected" ? "light" : "dark")
         bobbing: true
     }
