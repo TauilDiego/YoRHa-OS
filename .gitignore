@@ -4,3 +4,6 @@
 
 # Private test environment (VM lab, containers): kept out of the public repo.
 /lab/
+
+# Local Claude Code settings (lab/perf hook points into the private repo)
+.claude/settings.local.json

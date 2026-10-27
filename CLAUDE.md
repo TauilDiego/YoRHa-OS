@@ -11,6 +11,8 @@ NieR:Automata. As regras estão em `.specify/memory/constitution.md` e valem aci
 - **Spec antes de código:** `/speckit-specify` → `/speckit-plan` → `/speckit-tasks`, com o dono
   aprovando a spec e o plano.
 - **Pronto só com evidência:** screenshot do ambiente de testes, comando que responde, log sem erro de QML.
+- **Todo teste é medido:** abra com `lab/perf begin "<teste>"` e feche com `lab/perf end --result …`
+  (ver "Medição" no `lab/README.md` privado). Ao reportar, cite o resumo do relatório.
 - **Tarefas `[P]`** vão pra agentes paralelos, cada um com worktree e VM próprios.
 - **Git:** o dono commita na branch principal; agentes, só nas branches deles.
 - **Idioma:** conversa, docs e specs em português; código e comentários em inglês.
