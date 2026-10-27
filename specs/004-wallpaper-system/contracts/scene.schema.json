@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/TauilDiego/rien-OS/specs/004-wallpaper-system/contracts/scene.schema.json",
+  "title": "rien-OS wallpaper scene (shell/wallpaper/scenes/<id>.json)",
+  "description": "Parameters of a procedural scene. The geometry of the arcs and beams lives in the Scene component (the measured layout); a scene only switches layers, colors and motion.",
+  "type": "object",
+  "required": ["name", "description", "kind", "paper", "layers", "lineAlpha", "motion"],
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string", "minLength": 1, "description": "Shown in the picker list (English)" },
+    "description": { "type": "string", "description": "Shown in the preview card (English)" },
+    "kind": { "enum": ["paper", "dark"] },
+    "paper": {
+      "type": "object",
+      "required": ["center", "edge", "corner"],
+      "additionalProperties": false,
+      "properties": {
+        "center": { "$ref": "#/$defs/color" },
+        "edge": { "$ref": "#/$defs/color" },
+        "corner": { "$ref": "#/$defs/color" }
+      }
+    },
+    "layers": {
+      "type": "object",
+      "required": ["arcs", "beams", "rules", "dots"],
+      "additionalProperties": false,
+      "properties": {
+        "arcs": { "type": "boolean" },
+        "beams": { "type": "boolean" },
+        "rules": { "type": "boolean", "description": "Dotted rules at y 108 and 1012 (game px)" },
+        "dots": { "type": "boolean", "description": "Dark variant's dot weave (1 px every 4 px)" }
+      }
+    },
+    "lineAlpha": { "type": "number", "minimum": 0, "maximum": 1 },
+    "motion": {
+      "type": "object",
+      "required": ["arcPeriod", "arcAmplitude", "beamPeriod", "beamAmplitude"],
+      "additionalProperties": false,
+      "properties": {
+        "arcPeriod": { "type": "number", "exclusiveMinimum": 0, "description": "seconds" },
+        "arcAmplitude": { "type": "number", "minimum": 0, "description": "degrees, ± around each arc's center" },
+        "beamPeriod": { "type": "number", "exclusiveMinimum": 0, "description": "seconds" },
+        "beamAmplitude": { "type": "number", "minimum": 0, "description": "game px, ± along the beam direction" }
+      }
+    }
+  },
+  "$defs": {
+    "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+  },
+  "examples": [{
+    "name": "Menu",
+    "description": "The game's menu paper: radial vignette, double arcs and short diagonal beams that breathe slowly. No grid.",
+    "kind": "paper",
+    "paper": { "center": "#C8C3AC", "edge": "#A6A18D", "corner": "#8C8978" },
+    "layers": { "arcs": true, "beams": true, "rules": false, "dots": false },
+    "lineAlpha": 0.15,
+    "motion": { "arcPeriod": 420, "arcAmplitude": 9, "beamPeriod": 300, "beamAmplitude": 70 }
+  }]
+}

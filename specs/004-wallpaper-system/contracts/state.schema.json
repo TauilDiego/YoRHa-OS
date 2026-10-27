@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/TauilDiego/rien-OS/specs/004-wallpaper-system/contracts/state.schema.json",
+  "title": "rien-OS wallpaper state ($XDG_STATE_HOME/rien-os/wallpaper.json)",
+  "description": "Written by the shell (atomic writes), never by hand. Missing keys fall back to shell.json, then defaults.json. Not written while the `wallpaper` fixture domain is active.",
+  "type": "object",
+  "required": ["version"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "all": { "$ref": "#/$defs/id", "description": "The 'all monitors' choice" },
+    "monitors": {
+      "type": "object",
+      "description": "Own choice per output name (e.g. DP-1, eDP-1)",
+      "additionalProperties": { "$ref": "#/$defs/id" }
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["camouflage", "wipe", "tiles", "crossfade"] },
+        "cell": { "enum": [16, 24, 32] },
+        "trail": { "type": "integer", "minimum": 400, "maximum": 4000 },
+        "glitch": { "enum": [0, 1, 2] }
+      }
+    },
+    "paperFilterOff": {
+      "type": "array",
+      "description": "Absolute paths of images shown without the paper filter",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^(scene:[a-z0-9-]+|image:/.+)$" }
+  },
+  "examples": [{
+    "version": 1,
+    "all": "scene:menu",
+    "monitors": { "eDP-1": "image:/home/diego/Pictures/Wallpapers/ruins.jpg" },
+    "transition": { "kind": "camouflage", "cell": 24, "trail": 2600, "glitch": 2 },
+    "paperFilterOff": []
+  }]
+}
