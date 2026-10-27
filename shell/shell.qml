@@ -4,12 +4,12 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import Quickshell.Wayland
 import "ds"
 import "gallery"
 import "hud"
 import "wallpaper"
 import "services"
+import "settings"
 
 ShellRoot {
     id: shell
@@ -154,20 +154,10 @@ ShellRoot {
     LazyLoader {
         id: settingsLoader
         active: shell.settingsLoaded
-        // Placeholder until the pop-up exists (T012); replaced by SettingsPopup (T023).
-        PanelWindow {
+        SettingsPopup {
             screen: shell.settingsScreen
-            anchors {
-                top: true
-                left: true
-            }
-            implicitWidth: 200
-            implicitHeight: 100
-            exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.namespace: "rien-popup"
-            WlrLayershell.keyboardFocus: shell.settingsOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-            color: Tokens.color.darkGray
+            keyboardActive: shell.settingsOpen
+            onCloseRequested: shell.closeSettings()
         }
     }
 

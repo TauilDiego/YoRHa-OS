@@ -10,7 +10,7 @@ import ".."
 // It stays still, as in the game. `shown` blinks it: hiding fades out (ease-in) in half of
 // Tokens.motion.blink; showing waits that half, then fades in (ease-out). When the cursor moves,
 // the old item's selector fades out while the new one waits, so it reads as one blink.
-// Frozen (fixtures): no fade, so screenshots stay identical.
+// Frozen (fixtures) or reduced motion (spec 003): no fade, it just jumps.
 Item {
     id: root
 
@@ -32,7 +32,7 @@ Item {
     implicitHeight: 2 * dotOffset + dot
 
     // The blink: half the time out, half in.
-    readonly property int half: Tokens.frozen ? 0 : Math.round(Tokens.motion.blink / 2)
+    readonly property int half: Tokens.instant ? 0 : Math.round(Tokens.motion.blink / 2)
 
     opacity: 0
     visible: opacity > 0

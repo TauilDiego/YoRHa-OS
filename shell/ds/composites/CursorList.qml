@@ -13,6 +13,10 @@ import "../base"
 //   model: a JS array of { label, trailing } (plain strings are accepted as labels).
 //   variant: "opaque" | "plain", passed to every ListItem.
 // The parent sets the width; items fill what is left after the strips and the selector room.
+// spec 003: `focused: false` draws the current item "selected" (its kite light and still, the
+// list that lost the focus); `wrap` makes move() go round at the ends; `keysEnabled: false`
+// hands the list to its parent: no keys, and hover and clicks only report (hoveredIndex,
+// activated) without moving `currentIndex`.
 Item {
     id: root
 
@@ -20,8 +24,12 @@ Item {
     property var model: []
     property int currentIndex: 0
     property string variant: "opaque"
+    property bool focused: true
+    property bool wrap: false
+    property bool keysEnabled: true
 
     signal activated(int index)
+    signal hoveredIndex(int index)
 
     readonly property int count: Array.isArray(model) ? model.length : 0
     readonly property int stripGap: Tokens.px(Tokens.space.buttonMargin, s)
@@ -43,10 +51,15 @@ Item {
     }
 
     function move(step: int): void {
-        if (count > 0)
+        if (count <= 0)
+            return;
+        if (wrap)
+            currentIndex = ((currentIndex + step) % count + count) % count;
+        else
             currentIndex = Math.max(0, Math.min(count - 1, currentIndex + step));
     }
 
+    Keys.enabled: keysEnabled
     Keys.onUpPressed: move(-1)
     Keys.onDownPressed: move(1)
     Keys.onReturnPressed: if (currentIndex >= 0 && currentIndex < count) activated(currentIndex)
@@ -78,11 +91,18 @@ Item {
                 variant: root.variant
                 text: root.labelOf(modelData)
                 trailing: root.trailingOf(modelData)
-                state: index === root.currentIndex ? "hovered" : "normal"
+                state: index === root.currentIndex ? (root.focused ? "hovered" : "selected") : "normal"
 
-                onHoveredChanged: if (hovered) root.currentIndex = index
+                onHoveredChanged: {
+                    if (!hovered)
+                        return;
+                    root.hoveredIndex(index);
+                    if (root.keysEnabled)
+                        root.currentIndex = index;
+                }
                 onClicked: {
-                    root.currentIndex = index;
+                    if (root.keysEnabled)
+                        root.currentIndex = index;
                     root.activated(index);
                 }
             }

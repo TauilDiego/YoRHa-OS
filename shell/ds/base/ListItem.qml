@@ -18,6 +18,9 @@ Item {
     property string text
     property string variant: "opaque"
     property string trailing: ""
+    // spec 003: px kept free on the right for a value the parent draws (OptionRow); the label
+    // is cut with an ellipsis before it. 0 changes nothing.
+    property real reserve: 0
 
     readonly property bool hovered: mouse.containsMouse
     readonly property int selectorRoom: Tokens.px(Tokens.space.selectorW + Tokens.space.selectorGap, s)
@@ -81,10 +84,12 @@ Item {
         Label {
             id: label
             x: root.pad + Tokens.px(Tokens.space.square, root.s) + root.gap
+            width: root.reserve > 0 ? Math.max(0, Math.min(implicitWidth, root.width - x - root.reserve)) : implicitWidth
             anchors.verticalCenter: parent.verticalCenter
             s: root.s
             role: "listButton"
             text: root.text
+            elide: Text.ElideRight
             color: parent.ink
         }
         Label {
