@@ -22,7 +22,7 @@ também com pesos iguais.
 |---|---|---|
 | **Camada `u2-base`** (congelada) | `arch-limpo` + Hyprland, uwsm, kitty, login automático e um `u2-ui-run` que abre `rien-shell` quando ele existir. **Sem** `quickshell`, Qt 6 extra, `qt6-shadertools` nem fontes da UI | Pra instalação ter que resolver as dependências da carga (FR-009). A `hypr-base` já traz tudo e esconderia isso |
 | **Mirror fixo** | O pacman da `u2-base` aponta pro Arch Linux Archive numa data fixa (R13) | Mesmas versões de pacote em todas as execuções |
-| **VMs de execução** | `lab/new u2-<método>-<n> --from u2-base`, apagadas no fim; `NIER_LAB_CPUS=4 NIER_LAB_MEM=4G`, perfil `1080` | Mesmo ponto de partida e mesmos recursos pros quatro. Não usa `teste-a/b/c`, que são de outros agentes |
+| **VMs de execução** | `lab/new u2-<método>-<n> --from u2-base`, apagadas no fim; `NIER_LAB_CPUS=2 NIER_LAB_MEM=4G` (limite do dono), perfil `1080`, uma por vez | Mesmo ponto de partida e mesmos recursos pros quatro. Não usa `teste-a/b/c`, que são de outros agentes |
 | **Servidor de distribuição** | Container `nier-lab` com HTTP estático e log de bytes, porta só em `localhost`; a VM chega por `10.0.2.2` (R11) | Simula GitHub, AUR, repositório pacman e pacotes de versão sem publicar nada |
 | **Fábrica** | Container de Arch (`nier-lab`), usuário sem privilégio: `makepkg`, `repo-add`, `gpg` com chave descartável do lab | Constituição I: build nunca no host |
 | **Carga** | `shell/` do commit fixado + remendos 0.2 e 0.3 do lab ([data-model.md](data-model.md)) | Mesma carga pros quatro (FR-001, FR-002) |
@@ -106,15 +106,16 @@ começa com um protótipo dela, medido de novo em S1, S2, S5 e S6.
 ## 6. Protocolo
 
 1. **Antes de medir:** fixar o commit da carga, a data do mirror e este §5 num commit desta branch (R16).
+   **Fixado em 2026-10-27:** carga = `shell/` do commit `422cca7`; mirror = Arch Linux Archive de
+   2026-10-26; §5 sem mudança (pesos confirmados pelo dono).
 2. **Montar uma vez:** a `u2-base`, o servidor e a fábrica (sessão `lab/perf` "005: preparação").
 3. **Validar cada protótipo** com uma S1 sem contar (estado `prototipado`).
 4. **Execuções de tempo (S1, S2, S3, S4, S13):** **uma VM por vez**, na ordem A, B, C, D, depois D, C,
    B, A, depois A, B, C, D (ordem alternada, pra um efeito de cache ou de horário não favorecer um
    método). Três repetições; o documento usa a mediana e mostra o mínimo e o máximo.
-5. **Execuções de função (S5–S12):** podem rodar em paralelo, um agente por método, cada um com worktree
-   e VM próprios (constituição VI). Delas só se usam resultados e tempos grossos (o limite de 5 min do
+5. **Execuções de função (S5–S12):** rodam em sequência, uma VM por vez (limite do dono, 2026-10-27). Delas só se usam resultados e tempos grossos (o limite de 5 min do
    SC-006), não as medianas.
-6. **Toda execução** fica numa sessão `lab/perf begin "005: <método> <cenário> #n" --kind estudo --task 005`
+6. **Toda execução** fica numa sessão `lab/perf begin "005: <método> <cenário> #n" --kind 005-u2 --task 005/<T>`
    e termina com `lab/perf end --result pass|fail`. "fail" quer dizer que o cenário não rodou, não que o
    método perdeu: um método que quebra no S5 é um resultado válido, com `--result pass`.
 7. **Uma execução que falha por erro do protótipo** (não do método) é corrigida e refeita; o documento

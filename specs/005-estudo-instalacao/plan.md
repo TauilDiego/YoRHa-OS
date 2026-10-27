@@ -2,8 +2,25 @@
 
 **Branch**: `005-estudo-instalacao` | **Date**: 2026-10-27 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `specs/005-estudo-instalacao/spec.md` (rascunho, escrito junto com
-este plano a pedido do dono; **os dois aguardam aprovação**)
+**Input**: Feature specification from `specs/005-estudo-instalacao/spec.md` (spec e plano **aprovados pelo
+dono em 2026-10-27**, com as decisões abaixo)
+
+## Decisões do dono (2026-10-27)
+
+Respondem às escolhas abertas da spec (ver spec, "Decisões do dono"):
+
+| # | Decisão | Efeito neste plano |
+|---|---|---|
+| 1 | Nada é publicado; tudo simulado num container `nier-lab` (GitHub, AUR, repositório pacman). Checagem só de leitura do AUR real de dentro da VM permitida | Servidor de distribuição do lab (R11); B-ref com `yay` de verdade, sem publicar |
+| 2 | Escopo: a camada inteira (UI, padrões, `bin/`, migrations); combinações permitidas, se justificadas | O documento extrapola da carga pra camada (experimentos §8) e pode escolher uma combinação |
+| 3 | Cursor como segunda carga opcional, depois do `shell/`, se houver tempo | S13 fica por último |
+| 4 | Pesos como propostos (experimentos §5) | Conta com esses pesos e, ao lado, com pesos iguais |
+| 5 | Protótipos no repositório privado; só o documento vai pro público | `lab/u2/` no privado; `docs/estudo-instalacao.md` no público |
+
+**Limite de recursos do dono (vale pra execução):** no máximo 4 VMs no host, cada uma com 2 núcleos e
+4 GB; outros agentes usam as outras. Este estudo usa **uma VM por vez**, com
+`NIER_LAB_CPUS=2 NIER_LAB_MEM=4G`. Consequência: as execuções de função (S5–S12), que o plano deixava
+em paralelo, rodam em sequência, todas pelo mesmo agente.
 
 ## Summary
 
@@ -59,7 +76,7 @@ resposta de IPC, log de QML, relatório `lab/perf`). Validação dos protótipos
 testes unitários (constituição VII).
 
 **Target Platform**: Arch Linux x86_64, Hyprland 0.56+ (Lua), na VM do lab (`u2-base`), perfil `1080`,
-4 CPUs e 4 GB por VM.
+2 CPUs e 4 GB por VM (limite do dono), uma VM por vez.
 
 **Project Type**: estudo comparativo com protótipos de instalador (CLI em shell); entrega um documento.
 
@@ -87,8 +104,8 @@ tempo e ≈ 50 de função; 3 versões de carga; 1 documento.
 | II. Camada sobre Arch limpo | Todo método parte de uma `u2-base` (Arch limpo + sessão) e põe a camada por cima; nenhum gera imagem. O D guarda versões da camada, não do sistema | ✅ |
 | III. Padrões × arquivos do usuário | O contrato proíbe escrever em `~/.config`; toda execução compara a soma de `~/.config` antes e depois (G1, elimina). Migrations idempotentes, com backup antes de escrever, e o S3 prova a idempotência. O S10 mede o que cada método faz com arquivo gerenciado editado | ✅ |
 | IV. Pronto exige evidência da VM | Cada SC tem prova no [quickstart.md](quickstart.md): registro, screenshot, IPC, log, `lab/perf`. O documento só aceita célula com execução ou fonte | ✅ |
-| V. Spec antes de código | Spec e plano escritos juntos, **ambos aguardando o dono**; nenhum protótipo antes da aprovação e do `/speckit-tasks` | ✅ (pendente de aprovação) |
-| VI. Paralelizar | O contrato de entrega e o formato do registro vêm antes e congelam. Os 4 protótipos (e os cenários de função) vão em paralelo, um agente por método, cada um com worktree e VM `u2-<m>-<n>` (porta própria). As execuções de tempo ficam sequenciais de propósito, pra não contaminar a medida. Não usa `teste-a/b/c` | ✅ |
+| V. Spec antes de código | Spec e plano escritos juntos e **aprovados pelo dono em 2026-10-27**; nenhum protótipo antes do `/speckit-tasks` | ✅ |
+| VI. Paralelizar | O contrato de entrega e o formato do registro vêm antes e congelam. Os 4 protótipos são independentes (`[P]`). Pelo limite do dono (uma VM por vez neste estudo), as execuções rodam em sequência; as de tempo seriam sequenciais de qualquer jeito, pra não contaminar a medida. Não usa `teste-a/b/c` | ✅ (paralelismo limitado pelo dono) |
 | VII. Simplicidade | Protótipos mínimos (sem menu, canais nem indicador); A+D avaliada por composição, sem quinto protótipo; AUR simulado por git + `makepkg` em vez de um AUR falso com API | ✅ |
 | Restrições: segredos | A chave descartável fica em `~/.local/share/nier-lab/u2/`; o documento público não cita portas, chaves nem caminhos da máquina do dono | ✅ |
 | Restrições: licença | Ideias do Omarchy (MIT) e do Capistrano entram como referência; se um trecho for copiado num protótipo, vai com crédito. Os protótipos ficam no privado | ✅ |

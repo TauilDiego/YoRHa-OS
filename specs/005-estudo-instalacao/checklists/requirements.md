@@ -45,5 +45,6 @@
   - pesos de partida no plano;
   - protótipos no repositório privado.
 - **Escopo:** é um estudo. O produto (instalador, `rien update`) é a S3 e a S4.
-- **Pronta para** `/speckit-plan` (já escrito junto, a pedido do dono). As duas esperam aprovação
-  (constituição V).
+- **Pronta para** `/speckit-plan` (já escrito junto, a pedido do dono).
+- **Aprovada em 2026-10-27:** o dono respondeu às cinco escolhas acima (spec, "Decisões do dono"): as
+  cinco ficam como estavam, com o cursor depois do `shell/` e a checagem do AUR real só de leitura.

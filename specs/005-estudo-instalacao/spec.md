@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-27
 
-**Status**: Rascunho, aguardando a aprovação do dono
+**Status**: Aprovada pelo dono em 2026-10-27, com as decisões da seção "Decisões do dono"
 
 **Input**: Fase U2 do `PLAN.md`: "Estudo de instalação | Métodos A–D comparados, com o HUD como carga
 (8.4) | `docs/estudo-instalacao.md` escrito e método escolhido". Os métodos estão na seção "Estudo:
@@ -27,6 +27,21 @@ de manter, sem quebrar a regra de que update nunca mexe nos arquivos do usuário
 Esta fase é um **estudo**, não um produto: ela escreve protótipos descartáveis de cada método, roda
 os mesmos cenários em cada um, mede, e termina com um documento e uma escolha. O instalador de
 verdade é a S3.
+
+## Decisões do dono (2026-10-27)
+
+As escolhas que a spec tinha feito sem o dono (checklist, "Escolhas feitas sem o dono") foram
+respondidas por ele na aprovação. Elas substituem as suposições correspondentes:
+
+1. **Nada é publicado ("ainda não").** Nem AUR, nem releases no GitHub, nada na internet. Tudo é
+   simulado no laboratório: um container `nier-lab` faz o papel do GitHub, do AUR e do repositório
+   pacman. Uma checagem **só de leitura** contra o AUR real, de dentro da VM, é permitida (B-ref).
+2. **Escopo: a camada inteira.** A UI, os padrões (configs), o `bin/` e as migrations. Métodos podem
+   ser combinados, se a combinação for justificada.
+3. **O tema de cursor é a carga secundária opcional**, rodada depois do `shell/`, se houver tempo (S13).
+4. **Pesos como propostos** (experimentos §5): manutenção do dono 20; update 15; volta 15; interrupção,
+   confiança e encaixe 10 cada; os demais 5 cada. O documento mostra, ao lado, a conta com pesos iguais.
+5. **Os protótipos ficam no repositório privado.** Só o documento final vai pro repositório público.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -284,20 +299,21 @@ commit, sem automação nova além do protótipo.
 
 ## Assumptions
 
-- **Nada é publicado de verdade:** o AUR, a hospedagem do repositório pacman e as versões de D são
-  simulados num servidor do laboratório. A publicação real fica pra S6, com aprovação do dono. Uma
-  checagem pontual contra o AUR real (instalar um pacote de shell Quickshell que já existe lá) pode
-  entrar como referência de experiência do usuário, sem publicar nada.
+- **Nada é publicado de verdade** (decisão 1 do dono): o AUR, a hospedagem do repositório pacman e as
+  versões de D são simulados num servidor do laboratório. A publicação real fica pra S6, com aprovação
+  do dono. Uma checagem pontual, só de leitura, contra o AUR real (instalar um pacote de shell
+  Quickshell que já existe lá) entra como referência de experiência do usuário, sem publicar nada.
 - **A carga é só a UI** (`shell/`, com os shaders compilados no destino). O tema de cursor
-  (`system/cursors/`), que tem um build pesado, entra como carga secundária opcional, só pra medir a
-  diferença entre "montar no destino" e "baixar pronto".
-- **A escolha vale pra camada inteira, não só pra UI:** a UI é a carga de teste, mas o que se aprende
+  (`system/cursors/`), que tem um build pesado, entra como carga secundária opcional, depois do
+  `shell/` e só se houver tempo (decisão 3), pra medir a diferença entre "montar no destino" e
+  "baixar pronto".
+- **A escolha vale pra camada inteira, não só pra UI** (decisão 2): a UI é a carga de teste, mas o que se aprende
   decide como a S3 entrega também os padrões, o `bin/` e as migrations. Combinações (por exemplo, um
   método pra camada e outro pras partes compiladas) são permitidas, se justificadas.
-- **Os pesos de partida** (ver o plano) dão mais peso a recuperação, atualização e manutenção do que à
-  velocidade da primeira instalação. O dono pode trocar antes das medições.
+- **Os pesos** (experimentos §5, confirmados pelo dono, decisão 4) dão mais peso a recuperação,
+  atualização e manutenção do que à velocidade da primeira instalação.
 - **Os protótipos** ficam no repositório privado do laboratório; o repositório público recebe o
-  documento.
+  documento (decisão 5).
 - **Só Hyprland**; o Niri (S5) e o pacote pro Omarchy (S7) entram só como avaliação escrita.
 - **Um usuário com sudo**, como a S3 assume; um segundo usuário é criado só pro cenário de dois usuários.
 - **Rollback do sistema inteiro** (snapshots do disco antes de um update do pacman) é avaliado só como
