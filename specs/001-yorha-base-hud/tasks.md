@@ -75,10 +75,10 @@ e `hud dump` traz os mesmos valores.
 - [x] T023 [P] [US1] `shell/services/Audio.qml`: `vol` a partir de `Pipewire.defaultAudioSink` + `PwObjectTracker`; `extra: "muted"` e valor 0 quando mudo; fixture `volume`
 - [x] T024 [P] [US1] `shell/services/Battery.qml`: `bat` a partir de `UPower.displayDevice`; `available: false` sem bateria; `critical` "value < 0.15 e sem carregar"; `extra: "charging"`; fixture `battery` (null = sem bateria)
 - [x] T025 [P] [US1] `shell/services/Compositor.qml`: o único arquivo que importa `Quickshell.Hyprland`. `workspacesFor(monitorName)` devolve ids de 1 até "max(5, maior id existente, id em foco)", "só ids ≥ 1"; `activeTitle`; `focus(id)` (com a fixture `workspaces`, só atualiza o estado fixo)
-- [ ] T026 [US1] `shell/ds/composites/TabBar.qml`: faixas verticais + `HeaderButton` por aba + régua pontilhada; a aba `selected` desce até a régua; sinal `activated(index)`
-- [ ] T027 [US1] `shell/hud/Hud.qml`: `PanelWindow` no topo, `exclusiveZone` = altura (`Settings.barHeight`, 40), `s = tabH/47` com `tabH = barHeight × 31/40` × `Settings.uiScale`; da esquerda pra direita: marca (as duas faixas), `TabBar`, título centralizado (`elide`), `CPU`/`MEM`/`VOL`/`BAT` (`Label` + `Meter` + número), data `yyyy.MM.dd` e hora; régua pontilhada embaixo; sem vinheta
-- [ ] T028 [US1] Em `shell/shell.qml`: `Variants` sobre `Quickshell.screens` criando um `Hud` por monitor, e `hud.dump()` real (formato de contracts/ipc.md)
-- [ ] T029 [US1] Validar no lab (`lab/perf begin "U1: HUD"`): cenários 1–4 da H1 por screenshot + `dump`; casos de borda com `fixtures load` (battery-low, no-battery, muted, long-title, no-window); 0 erros de QML
+- [x] T026 [US1] `shell/ds/composites/TabBar.qml`: faixas verticais + `HeaderButton` por aba + régua pontilhada; a aba `selected` desce até a régua; sinal `activated(index)`
+- [x] T027 [US1] `shell/hud/Hud.qml`: `PanelWindow` no topo, `exclusiveZone` = altura (`Settings.barHeight`, 40), `s = tabH/47` com `tabH = barHeight × 31/40` × `Settings.uiScale`; da esquerda pra direita: marca (as duas faixas), `TabBar`, título centralizado (`elide`), `CPU`/`MEM`/`VOL`/`BAT` (`Label` + `Meter` + número), data `yyyy.MM.dd` e hora; régua pontilhada embaixo; sem vinheta
+- [x] T028 [US1] Em `shell/shell.qml`: `Variants` sobre `Quickshell.screens` criando um `Hud` por monitor, e `hud.dump()` real (formato de contracts/ipc.md)
+- [x] T029 [US1] Validar no lab (`lab/perf begin "U1: HUD"`): cenários 1–4 da H1 por screenshot + `dump`; casos de borda com `fixtures load` (battery-low, no-battery, muted, long-title, no-window); 0 erros de QML
 
 **Checkpoint**: MVP pronto, a barra funciona sozinha.
 
@@ -91,8 +91,8 @@ e `hud dump` traz os mesmos valores.
 **Independent Test**: com `hud-live-ws.json`, clicar na aba 03 leva ao workspace 3 em ≤ 0,5 s
 (`hud dump` + screenshot).
 
-- [ ] T030 [US2] `shell/hud/Hud.qml` + `TabBar.qml`: clique → `Compositor.focus(id)`; `HoverHandler` → estado `hovered` em abas não selecionadas, voltando ao normal quando o mouse sai
-- [ ] T031 [US2] Validar no lab (`lab/perf begin "U1: abas"`): clique simulado (`lab/ipc hyprctl dispatch workspace 3` como controle + clique real via QMP `input-send-event`, ou `ydotool`/`wlrctl` se houver na VM), medir o tempo até o `dump` mostrar a 03 `selected` (SC-003); screenshot do hover
+- [x] T030 [US2] `shell/hud/Hud.qml` + `TabBar.qml`: clique → `Compositor.focus(id)`; `HoverHandler` → estado `hovered` em abas não selecionadas, voltando ao normal quando o mouse sai
+- [x] T031 [US2] Validar no lab (`lab/perf begin "U1: abas"`): clique simulado (`lab/ipc hyprctl dispatch workspace 3` como controle + clique real via QMP `input-send-event`, ou `ydotool`/`wlrctl` se houver na VM), medir o tempo até o `dump` mostrar a 03 `selected` (SC-003); screenshot do hover
 
 **Checkpoint**: US1 e US2 funcionam.
 
@@ -105,10 +105,10 @@ e `hud dump` traz os mesmos valores.
 **Independent Test**: `gallery open` → screenshot com 100% das peças do FR-003 e estados do
 FR-004 → `gallery close`.
 
-- [ ] T032 [P] [US3] `shell/ds/composites/CursorList.qml`: faixas verticais + `ListItem`s + `Selector` no item atual; sinal `activated(index)`
-- [ ] T033 [US3] `shell/gallery/Gallery.qml`: `PanelWindow` de tela cheia na camada `Overlay` (via `LazyLoader` no `shell.qml`), `keyboardFocus` exclusivo (Esc fecha), `GridBackground`, `Vignette` (se `Settings.vignette`), `s = altura/1080`; seções com nome: primitivas, `HeaderButton` e `ListItem` nos 4 estados, `Selector` claro e escuro balançando, `Meter` normal e crítico, `PageHeader`, `Card`, `TabBar` e `CursorList`
-- [ ] T034 [US3] Ligar os `IpcHandler` `gallery` (`open`/`close`/`toggle`/`isOpen`) ao `LazyLoader` em `shell/shell.qml`
-- [ ] T035 [US3] Validar no lab (`lab/perf begin "U1: galeria"`): `open` → screenshot → conferir peça por peça (SC-004) → `close` e Esc
+- [x] T032 [P] [US3] `shell/ds/composites/CursorList.qml`: faixas verticais + `ListItem`s + `Selector` no item atual; sinal `activated(index)`
+- [x] T033 [US3] `shell/gallery/Gallery.qml`: `PanelWindow` de tela cheia na camada `Overlay` (via `LazyLoader` no `shell.qml`), `keyboardFocus` exclusivo (Esc fecha), `GridBackground`, `Vignette` (se `Settings.vignette`), `s = altura/1080`; seções com nome: primitivas, `HeaderButton` e `ListItem` nos 4 estados, `Selector` claro e escuro balançando, `Meter` normal e crítico, `PageHeader`, `Card`, `TabBar` e `CursorList`
+- [x] T034 [US3] Ligar os `IpcHandler` `gallery` (`open`/`close`/`toggle`/`isOpen`) ao `LazyLoader` em `shell/shell.qml`
+- [x] T035 [US3] Validar no lab (`lab/perf begin "U1: galeria"`): `open` → screenshot → conferir peça por peça (SC-004) → `close` e Esc
 
 **Checkpoint**: as três histórias funcionam.
 
@@ -116,11 +116,11 @@ FR-004 → `gallery close`.
 
 ## Phase 6: Polish & validação final
 
-- [ ] T036 Rodar o quickstart.md inteiro numa sessão `lab/perf begin "U1: validação" --kind u1-validacao --task 001`: SC-001 a SC-005, SC-007, SC-008 (`lab/profile hidpi` e `1080`), casos de borda e `qmllint`
-- [ ] T037 Corrigir o que o T036 apontar e repetir só os cenários afetados
+- [x] T036 Rodar o quickstart.md inteiro numa sessão `lab/perf begin "U1: validação" --kind u1-validacao --task 001`: SC-001 a SC-005, SC-007, SC-008 (`lab/profile hidpi` e `1080`), casos de borda e `qmllint`
+- [x] T037 Corrigir o que o T036 apontar e repetir só os cenários afetados
 - [ ] T038 [P] Polir o visual contra `docs/design-system.md` §6 (régua pontilhada, proporções da aba, título), comparando lado a lado com as referências privadas
 - [ ] T039 [P] Rodar `/speckit-analyze` e resolver as inconsistências entre spec, plano e tarefas
-- [ ] T040 Escrever `specs/001-yorha-base-hud/relatorio-noite.md` (o que ficou pronto com a evidência, o que faltou, as decisões tomadas sozinho, o custo somado do `lab/perf`, os commits) e montar a imagem final com HUD 1080p + HUD hidpi + galeria
+- [x] T040 Escrever `specs/001-yorha-base-hud/relatorio-noite.md` (o que ficou pronto com a evidência, o que faltou, as decisões tomadas sozinho, o custo somado do `lab/perf`, os commits) e montar a imagem final com HUD 1080p + HUD hidpi + galeria
 
 ---
 
