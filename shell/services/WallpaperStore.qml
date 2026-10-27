@@ -8,7 +8,9 @@ import Quickshell.Io
 // What each monitor shows (spec 004, contracts/services.md): the "all monitors" choice, each
 // monitor's own choice, the transition and the pictures shown without the paper filter.
 // `set` and `step` only change the choice: each Wallpaper watches resolve(its monitor) and plays
-// its own transition. With the `wallpaper` fixture everything comes from it.
+// its own transition. The choice is user state, kept in $XDG_STATE_HOME/rien-os/wallpaper.json
+// (contracts/state.schema.json), never in the user's config (constitution III). With the
+// `wallpaper` fixture everything comes from it and nothing is written.
 Singleton {
     id: root
 
@@ -148,11 +150,67 @@ Singleton {
 
     // Start over from the fixture, or from the saved state.
     function reset(): void {
-        load(fixed ? Fixtures.get("wallpaper") : ({}));
+        load(fixed ? Fixtures.get("wallpaper") : readState());
     }
 
-    // A choice changed (persisted in US5).
+    // --- the state file (research R8) -------------------------------------------------------------
+    readonly property string statePath: {
+        const xdg = Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state");
+        return xdg + "/rien-os/wallpaper.json";
+    }
+
+    // Unreadable or missing: start empty (a broken file gets a line in the log).
+    function readState(): var {
+        const text = stateFile.text();
+        if (!text)
+            return {};
+        try {
+            const d = JSON.parse(text);
+            if (d && typeof d === "object" && !Array.isArray(d))
+                return d;
+        } catch (e) {
+        }
+        if (badState !== text) {                  // once per broken content (reset() runs often)
+            badState = text;
+            console.info(`wallpaper: ${statePath} is not a valid state file, starting from the defaults`);
+        }
+        return {};
+    }
+    property string badState: ""
+
+    // A choice changed: save it a moment later, in one write (never with the fixture).
     function changed(): void {
+        if (!fixed)
+            saveSoon.restart();
+    }
+
+    function save(): void {
+        if (fixed)
+            return;
+        const out = { version: 1 };
+        if (all)
+            out.all = all;
+        out.monitors = monitors;
+        if (Object.keys(picked).length > 0)
+            out.transition = picked;
+        out.paperFilterOff = paperFilterOff;
+        stateFile.setText(JSON.stringify(out, null, 2) + "\n");
+    }
+
+    Timer {
+        id: saveSoon
+        interval: 250
+        onTriggered: root.save()
+    }
+
+    // Read once, blocking, so the first frame already shows the saved choice. setText() writes
+    // atomically and creates the folder when needed.
+    FileView {
+        id: stateFile
+        path: root.statePath
+        blockLoading: true
+        printErrors: false          // no file yet is the normal first run
+        atomicWrites: true
     }
 
     Component.onCompleted: reset()
