@@ -104,7 +104,9 @@ Cantos sempre retos (raio 0).
     entre dois traços, um trio ∵ de pontos **redondos** (como no Figma); aparece sob a barra de
     abas e no rodapé;
   - **vertical:** as faixas duplas na lateral das listas.
-- **Fundo:** papel `dark-yellow`, grid a 6%, arcos de círculo e feixes de linhas diagonais finas.
+- **Fundo:** papel `dark-yellow` com vinheta radial, arcos de círculo e feixes de linhas diagonais
+  finas. **Sem grid** (o jogo não tem; medido em 2026-10-27, §6) e **sem grão** (o jogo tem um grão
+  fino, mas o dono preferiu sem).
   Medido nas capturas do jogo (§6):
   - **arcos:** círculos grandes (raio ≈ 600–1100 px a 1080p) com centro fora da tela, traço de
     2 px em tinta a ~10%;
@@ -231,7 +233,9 @@ convertidas pra 1080p (×1,2). As imagens ficam só no repositório privado, pra
 | Sombra de painéis | 3,3 | **M** 3–4 px, dura, ≈`#716D61` | Seguir o Figma |
 | Papel | `#C9C5AB` | **M** `#C7C2AA`–`#C8C3AC` | Seguir o Figma |
 | Vinheta | — | **M** bordas `#A6A18D`, cantos `#8B8877`, em todas as telas de menu | **Decidido:** como no jogo, nos menus de tela cheia, desligável |
-| Grid | 6% | **M** passo ≈7 px, linha ≈2 px, contraste baixo | Passo de 7 px, 3–6% |
+| Grid | 6% | **Revisto (2026-10-27):** não existe no fundo do jogo; a leitura anterior era a compressão das capturas | Tirar do fundo |
+| Fundo (medido) | — | **M** centro `#C8C3AC`, bordas `#A6A18D`, cantos `#8C8978` (vinheta radial); grão fino, desvio ≈2 níveis em 255 (o rien-OS fica sem, escolha do dono); diagonais ≈20 níveis mais escuras que o papel (≈17% de tinta), em feixes de 2–3 linhas que começam e terminam na tela; arcos duplos (dois círculos a ≈6 px), centro fora da tela | Seguir (spec 004) |
+| Fundo escuro | — | **M** atrás de popups e legendas: `#141414`, arcos e diagonais cinza até ≈`#454545` | Variante pra testar |
 | `light-yellow` | `#D7D1B3` | **M** `#D2CDB4`–`#D4CEB5` | Seguir o Figma |
 | `light-gray` | `#B1AB93` | **M** `#B0AB97` | Seguir o Figma |
 | Tinta | `#4E4B42` | **M** `#4A473E`–`#565448` | Seguir o Figma |
