@@ -70,11 +70,11 @@ ou fixos.
 **Independent Test**: com `hud-default.json`, `lab/shot` mostra exatamente os cenários 1–4 da H1,
 e `hud dump` traz os mesmos valores.
 
-- [ ] T021 [P] [US1] `shell/services/Clock.qml`: `SystemClock` com precisão de segundos, ou a hora fixa de `Fixtures.data.clock`
-- [ ] T022 [P] [US1] `shell/services/Telemetry.qml`: `cpu` e `mem` como `Reading` (data-model). `FileView` em `/proc/stat` e `/proc/meminfo` com `reload()` a cada 2 s; **se o `FileView` não ler `/proc` na VM, usar `Process` + `StdioCollector` (research R3)**. Leitura que falha "vira value: 0"
-- [ ] T023 [P] [US1] `shell/services/Audio.qml`: `vol` a partir de `Pipewire.defaultAudioSink` + `PwObjectTracker`; `extra: "muted"` e valor 0 quando mudo; fixture `volume`
-- [ ] T024 [P] [US1] `shell/services/Battery.qml`: `bat` a partir de `UPower.displayDevice`; `available: false` sem bateria; `critical` "value < 0.15 e sem carregar"; `extra: "charging"`; fixture `battery` (null = sem bateria)
-- [ ] T025 [P] [US1] `shell/services/Compositor.qml`: o único arquivo que importa `Quickshell.Hyprland`. `workspacesFor(monitorName)` devolve ids de 1 até "max(5, maior id existente, id em foco)", "só ids ≥ 1"; `activeTitle`; `focus(id)` (com a fixture `workspaces`, só atualiza o estado fixo)
+- [x] T021 [P] [US1] `shell/services/Clock.qml`: `SystemClock` com precisão de segundos, ou a hora fixa de `Fixtures.data.clock`
+- [x] T022 [P] [US1] `shell/services/Telemetry.qml`: `cpu` e `mem` como `Reading` (data-model). `FileView` em `/proc/stat` e `/proc/meminfo` com `reload()` a cada 2 s; **se o `FileView` não ler `/proc` na VM, usar `Process` + `StdioCollector` (research R3)**. Leitura que falha "vira value: 0"
+- [x] T023 [P] [US1] `shell/services/Audio.qml`: `vol` a partir de `Pipewire.defaultAudioSink` + `PwObjectTracker`; `extra: "muted"` e valor 0 quando mudo; fixture `volume`
+- [x] T024 [P] [US1] `shell/services/Battery.qml`: `bat` a partir de `UPower.displayDevice`; `available: false` sem bateria; `critical` "value < 0.15 e sem carregar"; `extra: "charging"`; fixture `battery` (null = sem bateria)
+- [x] T025 [P] [US1] `shell/services/Compositor.qml`: o único arquivo que importa `Quickshell.Hyprland`. `workspacesFor(monitorName)` devolve ids de 1 até "max(5, maior id existente, id em foco)", "só ids ≥ 1"; `activeTitle`; `focus(id)` (com a fixture `workspaces`, só atualiza o estado fixo)
 - [ ] T026 [US1] `shell/ds/composites/TabBar.qml`: faixas verticais + `HeaderButton` por aba + régua pontilhada; a aba `selected` desce até a régua; sinal `activated(index)`
 - [ ] T027 [US1] `shell/hud/Hud.qml`: `PanelWindow` no topo, `exclusiveZone` = altura (`Settings.barHeight`, 40), `s = tabH/47` com `tabH = barHeight × 31/40` × `Settings.uiScale`; da esquerda pra direita: marca (as duas faixas), `TabBar`, título centralizado (`elide`), `CPU`/`MEM`/`VOL`/`BAT` (`Label` + `Meter` + número), data `yyyy.MM.dd` e hora; régua pontilhada embaixo; sem vinheta
 - [ ] T028 [US1] Em `shell/shell.qml`: `Variants` sobre `Quickshell.screens` criando um `Hud` por monitor, e `hud.dump()` real (formato de contracts/ipc.md)

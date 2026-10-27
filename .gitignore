@@ -7,3 +7,6 @@
 
 # Local Claude Code settings (lab/perf hook points into the private repo)
 .claude/settings.local.json
+
+# Agent worktrees (parallel tasks)
+.claude/worktrees/
