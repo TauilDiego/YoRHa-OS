@@ -30,7 +30,11 @@
 ## Código de terceiros
 
 Código de outros projetos só entra com licença compatível com a AGPL-3.0 e com crédito aqui e no
-próprio arquivo. Por enquanto não há nenhum.
+próprio arquivo.
+
+- **Hash without Sine**, de **David Hoskins** ([shadertoy.com/view/4djSRW](https://www.shadertoy.com/view/4djSRW)),
+  licença MIT (Copyright (c) 2014 David Hoskins): a função `hash` de três linhas em
+  `shell/shaders/transition.frag` (os sorteios por célula das transições do papel de parede).
 
 ## Marcas
 

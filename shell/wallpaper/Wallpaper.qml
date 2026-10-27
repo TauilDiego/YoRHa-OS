@@ -5,9 +5,9 @@ import "../ds"
 import "../services"
 
 // The desktop background, one per monitor, on the Wayland background layer behind every window
-// (spec 001 US4, spec 004). It shows the wallpaper WallpaperStore resolves for this monitor: a
-// scene (the default is the game's menu paper, spec 004 US1) or a picture. `phase` comes from
-// shell.qml, so every monitor breathes together.
+// (spec 001 US4, spec 004). It shows the wallpaper WallpaperStore resolves for this monitor (a
+// scene, by default the game's menu paper, or a picture) and changes it with the transition the
+// user picked. `phase` comes from shell.qml, so every monitor breathes together.
 PanelWindow {
     id: root
 
@@ -28,26 +28,31 @@ PanelWindow {
 
     readonly property real s: height / 1080 * Settings.uiScale
     readonly property string monitorName: modelData?.name ?? ""
-    readonly property real dpr: Tokens.scaleOf(monitorName)
-    readonly property string current: WallpaperStore.resolve(monitorName)
 
     // For `wallpaper dump` (contracts/ipc.md).
     function dumpEntry(): var {
         return {
             name: monitorName,
-            current: current,
+            current: view.current,
             own: WallpaperStore.monitors[monitorName] ?? "",
-            transitioning: false,
-            kind: WallpaperStore.transition.kind,
-            elapsed: 0
+            transitioning: view.running,
+            kind: view.running ? view.runKind : WallpaperStore.transition.kind,
+            elapsed: Math.round(view.elapsed)
         };
     }
 
-    WallpaperView {
+    WallpaperTransition {
+        id: view
         anchors.fill: parent
-        wallpaper: WallpaperCatalog.byId(root.current)
+        current: WallpaperStore.resolve(root.monitorName)
         s: root.s
         phase: root.phase
-        screenSize: Qt.size(Math.round(root.width * root.dpr), Math.round(root.height * root.dpr))
+        dpr: Tokens.scaleOf(root.monitorName)
+        kind: WallpaperStore.transition.kind
+        cell: WallpaperStore.transition.cell
+        trail: WallpaperStore.transition.trail
+        glitch: WallpaperStore.transition.glitch
+        instant: WallpaperStore.instant
+        paperFilterOff: WallpaperStore.paperFilterOff
     }
 }
