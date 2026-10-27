@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rien-os/settings-catalog",
+  "title": "Catálogo das configurações (spec 003, FR-019)",
+  "description": "shell/fixtures/settings-default.json. Os textos vêm em inglês e aparecem como estão.",
+  "type": "object",
+  "required": ["categories"],
+  "additionalProperties": false,
+  "properties": {
+    "needs": {
+      "description": "Mensagem mostrada no quadro quando uma opção depende de um liga/desliga desligado. Chave = o `key` do liga/desliga.",
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "about", "options"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "label": { "type": "string" },
+          "about": { "type": "string", "description": "Frase do quadro com o foco na categoria" },
+          "options": { "type": "array", "items": { "$ref": "#/$defs/option" } }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "option": {
+      "type": "object",
+      "required": ["id", "label", "type", "desc"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "label": { "type": "string" },
+        "type": { "enum": ["toggle", "choice", "slider", "action", "info"] },
+        "desc": { "type": "string" },
+        "key": { "type": "string", "description": "Só em toggle: nome que outras opções usam em `needs`" },
+        "needs": { "type": "string", "description": "Fica apagada quando o toggle com esse `key` está desligado" },
+        "value": { "description": "toggle: boolean; choice: índice em `values`; slider: 0–100" },
+        "default": { "description": "Mesmo tipo de `value`" },
+        "values": { "type": "array", "items": { "type": "string" }, "minItems": 2, "description": "Só em choice" },
+        "step": { "type": "integer", "minimum": 1, "maximum": 50, "description": "Só em slider" },
+        "text": { "type": "string", "description": "action: rótulo (Search, Set up, Open); info: o texto mostrado" },
+        "busy": { "type": "string", "description": "Só em action: aviso mostrado no quadro por motion.actionBusy" }
+      },
+      "allOf": [
+        { "if": { "properties": { "type": { "const": "toggle" } } }, "then": { "required": ["value", "default"], "properties": { "value": { "type": "boolean" }, "default": { "type": "boolean" } } } },
+        { "if": { "properties": { "type": { "const": "choice" } } }, "then": { "required": ["values", "value", "default"], "properties": { "value": { "type": "integer", "minimum": 0 }, "default": { "type": "integer", "minimum": 0 } } } },
+        { "if": { "properties": { "type": { "const": "slider" } } }, "then": { "required": ["value", "default", "step"], "properties": { "value": { "type": "integer", "minimum": 0, "maximum": 100 }, "default": { "type": "integer", "minimum": 0, "maximum": 100 } } } },
+        { "if": { "properties": { "type": { "const": "action" } } }, "then": { "required": ["text", "busy"] } },
+        { "if": { "properties": { "type": { "const": "info" } } }, "then": { "required": ["text"] } }
+      ]
+    }
+  }
+}

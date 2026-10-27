@@ -133,7 +133,8 @@ dependentes.
 
 **Abrir e fechar (US1)**
 
-- **FR-001**: O popup MUST abrir e fechar por um atalho de teclado da sessão (`SUPER + I` na VM)
+- **FR-001**: O popup MUST abrir e fechar por um atalho de teclado da sessão (`SUPER + I`; na VM
+  do laboratório, `ALT + I`, porque lá os atalhos usam ALT pra não colidir com os do host)
   e por comandos de controle `open`, `close` e `toggle`, pra testes e pra outros atalhos.
 - **FR-002**: O popup MUST abrir centrado no monitor em foco, com um tamanho proporcional à tela
   (≈84% da largura e da altura, num token) e o layout do mockup aprovado em escala.
@@ -267,8 +268,8 @@ Cada critério diz qual evidência da VM o comprova (constituição IV).
 
 ## Assumptions
 
-- **Onde roda:** só na VM do laboratório (constituição I). O atalho `SUPER + I` vai na config do
-  Hyprland da VM; na máquina do dono, entra pelo instalador (S3) ou na troca (U7).
+- **Onde roda:** só na VM do laboratório (constituição I). O atalho vai na config do
+  Hyprland da VM como `ALT + I` (plan.md, research R4); na máquina do dono, entra pelo instalador (S3) ou na troca (U7).
 - **Decisões do mockup, aprovadas pelo dono ("perfeito"):** setas pro liga/desliga (não os dois
   botões), pipa clara na coluna sem foco (não some), blink de 240 ms, quadro de descrição à direita,
   as 7 categorias com as opções do mockup.
