@@ -16,7 +16,9 @@ Singleton {
 
     // Does the active fixture define this domain? (e.g. has("battery"), even when it is null)
     function has(domain: string): bool {
-        return active && Object.prototype.hasOwnProperty.call(data, domain);
+        // `data` checked again: while the shell tears down, `active` can still read true for a
+        // moment after the file is gone (a TypeError in the log otherwise).
+        return active && data !== null && Object.prototype.hasOwnProperty.call(data, domain);
     }
 
     function get(domain: string): var {

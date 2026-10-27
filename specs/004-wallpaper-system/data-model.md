@@ -92,6 +92,20 @@ Um id que caiu no fallback por não existir mais gera uma linha no log.
 **Estados:** `idle` → (`set`) → `running` → (fim) → `idle`. Um `set` com `running` reinicia a partir da
 tela atual.
 
+## Tom da barra (emenda da US6, `WallpaperStore.toneMix`)
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `toneMix[monitor]` | real 0..1 | O que a barra daquele monitor mostra agora: 0 = tom papel, 1 = tom claro. Escrito pelo `Wallpaper` do monitor; lido pelo `Hud` |
+| `toneOf(id)` | 1 / 0 / −1 | Tom de destino: cena `kind: "dark"` → 1; outras cenas → 0; imagem → `luma` < 0,45 ? 1 : 0; −1 = imagem ainda não medida |
+| `lumas[chave]` | real 0..1 | No `WallpaperCatalog`. Chave = `"1:"` (filtro ligado) ou `"0:"` (desligado) + o caminho. Média de 0,2126 R + 0,7152 G + 0,0722 B (sRGB/255) da faixa de cima (altura da barra + 12 px lógicos) da imagem como aparece |
+
+**Regras:**
+- **Parado:** `toneMix` = `toneOf(item na tela)`; se for −1, segura o valor que tinha.
+- **Transição:** `toneMix` = `de + (para − de) × smoothstep(topProgress)`; `de` é o `toneMix` quando a
+  transição começou; `para` desconhecido (−1) = `de`.
+- **`instant`** (fixtures, movimento reduzido): sem transição, então troca na hora.
+
 ## Picker (estado do seletor, `WallpaperPicker`)
 
 | Campo | Tipo | Notas |
@@ -101,7 +115,7 @@ tela atual.
 | `focus` | `"list"` / `"options"` | Duas colunas (padrão da 003) |
 | `index` | int | Item em foco na lista (pula os títulos de grupo) |
 | `option` | int | 0 Monitor, 1 Transition, 2 Paper filter (só imagens) |
-| `monitor` | int | 0 = All monitors, depois as saídas em ordem |
+| `monitor` | int | 0 = All monitors, depois as saídas em ordem. Só do seletor: volta pra 0 a cada abertura. No `wallpaper dump` sai o rótulo (`All monitors` ou a saída) |
 
 ## Settings (acréscimos, `services/Settings.qml`)
 

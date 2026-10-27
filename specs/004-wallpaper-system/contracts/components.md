@@ -11,8 +11,20 @@ os textos, do `Strings`.
 | `WallpaperView` | `wallpaper` (item do catálogo), `s`, `phase`, `screenSize` (px físicos), `paperFilter` (bool) | — | Cena → `Scene`. Imagem → `Image` com `PreserveAspectCrop`, `sourceSize` = `screenSize`, `asynchronous`, `cache: false`, e `PaperFilter` quando `paperFilter`. Vídeo → nada (não é aplicável) |
 | `PaperFilter` | `source` (Item), `enabled` | — | `MultiEffect` com `colorization: 0.85` e `colorizationColor` = papel do centro, mais a `Vignette` da 001 por cima (R7) |
 | `WallpaperTransition` | `current` (id), `screenSize`, `s`, `phase`, `kind`, `cell`, `trail`, `glitch`, `instant` | `running`, `elapsed`, `seed` (leitura) | Dois slots (`Loader` de `WallpaperView`). Quando `current` muda: se `instant` ou se não houver `.qsb` → troca seca (ou crossfade QML, sem shader); senão, `ShaderEffect` com `transition.frag.qsb` sobre dois `ShaderEffectSource` vivos (R2, R4). Na varredura, uma `Rule { kind: "dotted"; rotation: -90 }` acompanha a borda (R5). Troca no meio de outra parte da tela atual (FR-017) |
-| `GroupedList` | `model` (lista com `{ group }` e itens `{ label, trailing, dim }`), `currentIndex`, `focused`, `s` | `activated(int index)` | `CursorList` da 001 com títulos de grupo (texto `small`, sem foco). A pipa e o blink vêm da `ListItem`/`Selector`; `focused: false` = estado "sem foco" da 003 (pipa clara, parada). Se a 003 der grupos à `CursorList`, este componente vira só um alias |
-| `WallpaperPicker` | `screen` (a saída em foco) | `closeRequested()` | O seletor (FR-006–FR-009): moldura de popup da 003, título `WALLPAPER -Select`, `GroupedList` à esquerda, `Card` da prévia (nome, `WallpaperView` pequena, descrição), `Card` "Options" com linhas `Monitor`, `Transition` e `Paper filter` (só imagens) + informações (Type, Layers, Motion, Now on), rodapé de teclas. Duas colunas: lista ↔ opções (padrão da 003). `dump()` devolve o estado do data-model "Picker" |
+| `GroupedList` | `model` (entradas `{ group }`, `{ note }` e itens `{ label, trailing, dim }`), `currentIndex` (conta só os itens), `focused`, `wrap`, `keysEnabled`, `s` | `activated(int index)`, `hoveredIndex(int index)`, `itemAt(index)`, `itemData(index)` | Composto novo em `ds/composites/` (a `CursorList` da 003 não tem grupos), com as mesmas peças: faixas, `ListItem` e a pipa com o blink. Títulos `small` sem foco; `note` = aviso debaixo de um título; `dim` = item apagado que ainda recebe o cursor; marca à direita em `small`. `focused: false` = estado "sem foco" da 003 (pipa clara, parada). Rola por entradas inteiras, com o item atual sempre visível |
+| `PickerLayout` | `entries`, `index`, `column` (`list`/`options`), `option`, `options` (`[{ id, label, values }]`), `values` (id → índice), `info` (`[{ label, value }]`), `s`; a prévia é a propriedade padrão | `applied(int index)`, `picked(int option, int value)`, `closeRequested()`; `keys`, `restart(i)`, `geometry()` | O composto "lista + prévia + opções" (FR-022, design-system §8), em `ds/composites/`: `GroupedList` à esquerda, a prévia no meio, o card "Options" com linhas de escolha e as informações à direita, a navegação em duas colunas e o rodapé de teclas por foco |
+| `PreviewCard` | `wallpaper`, `s`, `phase`, `dpr`, `paperFilter` | — | `Card` com o nome, a `WallpaperView` pequena (cena viva a 512/1920; imagem decodificada no tamanho físico de 512 × 288, com o filtro; vídeo = "NOT YET") e a descrição |
+| `WallpaperPicker` | `screen` (a saída em foco), `phase` | `closeRequested()` | O seletor (FR-006–FR-009): `PopupWindow` da 003 (título `WALLPAPER -Select`) com o `PickerLayout`: o catálogo por grupo com as marcas, o `PreviewCard` e as opções `Monitor`, `Transition` e `Paper filter` (só imagens) + informações (Type, Layers, Motion, Now on). `dumpState()` devolve o estado do data-model "Picker" |
+
+**Emenda da US6 (2026-10-27): a barra sobre o fundo**
+
+| Componente | Acréscimo | Comportamento |
+|---|---|---|
+| `WallpaperTransition` | `topProgress` (0..1, leitura), `band` (altura da faixa da barra, px lógicos) | Quanto da faixa da barra a transição em andamento já cobriu, com as mesmas contas do shader: camuflagem = fração das células da faixa já reveladas; varredura = borda ÷ largura; quadradinhos = fração dos quadradinhos das linhas da faixa já começados; crossfade = progresso. Sinal `begun()` quando uma transição começa |
+| `WallpaperView` | `luma` (leitura, −1 até medir) | Imagem: quando fica pronta e não há medida guardada, mede a faixa de cima (`grabToImage` + `Canvas.getImageData`) e guarda no catálogo |
+| `Wallpaper` | publica `WallpaperStore.setToneMix` | Parado: o tom do fundo na tela. Numa transição: `de + (para − de) × smoothstep(topProgress)`. Esperando a imagem nova ou a medida dela: segura o tom |
+| `Label`, `Rule`, `HeaderButton`, `Meter`, `TabBar` (001) | `property real tone: 0` | Cores = `Tokens.hudColor(papel, tone)` (FR-028). Com 0, as cores de antes, sem conta |
+| `Hud` (001) | `color: "transparent"`, sem `Rectangle` nem `Vignette` | Lê `WallpaperStore.toneMix[monitor]` e passa pros componentes; `dumpEntry()` ganha `tone`, `toneMix` e `texts` |
 
 ## Reaproveitados
 
@@ -39,4 +51,7 @@ A galeria da 001 ganha uma seção "Wallpaper" com estas peças:
 - um quadro congelado de cada transição. É a `WallpaperTransition` com `elapsed`/`progress` fixos e
   `seed = 1`: camuflagem em 700 ms (refração, mosaico e rastro visíveis), varredura em 50%,
   quadradinhos em 50% e crossfade em 50%;
-- a `GroupedList` nos estados com foco e sem foco.
+- a `GroupedList` nos estados com foco e sem foco;
+- o `PickerLayout` em miniatura, numa `PopupFrame` sobre a cena `menu`.
+
+Fica na página 3 da galeria (Tab duas vezes), carregada só enquanto aparece.
