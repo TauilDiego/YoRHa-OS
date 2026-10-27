@@ -134,3 +134,45 @@ lab/up teste-c --window                 # ou ver numa janela (ALT+Enter abre o k
   workspace).
 - **Laboratório:** resolução fixa no `lab/profile` (a janela do QEMU não muda mais a VM) e
   fuso do host no `lab/sync`.
+
+## Segunda noite (2026-10-27, madrugada) — cursor próprio, 39 formatos
+
+**Pronto:**
+- **Tema `rien_cursors`** (spec 002, revisada): desenho próprio, vetorial (hyprcursor + XCursor
+  de reserva), com os **39 formatos** do NieR Cursors de Beinsezii, os mesmos aliases e
+  hotspots, no estilo aprovado na seta. As animações (espera, progresso, proibido com glitch)
+  funcionam nos dois formatos.
+- **`gen/style.py`:** o estilo aprovado virou um módulo único. A seta sai idêntica à aprovada
+  (0 px de diferença), e todas as famílias usam só ele:
+  - A (ponteiros em 6 direções + ajuda/espera/erro);
+  - B (texto);
+  - C (redimensionar);
+  - D (bordas e cantos);
+  - E (mãos);
+  - F (mira, alvo, espera).
+- **Agentes:** C/D e E/F foram desenhados por agentes em paralelo, em worktrees próprias.
+- **Mão nas abas:** as abas e os itens clicáveis agora pedem a mão.
+- **`lab/cursor`:** monta o tema do nosso repositório num container, com cache, e aplica na
+  VM. O `.lock` do release e o fork deixaram de ser usados.
+- **Barra:**
+  - pontilhado nítido no hidpi (0 px misturados; corrige o SC-008, que eu tinha dado como
+    passado sem medir o pontilhado);
+  - fim do `ReferenceError` ao recarregar ao vivo.
+- **Validação:** `check-u1` **15/15** na VM com o tema completo. Seta, mão e texto conferidos
+  ao vivo.
+
+**Esperando você:**
+1. **Folha dos 39** (nosso × original): `/tmp/claude-1000/-home-diego-projects-nier-os/af714ffc-7877-47c9-a81d-c3bc321932d9/scratchpad/full/compact.png`.
+   - Pontos de dúvida dos agentes: o polegar da mão fechada, que parece uma rodinha; os
+     polegares listrados das mãos; o "mover", que segue o original sem bloco central.
+   - O alvo (`Targeter`) usa a paleta em vez do vermelho do original.
+2. **Altura da barra:** 46, 50 ou 54 (sugestão 50). Depois dela vêm o vão até a régua, a
+   animação do "toque" e o pontilhado maior.
+3. **Fork `TauilDiego/NieR-Cursors`:** está sem uso e sem commits nossos. Apagar?
+
+**Ver de novo:**
+```sh
+cd ~/projects/rien-OS-private && export NIER_LAB_VM=teste-c
+NIER_LAB_PROFILE=hidpi lab/up teste-c --window   # ou 1080 pro Dell
+lab/profile hidpi && lab/sync --no-env && lab/cursor
+```
