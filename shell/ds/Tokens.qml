@@ -173,7 +173,11 @@ Singleton {
         readonly property color dotWeave: Qt.rgba(1, 1, 1, 0.07)   // dark scene: a 1 px dot every 4 px
         readonly property color glint: "#E6E1C8"           // camouflage: the front's flash, the trail's veil
         readonly property real inkSquare: 0.9              // tiles: the ink square before each cell
-        // paper filter (research R7): colors pulled toward the paper, a softer vignette on top
+        // paper filter (research R7): colors pulled toward the paper, a softer vignette on top.
+        // MultiEffect's colorization multiplies the picture's luminance by this color, so it is
+        // the paper's hue at full brightness (the paper #C9C5AB over its red channel): the light
+        // of the picture stays, as with the mockup's "color" blend.
+        readonly property color filterTint: "#FFFAD9"
         readonly property real filterAmount: 0.85
         readonly property real filterVignetteStart: 0.5
         readonly property real filterVignetteEdge: 0.26

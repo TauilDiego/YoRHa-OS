@@ -21,7 +21,33 @@ Item {
     Loader {
         id: loader
         anchors.fill: parent
-        sourceComponent: root.wallpaper?.type === "scene" ? sceneView : null
+        sourceComponent: root.wallpaper?.type === "scene" ? sceneView
+            : root.wallpaper?.type === "image" ? imageView : null
+    }
+
+    // A picture covers the screen without stretching (the excess is cut), decoded at the screen's
+    // physical size off the UI thread, and gets the paper filter unless it was turned off.
+    Component {
+        id: imageView
+        Item {
+            readonly property bool ready: picture.status === Image.Ready || picture.status === Image.Error
+
+            Image {
+                id: picture
+                anchors.fill: parent
+                source: root.wallpaper.url
+                fillMode: Image.PreserveAspectCrop
+                sourceSize: root.screenSize
+                asynchronous: true
+                cache: false
+            }
+            PaperFilter {
+                anchors.fill: parent
+                enabled: root.paperFilter
+                source: picture
+                textureSize: root.screenSize
+            }
+        }
     }
 
     Component {
