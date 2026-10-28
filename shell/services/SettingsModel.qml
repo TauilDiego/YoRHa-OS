@@ -12,6 +12,9 @@ import "../strings"
 // restarting the shell goes back to the file. Nothing is written and nothing touches the
 // system (FR-018).
 // Values: toggle → bool, choice → index in `values`, slider → 0–100; actions and infos have none.
+// 004 acabamento: a choice with `"setting": key` is live. Its value is the shell setting's level
+// (Settings.levelOf), and changing it changes the setting for the session (Settings.setSession).
+// Still nothing is written.
 // Options are addressed by category id + option id; "cat.opt" keys the maps below.
 Singleton {
     id: root
@@ -37,6 +40,9 @@ Singleton {
     }
 
     function value(catId: string, optId: string): var {
+        const opt = find(catId, optId);
+        if (opt?.setting)
+            return Math.max(0, Settings.levelsOf(opt.setting).indexOf(Settings.levelOf(opt.setting)));
         const k = catId + "." + optId;
         return Object.prototype.hasOwnProperty.call(current, k) ? current[k] : null;
     }
@@ -98,6 +104,9 @@ Singleton {
     }
 
     function set(catId: string, optId: string, v: var): void {
+        const opt = find(catId, optId);
+        if (opt?.setting)
+            Settings.setSession(opt.setting, Settings.levelsOf(opt.setting)[v] ?? "");
         const next = Object.assign({}, current);
         next[catId + "." + optId] = v;
         current = next;
@@ -144,9 +153,12 @@ Singleton {
     function reset(): void {
         const next = {};
         for (const c of categories)
-            for (const o of c.options)
-                if (hasValue(o))
+            for (const o of c.options) {
+                if (o.setting)
+                    Settings.setSession(o.setting, "");     // back to shell.json / defaults.json
+                else if (hasValue(o))
                     next[c.id + "." + o.id] = o.value;
+            }
         current = next;
         busy = "";
         busyTimer.stop();
@@ -182,6 +194,9 @@ Singleton {
                 if (o.type === "slider" && !(Number.isInteger(o.value) && o.value >= 0 && o.value <= 100
                         && Number.isInteger(o.step) && o.step >= 1))
                     return `${where}: a slider needs a value 0–100 and a step`;
+                if (o.setting !== undefined && !(o.type === "choice"
+                        && Settings.levelsOf(String(o.setting)).length === o.values.length))
+                    return `${where}: a live setting is a choice over the setting's levels`;
             }
         }
         return "";

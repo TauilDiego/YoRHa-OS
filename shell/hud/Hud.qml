@@ -16,6 +16,8 @@ import "../strings"
 // spec 004 US6: the bar has no background of its own. The monitor's wallpaper (and its
 // transitions) shows under it, and its colors follow that wallpaper: `tone`, 0 paper → 1 light,
 // from WallpaperStore.toneMix (set by the monitor's Wallpaper), handed to every piece.
+// 004 acabamento: `high` (Settings.barContrast, System Settings › Appearance › Bar contrast)
+// inks every secondary text in the main ink over paper and draws the clock heavier.
 PanelWindow {
     id: root
 
@@ -55,6 +57,10 @@ PanelWindow {
 
     // spec 004 US6: this monitor's tone (0 paper → 1 light).
     readonly property real tone: WallpaperStore.toneMix[monitorName] ?? 0
+    readonly property bool high: Settings.barContrast === "high"
+    function ink(role: string): color {
+        return Tokens.hudColorAt(role, root.tone, root.high);
+    }
 
     // What the bar shows, for `hud dump` (contracts/ipc.md).
     function dumpEntry(): var {
@@ -77,6 +83,7 @@ PanelWindow {
             // color, so the contrast can be measured on the pixels.
             tone: tone >= 0.5 ? "light" : "paper",
             toneMix: Math.round(tone * 1000) / 1000,
+            contrast: Settings.barContrast,
             texts: textBoxes()
         };
     }
@@ -112,7 +119,7 @@ PanelWindow {
                 y: Math.round(tabBar.y),
                 w: g.w,
                 h: tabBar.bandH,
-                color: hex(Tokens.hudColor(inked ? "selInk" : t.state === "dimmed" ? "ink2" : "ink", root.tone)),
+                color: hex(root.ink(inked ? "selInk" : t.state === "dimmed" ? "ink2" : "ink")),
                 plate: hex(Tokens.hudColor(inked ? "sel" : "rest", root.tone))
             });
         });
@@ -137,6 +144,7 @@ PanelWindow {
         width: root.width - 2 * root.margin
         s: root.s
         tone: root.tone
+        high: root.high
         ruleGap: root.ruleGap
         ruleScale: root.s * root.ruleShare
         model: root.tabs.map((t, i) => ({
@@ -171,7 +179,7 @@ PanelWindow {
             s: root.s
             tone: root.tone
             role: "small"
-            color: Tokens.hudColor("ink2", root.tone)
+            color: root.ink("ink2")
             text: Compositor.activeTitle
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
@@ -207,7 +215,7 @@ PanelWindow {
                     s: root.s
                     tone: root.tone
                     role: "headerButton"
-                    color: Tokens.hudColor("ink2", root.tone)
+                    color: root.ink("ink2")
                     text: Clock.dateText
                 }
                 Label {
@@ -216,6 +224,10 @@ PanelWindow {
                     s: root.s
                     tone: root.tone
                     role: "headerButton"
+                    // High contrast: one step heavier (DemiBold → Bold), on the variable axis too.
+                    readonly property int weight: root.high ? Font.Bold : textStyle.weight
+                    font.weight: weight
+                    font.variableAxes: ({ "wght": weight })
                     text: Clock.timeText
                 }
             }
@@ -258,7 +270,7 @@ PanelWindow {
             s: root.s
             tone: root.tone
             role: "small"
-            color: Tokens.hudColor(view.reading.critical ? "alert" : "ink2", root.tone)
+            color: root.ink(view.reading.critical ? "alert" : "ink2")
             text: view.muted ? Strings.muted
                              : Math.round((view.reading.value ?? 0) * 100) + (view.charging ? Strings.charging : "")
             Label {

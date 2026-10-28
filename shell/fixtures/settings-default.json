@@ -50,6 +50,7 @@
       "options": [
         {"id": "ui-scale", "label": "Interface scale", "type": "choice", "desc": "Size of the rien-OS interface, on top of the screen scale.", "values": ["90%", "100%", "110%", "125%"], "value": 1, "default": 1},
         {"id": "bar-height", "label": "Top bar height", "type": "choice", "desc": "Height of the bar at the top of the screen. The tabs and the dotted rule follow it.", "values": ["40 px", "50 px", "68 px", "80 px"], "value": 2, "default": 2},
+        {"id": "bar-contrast", "label": "Bar contrast", "type": "choice", "desc": "How the texts of the top bar stand out from the wallpaper. High draws every text in the main ink and the clock heavier.", "setting": "barContrast", "values": ["Normal", "High"], "value": 0, "default": 0},
         {"id": "vignette", "label": "Vignette", "type": "toggle", "desc": "Darkens the edges and corners of full-screen menus and the desktop, like the game.", "value": true, "default": true},
         {"id": "bg-motion", "label": "Background motion", "type": "toggle", "desc": "The arcs and beams that drift slowly behind the desktop.", "value": true, "default": true},
         {"id": "reduce-motion", "label": "Reduce motion", "type": "toggle", "desc": "Stops the ink sweeps and the blink of the selector.", "value": false, "default": false},

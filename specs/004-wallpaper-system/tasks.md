@@ -203,6 +203,23 @@ medido e a área vazia contra a cena sem a barra; sem fixtures, rajadas da camuf
 
 ---
 
+<!-- acabamento (004-acabamento): início -->
+## Phase 10: Acabamento (decisões do dono, 2026-10-27)
+
+> Branch `004-acabamento` (sai da `004-wallpaper-system` em `422cca7`), VM `teste-a` (2 núcleos, 4 GB),
+> `lab/perf --kind 004-acab`. Emenda (2) da spec: FR-024, FR-028, FR-029, FR-030 e SC-011.
+
+- [x] T060 Emenda (2) da spec antes do código: Bar contrast (FR-030), paleta High e `ink2` clara (FR-028), `contrast` no `hud dump` (FR-029), SC-011 revisto, aviso do Qt silenciado (FR-024); contratos, data-model; nota na FR-018 da 003; `setting` no `settings.schema.json` da 003
+- [x] T061 Bar contrast: `barContrast` no `defaults.json` e no `Settings` (com a troca da sessão); opção `bar-contrast` em Appearance, ligada pelo `SettingsModel` (`"setting"`); `Tokens.hudPaperHigh`, `Tokens.hudColorAt`; `high` em `HeaderButton`, `TabBar` e `Hud` (hora em Bold); `ink2` do tom claro 175,172,161
+- [x] T062 Aviso `qt.qpa.wayland.textinput`: o `//@ pragma Env QT_LOGGING_RULES=…` no `shell.qml` **não funciona** no Quickshell 0.3.2 (conferido na VM: o aviso continua, nas duas sintaxes; com a variável no ambiente antes do `qs`, some). A regra foi pro lançador do lab (`guest/nier-ui-run`), e o `shell.qml` diz como lançar e quando tirar
+- [x] T063 `lab/check-003` e `lab/check-004` sem contar o aviso à parte (0 WARN); bloco US6 do `check-004` em Normal e High, com a troca por teclas reais no popup, o `settings reset` e o `barContrast` do `shell.json`
+- [x] T064 Sobras: domínios `settings` e `wallpaper` no `fixtures.schema.json` da 001; o `Compositor` relê as escalas quando a geometria de uma tela muda (o HUD ficava com a escala velha depois do `lab/profile`)
+- [ ] T065 Validar na `teste-a` (`lab/perf` 2026-10-27T204902, `--kind 004-acab`): `check-u1` **15/15**; `check-003 --profile 1080` **25/25**, log com 0 avisos; `check-004` **53 PASS / 2 FAIL** (`out/004-acab-check-004-final`): log 0 erros e 0 avisos em 5 inícios do `qs`, `qmllint` limpo, Bar contrast por teclas reais nos dois perfis, `settings reset` volta pro Normal, `barContrast` do `shell.json` vale depois de reiniciar, escala relida sozinha (faixa da barra: 2462 px de diferença com o `Compositor` antigo, 0 com o novo, `out/004-acab-escala`), SC-012 e SC-013 nos dois modos, SC-011 do tom claro no Normal (pior 4,77 em 1080, 5,08 em hidpi). **Os 2 FAIL são o SC-011 do High no tom papel**, como decidido (tinta principal): a hora fica em 2,57 na vinheta do canto, as abas em 3,78 (tinta sobre a placa) e a imagem de meio-tom (`parede 'teste' #1`, luma 0,47) em 1,60. **Decisão do dono pendente** (ver o relatório); imagem `out/004-contraste-revisao.png`
+- [x] T066 `docs/design-system.md` (§8, "A barra sobre o fundo") e `PLAN.md` (fase U5a, boot e login; decisões de 2026-10-27)
+<!-- acabamento (004-acabamento): fim -->
+
+---
+
 ## Dependencies & Execution Order
 
 - **Setup (T001–T007):** o T001 vem primeiro e pode parar tudo (sem shader na VM, sem camuflagem).

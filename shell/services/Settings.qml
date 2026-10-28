@@ -16,7 +16,7 @@ Singleton {
     // Reduced motion: fades, the selector blink and wallpaper transitions become instant.
     readonly property bool reduceMotion: typeof merged.reduceMotion === "boolean" ? merged.reduceMotion : defaults.reduceMotion
 
-    readonly property var defaults: parse(defaultsFile.text(), "defaults.json") ?? ({ uiScale: 1.0, barHeight: 68, vignette: true, wallpaperMotion: true, reduceMotion: false })
+    readonly property var defaults: parse(defaultsFile.text(), "defaults.json") ?? ({ uiScale: 1.0, barHeight: 68, vignette: true, wallpaperMotion: true, reduceMotion: false, barContrast: "normal" })
     readonly property var user: userFile.loaded ? (parse(userFile.text(), userFile.path) ?? ({})) : ({})
     readonly property var merged: Object.assign({}, defaults, user)
 
@@ -89,6 +89,37 @@ Singleton {
         return "";
     }
     // --- end spec 004 ----------------------------------------------------------------------------
+
+    // --- 004 acabamento: the top bar's contrast ---------------------------------------------------
+    // "normal" (the approved palettes) or "high" (every text of the bar in the main ink, a heavier
+    // clock), from shell.json / defaults.json. The settings pop-up (Appearance › Bar contrast)
+    // changes it live for the session, without writing any file (spec 003 FR-018); its reset, or a
+    // restart, goes back to the configured value.
+    readonly property var barContrastLevels: ["normal", "high"]
+    property string barContrastSession: ""
+    readonly property string barContrastConfigured: {
+        const v = merged.barContrast;
+        if (barContrastLevels.includes(v))
+            return v;
+        if (v !== undefined)
+            console.warn(`settings: barContrast must be one of ${barContrastLevels.join(", ")}, using the default`);
+        return barContrastLevels.includes(defaults.barContrast) ? defaults.barContrast : "normal";
+    }
+    readonly property string barContrast: barContrastLevels.includes(barContrastSession) ? barContrastSession : barContrastConfigured
+
+    // The shell settings the settings pop-up changes live: an option with `"setting": key` in the
+    // catalog is a choice over these values, in this order.
+    function levelsOf(key: string): var {
+        return key === "barContrast" ? barContrastLevels : [];
+    }
+    function levelOf(key: string): string {
+        return key === "barContrast" ? barContrast : "";
+    }
+    function setSession(key: string, level: string): void {
+        if (key === "barContrast")
+            barContrastSession = barContrastLevels.includes(level) ? level : "";
+    }
+    // --- end 004 acabamento ------------------------------------------------------------------------
 
     FileView {
         id: defaultsFile

@@ -13,11 +13,13 @@ import "../primitives"
 //   when the tab is deselected (Tokens.motion.untouch). The button's own height does not change.
 // Tabs have no Selector (the owner's call): only list items carry the Pod cursor.
 // `tone` (spec 004 US6): the top bar's tone, 0 paper → 1 light (plate, ink and the selected ink).
+// `high` (004 acabamento): the bar's High contrast, a dimmed tab inked like a normal one on paper.
 Item {
     id: root
 
     property real s: 1
     property real tone: 0
+    property bool high: false
     property string text
     property bool reachRule: false
     property real ruleY: 0
@@ -141,7 +143,7 @@ Item {
     Face {
         id: dark
         visible: root.fill < 1
-        ink: Tokens.hudColor(root.state === "dimmed" ? "ink2" : "ink", root.tone)
+        ink: Tokens.hudColorAt(root.state === "dimmed" ? "ink2" : "ink", root.tone, root.high)
     }
 
     // The stem, from the band's bottom to the rule. While inked it is part of the ink itself:

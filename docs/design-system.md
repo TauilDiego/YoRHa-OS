@@ -479,7 +479,7 @@ tons:
 | Papel | Uso | Tom papel | Tom claro |
 |---|---|---|---|
 | `ink` | texto principal, hora, tinta da aba normal, rótulos das leituras | `#4E4B42` | `#D7D1B3` |
-| `ink2` | título, data, valores, tinta da aba apagada | `#676458` | `#96948C` |
+| `ink2` | título, data, valores, tinta da aba apagada | `#676458` (High: `#4E4B42`) | `#AFACA1` |
 | `rest` | placa da aba, faixas verticais | `#B1AB93` | `#D7D1B3` a 16% |
 | `sel` / `selInk` | placa e tinta da aba em foco (e da destacada) | `#4E4B42` / `#D7D1B3` | `#D7D1B3` / `#4E4B42` |
 | `track` / `fill` | trilho e preenchimento do medidor | `#B1AB93` / `#4E4B42` | `#D7D1B3` a 22% / `#D7D1B3` |
@@ -490,6 +490,17 @@ O tom papel são os tokens de sempre (§1). Os dois ficam em `Tokens.hudPaper` e
 `Tokens.hudColor(papel, tom)` dá a cor de um papel num tom de 0 (papel) a 1 (claro), misturando
 canal a canal, com alfa. `Label`, `Rule`, `HeaderButton`, `Meter` e `TabBar` recebem `tone` (padrão
 0, que deixa a galeria, o popup e todo o resto como sempre foram).
+
+**Contraste da barra** (System Settings › Appearance › Bar contrast; `barContrast` no `shell.json`,
+`"normal"` de padrão; decisão do dono, 2026-10-27):
+- **Normal:** as paletas acima.
+- **High:** no tom papel, título, data, valores e a tinta da aba apagada passam pra `ink`
+  (`Tokens.hudPaperHigh`), e a hora sai em Bold (no Normal, DemiBold). O tom claro é o mesmo.
+- A `ink2` do tom claro é `#AFACA1` nos dois modos (era `#96948C`): a aba apagada fica ≥ 4,5:1 sobre
+  a placa.
+- `Tokens.hudColorAt(papel, tom, high)` dá a cor; `HeaderButton` e `TabBar` recebem `high` (padrão
+  `false`), e o resto da UI não muda.
+- O popup troca na hora e vale pra sessão; o `shell.json` vale depois de reiniciar.
 
 **Qual tom:**
 - cenas de papel (`menu`, `rules`, `plain`) → papel;
@@ -586,7 +597,7 @@ agrupada com e sem foco e o layout inteiro em miniatura.
   `reveal` 1200, `lead` 200, `settle` 450, `duration` 900.
 - **Configuração** (`config/defaults.json`, sobrescrita pelo `shell.json` do usuário):
   `wallpaperFolder`, `wallpaperTransition` (`camouflage`), `camouflage` (`cell` 24, `trail` 2600,
-  `glitch` 2) e `reduceMotion`. A última escolha feita (no seletor ou por comando) vale mais que a
+  `glitch` 2), `reduceMotion` e `barContrast` (`normal`; ver "A barra sobre o fundo"). A última escolha feita (no seletor ou por comando) vale mais que a
   config e fica no arquivo de estado.
 - **Comandos:** `qs ipc call wallpaper list | set <id> <monitor|all> | next | prev | transition
   <tipo> | camouflage <cell> <trail> <glitch> | filter <caminho> <true|false> | picker
