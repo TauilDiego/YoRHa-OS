@@ -160,7 +160,7 @@ Serpantinum.
 | Fase | Entrega | Pronto quando |
 |---|---|---|
 | S1 Inventário | Classificação em base/módulo/hardware/pessoal (o rascunho já está pronto) | Você revisou o inventário (repositório privado) |
-| S2 Arch completo na VM | ISO + archinstall desassistido (8.5) | Um comando entrega um `arch-limpo` instalado pela ISO |
+| S2 Arch completo na VM ✅ | ISO + archinstall desassistido (8.5) | Um comando entrega um `arch-limpo` instalado pela ISO |
 | S3 Instalador v0 | Arch limpo → o seu uso, com o Serpantinum no encaixe do shell | O checklist bate na VM |
 | S4 Updates | `rien update` e migrations, usando o que o U2 aprendeu | Atualizar de v0.1 pra v0.2 funciona na VM |
 | S5 Niri | Gerador de atalhos e regras de janela, adaptador de workspaces no shell | O mesmo checklist passa no Niri |
@@ -215,6 +215,10 @@ Serpantinum.
 - **2026-10-26:** avaliado um "aquário" em Docker (Hyprland sem tela,
   `HYPRLAND_HEADLESS_ONLY=1`). Trocado pela VM, que cobre também instalação, updates e
   serviços do sistema (SDDM, polkit, systemd).
+- **2026-10-28:** S2 concluída (spec 006): o `lab/install-iso` instala o Arch pela ISO oficial sem
+  nenhuma tecla, em cerca de 5,5 min, e congela a camada `arch-iso` (13 de 13 conferências). O dono
+  decidiu que a cadeia do Hyprland passa a ser montada sobre ela, junto com as camadas do Niri e do
+  Mango do estudo 009.
 
 ## Fontes
 
