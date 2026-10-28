@@ -109,7 +109,7 @@ SC-004.
 **Project Type**: desktop shell (UI de Wayland em QML)
 
 **Performance Goals**: sem meta (U6). Abrir em ≤ 0,3 s (SC-005); a lista de janelas acompanha em
-≤ 1 s (FR-017); um app novo aparece em ≤ 2 s (SC-009). Páginas criadas na primeira visita; nenhum
+≤ 1 s (FR-017); um app novo aparece em ≤ 2 s (SC-009). As quatro páginas são criadas junto com o menu (research R1, revisto na T016); nenhum
 polling (as janelas leem nos eventos; a energia, ao entrar na aba).
 
 **Constraints**:
@@ -188,7 +188,7 @@ shell/
 │   ├── PopupFrame.qml           # + tabs, tab, clock, tabClicked, bodyTop
 │   └── PopupWindow.qml          # repassa os acréscimos
 ├── settings/
-│   ├── SettingsPage.qml         # + top, extraKeys
+│   ├── SettingsPage.qml         # + startY, extraKeys
 │   └── SettingsPopup.qml        # sai (a aba SYSTEM substitui)
 ├── ds/
 │   ├── Tokens.qml               # + space.pause* (R12), confirmW, mapW/H, appIcon
@@ -199,7 +199,7 @@ shell/
 │       ├── StatusCard.qml       # novo
 │       ├── ConfirmDialog.qml    # novo
 │       ├── GroupedList.qml      # + search, emptyText
-│       └── PickerLayout.qml     # + top, searchHeader/emptyText, opções action/toggle, triggered
+│       └── PickerLayout.qml     # + startY, searchHeader/emptyText, opções action/toggle, triggered
 ├── services/
 │   ├── Apps.qml                 # novo
 │   ├── appsearch.js             # novo

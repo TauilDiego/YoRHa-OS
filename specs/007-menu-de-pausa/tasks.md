@@ -9,6 +9,8 @@ quickstart.md)
 
 **Status**: plano e tarefas aprovados pelo dono (27.10; a T012a em 28.10). Fases 1–3 em andamento na `007-menu-de-pausa`; as frentes A, B e C saem depois da T022.
 
+**Decisões do dono (28.10, depois da T022):** aceitas as quatro do agente: a altura das páginas é `startY` (o Qt recusa `top`); as quatro páginas são criadas junto com o menu; os ícones de teste de APPS são coloridos, pra o SC-013 provar a troca de estilo; a fixture de hibernação é `na`.
+
 **Tests**: a spec não pede testes automatizados. A prova de cada tarefa é a evidência da VM
 (princípio IV): screenshot, `qs ipc call pause dump`, teclas reais via QMP, `hyprctl … -j` e log de
 QML sem erro, sempre dentro de `lab/perf begin/end`.
