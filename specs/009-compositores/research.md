@@ -62,7 +62,7 @@ código.
   estar vindo.
 - **`hyprpm`:** pacote separado; `hyprpm update`, `hyprpm add <repo>`, `hyprpm enable <nome>`; compila
   na versão do Hyprland que está rodando.
-- **Decisão (pendente da pergunta 2):** a nota oficial é do Hyprland puro, **com** o layout de colunas
+- **Decisão (aprovada pelo dono em 2026-10-28, P2 do plano):** a nota oficial é do Hyprland puro, **com** o layout de colunas
   nativo. A linha "com plugin" fica só pra visão geral, com uma cópia da comunidade do `hyprexpo` numa
   camada descartável, se compilar; se não compilar, a linha diz isso (é evidência de risco).
 - **Fontes:** https://archlinux.org/packages/extra/x86_64/hyprland/ ;
@@ -338,5 +338,6 @@ Mais a sessão manual do dono (~30–45 min, uma VM por vez, `--window`) e a eta
 
 - **Recomendação: A**, com a data anotada no relatório e no `lab/009/versoes/`. A troca pra 0.57 vira
   trabalho à parte (outra spec ou uma tarefa de manutenção do lab). **Pergunta 1 do plano.**
+- **Decidido pelo dono em 2026-10-28: A, com a data 2026/10/28.**
 - **Fonte:** https://wiki.archlinux.org/title/Arch_Linux_Archive (mecanismo já usado pelo
   `lab/install-iso --snapshot`, spec 006)

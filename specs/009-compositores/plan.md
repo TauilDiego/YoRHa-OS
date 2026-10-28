@@ -255,21 +255,20 @@ Mais a sessão manual do dono (~30–45 min, 1 VM por vez, com `--window`).
 | A cópia da comunidade do `hyprexpo` não compila na 0.56.2 | Linha "com plugin" vazia | Documentar a falha (é evidência de risco de manutenção) e citar a documentação como pesquisa |
 | Um só mantenedor no Mango, lançamentos semanais com chaves renomeadas | Config do lab quebra no meio do estudo | Data fixa (R15); a quebra entra no risco de manutenção |
 
-## Perguntas pro dono (antes do `/speckit-tasks`)
+## Decisões do dono sobre o plano (2026-10-28)
 
-1. **Fixar a data dos pacotes nas três camadas?** (research R15) O Hyprland 0.57 saiu hoje com mudanças
-   no Lua. **Recomendação:** sim, as três preparações e a regressão numa data fixa do Arch Linux Archive
-   (2026/10/28: Hyprland 0.56.2, Niri 26.04, mangowm 0.18.3, Quickshell 0.3.2). A 0.57 fica pra uma
-   tarefa à parte.
-2. **O que vira a linha "com plugin" do Hyprland?** (research A5, R3) A resposta 3 falava em plugins
-   oficiais de visão geral e de colunas, mas as colunas já são nativas (0.54) e o plugin oficial de visão
-   geral saiu em 2026-05-12. **Recomendação:** a nota oficial do Hyprland puro inclui o layout de colunas
-   nativo (a sessão do dono liga ele nas áreas 3–5); a linha "com plugin" fica só pra visão geral, com uma
-   cópia da comunidade do `hyprexpo` numa camada descartável, marcada como "plugin da comunidade"; se não
-   compilar na 0.56.2, a linha registra isso.
-3. **Se o `egl-headless` não servir pro Niri ou pro Mango** (research R4), pode ligar a VM deles com
-   `--window` (uma janela do QEMU no seu desktop) durante os testes? **Recomendação:** só se o spike 0
-   falhar, e aí perguntar de novo com o resultado; até lá, não muda nada.
+O dono aprovou o plano com as três recomendações:
+
+| # | Decisão | Efeito |
+|---|---|---|
+| P1 | **Data fixa dos pacotes: 2026/10/28**, pelo Arch Linux Archive, nas três cadeias e na regressão (Hyprland 0.56.2, Niri 26.04, mangowm 0.18.3, Quickshell 0.3.2) | `LAB_ALA_DATE=2026/10/28` nas três preparações. O Hyprland 0.57 vira uma tarefa à parte, depois, anotada no resumão |
+| P2 | **Colunas nativas na nota oficial do Hyprland puro** (layout `scrolling` nas áreas 3–5, só na camada da sessão do dono); a linha "com plugin" é **só a visão geral**, com uma cópia da comunidade do `hyprexpo` numa camada descartável, marcada "plugin da comunidade"; se não compilar na 0.56.2, isso vira risco de manutenção | `guest/hyprland.lua` com o `local.lua` opcional; camada `hypr-plugins` descartável |
+| P3 | **`--window` como plano B:** só se o spike 0 falhar; aí o estudo **para** e relata o resultado (o coordenador pergunta ao dono) | Ponto de parada depois do spike 0 |
+
+**Execução (coordenador, 2026-10-28):** no máximo 4 VMs no total; a 007 usa `teste-a` e a 008 usa
+`teste-b`, então este estudo usa **no máximo 2 VMs** ao mesmo tempo, sem subagentes. Antes de cada
+`lab/up`, contar as VMs ligadas pelos `.pid`. Paradas obrigatórias: spike 0 falhando, qualquer decisão do
+dono, e o fim do passo 7 (relatório etapa 1 e folha de notas prontos).
 
 ## Complexity Tracking
 
