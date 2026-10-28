@@ -81,8 +81,9 @@ Singleton {
     }
 
     // --- spec 008: a full-screen window in focus (R11) holds transmissions (FR-027) --------------------
-    // From `hyprctl activewindow -j` (field `fullscreen`, a mode number, 0 = not full screen), re-read
-    // on the fullscreen, active window and workspace events. Fixture: notifications.fullscreen.
+    // From `hyprctl activewindow -j` (field `fullscreen`, a mode: 0 none, 1 maximized, 2 full screen,
+    // 3 both; only the full-screen bit counts), re-read on the fullscreen, active window and workspace
+    // events. Fixture: notifications.fullscreen.
     property bool liveFullscreen: false
     readonly property bool focusedFullscreen: Fixtures.has("notifications")
         ? (Fixtures.get("notifications")?.fullscreen === true)
@@ -94,7 +95,7 @@ Singleton {
             onStreamFinished: {
                 try {
                     const fs = JSON.parse(text).fullscreen;
-                    root.liveFullscreen = fs === true || Number(fs) > 0;
+                    root.liveFullscreen = fs === true || (Number(fs) & 2) !== 0;
                 } catch (e) {
                     root.liveFullscreen = false;      // no window in focus
                 }
