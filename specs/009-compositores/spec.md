@@ -5,7 +5,8 @@
 
 **Created**: 2026-10-28
 
-**Status**: Rascunho, aguardando a aprovação do dono (constituição V). Três perguntas em aberto, no fim.
+**Status**: Aprovada pelo dono em 2026-10-28, com os pesos e a regra da recomendação propostos, e as três
+respostas da seção "Clarifications"
 
 **Input**: O PRD do estudo 009 (`rien-OS-private/central/prd-009-compositores.md`, de 2026-10-28),
 aprovado pelo dono como direção, com as respostas dele no §6. Resumo do pedido: colocar o **Niri** e o
@@ -63,13 +64,33 @@ shell são a S5, depois.
    Os pesos são propostos nesta spec, pro dono aprovar (seção "Critérios e pesos").
 4. **O Hyprland entra na comparação** com o mesmo roteiro, já sobre a `arch-iso`.
 
-## Critérios e pesos (proposta, pro dono aprovar)
+## Clarifications
+
+### Session 2026-10-28
+
+Respostas do dono às três perguntas da spec, na aprovação:
+
+- Q: Recriar as `teste-a/b/c` dentro do 009 (o PRD §2 manda, o §3 exclui)? → A: Sim, só depois que a
+  cadeia nova do Hyprland for promovida, uma de cada vez e só quando a camada estiver livre (conferir
+  `lab/ls`, `pgrep -af qemu-system` e os arquivos `.pid` do lab; a 007, a 008 e outros agentes usam as
+  `teste-a/b/c`). O que estiver em uso vai pro resumão como pendente, pro dono liberar (FR-004).
+- Q: Quem dá as notas dos quatro critérios de experiência, e a recomendação espera a sessão do dono? → A:
+  **Só o dono** dá essas notas. O agente não dá nota de experiência, nem provisória: ele junta a evidência
+  (rajadas, screenshots, anotações, o que a documentação de cada compositor oferece) e prepara a folha da
+  sessão manual, onde o dono dá de 0 a 3 em cada critério. A recomendação final espera as notas do dono;
+  antes delas, o relatório só traz as notas técnicas e a evidência (FR-030, FR-035a, SC-013).
+- Q: O Hyprland é avaliado com os plugins oficiais de visão geral e de colunas? → A: A nota oficial é a do
+  Hyprland puro. Os plugins oficiais são testados numa camada descartável e aparecem numa linha à parte,
+  "com plugin", e o custo de manter plugin entra no risco de manutenção (FR-038).
+
+## Critérios e pesos (aprovados pelo dono em 2026-10-28)
 
 A nota de cada critério vai de 0 a 3. A pontuação de um compositor é `Σ (peso × nota) / 3`, de 0 a 100.
 O relatório mostra, ao lado, a mesma conta com pesos iguais, e os pesos e as notas ficam separados pra o
 dono refazer a conta com outros números.
 
-**Experiência (60):** os quatro critérios do dono.
+**Experiência (60):** os quatro critérios do dono. **Quem dá a nota é só o dono**, na sessão manual (US5);
+as âncoras abaixo servem de guia pra ele.
 
 | Critério | Peso | 0 | 1 | 2 | 3 |
 |---|---|---|---|---|---|
@@ -92,7 +113,7 @@ dono refazer a conta com outros números.
 - não ter como a UI listar áreas de trabalho e a janela em foco (IPC ou protocolo);
 - não dar pra instalar de forma reproduzível na VM (nem pacote, nem receita do AUR que compile).
 
-**Regra da recomendação (proposta):**
+**Regra da recomendação (aprovada):**
 - **trocar o padrão:** só se o candidato passar o Hyprland por **10 pontos ou mais**, com nota ≥ 2 no
   IPC e no risco de manutenção;
 - **Hyprland + um deles:** se o candidato ficar a **até 10 pontos** do Hyprland (ou acima), com nota
@@ -234,10 +255,12 @@ arquivo de amostra e um estado na tabela.
 O dono liga cada compositor numa janela no desktop dele (`lab/up teste-niri --window`,
 `lab/up teste-mango --window` e o Hyprland pra comparar) e usa por alguns minutos, com uma colinha curta
 na mão: os atalhos de cada um em ALT, o que vale olhar pra cada um dos quatro critérios de experiência, e
-o aviso de que os gestos de touchpad não passam pela VM.
+o aviso de que os gestos de touchpad não passam pela VM. Junto vai a **folha de notas**: pra cada
+compositor e critério, a evidência que o agente juntou e um espaço pra nota de 0 a 3 do dono. Só o dono dá
+as notas de experiência.
 
-**Why this priority**: Três dos quatro critérios do dono são de sensação, e a VM não serve pra julgar
-fluidez (lab, "Limites"). Sem a sessão dele, essas notas ficam só do agente.
+**Why this priority**: Os quatro critérios de experiência são notas do dono (Clarifications), e a VM
+não serve pra julgar fluidez (lab, "Limites"). Sem a sessão dele, não há recomendação final.
 
 **Independent Test**: Com as camadas da US2 prontas, um comando liga cada sessão; a colinha cabe numa
 tela e lista os atalhos que foram conferidos na US2.
@@ -249,8 +272,9 @@ tela e lista os atalhos que foram conferidos na US2.
 2. **Given** a colinha, **When** o dono a lê, **Then** ela tem, por compositor: como ligar e desligar, os
    atalhos em ALT (os do lab e os nativos que valem testar: visão geral, colunas, mover janela), o que
    olhar em cada critério e o aviso sobre os gestos.
-3. **Given** as notas do dono depois da sessão, **When** elas chegam, **Then** o relatório as registra
-   ao lado das do agente, e a conta é refeita com elas (ver a pergunta 2).
+3. **Given** a folha da sessão manual, **When** o dono dá de 0 a 3 em cada critério de experiência,
+   **Then** essas são as únicas notas de experiência do relatório, e a conta e a recomendação são feitas
+   com elas.
 
 ---
 
@@ -258,7 +282,9 @@ tela e lista os atalhos que foram conferidos na US2.
 
 O dono lê `docs/estudo-compositores.md` (público, em português): um resumo de uma página, a tabela
 Hyprland × Niri × Mango, a conta com os pesos aprovados e com pesos iguais, os eliminados (e por quê) e a
-recomendação: só Hyprland, Hyprland + um deles, ou trocar o padrão. Junto, a tabela §6 do contrato
+recomendação: só Hyprland, Hyprland + um deles, ou trocar o padrão. O documento sai em duas etapas:
+primeiro com as notas técnicas e a evidência de experiência (sem nota de experiência e sem
+recomendação); depois da sessão do dono, com as notas dele, a conta completa e a recomendação. Junto, a tabela §6 do contrato
 corrigida, como proposta de mudança.
 
 **Why this priority**: É o "pronto" do estudo; sem ele, nada é decidido. Depende das outras histórias.
@@ -269,13 +295,16 @@ leitor refaz a conta com outros pesos só com o documento.
 
 **Acceptance Scenarios**:
 
-1. **Given** as medidas e as amostras, **When** o documento é escrito, **Then** ele cobre, por
-   compositor: como instalar (repositório oficial ou AUR, versão), o IPC (o que lê, o que faz, eventos),
+1. **Given** as medidas, as amostras e as notas de experiência do dono, **When** o documento é
+   fechado, **Then** ele cobre, por compositor: como instalar (repositório oficial ou AUR, versão), o IPC (o que lê, o que faz, eventos),
    o que a UI precisa × o que ele oferece (as `capabilities`), o custo medido, os riscos de manutenção,
    os quatro critérios de experiência, a conta e a recomendação.
 2. **Given** uma afirmação que não foi medida na VM (gestos, cadência de lançamentos, planos do
    projeto), **When** ela entra no documento, **Then** traz a fonte e a marca "pesquisa".
-3. **Given** o documento pronto, **When** o estudo termina, **Then** existe uma entrada no
+3. **Given** só as medidas e as amostras (o dono ainda não deu as notas), **When** o documento sai na
+   primeira etapa, **Then** ele traz as notas técnicas, a evidência de cada critério de experiência e a
+   folha de notas, e diz que a recomendação espera o dono; nenhuma nota de experiência é do agente.
+4. **Given** o documento pronto, **When** o estudo termina, **Then** existe uma entrada no
    `central/resumao.md` com o resultado, os commits e as decisões pro dono, e a rien-OS Central lista os
    comandos e camadas novos.
 
@@ -323,12 +352,10 @@ leitor refaz a conta com outros pesos só com o documento.
 - **FR-003**: A cadeia nova MUST só virar a padrão (base padrão do `lab/new`, o `lab/bootstrap`, o README
   do lab e a Central) depois que uma camada de teste sobre ela passar em `check-u1` 15/0, `check-003`
   25/0 e `check-004` 58/0, com os relatórios do `lab/perf` como prova.
-- **FR-004**: Depois da promoção, as camadas `teste-*` MUST ser recriadas sobre a cadeia nova, uma de cada
-  vez, e só depois de conferir que nenhum agente está usando cada uma (lista de camadas e VMs ligadas).
-  Uma camada em uso fica como está e entra como pendente.
-  [NEEDS CLARIFICATION: o PRD pede pra recriar as `teste-*` (§2, item 0), mas também diz que mexer nas
-  `teste-a/b/c` está fora do escopo (§3), e a 007 e a 008 estão usando o lab agora. Recriar dentro do
-  009 ou deixar pro dono?]
+- **FR-004**: Depois da promoção, as camadas `teste-*` (incluindo as `teste-a/b/c`) MUST ser recriadas
+  sobre a cadeia nova, uma de cada vez, e só depois de conferir que cada uma está livre: `lab/ls`,
+  `pgrep -af qemu-system` e os arquivos `.pid` do lab. Uma camada em uso fica como está e entra no
+  resumão como pendente, pro dono liberar (Clarifications, 2026-10-28).
 - **FR-005**: A cadeia antiga MUST continuar no disco até o OK explícito do dono; o estudo não a apaga.
 - **FR-006**: O `lab/bootstrap` MUST montar, num lab vazio, a `arch-iso` (pelo comando da 006) e, sobre
   ela, a cadeia do Hyprland, a `niri-base` e a `mango-base`, pulando o que já existe.
@@ -404,10 +431,10 @@ leitor refaz a conta com outros pesos só com o documento.
   colinha curta MUST listar, por compositor: como ligar e desligar, os atalhos em ALT, os atalhos
   nativos que valem testar (visão geral, colunas, mover janela), o que olhar em cada critério de
   experiência e que os gestos de touchpad não passam pela VM.
-- **FR-030**: As notas do dono, quando vierem, MUST entrar no relatório ao lado das do agente, e a conta
-  MUST ser refeita com elas.
-  [NEEDS CLARIFICATION: nos quatro critérios de experiência, valem as notas do agente, as do dono depois
-  da sessão manual, ou as duas? E a recomendação final espera essa sessão?]
+- **FR-030**: Só o dono dá as notas dos quatro critérios de experiência. O agente MUST NOT dar nota de
+  experiência, nem provisória; ele MUST juntar a evidência de cada critério (rajadas, screenshots,
+  anotações, o que a documentação de cada compositor oferece) e preparar a folha de notas da sessão
+  manual, com um espaço de 0 a 3 por compositor e critério (Clarifications, 2026-10-28).
 
 **Medição (todas)**
 
@@ -425,15 +452,19 @@ leitor refaz a conta com outros pesos só com o documento.
 
 - **FR-035**: Os critérios, os pesos, as âncoras das notas e a regra da recomendação MUST ser os
   aprovados pelo dono nesta spec, fixados antes da primeira medida.
+- **FR-035a**: A recomendação final MUST esperar as notas do dono. Antes delas, o relatório MUST trazer
+  só as notas técnicas, a evidência de experiência e a folha de notas, e dizer que a recomendação está
+  pendente.
 - **FR-036**: `docs/estudo-compositores.md` MUST trazer: resumo de uma página; a tabela Hyprland × Niri ×
   Mango com instalação (repositório ou AUR, versão), IPC (leitura, ações, eventos), `capabilities`, custo
   medido, riscos de manutenção e os quatro critérios de experiência; a conta com os pesos aprovados e com
   pesos iguais; os eliminados; e a recomendação.
 - **FR-037**: Toda célula da tabela MUST apontar pra uma evidência (amostra, screenshot, relatório) ou pra
   uma fonte marcada como "pesquisa". Os gestos de touchpad entram só como pesquisa.
-- **FR-038**: A visão geral e a rolagem em colunas do Hyprland MUST ser avaliadas
-  [NEEDS CLARIFICATION: só com o que vem no Hyprland, ou também com os plugins oficiais (por exemplo, o
-  de visão geral e o de colunas)? Muda bastante as notas dele nesses dois critérios.]
+- **FR-038**: A nota oficial do Hyprland MUST ser a do Hyprland puro. Os plugins oficiais de visão
+  geral e de colunas MUST ser testados numa camada descartável (nunca na cadeia padrão) e aparecer numa
+  linha à parte, "com plugin", com evidência; o custo de manter plugin MUST entrar no risco de manutenção
+  do Hyprland (Clarifications, 2026-10-28).
 - **FR-039**: O relatório MUST trazer a tabela §6 do contrato corrigida como **proposta de mudança**; o
   estudo não edita a branch da 007.
 - **FR-040**: O estudo MUST deixar uma entrada no `central/resumao.md` (resultado, commits, decisões pro
@@ -458,10 +489,12 @@ leitor refaz a conta com outros pesos só com o documento.
 - **Amostra**: a saída de uma consulta ou ação de uma linha do §6 do contrato, num compositor, com o
   comando, a data e o estado da VM (janelas abertas, perfil).
 - **Capacidades**: os seis valores do §3 do contrato, por compositor, cada um ligado a amostras.
-- **Critério**: nome, peso, âncoras 0–3, se é eliminatório; com as notas do agente e, depois, as do dono.
+- **Critério**: nome, peso, âncoras 0–3, se é eliminatório e quem dá a nota (o agente, nos técnicos; só o
+  dono, nos de experiência).
 - **Medida de custo**: compositor, rodada (1–3), RAM e CPU parado, tempo até a UI, id do relatório
   `lab/perf`.
-- **Colinha**: o texto curto da sessão manual, por compositor.
+- **Colinha e folha de notas**: o texto curto da sessão manual, por compositor, e a folha onde o dono dá
+  as notas de experiência, com a evidência de cada critério.
 
 ## Success Criteria *(mandatory)*
 
@@ -487,15 +520,19 @@ leitor refaz a conta com outros pesos só com o documento.
   só as de monitor, com fonte marcada como pesquisa.
 - **SC-009**: O custo tem 3 rodadas por compositor, com a mediana e a maior diferença entre rodadas, nos
   três compositores, medidas do mesmo jeito.
-- **SC-010**: O dono liga cada sessão manual com **um** comando, e a colinha de cada compositor cabe numa
-  tela (até 30 linhas).
+- **SC-010**: O dono liga cada sessão manual com **um** comando; a colinha de cada compositor cabe numa
+  tela (até 30 linhas); a folha de notas tem os 12 campos (4 critérios × 3 compositores) com a evidência
+  de cada um, e nenhum vem preenchido pelo agente.
 - **SC-011**: No documento, 100% das células da tabela apontam pra uma evidência ou pra uma fonte marcada
   como pesquisa, e um leitor refaz a conta com outros pesos usando só o documento.
 - **SC-012**: Os relatórios do `lab/perf` mostram, no sistema do dono, só as ferramentas do lab; nenhum
   compositor, Quickshell ou compilação de pacote. Nunca houve mais de 2 VMs do estudo nem mais de 4 no
   total ligadas ao mesmo tempo.
-- **SC-013**: O dono recebe uma recomendação (só Hyprland, Hyprland + um, ou trocar o padrão) que segue
-  da conta ou explica por que não, a tabela §6 corrigida, a entrada no resumão e a Central atualizada.
+- **SC-013**: Depois das notas do dono, ele recebe uma recomendação (só Hyprland, Hyprland + um, ou trocar
+  o padrão) que segue da conta ou explica por que não, a tabela §6 corrigida, a entrada no resumão e a
+  Central atualizada. Antes das notas, o relatório não traz recomendação nem nota de experiência.
+- **SC-014**: O Hyprland tem a nota oficial sem plugin e uma linha "com plugin" à parte, com a evidência
+  da camada descartável.
 
 ## Assumptions
 
@@ -525,22 +562,3 @@ leitor refaz a conta com outros pesos só com o documento.
   sistema do dono; avaliar fluidez de verdade.
 - **Recursos:** no máximo 2 VMs deste estudo ligadas, cada uma com 2 núcleos e 4 GB (memória
   `feedback-vm-limits` e PRD §4).
-
-## Perguntas pro dono
-
-As três perguntas marcadas na spec (FR-004, FR-030 e FR-038), com a recomendação do agente:
-
-1. **Recriar as `teste-a/b/c` dentro do 009?** (FR-004) O PRD manda recriar as `teste-*` sobre a cadeia
-   nova (§2, item 0), mas lista "mexer nas `teste-a/b/c`" como fora do escopo (§3), e a 007 e a 008 estão
-   usando o lab. **Recomendação:** recriar dentro do 009, só depois da promoção, uma de cada vez e só
-   quando a camada estiver livre (lista de camadas e VMs ligadas); o que estiver em uso fica pendente no
-   resumão, pro dono liberar.
-2. **Quem dá as notas dos critérios de experiência, e a recomendação espera a sessão do dono?** (US5,
-   FR-030) **Recomendação:** o agente dá notas provisórias com a evidência (rajadas, amostras,
-   documentação) e entrega o relatório com a recomendação marcada "provisória"; as notas do dono, depois
-   da sessão manual, substituem as do agente nos quatro critérios de experiência, e a recomendação final
-   sai com elas.
-3. **O Hyprland é avaliado com plugins oficiais?** (FR-038) Nativamente, ele não tem visão geral nem é
-   centrado em colunas como o Niri; com os plugins oficiais, tem. **Recomendação:** a nota oficial é só
-   com o que vem no Hyprland; os plugins oficiais entram numa camada de teste descartável e aparecem numa
-   linha à parte ("com plugin"), com o custo de manter plugin no risco de manutenção.

@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -39,14 +39,17 @@
 - **Decisões do dono já incorporadas (PRD §6, 28.10):** `arch-iso` pras três (fase 0, US1); AUR na VM
   com versão fixada; os quatro critérios de experiência; o Hyprland no mesmo roteiro. Nenhuma delas
   virou pergunta.
-- **Pesos propostos** (seção "Critérios e pesos"), pro dono aprovar junto com a spec: experiência 60
+- **Pesos aprovados pelo dono em 2026-10-28** (seção "Critérios e pesos"): experiência 60
   (visão geral 15, colunas 15, animações 10, atalhos e uso diário 20) e técnicos 40 (IPC 15, risco de
   manutenção 10, custo medido 10, empacotamento 5), com âncoras 0–3, três eliminatórios e uma regra de
   recomendação.
-- **Três [NEEDS CLARIFICATION], todos de escopo ou de decisão do dono** (o agente não podia perguntar):
-  1. FR-004: recriar as `teste-a/b/c` dentro do 009 (o PRD §2 manda, o §3 exclui);
-  2. FR-030: quem dá as notas dos critérios de experiência e se a recomendação espera a sessão do dono;
-  3. FR-038: o Hyprland avaliado só nativo ou também com os plugins oficiais.
-  Cada um tem a recomendação do agente na seção "Perguntas pro dono" da spec. Levar pro
-  `/speckit-clarify` ou responder na aprovação, antes do `/speckit-plan`.
-- **Validação:** uma passada; os itens marcados passam. O único em aberto é o das marcas, de propósito.
+- **As três [NEEDS CLARIFICATION] foram respondidas pelo dono na aprovação (2026-10-28)** e estão na
+  seção "Clarifications" da spec:
+  1. FR-004: as `teste-a/b/c` são recriadas depois da promoção, uma de cada vez, só quando livres
+     (`lab/ls`, `pgrep -af qemu-system`, `.pid`); o que estiver em uso fica pendente no resumão;
+  2. FR-030/FR-035a: só o dono dá as notas de experiência; o agente junta a evidência e a folha de notas,
+     e a recomendação espera o dono;
+  3. FR-038: a nota oficial é a do Hyprland puro; os plugins oficiais numa linha "com plugin", com o custo
+     no risco de manutenção.
+- **Validação:** duas passadas (rascunho e depois das respostas); todos os itens passam.
+- **Aprovada pelo dono em 2026-10-28** (constituição V), com os pesos e a regra da recomendação.
