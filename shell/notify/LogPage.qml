@@ -33,10 +33,10 @@ FocusScope {
 
     signal closeRequested()
 
-    readonly property var N: Strings.notify
-    readonly property string title: N.title
-    readonly property string subtitle: N.subtitle
-    readonly property string footerLeft: N.footer
+    readonly property var str: Strings.notify
+    readonly property string title: str.title
+    readonly property string subtitle: str.subtitle
+    readonly property string footerLeft: str.footer
 
     property int filter: 0                       // 0 All, 1 Unread (NEW), 2 Critical
     readonly property var filters: ["all", "unread", "critical"]
@@ -54,15 +54,15 @@ FocusScope {
     // NOW = the last hour (of the fixture's clock, with fixtures).
     readonly property real nowMs: Clock.date.getTime()
     function timeOf(e: var): string {
-        return Qt.formatDateTime(new Date(Number(e.at)), N.timeFormat);
+        return Qt.formatDateTime(new Date(Number(e.at)), str.timeFormat);
     }
     readonly property var rows: {
         const out = [];
         if (shown.length === 0)
-            return [{ note: N.emptyTitle }];
+            return [{ note: str.emptyTitle }];
         let grp = "";
         for (const e of shown) {
-            const g = nowMs - Number(e.at) <= 3600000 ? N.now : N.earlier;
+            const g = nowMs - Number(e.at) <= 3600000 ? str.now : str.earlier;
             if (g !== grp) {
                 grp = g;
                 out.push({ group: g });
@@ -71,7 +71,7 @@ FocusScope {
                 label: e.title,
                 lead: NotifyStore.speakerOf(e),
                 trailing: timeOf(e),
-                tag: e.isNew ? N.newTag : "",
+                tag: e.isNew ? str.newTag : "",
                 markColor: e.urgency === "critical" ? Tokens.color.alert : "transparent"
             });
         }
@@ -79,15 +79,15 @@ FocusScope {
     }
 
     readonly property var options: [
-        { id: "dnd", label: N.dnd, type: "toggle" },
-        { id: "show", label: N.show, values: [N.showAll, N.showUnread, N.showCritical] },
-        { id: "clear", label: N.clearAll, type: "action", text: N.clear }
+        { id: "dnd", label: str.dnd, type: "toggle" },
+        { id: "show", label: str.show, values: [str.showAll, str.showUnread, str.showCritical] },
+        { id: "clear", label: str.clearAll, type: "action", text: str.clear }
     ]
     readonly property var values: ({ dnd: NotifyPrefs.dnd, show: filter })
     readonly property var info: [
-        { label: N.unread, value: String(NotifyStore.entries.filter(e => e.isNew).length) },
-        { label: N.kept, value: N.keptOf.arg(NotifyStore.entries.length).arg(NotifyPrefs.logSize) },
-        { label: N.server, value: NotifyStore.server ? N.serverOn : N.serverOff }
+        { label: str.unread, value: String(NotifyStore.entries.filter(e => e.isNew).length) },
+        { label: str.kept, value: str.keptOf.arg(NotifyStore.entries.length).arg(NotifyPrefs.logSize) },
+        { label: str.server, value: NotifyStore.server ? str.serverOn : str.serverOff }
     ]
 
     // The default action of the entry in focus, when its app still listens.
@@ -97,12 +97,12 @@ FocusScope {
         const S = Strings.settings;
         if (layout.column === "options")
             return layout.keys;
-        const out = [{ key: S.keyUpDown, label: N.keySelect }];
+        const out = [{ key: S.keyUpDown, label: str.keySelect }];
         if (canAct)
-            out.push({ key: S.keyEnter, label: entry.defaultLabel || N.keyAction });
+            out.push({ key: S.keyEnter, label: entry.defaultLabel || str.keyAction });
         if (entry)
-            out.push({ key: N.keyDelete, label: N.keyDismiss });
-        out.push({ key: S.keyRight, label: N.keyOptions }, { key: S.keyEsc, label: N.keyClose });
+            out.push({ key: str.keyDelete, label: str.keyDismiss });
+        out.push({ key: S.keyRight, label: str.keyOptions }, { key: S.keyEsc, label: str.keyClose });
         return out;
     }
 
@@ -133,9 +133,9 @@ FocusScope {
         const e = entry;
         if (!e)
             return;
-        const label = actionId === "default" ? (e.defaultLabel || N.keyAction) : (e.actions.find(a => a.id === actionId)?.label ?? actionId);
+        const label = actionId === "default" ? (e.defaultLabel || str.keyAction) : (e.actions.find(a => a.id === actionId)?.label ?? actionId);
         if (NotifyStore.invoke(e.id, actionId) === "ok")
-            flash(N.answeredNote.arg(label));
+            flash(str.answeredNote.arg(label));
     }
 
     Keys.onPressed: event => {
@@ -161,7 +161,7 @@ FocusScope {
         options: root.options
         values: root.values
         info: root.info
-        optionsTitle: root.N.options
+        optionsTitle: root.str.options
         onApplied: i => {
             if (root.canAct)
                 root.act("default");
@@ -201,7 +201,7 @@ FocusScope {
             }
             onReplySent: text => {
                 if (root.entry && NotifyStore.reply(root.entry.id, text) === "ok")
-                    root.flash(root.N.answeredNote.arg(root.N.reply));
+                    root.flash(root.str.answeredNote.arg(root.str.reply));
                 root.replying = false;
                 layout.forceActiveFocus();
             }
@@ -226,7 +226,7 @@ FocusScope {
             keys: keys.map(k => `${k.key} ${k.label}`),
             preview: { speaker: entry ? preview.speaker : "", status: preview.status, note: preview.noteText },
             rows: rows.map(r => r.group ?? r.note ?? `■ ${r.lead} · ${r.label} · ${r.trailing}${r.tag ? " " + r.tag : ""}`),
-            values: { dnd: NotifyPrefs.dnd, show: [N.showAll, N.showUnread, N.showCritical][filter] },
+            values: { dnd: NotifyPrefs.dnd, show: [str.showAll, str.showUnread, str.showCritical][filter] },
             geometry: geo
         };
     }

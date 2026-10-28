@@ -29,15 +29,15 @@ Item {
     signal actionClicked(int id, string action)
     signal replyOpened(int id)
 
-    readonly property var N: Tokens.notify
+    readonly property var nt: Tokens.notify
     readonly property var entry: entries[Math.max(0, Math.min(page, entries.length - 1))] ?? null
-    readonly property var actions: (Array.isArray(entry?.actions) ? entry.actions : []).slice(0, N.maxActions)
+    readonly property var actions: (Array.isArray(entry?.actions) ? entry.actions : []).slice(0, nt.maxActions)
 
     function u(v: real): int {
         return Tokens.px(v, s);
     }
 
-    implicitHeight: Math.max(u(N.critMinH), u(N.critPadTop) + column.height + u(N.critPadBottom))
+    implicitHeight: Math.max(u(nt.critMinH), u(nt.critPadTop) + column.height + u(nt.critPadBottom))
 
     Item {
         id: reveal
@@ -58,22 +58,22 @@ Item {
         Rectangle {
             y: root.height
             width: root.width
-            height: root.u(root.N.shadow)
+            height: root.u(root.nt.shadow)
             color: Tokens.notify.bandShadow
         }
 
         Column {
             id: column
-            x: root.u(root.N.topPad)
-            y: root.u(root.N.critPadTop)
-            width: Math.min(root.u(root.N.critCol), root.width - x - root.u(root.N.critSide) - side.width - root.u(24))
+            x: root.u(root.nt.topPad)
+            y: root.u(root.nt.critPadTop)
+            width: Math.min(root.u(root.nt.critCol), root.width - x - root.u(root.nt.critSide) - side.width - root.u(24))
 
             Row {
                 spacing: root.u(10)
                 Square {
                     anchors.verticalCenter: parent.verticalCenter
                     s: root.s
-                    size: root.N.critWhoSq
+                    size: root.nt.critWhoSq
                     color: Tokens.notify.bandText
                 }
                 Label {
@@ -121,7 +121,7 @@ Item {
             }
             Item {
                 width: 1
-                height: body.visible ? root.u(root.N.bodyGap) : 0
+                height: body.visible ? root.u(root.nt.bodyGap) : 0
             }
             TypedText {
                 id: body
@@ -129,10 +129,10 @@ Item {
                 visible: text !== ""
                 s: root.s
                 role: "critBody"
-                maxLines: root.N.critLines
+                maxLines: root.nt.critLines
                 text: String(root.entry?.body ?? "")
                 instant: root.instant
-                ms: Math.min(root.N.typeMaxMs, Math.round(TextCut.visibleLength(text) / root.N.cps * 1000))
+                ms: Math.min(root.nt.typeMaxMs, Math.round(TextCut.visibleLength(text) / root.nt.cps * 1000))
                 restartKey: root.entry?.id ?? 0
             }
             Item {
@@ -141,8 +141,8 @@ Item {
             }
             Row {
                 id: acts
-                visible: root.actions.length > 0 || root.entry?.reply
-                spacing: root.u(root.N.actionGap)
+                visible: root.actions.length > 0 || !!root.entry?.reply
+                spacing: root.u(root.nt.actionGap)
                 Repeater {
                     model: root.actions
                     ActionButton {
@@ -161,7 +161,7 @@ Item {
         Row {
             id: side
             anchors.right: parent.right
-            anchors.rightMargin: root.u(root.N.critSide)
+            anchors.rightMargin: root.u(root.nt.critSide)
             y: root.u(36)
             spacing: root.u(14)
 
@@ -170,7 +170,7 @@ Item {
                 visible: root.entries.length > 1
                 spacing: root.u(10)
                 Tri {
-                    left: true
+                    pointsLeft: true
                     end: root.page === 0
                     onTapped: root.pageStepped(-1)
                 }
@@ -185,14 +185,14 @@ Item {
                     color: Tokens.notify.bandText2
                 }
                 Tri {
-                    left: false
+                    pointsLeft: false
                     end: root.page >= root.entries.length - 1
                     onTapped: root.pageStepped(1)
                 }
             }
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                width: root.u(root.N.critClose)
+                width: root.u(root.nt.critClose)
                 height: width
                 color: "transparent"
                 border.width: Tokens.hair(2 * root.s, root.dpr)
@@ -216,7 +216,7 @@ Item {
     // ◂ / ▸
     component Tri: Canvas {
         id: tri
-        property bool left: true
+        property bool pointsLeft: true
         property bool end: false
         signal tapped()
         anchors.verticalCenter: parent.verticalCenter
@@ -228,7 +228,7 @@ Item {
             ctx.reset();
             ctx.fillStyle = Tokens.notify.bandText2;
             ctx.beginPath();
-            if (left) {
+            if (pointsLeft) {
                 ctx.moveTo(width, 0);
                 ctx.lineTo(0, height / 2);
                 ctx.lineTo(width, height);

@@ -27,7 +27,7 @@ PanelWindow {
     readonly property real s: Settings.uiScale * Math.min(1, width / 1920, height / 1080)
     readonly property int barH: Settings.barHeight
     readonly property string position: NotifyPrefs.position
-    readonly property var N: Tokens.notify
+    readonly property var nt: Tokens.notify
 
     anchors {
         top: true
@@ -63,7 +63,7 @@ PanelWindow {
     CriticalBand {
         id: band
         visible: root.critEntries.length > 0
-        y: root.position === "top" ? root.barH : root.barH + Tokens.px(root.N.stackTop, root.s)
+        y: root.position === "top" ? root.barH : root.barH + Tokens.px(root.nt.stackTop, root.s)
         width: root.width
         height: implicitHeight
         s: root.s
@@ -86,10 +86,12 @@ PanelWindow {
         items: root.items
         overflow: NotifyStore.overflow
         instant: Tokens.instant || NotifyStore.fixed
-        topInset: band.visible && root.position !== "subtitle" ? band.y + band.height + Tokens.px(root.N.stackGap, root.s)
-                : root.position === "top" ? root.barH : root.barH + Tokens.px(root.N.stackTop, root.s)
-        bottomInset: Tokens.px(root.N.subtitleBottom, root.s)
+        topInset: band.visible && root.position !== "subtitle" ? band.y + band.height + Tokens.px(root.nt.stackGap, root.s)
+                : root.position === "top" ? root.barH : root.barH + Tokens.px(root.nt.stackTop, root.s)
+        bottomInset: Tokens.px(root.nt.subtitleBottom, root.s)
+        ready: root.backingWindowVisible
 
+        onAppeared: id => NotifyStore.appeared(id)
         onClicked: (id, button) => {
             const e = NotifyStore.entry(id);
             if (button === Qt.LeftButton && e?.hasDefault && e.alive)

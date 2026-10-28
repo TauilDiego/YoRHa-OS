@@ -81,7 +81,7 @@ Singleton {
     property var live: ({})                    // id → Notification (tracked), not persisted
 
     NotificationServer {
-        id: server
+        id: notifServer
         keepOnReload: true
         bodySupported: true
         bodyMarkupSupported: true
@@ -282,11 +282,11 @@ Singleton {
         }
         const t = {
             key: "t" + (++txSeq), id: e.id, ids: [e.id], entry: e, appKey: e.appKey, count: 1, monitor: monitorFor(),
-            arrivedAt: arrivedAt, shownAt: now, typedAt: now, typed: false, from: 0,
+            arrivedAt: arrivedAt, shownAt: now, typedAt: now, typed: false, from: 0, seen: false,
             expiresAt: null, remaining: null, total: null, paused: false, hover: false, replying: false
         };
-        startTyping(t, now);
         stack = [t].concat(stack);
+        startTyping(t, now);                     // after it is on the stack: settle() plans its deadline
         enforceLimit();
     }
     property int txSeq: 0
@@ -419,6 +419,37 @@ Singleton {
         }
         settle(now);
         commit(false);
+    }
+    // Its view is on screen (the window mapped): the typing starts now. The first window of a monitor
+    // can take a moment to map, so `shownAt` is when it really shows (SC-001, R19); until then the
+    // plan made on arrival stands (and is what happens if no view ever shows).
+    // Called while the view is being created: applied right after (no binding loop on `stack`).
+    property var appearing: []
+    function appeared(id: int): void {
+        appearing.push(id);
+        Qt.callLater(root.applyAppeared);
+    }
+    function applyAppeared(): void {
+        const ids = appearing;
+        appearing = [];
+        const now = Date.now();
+        let changed = false;
+        for (const id of ids) {
+            const t = txOf(id);
+            if (!t || t.seen)
+                continue;
+            t.seen = true;
+            if (fixed)
+                continue;
+            t.shownAt = now;
+            if (!t.paused) {
+                t.entry.read = false;
+                startTyping(t, now);
+            }
+            changed = true;
+        }
+        if (changed)
+            commit(false);
     }
     // The view says the typing is done (or the user completed it).
     function typed(id: int): void {
@@ -770,7 +801,7 @@ Singleton {
             const e = list.find(x => x.id === id);
             return {
                 key: "f" + id, id: id, ids: [id], entry: e, appKey: e.appKey, count: e.count ?? 1, monitor: monitorFor(),
-                arrivedAt: shownAt, shownAt: shownAt, typedAt: shownAt, typed: true, from: 0,
+                arrivedAt: shownAt, shownAt: shownAt, typedAt: shownAt, typed: true, from: 0, seen: true,
                 expiresAt: null, remaining: null, total: null, paused: false, hover: false, replying: false
             };
         });

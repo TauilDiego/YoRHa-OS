@@ -52,11 +52,11 @@ Item {
     readonly property bool hovering: hover.hovered
     readonly property bool typing: body.typing
     readonly property bool truncated: body.truncated
-    readonly property var N: Tokens.notify
+    readonly property var nt: Tokens.notify
     readonly property string urgency: String(entry?.urgency ?? "normal")
     readonly property color blockColor: urgency === "low" ? Tokens.color.mediumGray
                                       : urgency === "critical" ? Tokens.color.alert : Tokens.color.lightYellow
-    readonly property var actions: (Array.isArray(entry?.actions) ? entry.actions : []).slice(0, N.maxActions)
+    readonly property var actions: (Array.isArray(entry?.actions) ? entry.actions : []).slice(0, nt.maxActions)
     readonly property bool hasReply: entry?.reply !== null && entry?.reply !== undefined
     readonly property bool hasImage: String(entry?.image ?? "") !== ""
     readonly property bool hasProgress: entry?.progress !== null && entry?.progress !== undefined
@@ -69,12 +69,12 @@ Item {
         body.complete();
     }
 
-    readonly property int padTop: u(layout === "top" ? 12 : N.padTop)
-    readonly property int padBottom: u(layout === "top" ? 14 : N.padBottom)
-    readonly property int contentX: layout === "top" ? u(N.topPad) : u(layout === "subtitle" ? N.subtitlePadLeft : N.padLeft)
-    readonly property int contentW: width - contentX - (layout === "top" ? u(N.topPad) : u(N.padRight))
+    readonly property int padTop: u(layout === "top" ? 12 : nt.padTop)
+    readonly property int padBottom: u(layout === "top" ? 14 : nt.padBottom)
+    readonly property int contentX: layout === "top" ? u(nt.topPad) : u(layout === "subtitle" ? nt.subtitlePadLeft : nt.padLeft)
+    readonly property int contentW: width - contentX - (layout === "top" ? u(nt.topPad) : u(nt.padRight))
 
-    implicitWidth: u(N.stackW)
+    implicitWidth: u(nt.stackW)
     implicitHeight: padTop + column.height + padBottom
 
     Band {
@@ -121,7 +121,7 @@ Item {
                 Square {
                     anchors.verticalCenter: parent.verticalCenter
                     s: root.s
-                    size: root.N.who
+                    size: root.nt.who
                     color: Tokens.notify.bandText
                 }
                 Label {
@@ -171,7 +171,7 @@ Item {
 
         Item {
             width: 1
-            height: root.u(root.N.titleGap)
+            height: root.u(root.nt.titleGap)
         }
         Label {
             id: titleLabel
@@ -187,7 +187,7 @@ Item {
 
         Item {
             width: 1
-            height: root.hasBody || root.hasImage ? root.u(root.N.bodyGap) : 0
+            height: root.hasBody || root.hasImage ? root.u(root.nt.bodyGap) : 0
         }
         Item {
             id: bodyRow
@@ -205,7 +205,7 @@ Item {
                 ms: root.typeMs
                 restartKey: root.typeKey
                 instant: root.instant
-                maxLines: root.preview ? root.N.previewLines : root.N.lines
+                maxLines: root.preview ? root.nt.previewLines : root.nt.lines
                 onDone: root.typedOut()
             }
             Image {
@@ -213,7 +213,7 @@ Item {
                 anchors.right: parent.right
                 y: root.u(4)
                 visible: root.hasImage
-                width: root.u(root.N.imageSize)
+                width: root.u(root.nt.imageSize)
                 height: width
                 source: root.hasImage ? String(root.entry.image) : ""
                 sourceSize.width: Math.round(width * root.dpr)
@@ -224,7 +224,7 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     color: "transparent"
-                    border.width: Tokens.hair(root.N.imageFrame * root.s, root.dpr)
+                    border.width: Tokens.hair(root.nt.imageFrame * root.s, root.dpr)
                     border.color: Tokens.notify.bandText2
                 }
             }
@@ -245,7 +245,7 @@ Item {
 
         Item {
             width: 1
-            height: root.hasProgress ? root.u(root.N.progressGap) : 0
+            height: root.hasProgress ? root.u(root.nt.progressGap) : 0
         }
         Item {
             id: progress
@@ -269,7 +269,7 @@ Item {
                 id: progressNum
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                width: root.u(root.N.progressNumW)
+                width: root.u(root.nt.progressNumW)
                 s: root.s
                 role: "bandBody"
                 font.features: ({ "tnum": 1 })
@@ -286,7 +286,7 @@ Item {
         Row {
             id: buttons
             visible: !root.replying && (root.actions.length > 0 || root.hasReply)
-            spacing: root.u(root.N.actionGap)
+            spacing: root.u(root.nt.actionGap)
 
             Repeater {
                 model: root.actions
@@ -318,7 +318,7 @@ Item {
             id: replyRow
             visible: root.replying
             width: parent.width
-            height: root.u(root.N.replyH)
+            height: root.u(root.nt.replyH)
 
             Rectangle {
                 id: field
@@ -377,7 +377,7 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: root.layout === "top" ? root.u(300) : root.u(10)
         y: root.u(9)
-        width: root.u(root.N.closeSize)
+        width: root.u(root.nt.closeSize)
         height: width
         color: Qt.rgba(0x1E / 255, 0x1D / 255, 0x19 / 255, 0.9)
         border.width: Tokens.hair(2 * root.s, root.dpr)
@@ -400,10 +400,10 @@ Item {
     property real life: 1
     Rectangle {
         visible: root.showLife && !root.preview && !root.instant && root.lifeMs > 0
-        x: root.u(root.N.block)
+        x: root.u(root.nt.block)
         anchors.bottom: parent.bottom
         width: Math.round((root.width - x) * root.life)
-        height: root.u(root.N.lifeH)
+        height: root.u(root.nt.lifeH)
         color: Tokens.notify.bandText2
     }
     NumberAnimation {

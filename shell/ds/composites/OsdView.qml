@@ -17,13 +17,13 @@ Item {
     property bool meter: true
     property string valueText: String(value)
 
-    readonly property var N: Tokens.notify
+    readonly property var nt: Tokens.notify
     function u(v: real): int {
         return Tokens.px(v, s);
     }
 
-    implicitWidth: u(N.osdW)
-    implicitHeight: u(N.osdH)
+    implicitWidth: u(nt.osdW)
+    implicitHeight: u(nt.osdH)
 
     Band {
         anchors.fill: parent
@@ -45,7 +45,7 @@ Item {
         }
         Label {
             anchors.verticalCenter: parent.verticalCenter
-            width: root.u(root.N.osdLabelW)
+            width: root.u(root.nt.osdLabelW)
             s: root.s
             role: "osdLabel"
             text: root.label
@@ -54,7 +54,7 @@ Item {
         Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.meter
-            width: root.u(root.N.osdMeterW)
+            width: root.u(root.nt.osdMeterW)
             height: Tokens.px(Tokens.space.meterH, root.s)
             color: Tokens.notify.bandTrack
             opacity: root.muted ? 0.35 : 1

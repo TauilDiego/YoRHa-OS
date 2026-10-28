@@ -14,24 +14,30 @@ import "../strings"
 PanelWindow {
     id: root
 
+    property var modelData                       // the ShellScreen
+    screen: modelData
     property var osd: null                       // Osd.current, or the last one while fading out
     property bool shown: false
     property real topInset: 0
     readonly property string position: NotifyPrefs.osdPosition
-    readonly property real s: Settings.uiScale * Math.min(1, (screen?.width ?? 1920) / 1920, (screen?.height ?? 1080) / 1080)
-    readonly property real dpr: Tokens.scaleOf(screen?.name ?? "")
-    readonly property var N: Tokens.notify
+    readonly property real s: Settings.uiScale * Math.min(1, (modelData?.width ?? 1920) / 1920, (modelData?.height ?? 1080) / 1080)
+    readonly property real dpr: Tokens.scaleOf(modelData?.name ?? "")
+    readonly property var nt: Tokens.notify
 
     anchors {
         bottom: root.position !== "top"
         top: root.position === "top"
     }
-    margins {
-        bottom: Tokens.px(N.osdBottom, s)
-        top: topInset > 0 ? Math.round(topInset + Tokens.px(N.osdTop, s)) : Settings.barHeight + Tokens.px(N.osdTop, s)
+    readonly property real bottomGap: Tokens.px(nt.osdBottom, s)
+    readonly property real topGap: topInset > 0 ? Math.round(topInset + Tokens.px(nt.osdTop, s)) : Settings.barHeight + Tokens.px(nt.osdTop, s)
+    // qmllint disable missing-property
+    margins {                                    // an opaque value type to qmllint (Quickshell 0.3.2)
+        bottom: root.bottomGap
+        top: root.topGap
     }
-    implicitWidth: view.implicitWidth + Tokens.px(N.shadow, s)
-    implicitHeight: view.implicitHeight + Tokens.px(N.shadow, s)
+    // qmllint enable missing-property
+    implicitWidth: view.implicitWidth + Tokens.px(nt.shadow, s)
+    implicitHeight: view.implicitHeight + Tokens.px(nt.shadow, s)
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "rien-osd"
@@ -39,7 +45,7 @@ PanelWindow {
     color: "transparent"
     mask: Region {}
 
-    readonly property var O: Strings.notify
+    readonly property var ostr: Strings.notify
     OsdView {
         id: view
         s: root.s
@@ -51,10 +57,10 @@ PanelWindow {
         label: {
             const k = root.osd?.kind ?? "volume";
             if (k === "mic")
-                return root.osd?.muted ? root.O.micOff : root.O.micOn;
-            return k === "brightness" ? root.O.brightness : root.O.volume;
+                return root.osd?.muted ? root.ostr.micOff : root.ostr.micOn;
+            return k === "brightness" ? root.ostr.brightness : root.ostr.volume;
         }
-        valueText: root.osd?.kind === "volume" && root.osd?.muted ? root.O.mute
+        valueText: root.osd?.kind === "volume" && root.osd?.muted ? root.ostr.mute
                  : root.osd?.kind === "mic" ? "" : String(root.osd?.value ?? 0)
     }
     NumberAnimation {
@@ -79,9 +85,9 @@ PanelWindow {
 
     function box(): var {
         const w = Math.round(view.width), h = Math.round(view.height);
-        const sw = screen?.width ?? 0, sh = screen?.height ?? 0;
+        const sw = modelData?.width ?? 0, sh = modelData?.height ?? 0;
         const x = Math.round((sw - implicitWidth) / 2);
-        const y = position === "top" ? Math.round(margins.top) : Math.round(sh - margins.bottom - implicitHeight);
+        const y = position === "top" ? Math.round(topGap) : Math.round(sh - bottomGap - implicitHeight);
         return { x: x, y: y, w: w, h: h };
     }
 }

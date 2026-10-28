@@ -14,7 +14,7 @@ Singleton {
 
     readonly property var kept: ["b", "i", "u"]
 
-    function escape(text: string): string {
+    function escapeText(text: string): string {
         return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
 
@@ -25,7 +25,7 @@ Singleton {
         let out = "";
         let last = 0;
         const open = [];
-        const text = t => root.escape(root.decode(t)).replace(/\r\n|\r|\n/g, "<br>");
+        const text = t => root.escapeText(root.decode(t)).replace(/\r\n|\r|\n/g, "<br>");
         let m;
         while ((m = tagRe.exec(src)) !== null) {
             out += text(src.slice(last, m.index));

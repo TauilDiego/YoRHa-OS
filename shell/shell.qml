@@ -333,11 +333,12 @@ ShellRoot {
         interval: Tokens.notify.fade + 100
         onTriggered: if (!Osd.current) shell.osdLoaded = false
     }
+    readonly property var osdItem: osdLoader.item      // a var: qmllint types a LazyLoader's item as QObject
     LazyLoader {
         id: osdLoader
         active: shell.osdLoaded
         OsdWindow {
-            screen: shell.screenNamed(shell.osdLast?.monitor ?? "")
+            modelData: shell.screenNamed(shell.osdLast?.monitor ?? "")
             osd: shell.osdLast
             shown: Osd.current !== null
             topInset: shell.critBottomOn(shell.osdLast?.monitor ?? "")
@@ -413,6 +414,7 @@ ShellRoot {
         interval: 150
         onTriggered: if (!shell.logOpen) shell.logLoaded = false
     }
+    readonly property var logItem: logLoader.item
     LazyLoader {
         id: logLoader
         active: shell.logLoaded
@@ -600,10 +602,12 @@ ShellRoot {
                 d.critical.box = boxes[d.critical.monitor]?.critical ?? null;
             d.more = Object.values(boxes).map(b => b.stack.find(x => x.id === "more")).find(x => x) ?? null;
             d.osd = Osd.dump();
-            if (d.osd && osdLoader.item)
-                d.osd.box = osdLoader.item.box();
+            const osdWin = shell.osdLoaded ? shell.osdItem : null;
+            if (d.osd && osdWin)
+                d.osd.box = osdWin.box();
             d.osd = d.osd ? Object.assign(d.osd, { position: NotifyPrefs.osdPosition }) : null;
-            d.page = shell.logOpen ? (logLoader.item?.dumpState() ?? null) : null;
+            const logWin = shell.logOpen ? shell.logItem : null;
+            d.page = logWin ? logWin.dumpState() : null;
             d.windows = Object.keys(boxes);
             return JSON.stringify(d);
         }

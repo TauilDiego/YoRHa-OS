@@ -27,14 +27,14 @@ Item {
     signal replySent(string text)
     signal replyCancelled()
 
-    readonly property var N: Strings.notify
+    readonly property var str: Strings.notify
     readonly property bool live: entry !== null && entry.alive && !entry.earlier && entry.answered === ""
-    readonly property string status: !entry ? "" : entry.earlier ? N.statusEarlier : entry.answered !== "" ? N.statusAnswered
-                                    : !entry.alive ? N.statusClosed : N.statusWaiting
+    readonly property string status: !entry ? "" : entry.earlier ? str.statusEarlier : entry.answered !== "" ? str.statusAnswered
+                                    : !entry.alive ? str.statusClosed : str.statusWaiting
     readonly property string noteText: note !== "" ? note
-        : !entry ? "" : entry.earlier ? N.earlierNote
-        : entry.answered !== "" ? N.answeredNote.arg(entry.answered === "reply" ? N.reply : (entry.actions.find(a => a.id === entry.answered)?.label ?? entry.answered))
-        : !entry.alive ? N.closedNote : ""
+        : !entry ? "" : entry.earlier ? str.earlierNote
+        : entry.answered !== "" ? str.answeredNote.arg(entry.answered === "reply" ? str.reply : (entry.actions.find(a => a.id === entry.answered)?.label ?? entry.answered))
+        : !entry.alive ? str.closedNote : ""
     readonly property string speaker: NotifyStore.speakerOf(entry)
 
     function u(v: real): int {
@@ -49,7 +49,7 @@ Item {
         anchors.fill: parent
         s: root.s
         mark: true
-        title: root.entry ? root.speaker : root.N.transmission
+        title: root.entry ? root.speaker : root.str.transmission
 
         Column {
             width: parent.width
@@ -63,7 +63,7 @@ Item {
                 font.weight: Font.Medium
                 font.variableAxes: ({ "wght": Font.Medium })
                 wrapMode: Text.Wrap
-                text: root.N.emptyText
+                text: root.str.emptyText
                 color: Tokens.color.mediumGray
             }
 
@@ -94,14 +94,14 @@ Item {
                 columns: 2
                 rowSpacing: root.u(10)
                 columnSpacing: root.u(18)
-                readonly property var rows: root.entry ? [
-                    [root.N.app, root.entry.app || (root.entry.system ? root.speaker : root.N.unknown)],
-                    [root.N.received, Qt.formatDateTime(new Date(Number(root.entry.at)), root.N.dateFormat)],
-                    [root.N.urgency, root.N.urgencyLabels[root.entry.urgency] ?? ""],
-                    [root.N.status, root.status]
+                readonly property var infoRows: root.entry ? [
+                    [root.str.app, root.entry.app || (root.entry.system ? root.speaker : root.str.unknown)],
+                    [root.str.received, Qt.formatDateTime(new Date(Number(root.entry.at)), root.str.dateFormat)],
+                    [root.str.urgency, root.str.urgencyLabels[root.entry.urgency] ?? ""],
+                    [root.str.status, root.status]
                 ] : []
                 Repeater {
-                    model: info.rows.reduce((cells, r) => cells.concat([{ t: r[0], v: false }, { t: r[1], v: true }]), [])
+                    model: info.infoRows.reduce((cells, r) => cells.concat([{ t: r[0], v: false }, { t: r[1], v: true }]), [])
                     Label {
                         required property var modelData
                         width: modelData.v ? info.width - info.columnSpacing - labelMeasure.implicitWidth : implicitWidth
@@ -125,7 +125,7 @@ Item {
                 role: "small"
                 upper: true
                 font.pixelSize: Tokens.px(16, root.s)
-                text: root.N.received
+                text: root.str.received
             }
 
             Label {

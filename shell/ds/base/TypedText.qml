@@ -95,18 +95,29 @@ Item {
         visible: !root.typing
     }
 
-    // While typing: the first characters, and the cursor after them.
+    // While typing: the first characters, and the cursor after them. Text has no
+    // positionToRectangle: the end of the last laid-out line places the cursor.
     Body {
         id: part
         visible: root.typing
         text: TextCut.cut(root.text, Math.floor(root.shown))
+        property real endX: 0
+        property real endY: 0
+        property real endH: 0
+        onLineLaidOut: line => {
+            if (line.isLast) {
+                endX = line.x + line.implicitWidth;
+                endY = line.y;
+                endH = line.height;
+            }
+        }
     }
     Rectangle {
         id: cursor
         visible: root.typing
-        readonly property rect at: part.positionToRectangle(Math.floor(root.shown))
-        x: Math.round(at.x + Tokens.px(1, root.s))
-        y: Math.round(at.y + (at.height - height) / 2)
+        readonly property bool empty: part.text === ""
+        x: Math.round((empty ? 0 : part.endX) + Tokens.px(1, root.s))
+        y: Math.round((empty ? 0 : part.endY) + ((empty ? part.lineHeight : part.endH) - height) / 2)
         width: Math.round(part.font.pixelSize * 0.5)
         height: Math.round(part.font.pixelSize * 1.05)
         color: root.color

@@ -32,7 +32,9 @@ Item {
     property real bottomInset: Tokens.px(Tokens.notify.subtitleBottom, s)
     property int overflow: 0
     property bool instant: false
+    property bool ready: true                    // the window is mapped: rows can appear
 
+    signal appeared(int id)                      // a row is on screen for the first time
     signal clicked(int id, int button)
     signal closeClicked(int id)
     signal actionClicked(int id, string action)
@@ -43,18 +45,18 @@ Item {
     signal typedOut(int id)
     signal overflowClicked()
 
-    readonly property var N: Tokens.notify
+    readonly property var nt: Tokens.notify
     function u(v: real): int {
         return Tokens.px(v, s);
     }
 
     readonly property int bandW: position === "top" ? width
-                                : position === "subtitle" ? Math.min(u(N.subtitleW), width - 2 * u(N.stackRight))
-                                : Math.min(u(N.stackW), width - 2 * u(N.stackRight))
+                                : position === "subtitle" ? Math.min(u(nt.subtitleW), width - 2 * u(nt.stackRight))
+                                : Math.min(u(nt.stackW), width - 2 * u(nt.stackRight))
     readonly property int bandX: position === "top" ? 0
                                 : position === "subtitle" ? Math.round((width - bandW) / 2)
-                                : width - u(N.stackRight) - bandW
-    readonly property int gap: position === "top" ? u(N.topGap) : u(N.stackGap)
+                                : width - u(nt.stackRight) - bandW
+    readonly property int gap: position === "top" ? u(nt.topGap) : u(nt.stackGap)
 
     // --- the delegates, kept by key ------------------------------------------------------------------
     ListModel {
@@ -136,7 +138,7 @@ Item {
                 d.placed = true;
                 y += d.height + gap;
             }
-            more.y = y + (position === "top" ? u(N.stackGap) - gap : 0);
+            more.y = y + (position === "top" ? u(nt.stackGap) - gap : 0);
         }
     }
 
@@ -155,10 +157,25 @@ Item {
             onFoundChanged: if (found) item = found
             Component.onCompleted: {
                 item = found;
+                show();
+            }
+            // Once, as soon as the window is mapped: the sweep in, and the store is told.
+            property bool seen: false
+            function show(): void {
+                if (seen || !root.ready || !item)
+                    return;
+                seen = true;
                 if (!root.instant)
                     enter.start();
                 else
                     reveal.width = Qt.binding(() => row.width);
+                root.appeared(item.id);
+            }
+            Connections {
+                target: root
+                function onReadyChanged(): void {
+                    row.show();
+                }
             }
 
             property bool placed: false
@@ -170,7 +187,7 @@ Item {
             onHeightChanged: Qt.callLater(root.layout)
             Behavior on y {
                 enabled: row.slide
-                NumberAnimation { duration: root.N.sweep; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: root.nt.sweep; easing.type: Easing.OutCubic }
             }
 
             // The sweep in: a clip that opens from the stack's edge (the right one in the corner).
@@ -207,7 +224,7 @@ Item {
                     onReplyOpened: root.replyOpened(row.item.id)
                     onReplySent: text => root.replySent(row.item.id, text)
                     onReplyCancelled: root.replyCancelled(row.item.id)
-                    onTypedOut: if (row.item) root.typedOut(row.item.id)
+                    onTypedOut: if (row.item && row.seen) root.typedOut(row.item.id)
                 }
             }
             NumberAnimation {
@@ -216,7 +233,7 @@ Item {
                 property: "width"
                 from: 0
                 to: row.width
-                duration: root.N.sweep
+                duration: root.nt.sweep
                 easing.type: Easing.OutCubic
                 onFinished: reveal.width = Qt.binding(() => row.width)
             }
@@ -227,7 +244,7 @@ Item {
                 target: row
                 property: "opacity"
                 to: 0
-                duration: root.N.fade
+                duration: root.nt.fade
                 onFinished: {
                     const i = root.indexOfKey(row.key);
                     if (i >= 0)
@@ -246,7 +263,7 @@ Item {
     Item {
         id: more
         visible: root.overflow > 0 && rows.count > 0
-        x: root.position === "top" ? root.width - root.u(root.N.topPad) - width : root.bandX + root.bandW - width
+        x: root.position === "top" ? root.width - root.u(root.nt.topPad) - width : root.bandX + root.bandW - width
         width: moreLabel.implicitWidth + 2 * root.u(14)
         height: moreLabel.implicitHeight + 2 * root.u(8)
 

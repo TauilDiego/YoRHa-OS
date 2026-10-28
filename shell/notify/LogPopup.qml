@@ -11,6 +11,7 @@ PopupWindow {
     id: root
 
     signal closeRequested()
+    readonly property var scr: screen            // read through a var (qmllint: QuickshellScreenInfo)
 
     function dumpState(): var {
         return page.dumpState();
@@ -30,9 +31,9 @@ PopupWindow {
         id: page
         anchors.fill: parent
         s: root.s
-        dpr: Tokens.scaleOf(root.screen?.name ?? "")
+        dpr: Tokens.scaleOf(root.scr?.name ?? "")
         host: "popup"
-        monitor: root.screen?.name ?? ""
+        monitor: root.scr?.name ?? ""
         focus: true
         onCloseRequested: root.closeRequested()
     }

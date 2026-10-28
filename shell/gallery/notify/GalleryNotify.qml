@@ -20,8 +20,8 @@ Rectangle {
     property real s: 1
     property real dpr: 1
 
-    readonly property var G: Strings.gallery
-    readonly property var S: Strings.notify.samples
+    readonly property var gs: Strings.gallery
+    readonly property var samples: Strings.notify.samples
     readonly property real at: new Date(2026, 9, 26, 13, 37).getTime()
     readonly property string avatar: "file://" + Quickshell.shellPath("fixtures/notify/avatar.png")
 
@@ -33,15 +33,15 @@ Rectangle {
                                hasDefault: false, reply: null, image: "", progress: null, at: root.at, alive: true,
                                earlier: false, answered: "" }, f);
     }
-    readonly property var normal: sample(1, { app: S.normal.app, title: S.normal.title, body: S.normal.body })
-    readonly property var actions: sample(2, { app: S.actions.app, title: S.actions.title, body: S.actions.body,
-                                               actions: S.actions.actions.map(a => ({ id: a[0], label: a[1] })) })
-    readonly property var reply: sample(3, { app: S.reply.app, title: S.reply.title, body: S.reply.body,
+    readonly property var normal: sample(1, { app: samples.normal.app, title: samples.normal.title, body: samples.normal.body })
+    readonly property var actions: sample(2, { app: samples.actions.app, title: samples.actions.title, body: samples.actions.body,
+                                               actions: samples.actions.actions.map(a => ({ id: a[0], label: a[1] })) })
+    readonly property var reply: sample(3, { app: samples.reply.app, title: samples.reply.title, body: samples.reply.body,
                                              reply: { label: Strings.notify.reply }, image: root.avatar })
-    readonly property var progress: sample(4, { app: S.progress.app, title: S.progress.title, body: S.progress.body,
-                                                progress: S.progress.value, urgency: "low" })
-    readonly property var flood: sample(5, { app: S.flood.app, title: S.flood.title, body: S.flood.body.arg(5) })
-    readonly property var crit1: sample(6, { app: S.critical.app, title: S.critical.title, body: S.critical.body,
+    readonly property var progress: sample(4, { app: samples.progress.app, title: samples.progress.title, body: samples.progress.body,
+                                                progress: samples.progress.value, urgency: "low" })
+    readonly property var flood: sample(5, { app: samples.flood.app, title: samples.flood.title, body: samples.flood.body.arg(5) })
+    readonly property var crit1: sample(6, { app: samples.critical.app, title: samples.critical.title, body: samples.critical.body,
                                              urgency: "critical", actions: [{ id: "settings", label: "Power settings" }] })
     readonly property var crit2: sample(7, { app: "Disk", title: "Disk almost full", body: "Only 2 GB left on /home.", urgency: "critical" })
 
@@ -51,8 +51,8 @@ Rectangle {
         x: root.u(Tokens.space.pageMarginH)
         y: root.u(Tokens.space.pageMarginV)
         s: root.s
-        title: root.G.title
-        subtitle: root.G.page4Subtitle
+        title: root.gs.title
+        subtitle: root.gs.page4Subtitle
     }
     Rule {
         x: root.u(Tokens.space.pageMarginH)
@@ -86,7 +86,7 @@ Rectangle {
         spacing: root.u(22)
 
         Section {
-            name: root.G.transmission + " · " + root.G.typingHalf
+            name: root.gs.transmission + " · " + root.gs.typingHalf
             Transmission {
                 id: half
                 width: root.u(540)
@@ -101,14 +101,14 @@ Rectangle {
             }
         }
         Section {
-            name: root.G.withActions
+            name: root.gs.withActions
             Tx {
                 entry: root.actions
                 speaker: root.actions.app
             }
         }
         Section {
-            name: root.G.withReply
+            name: root.gs.withReply
             Tx {
                 entry: root.reply
                 speaker: root.reply.app
@@ -124,14 +124,14 @@ Rectangle {
         spacing: root.u(22)
 
         Section {
-            name: root.G.withProgress
+            name: root.gs.withProgress
             Tx {
                 entry: root.progress
                 speaker: root.progress.app
             }
         }
         Section {
-            name: root.G.grouped
+            name: root.gs.grouped
             Tx {
                 entry: root.flood
                 speaker: root.flood.app
@@ -139,7 +139,7 @@ Rectangle {
             }
         }
         Section {
-            name: root.G.criticalBand + " · 1/2"
+            name: root.gs.criticalBand + " · 1/2"
             Item {
                 width: root.u(540)
                 height: critMini.height
@@ -158,7 +158,7 @@ Rectangle {
             }
         }
         Section {
-            name: root.G.actionButton + " · " + root.G.tags
+            name: root.gs.actionButton + " · " + root.gs.tags
             Rectangle {
                 width: root.u(540)
                 height: root.u(64)
@@ -184,7 +184,7 @@ Rectangle {
         spacing: root.u(20)
 
         Section {
-            name: root.G.band + " · " + root.G.overPaper + " / " + root.G.overDark
+            name: root.gs.band + " · " + root.gs.overPaper + " / " + root.gs.overDark
             Row {
                 spacing: root.u(12)
                 Band {
@@ -212,7 +212,7 @@ Rectangle {
             }
         }
         Section {
-            name: root.G.osd
+            name: root.gs.osd
             Column {
                 spacing: root.u(10)
                 OsdView { s: root.s * 0.9; dpr: root.dpr; label: Strings.notify.volume; value: 66 }
@@ -222,7 +222,7 @@ Rectangle {
             }
         }
         Section {
-            name: root.G.positions
+            name: root.gs.positions
             Row {
                 spacing: root.u(10)
                 Repeater {
@@ -256,7 +256,7 @@ Rectangle {
             }
         }
         Section {
-            name: root.G.counter
+            name: root.gs.counter
             Row {
                 spacing: root.u(12)
                 Rectangle {
