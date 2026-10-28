@@ -1,4 +1,5 @@
 pragma Singleton
+pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
@@ -316,6 +317,24 @@ Singleton {
     Component.onCompleted: {
         monitorQuery.running = true;
         activeWindowQuery.running = true;
+    }
+
+    // A scale change alone (`hyprctl eval 'hl.monitor(…)'`, as `lab/profile` does) raises no event
+    // that reaches onRawEvent, so the scales went stale until the next monitor query. It does change
+    // the screen's logical size or pixel ratio: re-read the monitors then.
+    Variants {
+        model: Quickshell.screens
+
+        QtObject {
+            required property var modelData
+            readonly property string geometry: `${modelData.width}x${modelData.height}@${modelData.devicePixelRatio}`
+            onGeometryChanged: scaleQuery.restart()
+        }
+    }
+    Timer {
+        id: scaleQuery
+        interval: 100
+        onTriggered: monitorQuery.running = true
     }
 
     // Quickshell updates its objects while handling the event, so bump after it.

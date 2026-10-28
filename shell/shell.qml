@@ -1,4 +1,10 @@
 // rien-OS shell: YoRHa design system + HUD (spec 001).
+// Launch it with QT_LOGGING_RULES=qt.qpa.wayland.textinput.warning=false. That silences one Qt
+// 6.12.0 warning and nothing else: every newly focused pop-up logs "qt.qpa.wayland.textinput: …
+// disableSurface … but 0x0 is focused" (QWaylandInputContext disables text input on a surface
+// that never enabled it), an upstream bug already fixed in Qt dev. Drop the rule once Arch ships
+// a Qt with the fix. It has to be in the environment qs starts with: `//@ pragma Env` sets it too
+// late for Quickshell 0.3.2's logger (tried in the lab VM, 2026-10-27).
 pragma ComponentBehavior: Bound
 
 import QtQuick

@@ -10,3 +10,4 @@ singleton WallpaperStore 1.0 WallpaperStore.qml
 singleton SettingsModel 1.0 SettingsModel.qml
 singleton Apps 1.0 Apps.qml
 singleton Session 1.0 Session.qml
+singleton SettingsState 1.0 SettingsState.qml

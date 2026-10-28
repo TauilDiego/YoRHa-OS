@@ -205,7 +205,12 @@ dependentes.
   diz o que fazer ("Turn on Wi-Fi first.", "Turn on Bluetooth first.").
 - **FR-018**: Os valores MUST valer só em memória durante a sessão do shell: continuam ao fechar e
   reabrir; voltam aos dos dados de teste quando o shell reinicia. **Nada** mexe no sistema nem
-  grava arquivo.
+  grava arquivo. **Revisto por decisão do dono de 2026-10-27 ("salvar sempre", spec 004, emendas
+  (2) e (3), FR-030 e FR-031):** os valores mudados no popup são salvos em
+  `$XDG_STATE_HOME/rien-os/settings.json` e continuam depois de reiniciar o shell; o `settings
+  reset` limpa o estado; com fixtures nada é lido nem escrito
+  (`specs/004-wallpaper-system/contracts/settings-state.md`). A opção Appearance › Bar contrast é a
+  primeira ligada de verdade: troca a barra do topo na hora.
 
 **Dados, textos e testes**
 

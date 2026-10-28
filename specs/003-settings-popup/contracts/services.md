@@ -27,10 +27,10 @@ mesmas regras: a UI lê dados só dele, e uma leitura que falha nunca lança err
 | `dumpValues()` | objeto | `{ catId: { optId: valor de exibição } }` pro `settings dump` |
 | `dimmedIds()` | lista | As opções apagadas, como `"cat.opt"`, pro `settings dump` |
 
-**Domínio `settings` das fixtures:** é novo, e o `fixtures.schema.json` da 001 (que tem
-`additionalProperties: false`) ainda não o lista. No merge na principal, ele ganha
-`"settings": { "type": "string", "description": "Caminho de outro catálogo de configurações (spec 003)" }`.
+**Domínio `settings` das fixtures:** listado no `fixtures.schema.json` da 001 desde o acabamento da
+004 (2026-10-27), junto com o domínio `wallpaper` da 004.
 
 **Regras:**
-- As mudanças só valem em memória (FR-018). Nada é gravado.
+- ~~As mudanças só valem em memória (FR-018). Nada é gravado.~~ Revisto em 2026-10-27 ("salvar
+  sempre"): as mudanças são salvas no estado (`specs/004-wallpaper-system/contracts/settings-state.md`).
 - Catálogo inválido: `categories` vazio, `error` preenchido, um `console.warn` com o motivo.

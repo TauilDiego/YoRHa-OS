@@ -62,6 +62,7 @@ imagem na tela (0–1, três casas), ou `null` quando é uma cena ou a imagem ai
 {
   "tone": "light",
   "toneMix": 1,
+  "contrast": "normal",
   "texts": [
     { "role": "time", "text": "13:37:00", "x": 1830, "y": 9, "w": 80, "h": 22, "color": "#d7d1b3ff", "plate": "" },
     { "role": "tab", "text": "01", "x": 46, "y": 3, "w": 67, "h": 33, "color": "#d7d1b3ff", "plate": "#d7d1b329" }
@@ -71,6 +72,7 @@ imagem na tela (0–1, três casas), ou `null` quando é uma cena ou a imagem ai
 
 - `toneMix`: a mistura que a barra mostra agora, de 0 (papel) a 1 (claro), com três casas.
 - `tone`: `"light"` com `toneMix` ≥ 0,5, senão `"paper"`.
+- `contrast` (emenda (2)): `"normal"` ou `"high"`, o Bar contrast em vigor (`Settings.barContrast`).
 - `texts`: os textos visíveis da barra (abas, título, rótulos e valores das leituras, data, hora),
   com a caixa em px lógicos da janela, a cor do texto (`#rrggbbaa`) e, nas abas, a cor da placa
   embaixo do texto (vazia nos outros). Servem pra medir o contraste nos pixels (SC-011).

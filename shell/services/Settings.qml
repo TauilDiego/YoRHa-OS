@@ -16,7 +16,7 @@ Singleton {
     // Reduced motion: fades, the selector blink and wallpaper transitions become instant.
     readonly property bool reduceMotion: typeof merged.reduceMotion === "boolean" ? merged.reduceMotion : defaults.reduceMotion
 
-    readonly property var defaults: parse(defaultsFile.text(), "defaults.json") ?? ({ uiScale: 1.0, barHeight: 68, vignette: true, wallpaperMotion: true, reduceMotion: false, terminal: ["kitty"] })
+    readonly property var defaults: parse(defaultsFile.text(), "defaults.json") ?? ({ uiScale: 1.0, barHeight: 68, vignette: true, wallpaperMotion: true, reduceMotion: false, barContrast: "normal", terminal: ["kitty"] })
     readonly property var user: userFile.loaded ? (parse(userFile.text(), userFile.path) ?? ({})) : ({})
     readonly property var merged: Object.assign({}, defaults, user)
 
@@ -89,6 +89,40 @@ Singleton {
         return "";
     }
     // --- end spec 004 ----------------------------------------------------------------------------
+
+    // --- 004 acabamento: the top bar's contrast ---------------------------------------------------
+    // "normal" (the approved palettes) or "high" (a darker ink and a paper plate behind the texts
+    // over paper, a heavier clock), from shell.json / defaults.json. The settings pop-up
+    // (Appearance › Bar contrast) changes it live and saves it in SettingsState ("shell.barContrast"),
+    // which wins over the config; its reset goes back to the configured value.
+    readonly property var barContrastLevels: ["normal", "high"]
+    readonly property string barContrastSaved: String(SettingsState.get("shell.barContrast", ""))
+    readonly property string barContrastConfigured: {
+        const v = merged.barContrast;
+        if (barContrastLevels.includes(v))
+            return v;
+        if (v !== undefined)
+            console.warn(`settings: barContrast must be one of ${barContrastLevels.join(", ")}, using the default`);
+        return barContrastLevels.includes(defaults.barContrast) ? defaults.barContrast : "normal";
+    }
+    readonly property string barContrast: barContrastLevels.includes(barContrastSaved) ? barContrastSaved : barContrastConfigured
+
+    // The shell settings the settings pop-up changes live: an option with `"setting": key` in the
+    // catalog is a choice over these values, in this order.
+    function levelsOf(key: string): var {
+        return key === "barContrast" ? barContrastLevels : [];
+    }
+    function levelOf(key: string): string {
+        return key === "barContrast" ? barContrast : "";
+    }
+    // Save `level` for `key` (SettingsState, "shell.<key>"); "" goes back to shell.json / defaults.
+    function setLevel(key: string, level: string): void {
+        if (levelsOf(key).includes(level))
+            SettingsState.set("shell." + key, level);
+        else
+            SettingsState.remove("shell." + key);
+    }
+    // --- end 004 acabamento ------------------------------------------------------------------------
 
     // --- spec 007: the terminal that runs terminal apps (APPS, research R4) -----------------------
     // An argv prefix: a terminal app opens as [...terminal, "-e", ...its command]. A non-empty list

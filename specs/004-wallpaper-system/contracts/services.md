@@ -31,6 +31,9 @@ A UI lê o papel de parede **só** por estes serviços. As entidades estão em
 | Serviço | Acréscimo | Fonte |
 |---|---|---|
 | `Settings` | `reduceMotion`, `wallpaperFolder`, `wallpaperTransition`, `camouflage` | `defaults.json` + `shell.json` (data-model) |
+| `Settings` (emendas (2) e (3)) | `barContrast` (`"normal"` / `"high"`), `levelsOf(key)`, `levelOf(key)`, `setLevel(key, level)` (`""` volta pra config) | `SettingsState` (`shell.<key>`) > `shell.json` > `defaults.json` |
+| `SettingsModel` (emendas (2) e (3)) | uma opção com `"setting": key` é uma escolha ligada a uma configuração do shell; as outras são salvas em `settings.<cat>.<opt>` (a menos que `"persist": false`); `reset()` limpa o estado | `settings-default.json` + `SettingsState` |
+| `SettingsState` (novo, emenda (3)) | `values`, `persisted`, `has`, `get`, `set`, `remove`, `clear(prefix)` | `$XDG_STATE_HOME/rien-os/settings.json` (`contracts/settings-state.md`) |
 | `Compositor` | `focusedMonitor` (nome da saída) | campo `focused` do `hyprctl monitors -j` que já é lido para as escalas; atualizado nos mesmos eventos |
 | `Fixtures` | domínio `wallpaper` | data-model, "Fixture" |
 
