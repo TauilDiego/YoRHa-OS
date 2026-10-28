@@ -193,7 +193,7 @@ congelado.**
 - [ ] T028 [P] [US2] `shell/ds/base/Tag.qml` (`CRITICAL` sobre `alert`, `NEW` com contorno) e as urgências na `Transmission` (bloco `medium-gray` / `light-yellow` / `alert`; `Tag CRITICAL` ao lado de quem fala). Os únicos usos do `alert` são os da FR-010 — **Frente A**
 - [ ] T029 [P] [US2] `shell/ds/composites/CriticalBand.qml`: a largura do monitor, a coluna de 1080 centrada, arcos, até 3 linhas de corpo, ações embaixo, `1/N` com ◂ ▸ (`pageStepped`) e ×, altura mínima 230. Na galeria, com `1/2` — **Frente A**
 - [ ] T030 [P] [US2] `NotifyStore`: as críticas vão pra `critical` (fora do limite da pilha, a mais nova primeiro, `page`), nunca expiram; os tempos `low`/`normal` da FR-007; as críticas passam por cima de `held` (US6) — **Frente B**
-- [ ] T031 [US2] `NotifyLayer`: a `CriticalBand` logo abaixo da barra, e a pilha com `topInset` abaixo dela enquanto ela está na tela; `critical.box` no `dump`. `lab/check-008` bloco `urgency` (o `dump` a cada segundo por 65 s; screenshot da faixa)
+- [x] T031 [US2] `NotifyLayer`: a `CriticalBand` logo abaixo da barra, e a pilha com `topInset` abaixo dela enquanto ela está na tela; `critical.box` no `dump`. `lab/check-008` bloco `urgency` (o `dump` a cada segundo por 65 s; screenshot da faixa) — **feito** (`lab/perf` 2026-10-28T170342, `teste-b`, 4 núcleos): `lab/check-008 --only urgency` 6/0 (`out/check-008-1080-20261028-170435`): baixa saiu 3984 ms e normal 5960 ms depois de digitadas, a crítica ainda na faixa em 65 s, a pilha abaixo da faixa. T028–T030 ainda sem marcar: falta conferir as cores do bloco por urgência, a paginação ◂ ▸ por clique e a crítica com `held` (US6)
 
 ---
 
