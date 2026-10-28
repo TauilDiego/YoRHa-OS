@@ -203,6 +203,27 @@ medido e a área vazia contra a cena sem a barra; sem fixtures, rajadas da camuf
 
 ---
 
+<!-- acabamento (004-acabamento): início -->
+## Phase 10: Acabamento (decisões do dono, 2026-10-27)
+
+> Branch `004-acabamento` (sai da `004-wallpaper-system` em `422cca7`), VM `teste-a` (2 núcleos, 4 GB),
+> `lab/perf --kind 004-acab`. Emenda (2) da spec: FR-024, FR-028, FR-029, FR-030 e SC-011.
+
+- [x] T060 Emenda (2) da spec antes do código: Bar contrast (FR-030), paleta High e `ink2` clara (FR-028), `contrast` no `hud dump` (FR-029), SC-011 revisto, aviso do Qt silenciado (FR-024); contratos, data-model; nota na FR-018 da 003; `setting` no `settings.schema.json` da 003
+- [x] T061 Bar contrast: `barContrast` no `defaults.json` e no `Settings` (com a troca da sessão); opção `bar-contrast` em Appearance, ligada pelo `SettingsModel` (`"setting"`); `Tokens.hudPaperHigh`, `Tokens.hudColorAt`; `high` em `HeaderButton`, `TabBar` e `Hud` (hora em Bold); `ink2` do tom claro 175,172,161
+- [x] T062 Aviso `qt.qpa.wayland.textinput`: o `//@ pragma Env QT_LOGGING_RULES=…` no `shell.qml` **não funciona** no Quickshell 0.3.2 (conferido na VM: o aviso continua, nas duas sintaxes; com a variável no ambiente antes do `qs`, some). A regra foi pro lançador do lab (`guest/nier-ui-run`), e o `shell.qml` diz como lançar e quando tirar
+- [x] T063 `lab/check-003` e `lab/check-004` sem contar o aviso à parte (0 WARN); bloco US6 do `check-004` em Normal e High, com a troca por teclas reais no popup, o `settings reset` e o `barContrast` do `shell.json`
+- [x] T064 Sobras: domínios `settings` e `wallpaper` no `fixtures.schema.json` da 001; o `Compositor` relê as escalas quando a geometria de uma tela muda (o HUD ficava com a escala velha depois do `lab/profile`)
+- [x] T065 Validar na `teste-a` (`lab/perf` 2026-10-27T204902): `check-u1` 15/15, `check-003 --profile 1080` 25/25, `check-004` 53/2. Os 2 FAIL eram o SC-011 do High com a tinta principal (hora 2,57, abas 3,78, meio-tom 1,60), levados ao dono, que escolheu a P2 (T067)
+- [x] T066 `docs/design-system.md` (§8, "A barra sobre o fundo") e `PLAN.md` (fase U5a, boot e login; decisões de 2026-10-27)
+- [x] T067 High = P2 (emenda (3)): `Tokens.hudHighInk` `#2E2C27` em `ink`, `ink2` e `sel` do `hudPaperHigh`; `Tokens.hudHighPlate` (`#C9C5AB` a 55%) atrás do título, de cada leitura (até o fim dos dígitos), da data e da hora, com 3 × 2 px de folga, sumindo com o tom claro; `hud dump` com a placa de cada texto
+- [x] T068 "Salvar sempre" (emenda (3), FR-031): `services/SettingsState.qml` (`$XDG_STATE_HOME/rien-os/settings.json`, leitura no início, escrita atômica 250 ms depois, nada com fixtures); `Settings.setLevel` salva `shell.barContrast`; o `SettingsModel` salva `settings.<cat>.<opt>` (marca `persist` no catálogo) e o `reset()` limpa; contrato em `contracts/settings-state.md`; FR-018 da 003 revista
+- [x] T069 `lab/check-004`: bloco de configurações salvas (SC-014) sem fixtures: teclas reais, reinício, arquivo só em `~/.local/state/rien-os/`, reset também depois de reiniciar
+- [x] T070 Validar na `teste-a` (`lab/perf` 2026-10-27T215859, `--kind 004-acab`): `check-u1` **15/15** e `check-003 --profile 1080` **25/25** (`out/004-acab2-check-u1`, `out/004-acab2-check-003`); `check-004` **58 PASS / 0 FAIL** (`out/004-acab2-check-004-final`), log 0 erros e 0 avisos em 9 inícios do `qs`, `qmllint` limpo. SC-011 do High: pior p05 6,04 nas cenas de papel, 5,03 no meio-tom, 4,77 (1080) e 5,08 (hidpi) no tom claro; SC-012 0 níveis nos dois modos. A primeira rodada achou a placa das leituras passando do último dígito (SC-012 49 níveis): corrigido. Imagem `out/004-contraste-revisao.png`
+<!-- acabamento (004-acabamento): fim -->
+
+---
+
 ## Dependencies & Execution Order
 
 - **Setup (T001–T007):** o T001 vem primeiro e pode parar tudo (sem shader na VM, sem camuflagem).

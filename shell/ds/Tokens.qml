@@ -252,7 +252,8 @@ Singleton {
     }
     readonly property HudTone hudLight: HudTone {
         ink: Qt.rgba(215 / 255, 209 / 255, 179 / 255, 1)
-        ink2: Qt.rgba(150 / 255, 148 / 255, 140 / 255, 1)
+        // 175,172,161 (was 150,148,140): a dimmed tab keeps 4.5:1 on its plate (004 acabamento)
+        ink2: Qt.rgba(175 / 255, 172 / 255, 161 / 255, 1)
         rest: Qt.rgba(215 / 255, 209 / 255, 179 / 255, 0.16)
         sel: Qt.rgba(215 / 255, 209 / 255, 179 / 255, 1)
         selInk: Qt.rgba(78 / 255, 75 / 255, 66 / 255, 1)
@@ -260,6 +261,22 @@ Singleton {
         fill: Qt.rgba(215 / 255, 209 / 255, 179 / 255, 1)
         rule: Qt.rgba(150 / 255, 148 / 255, 140 / 255, 0.75)
         alert: "#C0574A"
+    }
+    // "Bar contrast: High" (System Settings › Appearance; the owner's P2, 2026-10-27): over paper,
+    // every text of the bar (secondary ones too) and the selected tab's plate in a darker ink, and a
+    // paper plate (hudHighPlate) behind the texts that have no tab plate. The light tone is the same.
+    readonly property color hudHighInk: "#2E2C27"
+    readonly property color hudHighPlate: Qt.rgba(0xC9 / 255, 0xC5 / 255, 0xAB / 255, 0.55)
+    readonly property HudTone hudPaperHigh: HudTone {
+        ink: root.hudHighInk
+        ink2: root.hudHighInk
+        rest: root.color.lightGray
+        sel: root.hudHighInk
+        selInk: root.color.lightYellow
+        track: root.color.lightGray
+        fill: root.color.darkGray
+        rule: root.color.darkGray
+        alert: root.color.alert
     }
     // Below this mean luma (0–1) of a picture's top band, the bar takes the light tone.
     readonly property real hudLightBelow: 0.45
@@ -276,6 +293,10 @@ Singleton {
     // The bar's color for one role (a HudTone property name) at tone t.
     function hudColor(role: string, t: real): color {
         return toneMix(hudPaper[role], hudLight[role], t);
+    }
+    // The same with the bar's contrast: `high` takes the paper end from hudPaperHigh.
+    function hudColorAt(role: string, t: real, high: bool): color {
+        return toneMix((high ? hudPaperHigh : hudPaper)[role], hudLight[role], t);
     }
     // --- end spec 004 US6 --------------------------------------------------------------------------
 }

@@ -11,11 +11,13 @@ import "../base"
 // The parent owns the states: map `hoveredIndex` into the model to show the hover.
 // The rule spans the bar's whole width; the tabs start at the left.
 // `tone` (spec 004 US6): the top bar's tone, 0 paper → 1 light, handed to strips, tabs and rule.
+// `high` (004 acabamento): the bar's High contrast, handed to the tabs.
 Item {
     id: root
 
     property real s: 1
     property real tone: 0
+    property bool high: false
     property var model: []
     property real ruleGap: 10                    // game px between the tabs and the rule
     property real ruleScale: s                   // scale of the rule's dotted pattern
@@ -86,6 +88,7 @@ Item {
 
                 s: root.s
                 tone: root.tone
+                high: root.high
                 text: entry.label ?? ""
                 state: entry.state ?? "normal"
                 reachRule: true

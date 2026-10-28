@@ -141,3 +141,41 @@ cenário do mouse.
 3. **O `Monitor` voltar pra "All monitors" a cada abertura:** confirmar, ou lembrar a última escolha.
 4. **Merge** da `004-seletor` com a branch da barra transparente (as duas mexem em `Tokens.qml`,
    `Strings.qml` e `WallpaperTransition.qml`, em blocos marcados).
+
+## Acabamento (2026-10-27, decisões do dono)
+
+Branch `004-acabamento`, VM `teste-a` (2 núcleos, 4 GB), `lab/perf` `2026-10-27T204902`
+(`--kind 004-acab`). Tarefas T060–T066.
+
+- **Bar contrast** (Appearance, Normal / High, ao vivo): feito e testado por teclas reais nos dois
+  perfis; `barContrast` no `defaults.json`/`shell.json`; o popup vale pra sessão e não grava.
+- **`ink2` do tom claro** `#AFACA1`: o tom claro passa no SC-011 nos dois modos (pior 4,77 em 1080 e
+  5,08 em hidpi; antes 3,57).
+- **High no tom papel não chega a 4,5:1** com a tinta principal: hora 2,57 (vinheta do canto), abas
+  3,78 (a tinta `#4E4B42` sobre a placa `#B1AB93` não passa disso), imagem de meio-tom 1,60. Simulado
+  nos mesmos pixels (sem rodar a UI):
+  - P1, tinta High `#22201C`: cenas e imagens claras ≥ 4,78; meio-tom 2,98;
+  - P2, tinta High `#2E2C27` e uma placa de papel (`#C9C5AB` a 55%) atrás dos textos da barra, só no
+    High e só no tom papel: pior 5,04, todos passam;
+  - escolher o tom pelo maior contraste não resolve o meio-tom (2,38 no tom claro).
+  **Decisão do dono.** Até lá o `check-004` fica com 2 FAIL (o SC-011 do High, 1080 e hidpi).
+- **Aviso `qt.qpa.wayland.textinput`:** o `//@ pragma Env` não funciona no Quickshell 0.3.2 (o aviso
+  continua; conferido na VM). A regra `QT_LOGGING_RULES` foi pro ambiente em que o `qs` inicia
+  (`guest/nier-ui-run` no lab). Log com 0 avisos nos três roteiros. O lançador do produto (fase de
+  sistema) vai precisar da mesma variável.
+- **Sobras:** domínios `settings` e `wallpaper` no `fixtures.schema.json` da 001; o HUD relê a
+  escala sozinho depois do `lab/profile`.
+- **Imagem de revisão:** `~/.local/share/nier-lab/out/004-contraste-revisao.png`.
+
+### Depois das decisões do dono (P2 e "salvar sempre")
+
+`lab/perf` `2026-10-27T215859`, VM `teste-a` (2 núcleos, 4 GB). Tarefas T067–T070.
+
+- **High = P2:** tinta `#2E2C27` e placa de papel a 55% atrás dos textos, só no tom papel. SC-011
+  passa no High nos 8 fundos, em 1080 e hidpi: 6,04 nas cenas, 5,03 no meio-tom, ≥ 4,77 no tom
+  claro. SC-012 continua em 0 níveis. O Normal não mudou.
+- **Salvar sempre:** `SettingsState` guarda os valores do popup em
+  `$XDG_STATE_HOME/rien-os/settings.json`, por cima da config; o `settings reset` limpa; fixtures
+  não leem nem escrevem. Contrato pra 007 e 008: `contracts/settings-state.md`.
+- **Roteiros:** `check-u1` 15/15, `check-003 --profile 1080` 25/25, `check-004` 58/0; log 0 avisos;
+  `qmllint` limpo.
