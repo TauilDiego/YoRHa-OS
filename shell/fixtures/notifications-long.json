@@ -1,0 +1,937 @@
+{
+  "clock": "2026-10-26T13:37:00",
+  "cpu": 23,
+  "mem": 41,
+  "volume": {
+    "percent": 64,
+    "muted": false
+  },
+  "battery": {
+    "percent": 87,
+    "charging": false
+  },
+  "workspaces": {
+    "existing": [
+      1,
+      2,
+      3
+    ],
+    "focused": 2
+  },
+  "activeWindow": "kitty — ~/projetos",
+  "wallpaper": {
+    "folder": "fixtures/wallpapers",
+    "all": "scene:menu",
+    "monitors": {},
+    "transition": {
+      "kind": "camouflage",
+      "cell": 24,
+      "trail": 2600,
+      "glitch": 2
+    }
+  },
+  "notifications": {
+    "server": true,
+    "log": [
+      {
+        "id": -100,
+        "app": "A build server with a remarkably long application name",
+        "title": "The nightly build finished with warnings in three packages and one slow test",
+        "body": "Packages: quickshell, hyprland, rien-shell. The slow test was settings/persist, at 4.2 s against 1.1 s yesterday. Nothing failed, but the warnings repeat the same deprecation notice about the old layer-shell namespace, which the next release removes. The full log is in ~/builds/nightly.log, and a summary was mailed to you. Run the build again with every step shown to see where the time goes; the cache was cold this morning, so part of the slowness is expected. Tomorrow's run starts at 03:00 and should be back to its usual eleven minutes. If it is not, the report from that run will say which st",
+        "at": "2026-10-26T13:36:00"
+      },
+      {
+        "id": -99,
+        "app": "Mail",
+        "title": "Markup",
+        "body": "<b>bold</b> <i>italic</i> <u>under</u> <a href=\"https://example.org\">a link</a> <img src=\"x.png\"/> <script>alert(1)</script> &amp; 5 < 6",
+        "at": "2026-10-26T13:35:00"
+      },
+      {
+        "id": -98,
+        "app": "Downloads",
+        "title": "archlinux.iso",
+        "body": "Downloading…",
+        "progress": 40,
+        "at": "2026-10-26T13:34:00"
+      },
+      {
+        "id": -97,
+        "app": "",
+        "title": "No app name",
+        "body": "Sent without an application name.",
+        "at": "2026-10-26T13:33:00"
+      },
+      {
+        "id": -96,
+        "app": "Notes",
+        "title": "Only a title",
+        "body": "",
+        "at": "2026-10-26T13:32:00"
+      },
+      {
+        "id": -95,
+        "app": "script.sh",
+        "title": "Step 95 of 100",
+        "body": "Job 95 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:31:59"
+      },
+      {
+        "id": -94,
+        "app": "script.sh",
+        "title": "Step 94 of 100",
+        "body": "Job 94 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:31:58"
+      },
+      {
+        "id": -93,
+        "app": "script.sh",
+        "title": "Step 93 of 100",
+        "body": "Job 93 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:31:57"
+      },
+      {
+        "id": -92,
+        "app": "script.sh",
+        "title": "Step 92 of 100",
+        "body": "Job 92 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:31:56"
+      },
+      {
+        "id": -91,
+        "app": "script.sh",
+        "title": "Step 91 of 100",
+        "body": "Job 91 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:30:55"
+      },
+      {
+        "id": -90,
+        "app": "script.sh",
+        "title": "Step 90 of 100",
+        "body": "Job 90 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:30:54"
+      },
+      {
+        "id": -89,
+        "app": "script.sh",
+        "title": "Step 89 of 100",
+        "body": "Job 89 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:30:53"
+      },
+      {
+        "id": -88,
+        "app": "script.sh",
+        "title": "Step 88 of 100",
+        "body": "Job 88 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:30:52"
+      },
+      {
+        "id": -87,
+        "app": "script.sh",
+        "title": "Step 87 of 100",
+        "body": "Job 87 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:29:51"
+      },
+      {
+        "id": -86,
+        "app": "script.sh",
+        "title": "Step 86 of 100",
+        "body": "Job 86 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:29:50"
+      },
+      {
+        "id": -85,
+        "app": "script.sh",
+        "title": "Step 85 of 100",
+        "body": "Job 85 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:29:49"
+      },
+      {
+        "id": -84,
+        "app": "script.sh",
+        "title": "Step 84 of 100",
+        "body": "Job 84 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:29:48"
+      },
+      {
+        "id": -83,
+        "app": "script.sh",
+        "title": "Step 83 of 100",
+        "body": "Job 83 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:28:47"
+      },
+      {
+        "id": -82,
+        "app": "script.sh",
+        "title": "Step 82 of 100",
+        "body": "Job 82 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:28:46"
+      },
+      {
+        "id": -81,
+        "app": "script.sh",
+        "title": "Step 81 of 100",
+        "body": "Job 81 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:28:45"
+      },
+      {
+        "id": -80,
+        "app": "script.sh",
+        "title": "Step 80 of 100",
+        "body": "Job 80 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:28:44"
+      },
+      {
+        "id": -79,
+        "app": "script.sh",
+        "title": "Step 79 of 100",
+        "body": "Job 79 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:27:43"
+      },
+      {
+        "id": -78,
+        "app": "script.sh",
+        "title": "Step 78 of 100",
+        "body": "Job 78 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:27:42"
+      },
+      {
+        "id": -77,
+        "app": "script.sh",
+        "title": "Step 77 of 100",
+        "body": "Job 77 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:27:41"
+      },
+      {
+        "id": -76,
+        "app": "script.sh",
+        "title": "Step 76 of 100",
+        "body": "Job 76 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:27:40"
+      },
+      {
+        "id": -75,
+        "app": "script.sh",
+        "title": "Step 75 of 100",
+        "body": "Job 75 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:26:39"
+      },
+      {
+        "id": -74,
+        "app": "script.sh",
+        "title": "Step 74 of 100",
+        "body": "Job 74 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:26:38"
+      },
+      {
+        "id": -73,
+        "app": "script.sh",
+        "title": "Step 73 of 100",
+        "body": "Job 73 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:26:37"
+      },
+      {
+        "id": -72,
+        "app": "script.sh",
+        "title": "Step 72 of 100",
+        "body": "Job 72 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:26:36"
+      },
+      {
+        "id": -71,
+        "app": "script.sh",
+        "title": "Step 71 of 100",
+        "body": "Job 71 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:25:35"
+      },
+      {
+        "id": -70,
+        "app": "script.sh",
+        "title": "Step 70 of 100",
+        "body": "Job 70 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:25:34"
+      },
+      {
+        "id": -69,
+        "app": "script.sh",
+        "title": "Step 69 of 100",
+        "body": "Job 69 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:25:33"
+      },
+      {
+        "id": -68,
+        "app": "script.sh",
+        "title": "Step 68 of 100",
+        "body": "Job 68 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:25:32"
+      },
+      {
+        "id": -67,
+        "app": "script.sh",
+        "title": "Step 67 of 100",
+        "body": "Job 67 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:24:31"
+      },
+      {
+        "id": -66,
+        "app": "script.sh",
+        "title": "Step 66 of 100",
+        "body": "Job 66 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:24:30"
+      },
+      {
+        "id": -65,
+        "app": "script.sh",
+        "title": "Step 65 of 100",
+        "body": "Job 65 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:24:29"
+      },
+      {
+        "id": -64,
+        "app": "script.sh",
+        "title": "Step 64 of 100",
+        "body": "Job 64 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:24:28"
+      },
+      {
+        "id": -63,
+        "app": "script.sh",
+        "title": "Step 63 of 100",
+        "body": "Job 63 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:23:27"
+      },
+      {
+        "id": -62,
+        "app": "script.sh",
+        "title": "Step 62 of 100",
+        "body": "Job 62 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:23:26"
+      },
+      {
+        "id": -61,
+        "app": "script.sh",
+        "title": "Step 61 of 100",
+        "body": "Job 61 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:23:25"
+      },
+      {
+        "id": -60,
+        "app": "script.sh",
+        "title": "Step 60 of 100",
+        "body": "Job 60 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:23:24"
+      },
+      {
+        "id": -59,
+        "app": "script.sh",
+        "title": "Step 59 of 100",
+        "body": "Job 59 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:22:23"
+      },
+      {
+        "id": -58,
+        "app": "script.sh",
+        "title": "Step 58 of 100",
+        "body": "Job 58 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:22:22"
+      },
+      {
+        "id": -57,
+        "app": "script.sh",
+        "title": "Step 57 of 100",
+        "body": "Job 57 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:22:21"
+      },
+      {
+        "id": -56,
+        "app": "script.sh",
+        "title": "Step 56 of 100",
+        "body": "Job 56 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:22:20"
+      },
+      {
+        "id": -55,
+        "app": "script.sh",
+        "title": "Step 55 of 100",
+        "body": "Job 55 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:21:19"
+      },
+      {
+        "id": -54,
+        "app": "script.sh",
+        "title": "Step 54 of 100",
+        "body": "Job 54 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:21:18"
+      },
+      {
+        "id": -53,
+        "app": "script.sh",
+        "title": "Step 53 of 100",
+        "body": "Job 53 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:21:17"
+      },
+      {
+        "id": -52,
+        "app": "script.sh",
+        "title": "Step 52 of 100",
+        "body": "Job 52 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:21:16"
+      },
+      {
+        "id": -51,
+        "app": "script.sh",
+        "title": "Step 51 of 100",
+        "body": "Job 51 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:20:15"
+      },
+      {
+        "id": -50,
+        "app": "script.sh",
+        "title": "Step 50 of 100",
+        "body": "Job 50 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:20:14"
+      },
+      {
+        "id": -49,
+        "app": "script.sh",
+        "title": "Step 49 of 100",
+        "body": "Job 49 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:20:13"
+      },
+      {
+        "id": -48,
+        "app": "script.sh",
+        "title": "Step 48 of 100",
+        "body": "Job 48 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:20:12"
+      },
+      {
+        "id": -47,
+        "app": "script.sh",
+        "title": "Step 47 of 100",
+        "body": "Job 47 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:19:11"
+      },
+      {
+        "id": -46,
+        "app": "script.sh",
+        "title": "Step 46 of 100",
+        "body": "Job 46 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:19:10"
+      },
+      {
+        "id": -45,
+        "app": "script.sh",
+        "title": "Step 45 of 100",
+        "body": "Job 45 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:19:09"
+      },
+      {
+        "id": -44,
+        "app": "script.sh",
+        "title": "Step 44 of 100",
+        "body": "Job 44 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:19:08"
+      },
+      {
+        "id": -43,
+        "app": "script.sh",
+        "title": "Step 43 of 100",
+        "body": "Job 43 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:18:07"
+      },
+      {
+        "id": -42,
+        "app": "script.sh",
+        "title": "Step 42 of 100",
+        "body": "Job 42 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:18:06"
+      },
+      {
+        "id": -41,
+        "app": "script.sh",
+        "title": "Step 41 of 100",
+        "body": "Job 41 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:18:05"
+      },
+      {
+        "id": -40,
+        "app": "script.sh",
+        "title": "Step 40 of 100",
+        "body": "Job 40 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:18:04"
+      },
+      {
+        "id": -39,
+        "app": "script.sh",
+        "title": "Step 39 of 100",
+        "body": "Job 39 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:17:03"
+      },
+      {
+        "id": -38,
+        "app": "script.sh",
+        "title": "Step 38 of 100",
+        "body": "Job 38 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:17:02"
+      },
+      {
+        "id": -37,
+        "app": "script.sh",
+        "title": "Step 37 of 100",
+        "body": "Job 37 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:17:01"
+      },
+      {
+        "id": -36,
+        "app": "script.sh",
+        "title": "Step 36 of 100",
+        "body": "Job 36 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:17:00"
+      },
+      {
+        "id": -35,
+        "app": "script.sh",
+        "title": "Step 35 of 100",
+        "body": "Job 35 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:16:59"
+      },
+      {
+        "id": -34,
+        "app": "script.sh",
+        "title": "Step 34 of 100",
+        "body": "Job 34 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:16:58"
+      },
+      {
+        "id": -33,
+        "app": "script.sh",
+        "title": "Step 33 of 100",
+        "body": "Job 33 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:16:57"
+      },
+      {
+        "id": -32,
+        "app": "script.sh",
+        "title": "Step 32 of 100",
+        "body": "Job 32 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:16:56"
+      },
+      {
+        "id": -31,
+        "app": "script.sh",
+        "title": "Step 31 of 100",
+        "body": "Job 31 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:15:55"
+      },
+      {
+        "id": -30,
+        "app": "script.sh",
+        "title": "Step 30 of 100",
+        "body": "Job 30 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:15:54"
+      },
+      {
+        "id": -29,
+        "app": "script.sh",
+        "title": "Step 29 of 100",
+        "body": "Job 29 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:15:53"
+      },
+      {
+        "id": -28,
+        "app": "script.sh",
+        "title": "Step 28 of 100",
+        "body": "Job 28 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:15:52"
+      },
+      {
+        "id": -27,
+        "app": "script.sh",
+        "title": "Step 27 of 100",
+        "body": "Job 27 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:14:51"
+      },
+      {
+        "id": -26,
+        "app": "script.sh",
+        "title": "Step 26 of 100",
+        "body": "Job 26 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:14:50"
+      },
+      {
+        "id": -25,
+        "app": "script.sh",
+        "title": "Step 25 of 100",
+        "body": "Job 25 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:14:49"
+      },
+      {
+        "id": -24,
+        "app": "script.sh",
+        "title": "Step 24 of 100",
+        "body": "Job 24 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:14:48"
+      },
+      {
+        "id": -23,
+        "app": "script.sh",
+        "title": "Step 23 of 100",
+        "body": "Job 23 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:13:47"
+      },
+      {
+        "id": -22,
+        "app": "script.sh",
+        "title": "Step 22 of 100",
+        "body": "Job 22 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:13:46"
+      },
+      {
+        "id": -21,
+        "app": "script.sh",
+        "title": "Step 21 of 100",
+        "body": "Job 21 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:13:45"
+      },
+      {
+        "id": -20,
+        "app": "script.sh",
+        "title": "Step 20 of 100",
+        "body": "Job 20 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:13:44"
+      },
+      {
+        "id": -19,
+        "app": "script.sh",
+        "title": "Step 19 of 100",
+        "body": "Job 19 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:12:43"
+      },
+      {
+        "id": -18,
+        "app": "script.sh",
+        "title": "Step 18 of 100",
+        "body": "Job 18 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:12:42"
+      },
+      {
+        "id": -17,
+        "app": "script.sh",
+        "title": "Step 17 of 100",
+        "body": "Job 17 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:12:41"
+      },
+      {
+        "id": -16,
+        "app": "script.sh",
+        "title": "Step 16 of 100",
+        "body": "Job 16 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:12:40"
+      },
+      {
+        "id": -15,
+        "app": "script.sh",
+        "title": "Step 15 of 100",
+        "body": "Job 15 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:11:39"
+      },
+      {
+        "id": -14,
+        "app": "script.sh",
+        "title": "Step 14 of 100",
+        "body": "Job 14 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:11:38"
+      },
+      {
+        "id": -13,
+        "app": "script.sh",
+        "title": "Step 13 of 100",
+        "body": "Job 13 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:11:37"
+      },
+      {
+        "id": -12,
+        "app": "script.sh",
+        "title": "Step 12 of 100",
+        "body": "Job 12 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:11:36"
+      },
+      {
+        "id": -11,
+        "app": "script.sh",
+        "title": "Step 11 of 100",
+        "body": "Job 11 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:10:35"
+      },
+      {
+        "id": -10,
+        "app": "script.sh",
+        "title": "Step 10 of 100",
+        "body": "Job 10 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:10:34"
+      },
+      {
+        "id": -9,
+        "app": "script.sh",
+        "title": "Step 9 of 100",
+        "body": "Job 9 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:10:33"
+      },
+      {
+        "id": -8,
+        "app": "script.sh",
+        "title": "Step 8 of 100",
+        "body": "Job 8 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:10:32"
+      },
+      {
+        "id": -7,
+        "app": "script.sh",
+        "title": "Step 7 of 100",
+        "body": "Job 7 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:09:31"
+      },
+      {
+        "id": -6,
+        "app": "script.sh",
+        "title": "Step 6 of 100",
+        "body": "Job 6 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:09:30"
+      },
+      {
+        "id": -5,
+        "app": "script.sh",
+        "title": "Step 5 of 100",
+        "body": "Job 5 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:09:29"
+      },
+      {
+        "id": -4,
+        "app": "script.sh",
+        "title": "Step 4 of 100",
+        "body": "Job 4 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:09:28"
+      },
+      {
+        "id": -3,
+        "app": "script.sh",
+        "title": "Step 3 of 100",
+        "body": "Job 3 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:08:27"
+      },
+      {
+        "id": -2,
+        "app": "script.sh",
+        "title": "Step 2 of 100",
+        "body": "Job 2 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:08:26"
+      },
+      {
+        "id": -1,
+        "app": "script.sh",
+        "title": "Step 1 of 100",
+        "body": "Job 1 finished.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T12:08:25"
+      }
+    ],
+    "screen": [
+      -100,
+      -99,
+      -98
+    ],
+    "critical": [],
+    "overflow": 2,
+    "osd": null
+  }
+}

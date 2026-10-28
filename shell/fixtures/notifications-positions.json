@@ -1,0 +1,102 @@
+{
+  "clock": "2026-10-26T13:37:00",
+  "cpu": 23,
+  "mem": 41,
+  "volume": {
+    "percent": 64,
+    "muted": false
+  },
+  "battery": {
+    "percent": 87,
+    "charging": false
+  },
+  "workspaces": {
+    "existing": [
+      1,
+      2,
+      3
+    ],
+    "focused": 2
+  },
+  "activeWindow": "kitty — ~/projetos",
+  "wallpaper": {
+    "folder": "fixtures/wallpapers",
+    "all": "scene:menu",
+    "monitors": {},
+    "transition": {
+      "kind": "camouflage",
+      "cell": 24,
+      "trail": 2600,
+      "glitch": 2
+    }
+  },
+  "notifications": {
+    "server": true,
+    "log": [
+      {
+        "id": -5,
+        "app": "Chat",
+        "title": "Mika",
+        "body": "Are you still coming tonight? I saved you a seat by the window.",
+        "reply": "Reply",
+        "image": "fixtures/notify/avatar.png",
+        "at": "2026-10-26T13:35:12"
+      },
+      {
+        "id": -4,
+        "app": "Calendar",
+        "title": "Stand-up in 10 minutes",
+        "body": "Daily sync · Room 2 and online.",
+        "actions": [
+          {
+            "id": "open",
+            "label": "Open"
+          },
+          {
+            "id": "later",
+            "label": "Snooze"
+          }
+        ],
+        "hasDefault": true,
+        "at": "2026-10-26T13:34:05"
+      },
+      {
+        "id": -3,
+        "app": "Firefox",
+        "title": "Download finished",
+        "body": "archlinux-2026.10.01-x86_64.iso is in <b>Downloads</b>.",
+        "at": "2026-10-26T13:33:48"
+      },
+      {
+        "id": -2,
+        "app": "Updates",
+        "title": "3 updates available",
+        "body": "They install the next time you restart.",
+        "urgency": "low",
+        "read": true,
+        "at": "2026-10-26T13:05:30"
+      },
+      {
+        "id": -1,
+        "app": "Mail",
+        "title": "Weekly report",
+        "body": "The weekly report is ready to read.",
+        "read": true,
+        "alive": false,
+        "at": "2026-10-26T11:20:00"
+      }
+    ],
+    "screen": [
+      -5,
+      -4,
+      -3
+    ],
+    "critical": [],
+    "overflow": 0,
+    "osd": {
+      "kind": "volume",
+      "value": 66,
+      "muted": false
+    }
+  }
+}

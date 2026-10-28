@@ -32,7 +32,8 @@ FocusScope {
     readonly property var cats: SettingsModel.categories
     readonly property var cat: cats.length > 0 ? cats[Math.max(0, Math.min(category, cats.length - 1))] : null
     readonly property string catId: cat?.id ?? ""
-    readonly property var opts: cat?.options ?? []
+    // spec 008: live notifications options take their texts and values from NotifyPrefs (resolve).
+    readonly property var opts: (cat?.options ?? []).map(o => SettingsModel.resolve(o))
     readonly property var opt: column === "options" ? (opts[option] ?? null) : null
 
     // The option list's maps; they re-evaluate when any value changes (SettingsModel.current).
@@ -51,6 +52,19 @@ FocusScope {
 
     function u(v: real): int {
         return Tokens.px(v, root.s);
+    }
+
+    // spec 008 (FR-029, R12): no OSD for a value this page already shows. While the focus is on
+    // Sound › Volume or Mute, volume changes show no OSD; on Display › Brightness, brightness ones.
+    readonly property string focusKey: column === "options" && opt ? catId + "." + opt.id : ""
+    function syncOsd(): void {
+        Osd.suppress("volume", focusKey === "sound.volume" || focusKey === "sound.mute");
+        Osd.suppress("brightness", focusKey === "display.brightness");
+    }
+    onFocusKeyChanged: syncOsd()
+    Component.onDestruction: {
+        Osd.suppress("volume", false);
+        Osd.suppress("brightness", false);
     }
 
     // A row whose value ← and → change (toggle, choice, slider, not dimmed).

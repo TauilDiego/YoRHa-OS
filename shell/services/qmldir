@@ -9,3 +9,7 @@ singleton WallpaperCatalog 1.0 WallpaperCatalog.qml
 singleton WallpaperStore 1.0 WallpaperStore.qml
 singleton SettingsModel 1.0 SettingsModel.qml
 singleton SettingsState 1.0 SettingsState.qml
+singleton NotifyText 1.0 NotifyText.qml
+singleton NotifyPrefs 1.0 NotifyPrefs.qml
+singleton NotifyStore 1.0 NotifyStore.qml
+singleton Osd 1.0 Osd.qml

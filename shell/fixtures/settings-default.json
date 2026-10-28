@@ -24,6 +24,23 @@
       ]
     },
     {
+      "id": "notifications", "label": "Notifications",
+      "about": "How transmissions, the text log and the on-screen display behave. These options apply at once and are kept.",
+      "options": [
+        {"id": "dnd", "label": "Do not disturb", "type": "toggle", "setting": "notify.dnd", "value": false, "default": false},
+        {"id": "position", "label": "Position", "type": "choice", "setting": "notify.position", "values": ["Corner", "Top band", "Subtitle"], "value": 0, "default": 0},
+        {"id": "osd-position", "label": "OSD position", "type": "choice", "setting": "notify.osdPosition", "values": ["Bottom", "Top"], "value": 0, "default": 0},
+        {"id": "voice", "label": "System voice", "type": "choice", "setting": "notify.voice", "values": ["Relay 01", "rien-OS", "System"], "value": 0, "default": 0},
+        {"id": "log", "label": "Text log", "type": "choice", "setting": "notify.log", "values": ["Session only", "Saved"], "value": 0, "default": 0},
+        {"id": "log-size", "label": "Log size", "type": "choice", "setting": "notify.logSize", "values": ["100", "50", "200"], "value": 0, "default": 0},
+        {"id": "monitor", "label": "Monitor", "type": "choice", "setting": "notify.monitor", "values": ["Focused", "—"], "value": 0, "default": 0},
+        {"id": "on-screen", "label": "On screen", "type": "choice", "setting": "notify.onScreen", "values": ["3", "1", "5"], "value": 0, "default": 0},
+        {"id": "duration", "label": "Duration", "type": "choice", "setting": "notify.duration", "values": ["Normal", "Short", "Long"], "value": 0, "default": 0},
+        {"id": "typing", "label": "Typing", "type": "toggle", "setting": "notify.typing", "value": true, "default": true},
+        {"id": "fullscreen", "label": "In fullscreen", "type": "choice", "setting": "notify.fullscreen", "values": ["Hold", "Show"], "value": 0, "default": 0}
+      ]
+    },
+    {
       "id": "network", "label": "Network",
       "about": "Wi-Fi, cable and VPN.",
       "options": [

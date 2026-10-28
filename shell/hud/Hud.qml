@@ -25,6 +25,8 @@ PanelWindow {
     property var modelData                       // the ShellScreen, from Variants
     screen: modelData
 
+    signal logRequested()                        // spec 008: a click on the unread counter
+
     anchors {
         top: true
         left: true
@@ -89,7 +91,16 @@ PanelWindow {
             tone: tone >= 0.5 ? "light" : "paper",
             toneMix: Math.round(tone * 1000) / 1000,
             contrast: Settings.barContrast,
-            texts: textBoxes()
+            texts: textBoxes(),
+            // spec 008 (contracts/ipc.md): the unread counter before the clock
+            log: {
+                visible: logCounter.visible,
+                text: logCounter.visible ? `${logCounter.labelText.text} ${logCounter.valueText.text}` : "",
+                box: logCounter.visible ? (() => {
+                    const p = logCounter.mapToItem(null, 0, 0);
+                    return { x: Math.round(p.x), y: Math.round(p.y), w: Math.round(logCounter.width), h: Math.round(logCounter.height) };
+                })() : null
+            }
         };
     }
 
@@ -136,6 +147,8 @@ PanelWindow {
                 continue;
             out.push(textBox("label", v.labelText), textBox("value", v.valueText));
         }
+        if (logCounter.visible)
+            out.push(textBox("log", logCounter.labelText), textBox("log", logCounter.valueText));
         out.push(textBox("date", dateText), textBox("time", timeText));
         return out;
     }
@@ -213,6 +226,20 @@ PanelWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     reading: root.readings[index]
                 }
+            }
+
+            // spec 008: LOG 3 / DND 3 (FR-025)
+            LogCounter {
+                id: logCounter
+                anchors.verticalCenter: parent.verticalCenter
+                s: root.s
+                tone: root.tone
+                ink: root.ink("ink")
+                count: NotifyStore.unread
+                dnd: NotifyPrefs.dnd
+                plate: root.plate
+                plated: root.plated
+                onClicked: root.logRequested()
             }
 
             Row {

@@ -16,6 +16,7 @@ import "hud"
 import "wallpaper"
 import "services"
 import "settings"
+import "notify"
 
 ShellRoot {
     id: shell
@@ -75,6 +76,7 @@ ShellRoot {
 
         Hud {
             visible: shell.hudShown
+            onLogRequested: shell.openLog()      // spec 008: the unread counter
         }
     }
 
@@ -255,6 +257,173 @@ ShellRoot {
     }
     // --- end spec 004 ---------------------------------------------------------------------------
 
+    // --- spec 008: transmissions ------------------------------------------------------------------
+    // One NotifyLayer per monitor, created only while that monitor shows something (research R9) and
+    // kept a moment after, so the last one can fade out.
+    function screenNamed(name: string): var {
+        for (const sc of Quickshell.screens)
+            if (sc.name === name)
+                return sc;
+        return Quickshell.screens[0] ?? null;
+    }
+    Variants {
+        id: notifyLayers
+        model: Quickshell.screens
+
+        Scope {
+            id: notifySlot
+            required property var modelData
+            readonly property string name: modelData?.name ?? ""
+            readonly property bool wanted: NotifyStore.stack.some(t => t.monitor === notifySlot.name)
+                || NotifyStore.critical?.monitor === notifySlot.name
+            property bool loaded: false
+            onWantedChanged: {
+                if (wanted) {
+                    linger.stop();
+                    loaded = true;
+                } else {
+                    linger.restart();
+                }
+            }
+            Component.onCompleted: loaded = wanted
+            Timer {
+                id: linger
+                interval: Tokens.notify.fade + 150
+                onTriggered: if (!notifySlot.wanted) notifySlot.loaded = false
+            }
+            LazyLoader {
+                id: notifyLoader
+                active: notifySlot.loaded
+                NotifyLayer {
+                    modelData: notifySlot.modelData
+                    onOpenLogRequested: shell.openLog()
+                }
+            }
+            function dumpBoxes(): var {
+                return notifyLoader.item?.dumpBoxes() ?? null;
+            }
+            readonly property real critBottom: notifyLoader.item?.critBottom ?? 0
+        }
+    }
+    function critBottomOn(name: string): real {
+        for (const slot of notifyLayers.instances)
+            if (slot.name === name)
+                return slot.critBottom;
+        return 0;
+    }
+
+    // --- spec 008: osd ----------------------------------------------------------------------------
+    // The OSD's window exists while there is an OSD, and a moment after (its fade out).
+    property var osdLast: null
+    property bool osdLoaded: false
+    Connections {
+        target: Osd
+        function onCurrentChanged(): void {
+            if (Osd.current) {
+                shell.osdLast = Osd.current;
+                osdUnload.stop();
+                shell.osdLoaded = true;
+            } else {
+                osdUnload.restart();
+            }
+        }
+    }
+    Timer {
+        id: osdUnload
+        interval: Tokens.notify.fade + 100
+        onTriggered: if (!Osd.current) shell.osdLoaded = false
+    }
+    LazyLoader {
+        id: osdLoader
+        active: shell.osdLoaded
+        OsdWindow {
+            screen: shell.screenNamed(shell.osdLast?.monitor ?? "")
+            osd: shell.osdLast
+            shown: Osd.current !== null
+            topInset: shell.critBottomOn(shell.osdLast?.monitor ?? "")
+        }
+    }
+
+    // --- spec 008: log ----------------------------------------------------------------------------
+    // The text log's pop-up, like the settings and the picker: it opens on the focused monitor (re-read
+    // first), closes in two steps, and only one of the three is open at a time. While it shows, the store
+    // knows (NotifyStore.logOpen: new ones go to its list, and opening marks everything read).
+    property bool logOpen: false
+    property bool logOpening: false
+    property bool logLoaded: false
+    property string logMonitor: ""
+    Binding {
+        target: NotifyStore
+        property: "logOpen"
+        value: shell.logOpen
+    }
+    function openLog(): void {
+        if (logOpen || logOpening)
+            return;
+        closeSettings();
+        closePicker();
+        logOpening = true;
+        Compositor.refreshFocusedMonitor();
+        logFallback.restart();
+    }
+    function showLog(): void {
+        if (!logOpening)
+            return;
+        logOpening = false;
+        logFallback.stop();
+        logMonitor = Compositor.focusedMonitor;
+        logOpen = true;
+    }
+    function closeLog(): void {
+        logOpening = false;
+        logOpen = false;
+    }
+    Connections {
+        target: Compositor
+        function onMonitorScalesChanged(): void {
+            shell.showLog();
+        }
+    }
+    Connections {
+        target: shell
+        function onSettingsOpenChanged(): void {
+            if (shell.settingsOpen)
+                shell.closeLog();
+        }
+        function onPickerOpenChanged(): void {
+            if (shell.pickerOpen)
+                shell.closeLog();
+        }
+    }
+    Timer {
+        id: logFallback
+        interval: 250
+        onTriggered: shell.showLog()
+    }
+    onLogOpenChanged: {
+        if (logOpen) {
+            logUnload.stop();
+            logLoaded = true;
+        } else {
+            logUnload.restart();
+        }
+    }
+    Timer {
+        id: logUnload
+        interval: 150
+        onTriggered: if (!shell.logOpen) shell.logLoaded = false
+    }
+    LazyLoader {
+        id: logLoader
+        active: shell.logLoaded
+        LogPopup {
+            screen: shell.screenNamed(shell.logMonitor)
+            keyboardActive: shell.logOpen
+            onCloseRequested: shell.closeLog()
+        }
+    }
+    // --- end spec 008 -----------------------------------------------------------------------------
+
     // --- IPC (contracts/ipc.md) ---------------------------------------------------------------
     IpcHandler {
         target: "gallery"
@@ -348,6 +517,7 @@ ShellRoot {
             const live = shell.settingsOpen ? settingsLoader.item : null;
             const page = live ? live.dumpState() : shell.settingsLast;
             return JSON.stringify({
+                live: SettingsModel.liveIds(),       // spec 008: the options that really apply
                 open: shell.settingsOpen,
                 monitor: shell.settingsMonitor,
                 focus: page.focus ?? "categories",
@@ -375,5 +545,67 @@ ShellRoot {
         // spec 004 US6: hide or show the bars (tests only; nothing remembers it). Not `show`:
         // the qs command line takes that word for its own `ipc show`.
         function visible(on: bool): void { shell.hudShown = on; }
+    }
+
+    // --- spec 008 (specs/008-pod-text-log/contracts/ipc.md) -------------------------------------------
+    IpcHandler {
+        target: "notify"
+        function open(): void { shell.openLog(); }
+        function close(): void { shell.closeLog(); }
+        function toggle(): void {
+            if (shell.logOpen || shell.logOpening)
+                shell.closeLog();
+            else
+                shell.openLog();
+        }
+        function isOpen(): string { return shell.logOpen ? "true" : "false"; }
+        function dnd(mode: string): string {
+            if (mode === "toggle")
+                NotifyPrefs.setDnd(!NotifyPrefs.dnd);
+            else if (mode === "on" || mode === "off")
+                NotifyPrefs.setDnd(mode === "on");
+            else
+                return "error: dnd takes on, off or toggle";
+            return NotifyPrefs.dnd ? "on" : "off";
+        }
+        function clear(): string {
+            NotifyStore.clear();
+            return "ok";
+        }
+        function dismissAll(): string {
+            NotifyStore.hideAll();
+            return "ok";
+        }
+        function invoke(id: int, action: string): string { return NotifyStore.invoke(id, action); }
+        function osd(kind: string, value: int, muted: bool): string { return Osd.show(kind, value, muted); }
+        function sample(name: string): string { return NotifyStore.sample(name); }
+        function pref(key: string, value: string): string { return NotifyPrefs.set(key, value); }
+        function prefsReset(): string {
+            NotifyPrefs.reset();
+            return "ok";
+        }
+        function dump(): string {
+            const d = NotifyStore.dumpState();
+            const boxes = {};
+            for (const slot of notifyLayers.instances) {
+                const b = slot.dumpBoxes();
+                if (b)
+                    boxes[slot.name] = b;
+            }
+            for (const t of d.screen) {
+                const b = boxes[t.monitor]?.stack.find(x => x.id === t.id);
+                t.box = b ? { x: b.x, y: b.y, w: b.w, h: b.h } : null;
+            }
+            if (d.critical)
+                d.critical.box = boxes[d.critical.monitor]?.critical ?? null;
+            d.more = Object.values(boxes).map(b => b.stack.find(x => x.id === "more")).find(x => x) ?? null;
+            d.osd = Osd.dump();
+            if (d.osd && osdLoader.item)
+                d.osd.box = osdLoader.item.box();
+            d.osd = d.osd ? Object.assign(d.osd, { position: NotifyPrefs.osdPosition }) : null;
+            d.page = shell.logOpen ? (logLoader.item?.dumpState() ?? null) : null;
+            d.windows = Object.keys(boxes);
+            return JSON.stringify(d);
+        }
     }
 }

@@ -7,5 +7,9 @@
   "barContrast": "normal",
   "wallpaperFolder": "~/Pictures/Wallpapers",
   "wallpaperTransition": "camouflage",
-  "camouflage": { "cell": 24, "trail": 2600, "glitch": 2 }
+  "camouflage": { "cell": 24, "trail": 2600, "glitch": 2 },
+  "notifications": {
+    "position": "corner", "osdPosition": "bottom", "voice": "relay", "log": "session", "logSize": 100,
+    "monitor": "", "onScreen": 3, "duration": "normal", "typing": true, "fullscreen": "hold"
+  }
 }

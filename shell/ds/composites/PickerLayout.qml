@@ -23,6 +23,14 @@ import "../../strings"
 // it. `keys` are the hints of the focus, for the pop-up's footer.
 //   options: [{ id, label, values: [text] }]; values: option id → index of its current value;
 //   info: [{ label, value }].
+// spec 008 (the text log, research R16), compatible additions:
+//   fluid    the columns and the top come from the layout's own width and height, in the proportions
+//            of the 1612×908 frame, and the layout fills its whole rect (no room for a title or a
+//            footer: the host draws those), so the same body fits the pop-up and a pause-menu tab;
+//   options of type "toggle" ({ id, label, type: "toggle" }; values: id → bool; ←→ and Enter flip
+//            it) and "action" ({ id, label, type: "action", text }: the text and ▸; Enter or a click →
+//            invoked(option); ← goes back to the list, → does nothing).
+// The default (fluid: false, choices only) is spec 004's picker, unchanged.
 FocusScope {
     id: root
 
@@ -36,10 +44,12 @@ FocusScope {
     property var info: []
     property string optionsTitle: Strings.wallpaper.options
     property string applyLabel: Strings.wallpaper.keyApply
+    property bool fluid: false
     default property alias preview: previewSlot.data
 
     signal applied(int index)
-    signal picked(int option, int value)
+    signal picked(int option, var value)
+    signal invoked(int option)
     signal closeRequested()
 
     readonly property int count: list.count
@@ -50,8 +60,17 @@ FocusScope {
     function u(v: real): int {
         return Tokens.px(v, root.s);
     }
+    // A horizontal position or width of the 1612 px frame: scaled with `s`, or (fluid) with the width.
+    function hx(v: real): int {
+        return fluid ? Math.round(v * width / Tokens.space.popupW) : u(v);
+    }
 
-    function valueOf(i: int): int {
+    function typeOf(i: int): string {
+        return String(options[i]?.type ?? "choice");
+    }
+    function valueOf(i: int): var {
+        if (typeOf(i) === "toggle")
+            return values[options[i]?.id] === true;
         return Number(values[options[i]?.id] ?? 0);
     }
 
@@ -80,6 +99,15 @@ FocusScope {
 
     // A value changed by ← → or an arrow: no wrapping; `back` (keys only) leaves on ← at the start.
     function step(i: int, dir: int, back: bool): void {
+        if (typeOf(i) === "toggle") {
+            picked(i, !valueOf(i));
+            return;
+        }
+        if (typeOf(i) === "action") {
+            if (dir < 0 && back)
+                column = "list";
+            return;
+        }
         const v = valueOf(i), n = lengthOf(i);
         if (dir < 0 && v <= 0) {
             if (back)
@@ -91,8 +119,16 @@ FocusScope {
         picked(i, v + dir);
     }
 
-    // Enter or a click on a row: the next value, wrapping.
+    // Enter or a click on a row: the next value, wrapping (a toggle flips, an action runs).
     function advance(i: int): void {
+        if (typeOf(i) === "toggle") {
+            picked(i, !valueOf(i));
+            return;
+        }
+        if (typeOf(i) === "action") {
+            invoked(i);
+            return;
+        }
         const n = lengthOf(i);
         if (n > 0)
             picked(i, (valueOf(i) + 1) % n);
@@ -168,8 +204,11 @@ FocusScope {
     // --- what the footer says --------------------------------------------------------------------
     readonly property var keys: {
         const W = Strings.wallpaper, K = Strings.settings;
-        if (column === "options")
+        if (column === "options") {
+            if (typeOf(option) === "action")
+                return [{ key: K.keyUpDown, label: W.keySelect }, { key: K.keyEnter, label: String(options[option]?.label ?? "") }, { key: K.keyEsc, label: W.keyBack }];
             return [{ key: K.keyUpDown, label: W.keySelect }, { key: K.keyLeftRight, label: W.keyChange }, { key: K.keyEsc, label: W.keyBack }];
+        }
         const out = [{ key: K.keyUpDown, label: W.keySelect }];
         if (count > 0 && !currentDim)
             out.push({ key: K.keyEnter, label: applyLabel });
@@ -207,14 +246,14 @@ FocusScope {
 
     // --- layout ----------------------------------------------------------------------------------
     // The columns start at y 150 and stop 24 px above the footer rule (88 px above the bottom).
-    readonly property int topY: u(150)
-    readonly property int bottomY: height - u(Tokens.space.popupH - 820) - u(24)
+    readonly property int topY: fluid ? 0 : u(150)
+    readonly property int bottomY: fluid ? height : height - u(Tokens.space.popupH - 820) - u(24)
 
     GroupedList {
         id: list
-        x: root.u(48)
+        x: root.hx(48)
         y: root.topY
-        width: implicitWidth
+        width: root.fluid ? Math.min(implicitWidth, root.hx(560 - 48) - root.u(24)) : implicitWidth
         height: Math.min(implicitHeight, root.bottomY - y)
         s: root.s
         model: root.entries
@@ -231,18 +270,18 @@ FocusScope {
 
     Item {
         id: previewSlot
-        x: root.u(560)
+        x: root.hx(560)
         y: root.topY
-        width: root.u(Tokens.space.pickerPreviewW)
+        width: root.hx(Tokens.space.pickerPreviewW)
         height: root.bottomY - y
     }
 
     // The Options card: the rows hang their kite into the 40 px gap on the card's left.
     Item {
         id: optionsBox
-        x: root.u(1160)
+        x: root.hx(1160)
         y: root.topY
-        width: root.u(Tokens.space.pickerOptionsW)
+        width: Math.min(root.hx(Tokens.space.pickerOptionsW), root.width - x - root.u(8))
         height: infoColumn.y + infoColumn.height + root.u(22)
 
         readonly property int railRoom: Tokens.px(Tokens.space.railGap, root.s) + Tokens.line(Tokens.space.rail, root.s)

@@ -12,6 +12,8 @@ import "../base"
 //   { label, trailing, dim }     an item: a ListItem with the kite. `trailing` is a mark on its right
 //                                in small text ("● ALL"); a `dim` item is drawn dimmed and still
 //                                takes the cursor (then its text is light at 55% on the band).
+//                                spec 008: also `lead`, `tag` and `markColor` (ListItem), for the
+//                                text log's rows (who speaks, NEW, the critical square).
 // `currentIndex` counts items only. As in the CursorList (spec 003): `focused: false` draws the
 // current item "selected" (its kite light and still); `wrap` makes move() go round; with
 // `keysEnabled: false` the parent drives it: no keys, and hover and clicks only report
@@ -189,6 +191,9 @@ Item {
                         trailingRole: "small"
                         text: String(entry.modelData?.label ?? "")
                         trailing: String(entry.modelData?.trailing ?? "")
+                        lead: String(entry.modelData?.lead ?? "")
+                        tag: String(entry.modelData?.tag ?? "")
+                        markColor: entry.modelData?.markColor ?? "transparent"
                         state: entry.item === root.currentIndex ? (root.focused ? "hovered" : "selected")
                              : entry.dim ? "dimmed" : "normal"
 

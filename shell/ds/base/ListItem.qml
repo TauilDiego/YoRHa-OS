@@ -26,6 +26,13 @@ Item {
     // kite (the picker's option rows, to fit their card).
     property string trailingRole: "listButton"
     property real contentScale: 1
+    // spec 008 (the text log's rows): `lead`, a text in weight 600 before the label (who speaks,
+    // at most 150 px, cut with an ellipsis); `tag`, an outline Tag before the trailing text (NEW);
+    // `markColor`, the square's color (the alert square of a critical entry; default: the ink).
+    // Empty, they change nothing.
+    property string lead: ""
+    property string tag: ""
+    property color markColor: "transparent"
     readonly property real cs: s * contentScale
 
     readonly property bool hovered: mouse.containsMouse
@@ -50,6 +57,8 @@ Item {
 
     implicitHeight: bandH
     implicitWidth: pad + Tokens.px(Tokens.space.square, cs) + gap + Math.ceil(dark.labelWidth)
+                   + (lead !== "" ? Math.ceil(dark.leadWidth) + gap : 0)
+                   + (tag !== "" ? Math.ceil(dark.tagWidth) + gap : 0)
                    + (trailing !== "" ? gap + Math.ceil(dark.trailingWidth) : 0) + pad
 
     // Ink sweep, as in HeaderButton.
@@ -76,21 +85,39 @@ Item {
     }
 
     component Face: Item {
+        id: face
         property color ink
         readonly property real labelWidth: label.implicitWidth
         readonly property real trailingWidth: tail.implicitWidth
+        readonly property real leadWidth: leadLabel.width
+        readonly property real tagWidth: tagBox.implicitWidth
         width: root.width
         height: root.bandH
         Square {
             x: root.pad
             anchors.verticalCenter: parent.verticalCenter
             s: root.cs
+            color: root.markColor.a > 0 ? root.markColor : parent.ink
+        }
+        Label {
+            id: leadLabel
+            x: root.pad + Tokens.px(Tokens.space.square, root.cs) + root.gap
+            width: root.lead !== "" ? Math.min(implicitWidth, Tokens.px(150, root.cs)) : 0
+            visible: root.lead !== ""
+            anchors.verticalCenter: parent.verticalCenter
+            s: root.cs
+            role: "listButton"
+            font.weight: Font.DemiBold
+            font.variableAxes: ({ "wght": Font.DemiBold })
+            text: root.lead
+            elide: Text.ElideRight
             color: parent.ink
         }
         Label {
             id: label
-            x: root.pad + Tokens.px(Tokens.space.square, root.cs) + root.gap
+            x: root.pad + Tokens.px(Tokens.space.square, root.cs) + root.gap + (root.lead !== "" ? leadLabel.width + root.gap : 0)
             width: Math.max(0, Math.min(implicitWidth, root.width - x - Math.max(root.pad, root.reserve)
+                                                        - (root.tag !== "" ? Math.ceil(tagBox.implicitWidth) + root.gap : 0)
                                                         - (root.trailing !== "" ? root.gap + Math.ceil(tail.implicitWidth) + root.pad : 0)))
             anchors.verticalCenter: parent.verticalCenter
             s: root.cs
@@ -109,6 +136,17 @@ Item {
             role: root.trailingRole
             text: root.trailing
             color: parent.ink
+        }
+        Tag {
+            id: tagBox
+            visible: root.tag !== ""
+            anchors.right: root.trailing !== "" ? tail.left : parent.right
+            anchors.rightMargin: root.trailing !== "" ? root.gap : root.pad
+            anchors.verticalCenter: parent.verticalCenter
+            s: root.cs
+            outline: true
+            ink: face.ink
+            text: root.tag
         }
     }
 

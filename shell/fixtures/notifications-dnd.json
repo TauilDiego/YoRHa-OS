@@ -1,0 +1,88 @@
+{
+  "clock": "2026-10-26T13:37:00",
+  "cpu": 23,
+  "mem": 41,
+  "volume": {
+    "percent": 64,
+    "muted": false
+  },
+  "battery": {
+    "percent": 87,
+    "charging": false
+  },
+  "workspaces": {
+    "existing": [
+      1,
+      2,
+      3
+    ],
+    "focused": 2
+  },
+  "activeWindow": "kitty — ~/projetos",
+  "wallpaper": {
+    "folder": "fixtures/wallpapers",
+    "all": "scene:menu",
+    "monitors": {},
+    "transition": {
+      "kind": "camouflage",
+      "cell": 24,
+      "trail": 2600,
+      "glitch": 2
+    }
+  },
+  "notifications": {
+    "server": true,
+    "dnd": true,
+    "log": [
+      {
+        "id": -6,
+        "app": "Battery",
+        "title": "Battery at 5%",
+        "body": "Plug in the charger. The system suspends at 3%.",
+        "urgency": "critical",
+        "at": "2026-10-26T13:36:40"
+      },
+      {
+        "id": -5,
+        "app": "Mail",
+        "title": "Held message 5",
+        "body": "Arrived while do not disturb was on.",
+        "at": "2026-10-26T13:35:00"
+      },
+      {
+        "id": -4,
+        "app": "Chat",
+        "title": "Held message 4",
+        "body": "Arrived while do not disturb was on.",
+        "at": "2026-10-26T13:34:00"
+      },
+      {
+        "id": -3,
+        "app": "Calendar",
+        "title": "Held message 3",
+        "body": "Arrived while do not disturb was on.",
+        "at": "2026-10-26T13:33:00"
+      },
+      {
+        "id": -2,
+        "app": "Firefox",
+        "title": "Held message 2",
+        "body": "Arrived while do not disturb was on.",
+        "at": "2026-10-26T13:32:00"
+      },
+      {
+        "id": -1,
+        "app": "Updates",
+        "title": "Held message 1",
+        "body": "Arrived while do not disturb was on.",
+        "at": "2026-10-26T13:31:00"
+      }
+    ],
+    "screen": [],
+    "critical": [
+      -6
+    ],
+    "overflow": 0,
+    "osd": null
+  }
+}

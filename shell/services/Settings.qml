@@ -124,6 +124,57 @@ Singleton {
     }
     // --- end 004 acabamento ------------------------------------------------------------------------
 
+    // --- spec 008: the notifications' options (FR-039, FR-040) ---------------------------------------
+    // The project's defaults (defaults.json) overridden key by key by the user's shell.json, each value
+    // checked against its options. NotifyPrefs puts the saved choices (SettingsState) on top.
+    readonly property var notificationChoices: ({
+        position: ["corner", "top", "subtitle"],
+        osdPosition: ["bottom", "top"],
+        voice: ["relay", "rienos", "system"],
+        log: ["session", "saved"],
+        logSize: [100, 50, 200],
+        onScreen: [3, 1, 5],
+        duration: ["normal", "short", "long"],
+        typing: [true, false],
+        fullscreen: ["hold", "show"]
+    })
+    readonly property var notificationFallback: ({
+        position: "corner", osdPosition: "bottom", voice: "relay", log: "session", logSize: 100,
+        monitor: "", onScreen: 3, duration: "normal", typing: true, fullscreen: "hold"
+    })
+    // Is `v` a value notification option `key` can take? (monitor: any output name, "" = focused)
+    function notificationValid(key: string, v: var): bool {
+        if (key === "monitor")
+            return typeof v === "string";
+        return (notificationChoices[key] ?? []).includes(v);
+    }
+    readonly property var notificationsDefault: {
+        const d = defaults.notifications && typeof defaults.notifications === "object" ? defaults.notifications : {};
+        const out = {};
+        for (const k of Object.keys(notificationFallback))
+            out[k] = notificationValid(k, d[k]) ? d[k] : notificationFallback[k];
+        return out;
+    }
+    // { values, user: [keys from shell.json] }. A bad value is ignored with an INFO line (FR-037).
+    readonly property var notificationsConfigured: {
+        const u = user.notifications && typeof user.notifications === "object" ? user.notifications : {};
+        const out = Object.assign({}, notificationsDefault);
+        const fromUser = [];
+        for (const k of Object.keys(notificationFallback)) {
+            if (u[k] === undefined)
+                continue;
+            if (notificationValid(k, u[k])) {
+                out[k] = u[k];
+                fromUser.push(k);
+            } else {
+                console.info(`settings: notifications.${k} = ${JSON.stringify(u[k])} is not an option, using the default`);
+            }
+        }
+        return { values: out, user: fromUser };
+    }
+    readonly property var notifications: notificationsConfigured.values
+    // --- end spec 008 --------------------------------------------------------------------------------
+
     FileView {
         id: defaultsFile
         path: Qt.resolvedUrl("../config/defaults.json").toString().replace("file://", "")

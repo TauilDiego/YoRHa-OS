@@ -80,6 +80,40 @@ Singleton {
         }
     }
 
+    // --- spec 008: a full-screen window in focus (R11) holds transmissions (FR-027) --------------------
+    // From `hyprctl activewindow -j` (field `fullscreen`, a mode number, 0 = not full screen), re-read
+    // on the fullscreen, active window and workspace events. Fixture: notifications.fullscreen.
+    property bool liveFullscreen: false
+    readonly property bool focusedFullscreen: Fixtures.has("notifications")
+        ? (Fixtures.get("notifications")?.fullscreen === true)
+        : liveFullscreen
+    Process {
+        id: fullscreenQuery
+        command: ["hyprctl", "activewindow", "-j"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const fs = JSON.parse(text).fullscreen;
+                    root.liveFullscreen = fs === true || Number(fs) > 0;
+                } catch (e) {
+                    root.liveFullscreen = false;      // no window in focus
+                }
+            }
+        }
+    }
+    function refreshFullscreen(): void {
+        if (fullscreenQuery.running)
+            fullscreenAgain.restart();
+        else
+            fullscreenQuery.running = true;
+    }
+    Timer {
+        id: fullscreenAgain
+        interval: 50
+        onTriggered: root.refreshFullscreen()
+    }
+    // --- end spec 008 ----------------------------------------------------------------------------------
+
     // Tabs for one monitor: ids 1..max(5, highest existing id, focused id), only ids ≥ 1.
     function workspacesFor(monitorName: string): var {
         let existing = [];
@@ -150,6 +184,7 @@ Singleton {
     Component.onCompleted: {
         monitorQuery.running = true;
         activeWindowQuery.running = true;
+        fullscreenQuery.running = true;      // spec 008
     }
 
     // A scale change alone (`hyprctl eval 'hl.monitor(…)'`, as `lab/profile` does) raises no event
@@ -177,6 +212,10 @@ Singleton {
             Qt.callLater(root.bump);
             if (event.name.startsWith("monitor") || event.name.startsWith("focusedmon") || event.name === "configreloaded")
                 monitorQuery.running = true;
+            // spec 008: the focused monitor (focusedmon, above) and full screen (R10, R11)
+            if (event.name === "fullscreen" || event.name.startsWith("activewindow") || event.name.startsWith("workspace")
+                    || event.name === "closewindow")
+                root.refreshFullscreen();
         }
     }
 }

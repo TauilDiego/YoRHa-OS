@@ -69,6 +69,20 @@ Singleton {
         readonly property TextStyle standard: TextStyle { family: types.body; size: 23; lineHeight: 23; weight: Font.DemiBold; letterSpacing: 1 }
         readonly property TextStyle small: TextStyle { family: types.body; size: 18; lineHeight: 18; weight: Font.Medium; letterSpacing: 2 }
         readonly property TextStyle button: TextStyle { family: types.body; size: 16; lineHeight: 16; weight: Font.DemiBold; letterSpacing: 0 }
+        // --- spec 008: the band's text (transmissions, the critical band, the OSD), from the mockup
+        readonly property TextStyle bandWho: TextStyle { family: types.body; size: 17; lineHeight: 17; weight: Font.DemiBold; letterSpacing: 2 }
+        readonly property TextStyle bandTitle: TextStyle { family: types.body; size: 23; lineHeight: 30; weight: Font.DemiBold; letterSpacing: 0.5 }
+        readonly property TextStyle bandBody: TextStyle { family: types.body; size: 19; lineHeight: 28.5; weight: Font.Medium; letterSpacing: 0.5 }
+        readonly property TextStyle bandTime: TextStyle { family: types.body; size: 16; lineHeight: 16; weight: Font.Medium; letterSpacing: 1.5 }
+        readonly property TextStyle bandAction: TextStyle { family: types.body; size: 16; lineHeight: 16; weight: Font.DemiBold; letterSpacing: 1 }
+        readonly property TextStyle bandTag: TextStyle { family: types.body; size: 13; lineHeight: 13; weight: Font.DemiBold; letterSpacing: 2 }
+        readonly property TextStyle bandMore: TextStyle { family: types.body; size: 15; lineHeight: 15; weight: Font.Medium; letterSpacing: 2 }
+        readonly property TextStyle critWho: TextStyle { family: types.body; size: 20; lineHeight: 20; weight: Font.DemiBold; letterSpacing: 2 }
+        readonly property TextStyle critTitle: TextStyle { family: types.body; size: 30; lineHeight: 39; weight: Font.DemiBold; letterSpacing: 0.5 }
+        readonly property TextStyle critBody: TextStyle { family: types.body; size: 23; lineHeight: 34.5; weight: Font.Medium; letterSpacing: 0.5 }
+        readonly property TextStyle osdLabel: TextStyle { family: types.body; size: 20; lineHeight: 20; weight: Font.DemiBold; letterSpacing: 3 }
+        readonly property TextStyle osdValue: TextStyle { family: types.body; size: 23; lineHeight: 23; weight: Font.Medium; letterSpacing: 1 }
+        // --- end spec 008
     }
 
     // --- shadows ----------------------------------------------------------------------------
@@ -219,6 +233,97 @@ Singleton {
         readonly property int duration: 900                // wipe, tiles and crossfade (ease in-out)
     }
     // --- end spec 004 ----------------------------------------------------------------------------
+
+    // --- spec 008 ---------------------------------------------------------------------------------
+    // The band (transmissions, the critical band, the OSD): translucent ink with a halftone of dark
+    // dots, light text, like the game's tutorial band (design-system §6, §9). Sizes in game px from
+    // the approved mockup (rien-OS-private/lab/mockups/transmissoes); times in ms. Estimates,
+    // calibrated in the VM.
+    readonly property Notifies notify: Notifies {}
+    component Notifies: QtObject {
+        readonly property color band: Qt.rgba(0x1E / 255, 0x1D / 255, 0x19 / 255, 0.84)
+        readonly property color bandDot: Qt.rgba(0, 0, 0, 0.32)
+        readonly property real dotStep: 5                  // the halftone's pitch
+        readonly property real dotRadius: 0.9
+        readonly property color bandText: "#E6E1C8"
+        readonly property color bandText2: Qt.rgba(0xE6 / 255, 0xE1 / 255, 0xC8 / 255, 0.62)
+        readonly property color bandBody: Qt.rgba(0xE6 / 255, 0xE1 / 255, 0xC8 / 255, 0.9)
+        readonly property color bandLine: Qt.rgba(0xE6 / 255, 0xE1 / 255, 0xC8 / 255, 0.14)
+        readonly property color bandEdge: Qt.rgba(0xE6 / 255, 0xE1 / 255, 0xC8 / 255, 0.10)
+        readonly property color bandShadow: Qt.rgba(0, 0, 0, 0.22)
+        readonly property color bandTrack: Qt.rgba(0xD7 / 255, 0xD1 / 255, 0xB3 / 255, 0.22)
+        readonly property color replyField: Qt.rgba(0, 0, 0, 0.25)
+        readonly property real shadow: 3
+        readonly property real line: 2                     // arcs, the action button's outline
+        readonly property real block: 14                   // the urgency block on the left
+        // corner (the default position)
+        readonly property real stackW: 540
+        readonly property real stackGap: 12
+        readonly property real stackRight: 16
+        readonly property real stackTop: 12                // below the bar
+        // a transmission's padding: top, right, bottom, left (after the block)
+        readonly property real padTop: 14
+        readonly property real padRight: 22
+        readonly property real padBottom: 18
+        readonly property real padLeft: 36
+        readonly property real who: 12                     // the speaker's square
+        readonly property real titleGap: 11
+        readonly property real bodyGap: 6
+        readonly property real closeSize: 26
+        // top band: the text in a centered column, the bands 2 px apart
+        readonly property real topPad: 360
+        readonly property real topGap: 2
+        // subtitle: centered at the bottom, above the OSD's area
+        readonly property real subtitleW: 1100
+        readonly property real subtitleBottom: 210
+        readonly property real subtitlePadLeft: 52
+        // the critical band
+        readonly property real critMinH: 230
+        readonly property real critCol: 1080
+        readonly property real critSide: 62
+        readonly property real critPadTop: 40
+        readonly property real critPadBottom: 38
+        readonly property real critWhoSq: 14
+        readonly property real critClose: 30
+        readonly property real imageSize: 72
+        readonly property real imageFrame: 2
+        readonly property real actionH: 32
+        readonly property real actionPad: 14
+        readonly property real actionGap: 10
+        readonly property int maxActions: 3
+        readonly property int lines: 4
+        readonly property int critLines: 3
+        readonly property int previewLines: 9
+        readonly property real lifeH: 3                    // the time line at the bottom
+        readonly property real progressGap: 12
+        readonly property real progressNumW: 54
+        readonly property real replyH: 36
+        // the OSD
+        readonly property real osdW: 600
+        readonly property real osdH: 72
+        readonly property real osdBottom: 110
+        readonly property real osdTop: 12                  // below the bar (or the critical band)
+        readonly property real osdLabelW: 168
+        readonly property real osdMeterW: 300
+        readonly property real osdNumW: 70
+        // the top bar's counter (LOG 3 / DND 3)
+        readonly property real counterSquare: 9
+        // the typing and the times (FR-006, FR-007, FR-029)
+        readonly property real cps: 90
+        readonly property int typeMaxMs: 700
+        readonly property int lowMs: 4000
+        readonly property int normalMs: 6000
+        readonly property int perCharsMs: 1000             // per perChars characters beyond freeChars
+        readonly property int perChars: 80
+        readonly property int freeChars: 120
+        readonly property int maxMs: 12000
+        readonly property int osdHold: 1200
+        readonly property int sweep: 150                   // = motion.highlight
+        readonly property int fade: 150
+        readonly property int batchMs: 16                  // a flood is applied once per frame
+        readonly property int saveMs: 500                  // the saved log's writes, together
+    }
+    // --- end spec 008 -----------------------------------------------------------------------------
 
     // --- spec 004 US6: the bar over the wallpaper (tone) -------------------------------------------
     // The top bar has no background of its own, so its colors follow the wallpaper under it: the

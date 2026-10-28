@@ -14,6 +14,11 @@ import "../strings"
 // Values: toggle → bool, choice → index in `values`, slider → 0–100; actions and infos have none.
 // 004 acabamento: a choice with `"setting": key` is live. Its value is the shell setting's level
 // (Settings.levelOf), and changing it changes and saves the setting (Settings.setLevel).
+// spec 008: the same live mechanism, extended. "setting": "notify.<key>" binds a choice or a toggle
+// to NotifyPrefs (levelsOf / levelOf / setLevel, the notifications' options, saved by NotifyPrefs as
+// "notifications.<key>"); its label, description and value labels come from Strings.notify, and the
+// Monitor option's values are the outputs (resolve()). reset() leaves them alone: the notifications
+// have their own reset (`notify prefsReset`).
 // Options are addressed by category id + option id; "cat.opt" keys the maps below.
 // "Salvar sempre" (owner, 2026-10-27; spec 004 amendment (3)): every value changed here is saved in
 // SettingsState as "settings.<cat>.<opt>" (unless the option says "persist": false) and wins over
@@ -41,10 +46,49 @@ Singleton {
         return null;
     }
 
+    // --- live options (004 acabamento; spec 008) -----------------------------------------------------
+    // The source of a live option: { src, key }; src is Settings or NotifyPrefs.
+    function liveOf(opt: var): var {
+        const k = String(opt?.setting ?? "");
+        if (k === "")
+            return null;
+        return k.startsWith("notify.") ? { src: NotifyPrefs, key: k.slice(7), notify: true } : { src: Settings, key: k, notify: false };
+    }
+    function isLive(catId: string, optId: string): bool {
+        return liveOf(find(catId, optId)) !== null;
+    }
+    // The option as the page draws it: a notifications option takes its texts from Strings.notify and
+    // its values from NotifyPrefs (the Monitor option lists the outputs).
+    function resolve(opt: var): var {
+        const l = liveOf(opt);
+        if (!l?.notify)
+            return opt;
+        const N = Strings.notify;
+        const out = Object.assign({}, opt, {
+            label: N.prefLabels[l.key] ?? opt.label,
+            desc: N.prefDescs[l.key] ?? opt.desc ?? ""
+        });
+        if (opt.type === "choice")
+            out.values = NotifyPrefs.labelsOf(l.key);
+        return out;
+    }
+    // Every live option, as "cat.opt" (for `settings dump`).
+    function liveIds(): var {
+        const out = [];
+        for (const c of categories)
+            for (const o of c.options)
+                if (o.setting)
+                    out.push(c.id + "." + o.id);
+        return out;
+    }
+
     function value(catId: string, optId: string): var {
         const opt = find(catId, optId);
-        if (opt?.setting)
-            return Math.max(0, Settings.levelsOf(opt.setting).indexOf(Settings.levelOf(opt.setting)));
+        const l = liveOf(opt);
+        if (l && opt.type === "toggle")
+            return l.src.levelOf(l.key) === true;
+        if (l)
+            return Math.max(0, l.src.levelsOf(l.key).indexOf(l.src.levelOf(l.key)));
         const k = catId + "." + optId;
         const saved = opt?.persist === false ? undefined : SettingsState.get("settings." + k, undefined);
         if (saved !== undefined && validValue(opt, saved))
@@ -71,7 +115,7 @@ Singleton {
         case "toggle":
             return v ? Strings.settings.on : Strings.settings.off;
         case "choice":
-            return String(opt.values[v] ?? "");
+            return String(resolve(opt).values[v] ?? "");
         case "slider":
             return v === null || v === undefined ? "" : String(v);
         case "action":
@@ -123,6 +167,11 @@ Singleton {
 
     function set(catId: string, optId: string, v: var): void {
         const opt = find(catId, optId);
+        const l = liveOf(opt);
+        if (l?.notify) {
+            l.src.setLevel(l.key, opt.type === "toggle" ? v === true : l.src.levelsOf(l.key)[v]);
+            return;
+        }
         if (opt?.setting)
             Settings.setLevel(opt.setting, Settings.levelsOf(opt.setting)[v] ?? "");
         else if (opt && opt.persist !== false)
@@ -141,7 +190,7 @@ Singleton {
         if (opt.type === "toggle")
             set(catId, optId, !v);
         else if (opt.type === "choice")
-            set(catId, optId, Math.max(0, Math.min(opt.values.length - 1, v + dir)));
+            set(catId, optId, Math.max(0, Math.min(resolve(opt).values.length - 1, v + dir)));
         else if (opt.type === "slider")
             set(catId, optId, Math.max(0, Math.min(100, v + dir * opt.step)));
     }
@@ -155,7 +204,7 @@ Singleton {
         if (opt.type === "toggle")
             set(catId, optId, !v);
         else if (opt.type === "choice")
-            set(catId, optId, (v + 1) % opt.values.length);
+            set(catId, optId, (v + 1) % resolve(opt).values.length);
         else if (opt.type === "action") {
             busy = catId + "." + optId;
             busyTimer.restart();
@@ -187,7 +236,7 @@ Singleton {
         SettingsState.clear("settings.");
         for (const c of categories)
             for (const o of c.options)
-                if (o.setting)
+                if (o.setting && !liveOf(o).notify)
                     Settings.setLevel(o.setting, "");     // back to shell.json / defaults.json
         initValues();
     }
@@ -222,7 +271,11 @@ Singleton {
                 if (o.type === "slider" && !(Number.isInteger(o.value) && o.value >= 0 && o.value <= 100
                         && Number.isInteger(o.step) && o.step >= 1))
                     return `${where}: a slider needs a value 0–100 and a step`;
-                if (o.setting !== undefined && !(o.type === "choice"
+                const live = o.setting === undefined ? null : liveOf(o);
+                if (live?.notify && !((o.type === "choice" || o.type === "toggle")
+                        && NotifyPrefs.levelsOf(live.key).length > 0))
+                    return `${where}: a notifications setting is a choice or a toggle over a known option`;
+                if (live && !live.notify && !(o.type === "choice"
                         && Settings.levelsOf(String(o.setting)).length === o.values.length))
                     return `${where}: a live setting is a choice over the setting's levels`;
             }
