@@ -7,7 +7,7 @@ description: "Tarefas da 008: Pod e text log (notificações e OSD)"
 **Input**: `specs/008-pod-text-log/` (plan.md, spec.md, research.md, data-model.md, contracts/,
 quickstart.md)
 
-**Status**: aguardando a aprovação do plano pelo dono. Nada daqui roda antes disso (constituição V).
+**Status**: plano aprovado pelo dono. MVP (T001–T027) pronto em 2026-10-28; US2+ (T028+) não começadas.
 
 **Tests**: a spec não pede testes automatizados. A prova de cada tarefa é a evidência da VM
 (princípio IV): `qs ipc call notify dump` (e `hud dump`, `settings dump`), screenshot, `lab/diffshot`,
@@ -39,14 +39,14 @@ mudar o `lab/guest/hyprland.lua` e `contracts/ipc.md`.
 **Purpose**: a VM de teste com `notify-send`, PipeWire e nenhum outro servidor; o cliente de teste;
 o servidor do Quickshell provado na VM antes de qualquer desenho.
 
-- [ ] T001 [P] Criar `lab/provision/notify.sh` (roda **dentro** da VM `teste-*`, nunca nas camadas congeladas) e a entrada `lab/provision notify`. Ele instala `libnotify pipewire wireplumber brightnessctl` com `pacman -S --needed`, liga `pipewire`/`wireplumber` do usuário e cria um sink e um source nulos persistentes (config do WirePlumber em `~/.config/wireplumber/wireplumber.conf.d/` **da VM**), com o sink padrão em 64%. Termina falhando se achar um `.service` com `Name=org.freedesktop.Notifications` em `/usr/share/dbus-1/services/` ou `~/.local/share/dbus-1/services/` (research R3). Bash `set -euo pipefail`, `shellcheck` limpo (container)
-- [ ] T002 [P] Criar `lab/notify-client` (roda na VM, via `lab/ssh`; só `gdbus`, do `glib2`). Subcomandos (research R5):
+- [x] T001 [P] Criar `lab/provision/notify.sh` (roda **dentro** da VM `teste-*`, nunca nas camadas congeladas) e a entrada `lab/provision notify`. Ele instala `libnotify pipewire wireplumber brightnessctl` com `pacman -S --needed`, liga `pipewire`/`wireplumber` do usuário e cria um sink e um source nulos persistentes (config do WirePlumber em `~/.config/wireplumber/wireplumber.conf.d/` **da VM**), com o sink padrão em 64%. Termina falhando se achar um `.service` com `Name=org.freedesktop.Notifications` em `/usr/share/dbus-1/services/` ou `~/.local/share/dbus-1/services/` (research R3). Bash `set -euo pipefail`, `shellcheck` limpo (container) — **feito** (`lab-008` `2f33636`): a entrada é `lab/provision-step notify` (`lab/provision` já é a pasta dos passos); rodou de novo nesta sessão sem erro, sink nulo a 64%; `lab/perf` 2026-10-28T160556 (`teste-b`)
+- [x] T002 [P] Criar `lab/notify-client` (roda na VM, via `lab/ssh`; só `gdbus`, do `glib2`). Subcomandos (research R5):
   - `reply` (ação `inline-reply`; espera `NotificationReplied` com `gdbus monitor` e imprime o texto);
   - `replace <id>`, `progress <id> <0-100>`, `flood <n> [app]`, `image <caminho>`;
   - `hold-name` (pega `org.freedesktop.Notifications` e segura até Ctrl-C, pro caso de borda da FR-002).
 
-  Textos fixos ou de argv, sem `eval`; `shellcheck` limpo
-- [ ] T003 [P] `lab/guest/hyprland.lua`:
+  Textos fixos ou de argv, sem `eval`; `shellcheck` limpo — **feito** (`2f33636`); `send` passou a aceitar app vazio (caso de borda); usado pelo bloco `edge` do `check-008`
+- [x] T003 [P] `lab/guest/hyprland.lua`:
   - os atalhos provisórios:
     - `ALT + N` → `qs -p ~/nier/ui ipc call notify toggle`;
     - `ALT + CTRL + N` → `… notify dnd toggle`;
@@ -56,8 +56,8 @@ o servidor do Quickshell provado na VM antes de qualquer desenho.
     - `XF86AudioMicMute` → o mesmo no source;
   - regras de camada sem animação pras namespaces `rien-notify` e `rien-osd` (conferir como o `rien-popup` já está).
 
-  Conferir que o `lab/key` manda `volumeup`, `volumedown`, `audiomute` pelo QMP. Registrar no `lab/README.md`
-- [ ] T004 **Spike na VM** (`lab/perf begin "008: spike do servidor"`): uma UI mínima em `lab/mockups/notify-spike/shell.qml` com um `NotificationServer` (todas as flags de research R1). Ela loga cada notificação (campos, `actions`, `hints`, `image`) e confirma:
+  Conferir que o `lab/key` manda `volumeup`, `volumedown`, `audiomute` pelo QMP. Registrar no `lab/README.md` — **feito** (`2f33636`): ALT+N, ALT+CTRL+N, as quatro teclas de volume e as `layer_rule` `no_anim`; o `lab/key` manda qcodes do QMP (`volumeup`, `volumedown`, `audiomute`)
+- [x] T004 **Spike na VM** (`lab/perf begin "008: spike do servidor"`): uma UI mínima em `lab/mockups/notify-spike/shell.qml` com um `NotificationServer` (todas as flags de research R1). Ela loga cada notificação (campos, `actions`, `hints`, `image`) e confirma:
   1. `notify-send` chega e o `busctl --user status` mostra o `qs` como dono;
   2. o nome exato da flag de resposta (`inlineReplySupported`) e o `lab/notify-client reply` recebendo o texto do `sendInlineReply`;
   3. `replaces_id` muda o mesmo objeto, sem sinal novo (R4);
@@ -67,8 +67,8 @@ o servidor do Quickshell provado na VM antes de qualquer desenho.
   7. o modo 600 mantido depois de uma escrita atômica do `FileView` (R14);
   8. o `udevadm monitor --kernel --subsystem-match=backlight` rodando sem root.
 
-  Registrar o resultado na seção "Validações" do `lab/README.md`. **Se 1 ou 2 falharem, parar e levar ao dono.**
-- [ ] T005 Criar o esqueleto do `lab/check-008` no padrão do `lab/check-u1` (`ok`/`ko`, pasta de evidência, `summary.txt`, `--only <bloco>`, `--profile 1080|hidpi`). Ele já roda as pré-condições do quickstart (sem outro servidor, dono do nome, sink nulo, log limpo) e o bloco `server`. Documentar T001–T005 no `lab/README.md`
+  Registrar o resultado na seção "Validações" do `lab/README.md`. **Se 1 ou 2 falharem, parar e levar ao dono.** — **feito** (`2f33636`, `lab/perf` 2026-10-27T222820, `teste-a`): as 8 perguntas respondidas no `lab/README.md`; a resposta usa `Exclusive` (o `OnDemand` só pega o teclado depois de um clique)
+- [x] T005 Criar o esqueleto do `lab/check-008` no padrão do `lab/check-u1` (`ok`/`ko`, pasta de evidência, `summary.txt`, `--only <bloco>`, `--profile 1080|hidpi`). Ele já roda as pré-condições do quickstart (sem outro servidor, dono do nome, sink nulo, log limpo) e o bloco `server`. Documentar T001–T005 no `lab/README.md` — **feito** (`2f33636`): pré-condições + bloco `server` (PASS nesta sessão)
 
 **Checkpoint**: a VM de teste aceita `notify-send`, o servidor do Quickshell funciona, as perguntas do
 spike têm resposta.
@@ -80,11 +80,11 @@ spike têm resposta.
 **Purpose**: tudo que as frentes paralelas usam. **⚠️ Depois do T020, [contracts/](contracts/) fica
 congelado.**
 
-- [ ] T006 [P] `shell/ds/Tokens.qml`, bloco marcado `// --- spec 008 ---`:
+- [x] T006 [P] `shell/ds/Tokens.qml`, bloco marcado `// --- spec 008 ---`:
   - o grupo `notify`, com todos os campos de contracts/components.md ("Tokens novos"): `band` `#1E1D19` a 84%, `bandDot`, `bandText` `#E6E1C8`, `bandText2`, `bandLine`, `bandEdge`, `bandShadow`, `block` 14, `stackW` 540, `stackGap` 12, `stackRight` 16, `stackTop` 12, `topPad` 360, `subtitleW` 1100, `subtitleBottom` 210, `critMinH` 230, `critCol` 1080, `critSide` 62, `imageSize` 72, `actionH` 32, `maxActions` 3, `lines` 4, `critLines` 3, `osdW` 600, `osdH` 72, `osdBottom` 110, `osdMeterW` 300;
   - os tempos: `cps` 90, `typeMaxMs` 700, `lowMs` 4000, `normalMs` 6000, `perCharsMs` 1000 a cada 80 além de 120, `maxMs` 12000, `osdHold` 1200;
-  - os papéis tipográficos da faixa
-- [ ] T007 [P] `shell/strings/Strings.qml`, grupo `notify` (inglês, FR-035):
+  - os papéis tipográficos da faixa — **feito**; o lint e o carregamento limpos (`lab/perf` 2026-10-28T160556 (`teste-b`))
+- [x] T007 [P] `shell/strings/Strings.qml`, grupo `notify` (inglês, FR-035):
   - o título (`LOG`, `-Transmissions`), `NOW`, `EARLIER`, `NEW`, `CRITICAL`, `+%1 in log`, `More in log`, `Reply`, `Send`, `Unknown`;
   - as frases do meio: "The app closed this notification.", "From an earlier session.", "No transmissions.", "Nothing here yet. New transmissions land here.";
   - as opções e valores do log (`Do not disturb`, `Show`, `All`, `Unread`, `Critical`, `Clear all`, `Clear`);
@@ -93,20 +93,20 @@ congelado.**
   - as teclas;
   - os rótulos e descrições das 11 opções da FR-039, com a descrição do `Text log` da FR-042;
   - as vozes (`Relay 01`, `rien-OS`, `System`);
-  - os textos fixos dos exemplos do injetor (mockup)
-- [ ] T008 [P] Gerar `shell/fixtures/notify/avatar.png` (96×96, desenhado do zero, < 20 KB) e `shell/fixtures/notify/broken.png` (bytes aleatórios) num container `nier-lab` com ImageMagick (`lab/make-test-notify-images`)
-- [ ] T009 Fixtures (domínio `notifications`, válidas contra `contracts/notifications.schema.json#/$defs/fixture`; conferir num container com python-jsonschema). Todas com `clock` fixo e os domínios da `hud-default.json`:
+  - os textos fixos dos exemplos do injetor (mockup) — **feito**
+- [x] T008 [P] Gerar `shell/fixtures/notify/avatar.png` (96×96, desenhado do zero, < 20 KB) e `shell/fixtures/notify/broken.png` (bytes aleatórios) num container `nier-lab` com ImageMagick (`lab/make-test-notify-images`) — **feito**: `avatar.png` 96×96, 1004 B; `broken.png` 3000 B aleatórios (`lab/make-test-notify-images`, `lab-008` `882ca2d`)
+- [x] T009 Fixtures (domínio `notifications`, válidas contra `contracts/notifications.schema.json#/$defs/fixture`; conferir num container com python-jsonschema). Todas com `clock` fixo e os domínios da `hud-default.json`:
   - `shell/fixtures/notifications-default.json`: o mockup, com log de 6, pilha de 3 (normal, com ações, com imagem `fixtures/notify/avatar.png`), uma crítica, o OSD em volume 66, `overflow` 0;
   - `notifications-positions.json`: a mesma pilha, com o OSD;
   - `notifications-long.json`: título e app longos, sem app, só título, texto de 600 caracteres, marcação com `<b>`, `<a>`, `<img>` e `<script>`, progresso 40, 100 entradas;
-  - `notifications-dnd.json`: DND, 5 normais não lidas e 1 crítica
-- [ ] T010 [P] `shell/config/defaults.json` + `shell/services/Settings.qml`: bloco `notifications` com os padrões da FR-039 (`position: "corner"`, `osdPosition: "bottom"`, `voice: "relay"`, `log: "session"`, `logSize: 100`, `monitor: ""`, `onScreen: 3`, `duration: "normal"`, `typing: true`, `fullscreen: "hold"`). `Settings.notifications` junta `defaults` + `shell.json` chave a chave; valor fora dos enums do schema → padrão + `console.info` (não `warn`, FR-037)
-- [ ] T011 [P] `shell/services/NotifyText.qml` (singleton, funções puras de contracts/services.md):
+  - `notifications-dnd.json`: DND, 5 normais não lidas e 1 crítica — **feito**: as 4 fixtures válidas contra `#/$defs/fixture` (python-jsonschema num container `archlinux`, label `nier-lab`)
+- [x] T010 [P] `shell/config/defaults.json` + `shell/services/Settings.qml`: bloco `notifications` com os padrões da FR-039 (`position: "corner"`, `osdPosition: "bottom"`, `voice: "relay"`, `log: "session"`, `logSize: 100`, `monitor: ""`, `onScreen: 3`, `duration: "normal"`, `typing: true`, `fullscreen: "hold"`). `Settings.notifications` junta `defaults` + `shell.json` chave a chave; valor fora dos enums do schema → padrão + `console.info` (não `warn`, FR-037) — **feito**: `notifications.position: "nada"` no `shell.json` da VM → `corner` + uma linha `INFO` (`settings: notifications.position = "nada" is not an option…`), `onScreen: 5` → origem `user`
+- [x] T011 [P] `shell/services/NotifyText.qml` (singleton, funções puras de contracts/services.md):
   - `sanitize`: escapa tudo, só `<b>`/`<i>`/`<u>` bem formadas, links viram texto, `<img>` e o resto saem;
   - `plain`, `cut` (n caracteres visíveis, fechando tags), `firstDiff`;
-  - `duration`: `low` 4000; `normal` `min(12000, 6000 + 1000 × ceil(max(0, len − 120) / 80))`; `critical` `null`; × fator quando o app não pediu tempo
-- [ ] T012 `shell/services/NotifyPrefs.qml` (singleton). A interface inteira de contracts/services.md, incluindo a **fonte viva** (`liveValue`, `setLiveValue`, `liveValues`, `liveChanged`). Precedência: fixture → padrões + `shell.json`; `set` em memória e validado. A escrita do estado entra na T049
-- [ ] T013 `shell/services/SettingsModel.qml` + `shell/fixtures/settings-default.json`. **Primeiro, conferir a branch da "Bar contrast" (004):**
+  - `duration`: `low` 4000; `normal` `min(12000, 6000 + 1000 × ceil(max(0, len − 120) / 80))`; `critical` `null`; × fator quando o app não pediu tempo — **feito**; `<script>`/`<style>` saem com o conteúdo (bloco `edge`, marcação)
+- [x] T012 `shell/services/NotifyPrefs.qml` (singleton). A interface inteira de contracts/services.md, incluindo a **fonte viva** (`liveValue`, `setLiveValue`, `liveValues`, `liveChanged`). Precedência: fixture → padrões + `shell.json`; `set` em memória e validado. A escrita do estado entra na T049 — **feito**, com a interface da emenda da T013 (`levelsOf`/`levelOf`/`setLevel`/`labelsOf` no lugar da "fonte viva"); `set` valida e grava no `SettingsState` (memória com fixtures)
+- [x] T013 `shell/services/SettingsModel.qml` + `shell/fixtures/settings-default.json`. **Primeiro, conferir a branch da "Bar contrast" (004):**
   - se ela já tiver um jeito de opção que vale de verdade, adotar o dela e atualizar `contracts/services.md` e research R13 antes de seguir;
   - senão, o campo `live` (research R13):
     - `liveSources: { notify: NotifyPrefs }`;
@@ -116,14 +116,14 @@ congelado.**
     - `isLive()`;
     - `dumpValues()` com o valor vivo.
 
-  A categoria `notifications` entra depois de `sound`, com as 11 opções da FR-039 (`live: "notify.<chave>"`, `desc` do `Strings`). As outras categorias não mudam
-- [ ] T014 `shell/services/NotifyStore.qml` (singleton): a interface inteira de contracts/services.md lendo **só a fixture** (`entries`, `stack`, `critical`, `unread`, `overflow`, `logOpen`, `held`, `dumpState()`); as funções de ação mudam o estado em memória. O servidor entra na T025
-- [ ] T015 [P] `shell/services/Osd.qml` (singleton): `current` da fixture, `show(kind, value, muted)` (valida `volume|mic|brightness`), `hide`, `suppress`, `brightnessAvailable: false`. As fontes reais entram na T043
-- [ ] T016 [P] `shell/services/Compositor.qml`: `focusedFullscreen` (do `hyprctl activewindow -j`, eventos `fullscreen`/`activewindow`/`workspace`; fixture `notifications.fullscreen`) e `focusedMonitor` atualizado também no evento `focusedmon` (research R10, R11)
-- [ ] T017 [P] `shell/ds/primitives/Band.qml`: o material (tinta, retícula em ladrilho estático, contorno interno, arcos com `Shape` opcional, bloco de 14, sombra), contracts/components.md. Na galeria, um retângulo de faixa sobre o papel e sobre a cena `dark`
-- [ ] T018 `shell/shell.qml` + `shell/services/qmldir`. Registrar `NotifyStore`, `NotifyPrefs`, `NotifyText` e `Osd`. O `IpcHandler` `notify` vem com todas as funções de contracts/ipc.md: as que dependem do servidor ou do log aberto respondem `"error: not yet"` até a história delas; `dump` sai no formato do contrato, com `page: null`
-- [ ] T019 [P] `hud dump` com `log: { visible, text, box }` (vazio até a T040); `settings dump` com `live` e `values.notifications` (contracts/ipc.md, "Acréscimos")
-- [ ] T020 Verificar na VM (`lab/perf begin "008: contrato"`, `teste-a`):
+  A categoria `notifications` entra depois de `sound`, com as 11 opções da FR-039 (`live: "notify.<chave>"`, `desc` do `Strings`). As outras categorias não mudam — **feito — a 004 já tinha o mecanismo:** `"setting"` + `SettingsState` ("salvar sempre"). Adotado, com a emenda em `contracts/services.md`, research R13/R14, data-model, plan e no schema; `settings dump` traz `live` e `values.notifications` com os valores vivos
+- [x] T014 `shell/services/NotifyStore.qml` (singleton): a interface inteira de contracts/services.md lendo **só a fixture** (`entries`, `stack`, `critical`, `unread`, `overflow`, `logOpen`, `held`, `dumpState()`); as funções de ação mudam o estado em memória. O servidor entra na T025 — **feito**: com a `notifications-default.json`, `dump` = 6 entradas, 3 na tela, 1 crítica
+- [x] T015 [P] `shell/services/Osd.qml` (singleton): `current` da fixture, `show(kind, value, muted)` (valida `volume|mic|brightness`), `hide`, `suppress`, `brightnessAvailable: false`. As fontes reais entram na T043 — **feito**: `osd` da fixture (volume 66); `notify osd volume 50 false` → `ok` e o `dump`; `osd nada …` → erro (o resto do `Osd` é da US5, não validado)
+- [x] T016 [P] `shell/services/Compositor.qml`: `focusedFullscreen` (do `hyprctl activewindow -j`, eventos `fullscreen`/`activewindow`/`workspace`; fixture `notifications.fullscreen`) e `focusedMonitor` atualizado também no evento `focusedmon` (research R10, R11) — **feito**: kitty em tela cheia → `fullscreen: true`, `held: true`; de volta → `false`. **Corrigido:** o `fullscreen` do `hyprctl` é um modo e uma janela só maximizada (1) segurava as transmissões; agora só o bit de tela cheia (2) conta
+- [x] T017 [P] `shell/ds/primitives/Band.qml`: o material (tinta, retícula em ladrilho estático, contorno interno, arcos com `Shape` opcional, bloco de 14, sombra), contracts/components.md. Na galeria, um retângulo de faixa sobre o papel e sobre a cena `dark` — **feito**: a retícula virou ladrilho (SVG) e os arcos um `Shape`, como no contrato (o WIP pintava ponto a ponto num `Canvas`, ~1,4 s travado por janela nova); na galeria, sobre o papel e sobre o escuro
+- [x] T018 `shell/shell.qml` + `shell/services/qmldir`. Registrar `NotifyStore`, `NotifyPrefs`, `NotifyText` e `Osd`. O `IpcHandler` `notify` vem com todas as funções de contracts/ipc.md: as que dependem do servidor ou do log aberto respondem `"error: not yet"` até a história delas; `dump` sai no formato do contrato, com `page: null` — **feito**: o `IpcHandler` `notify` já traz as funções de todas as histórias (as das US2+ ainda não validadas)
+- [x] T019 [P] `hud dump` com `log: { visible, text, box }` (vazio até a T040); `settings dump` com `live` e `values.notifications` (contracts/ipc.md, "Acréscimos") — **feito**: `hud dump` com `log` (e `LOG 99` depois da enxurrada); `settings dump` com `live` e `values.notifications`
+- [x] T020 Verificar na VM (`lab/perf begin "008: contrato"`, `teste-a`):
   - carrega com 0 erros e 0 avisos;
   - `notify dump` com a fixture default traz 6 entradas, 3 na tela e 1 crítica, e o `body` da `notifications-long.json` sai sanitizado;
   - `notify pref position top` → `ok`, e o `dump` mostra `position: "top"`, `origin.position: "state"` (em memória com fixture);
@@ -131,7 +131,7 @@ congelado.**
   - `settings dump` mostra a categoria `notifications` com os valores vivos;
   - `qmllint` limpo.
 
-  **Congela o contrato**
+  **Congela o contrato** — **feito** (`lab/perf` 2026-10-28T160556 (`teste-b`)): 0 erros e 0 avisos; `dump` da fixture default 6/3/1; o corpo da `notifications-long.json` sanitizado; `pref position top` → `ok`, `position: "top"`, origem `state`; `pref position nada` → erro; `settings dump` com a categoria; `qmllint` limpo. **Contrato congelado** (com a emenda da T013)
 
 **Checkpoint**: contrato congelado; as quatro frentes podem começar.
 
@@ -143,8 +143,8 @@ congelado.**
 
 **Independent Test**: `lab/check-008 --only server,first,group,flood` (SC-001, SC-005, SC-006).
 
-- [ ] T021 [P] [US1] `shell/ds/base/TypedText.qml`. Uma `NumberAnimation` de `shown` de `from` até o fim, em `min(n / Tokens.notify.cps, typeMaxMs)`; o texto visível é `NotifyText.cut`; cursor de bloco só durante a digitação; `instant` → inteiro, sem cursor (FR-031); corte em `maxLines` com reticências; `complete()`, `done()`. Na galeria: quadro parado na metade — **Frente A**
-- [ ] T022 [P] [US1] `shell/ds/composites/Transmission.qml` (contracts/components.md). Monta:
+- [x] T021 [P] [US1] `shell/ds/base/TypedText.qml`. Uma `NumberAnimation` de `shown` de `from` até o fim, em `min(n / Tokens.notify.cps, typeMaxMs)`; o texto visível é `NotifyText.cut`; cursor de bloco só durante a digitação; `instant` → inteiro, sem cursor (FR-031); corte em `maxLines` com reticências; `complete()`, `done()`. Na galeria: quadro parado na metade — **Frente A** — **feito**; o cursor sai do fim da última linha (`lineLaidOut`): o `Text` não tem `positionToRectangle`, como o research R8 supunha
+- [x] T022 [P] [US1] `shell/ds/composites/Transmission.qml` (contracts/components.md). Monta:
   - `Band` + quem fala (quadradinho, nome com reticências, `×N`, hora; × no lugar da hora com o mouse);
   - título numa linha, `TypedText`;
   - imagem de 72 (`PreserveAspectCrop`, moldura de 2 px, `file://` só depois do filtro da R6; senão ignorada com `console.info`);
@@ -152,13 +152,13 @@ congelado.**
   - linha de tempo (`remainingFrac`, parada com `instant`);
   - `More in log` quando corta.
 
-  Layouts `corner` e `preview`. Sinais `clicked(button)`, `closeClicked`, `hoverChanged`, `typedOut` — **Frente A**
-- [ ] T023 [P] [US1] `shell/ds/composites/TransmissionStack.qml`:
+  Layouts `corner` e `preview`. Sinais `clicked(button)`, `closeClicked`, `hoverChanged`, `typedOut` — **Frente A** — **feito**; `stillAt` repassado ao `TypedText` (galeria)
+- [x] T023 [P] [US1] `shell/ds/composites/TransmissionStack.qml`:
   - as três posições da FR-004, todas aqui (a opção vem na US7): **Corner** 540 à direita, a mais nova em cima; **Top band** com faixas da largura toda, coluna de 360 dos lados e 2 px entre elas; **Subtitle** com 1100 centrada, acima de `bottomInset`, a mais nova embaixo;
   - `topInset`, a linha `+N in log` (`overflowClicked`);
-  - entrada com varredura de `sweep` a partir da borda, saída com fade de 150, as outras deslizando; troca de posição sem animação (FR-041); `instant` sem nada animado — **Frente A**
-- [ ] T024 [P] [US1] Galeria (`shell/gallery/Gallery.qml`, página nova da 008, parte 1): a transmissão normal, com imagem, com progresso, com `×5` e digitando; a pilha nas três posições em miniatura — **Frente A**
-- [ ] T025 [P] [US1] `NotifyStore` real (research R1, R2, R4, R15, R17, R18), em `shell/services/NotifyStore.qml`:
+  - entrada com varredura de `sweep` a partir da borda, saída com fade de 150, as outras deslizando; troca de posição sem animação (FR-041); `instant` sem nada animado — **Frente A** — **feito**; a linha fica recortada até o primeiro quadro da janela (`FrameAnimation`) e só então varre e avisa o store (`appeared`), pra a digitação começar quando aparece de verdade
+- [x] T024 [P] [US1] Galeria (`shell/gallery/Gallery.qml`, página nova da 008, parte 1): a transmissão normal, com imagem, com progresso, com `×5` e digitando; a pilha nas três posições em miniatura — **Frente A** — **feito**: a `GalleryNotify` ligada como página 4 (Tab ×3); screenshot na sessão. Em 2560×1600 @1 a coluna 3 passa da borda (a galeria inteira escala pela altura); em 16:9 cabe
+- [x] T025 [P] [US1] `NotifyStore` real (research R1, R2, R4, R15, R17, R18), em `shell/services/NotifyStore.qml`:
   - **servidor:** `NotificationServer` com as flags do spike (`tracked = true`), `server`/`serverOwner` pelo `busctl` (argv), `entries` montadas como no data-model (`app` → `desktopEntry` → `Unknown`; `transient` fora do log);
   - **substituição** no lugar, com `typedFrom` = `firstDiff`;
   - **agrupamento:** por `appKey` enquanto a anterior está na tela, `count + 1`, tempo recomeça;
@@ -169,16 +169,16 @@ congelado.**
   - **recarga:** `PersistentProperties` (`reloadableId: "notify-session"`), religando os objetos com `lastGeneration`;
   - **injetor:** `sample(name)` pelo `Process` com argv (`notify-send`/`gdbus`, textos do `Strings`).
 
-  Provado por `notify-send` + `dump`, sem desenho — **Frente B**
-- [ ] T026 [US1] `shell/notify/NotifyLayer.qml` + `shell/shell.qml`. Antes, mesclar a `004-wallpaper-system` de novo (pega a "Bar contrast"), em commit próprio:
+  Provado por `notify-send` + `dump`, sem desenho — **Frente B** — **feito**: agrupamento (`×5`, as anteriores não lidas se não terminaram de digitar), pilha cheia (`+1 in log`, a que saiu digitando fica não lida), substituição, lote, `logSize`, pausa com o mouse, recarga (log mantido, a viva religada e a ação chegando no `notify-send -w`), injetor em ordem (laço de `sh` com argv). **Corrigido:** o prazo da digitação era agendado antes de a transmissão entrar na pilha; `appeared`/`typed` aplicados depois da atualização da vista (laço de binding). Evidência `out/008-t026-163250`
+- [x] T026 [US1] `shell/notify/NotifyLayer.qml` + `shell/shell.qml`. Antes, mesclar a `004-wallpaper-system` de novo (pega a "Bar contrast"), em commit próprio:
   - **janelas:** um `Variants` sobre as telas, com um `LazyLoader` ativo só com conteúdo naquele monitor;
   - **`PanelWindow`:** `Overlay`, `exclusionMode: Ignore`, namespace `rien-notify`, `mask` = união das caixas, teclado `None`;
   - **dentro:** `TransmissionStack` com `topInset` abaixo da barra (`Settings.barHeight` × escala);
   - **cliques** (FR-009): esquerdo dispara a ação padrão ou `hide`; direito `hide`; × `hide`;
   - **mouse por cima:** `pause` + `complete()`;
   - **saída:** monitor que some → as dele vão pro log como não lidas;
-  - **dump:** `dumpBoxes()` alimenta `screen[].box`
-- [ ] T027 [US1] `lab/check-008` blocos `first`, `group`, `flood` e a primeira parte do `edge` (sem app, só título, marcação, imagem quebrada, passageira, substituição, progresso 0→100), com `lab/burst` e a medição da research R19. Rodar em `lab/perf`; **é o "pronto quando" da fase**
+  - **dump:** `dumpBoxes()` alimenta `screen[].box` — **feito**: clique esquerdo sem ação padrão esconde (fica no log, lida); com ação padrão o `notify-send -w` imprime `default`; direito só esconde; o × esconde; o mouse por cima pausa (`remaining` parado) e completa; fora da caixa nada (a `mask`). A `004-wallpaper-system` já estava mesclada (nada novo). Evidência `out/008-t026-163250`. O monitor que some fica pro bloco `monitors` (T054)
+- [x] T027 [US1] `lab/check-008` blocos `first`, `group`, `flood` e a primeira parte do `edge` (sem app, só título, marcação, imagem quebrada, passageira, substituição, progresso 0→100), com `lab/burst` e a medição da research R19. Rodar em `lab/perf`; **é o "pronto quando" da fase** — **feito** (`lab/perf` 2026-10-28T160556 (`teste-b`)): `lab/check-008 --only server,first,group,flood,edge` **18 PASS, 0 FAIL** em 1080 (`out/check-008-1080-20261028-165654`) e em hidpi (`out/check-008-hidpi-20261028-165758`): na tela 68 ms depois do `notify-send`, digitada 289 ms depois (SC-001), ×5 (SC-006), 100 no log com 99 não lidas e `LOG 99`, CPU do `qs` 3% 5 s depois (repouso 1%) (SC-005). O "log abre em ≤ 0,3 s" do SC-005 sai como `INFO` (262/248 ms; 136–325 ms em outras rodadas): o log é da US4 e a `GroupedList` cria um delegado por entrada; o critério passa pra T040
 
 **Checkpoint**: MVP — notificações usáveis no tema.
 
@@ -244,7 +244,7 @@ congelado.**
   **Frente D**
 - [ ] T038 [US4] `shell/notify/LogPopup.qml` + `shell/shell.qml`: abre e fecha como os outros popups (monitor em foco relido, duas fases), um popup por vez (abrir o log fecha configurações e seletor, e vice-versa); `notify open|close|toggle|isOpen`; `dump.page` — **Frente D**
 - [ ] T039 [P] [US4] `shell/hud/LogCounter.qml` + `shell/hud/Hud.qml`: `LOG n` antes do relógio, escondido com 0 e sem DND, `DND n` com DND; o tom da barra (004 US6, `Tokens.hudColor`); clique → `notify open`; `hud dump` com `log` e `texts` `role: "log"` — **Frente D**
-- [ ] T040 [US4] Ligar o log ao store: `logOpen` (as novas entram na lista marcadas `NEW`, FR-027), `markAllRead()` ao abrir (FR-024), `+N in log` → abre o log. `lab/check-008` bloco `log-keys` com teclas reais (SC-009). Anotar em `contracts/components.md` o que a 007 usa (já escrito; conferir)
+- [ ] T040 [US4] Ligar o log ao store: `logOpen` (as novas entram na lista marcadas `NEW`, FR-027), `markAllRead()` ao abrir (FR-024), `+N in log` → abre o log. `lab/check-008` bloco `log-keys` com teclas reais (SC-009), e o "log abre em ≤ 0,3 s logo depois" da enxurrada (SC-005; no bloco `flood` ele é só `INFO`, ver T027: a `GroupedList` cria um delegado por entrada e passa perto do limite). Anotar em `contracts/components.md` o que a 007 usa (já escrito; conferir)
 
 ---
 
@@ -292,7 +292,7 @@ congelado.**
 
 **Independent Test**: `lab/check-008 --only prefs,saved` (SC-014, SC-015).
 
-- [ ] T048 [P] [US7] `NotifyPrefs` com o estado (research R14):
+- [ ] T048 [P] [US7] `NotifyPrefs` com o estado (research R14; **emenda da T013:** as escolhas já ficam no `SettingsState` da 004, chaves `notifications.<chave>`; aqui sobra conferir origem, reset, valor inválido e o "nunca no `~/.config`"):
   - **ordem de quem vale:** `$XDG_STATE_HOME/rien-os/notifications.json` (`{ "version": 1, "dnd", "prefs" }`, só as chaves mudadas) acima de `shell.json` e dos padrões;
   - **`origin`;**
   - **`reset()`** apaga as escolhas;
