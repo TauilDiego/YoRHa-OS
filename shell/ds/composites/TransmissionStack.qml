@@ -159,17 +159,29 @@ Item {
                 item = found;
                 show();
             }
-            // Once, as soon as the window is mapped: the sweep in, and the store is told.
+            // Once, when the window has drawn its first frame with this row (a new layer can take a
+            // moment to map and draw): the sweep in starts, and the store is told (its typing starts).
+            // Until then the row is clipped to nothing.
             property bool seen: false
+            property bool entered: false
             function show(): void {
                 if (seen || !root.ready || !item)
                     return;
                 seen = true;
-                if (!root.instant)
-                    enter.start();
-                else
-                    reveal.width = Qt.binding(() => row.width);
-                root.appeared(item.id);
+                firstFrame.start();
+            }
+            FrameAnimation {
+                id: firstFrame
+                onTriggered: {
+                    stop();
+                    row.entered = true;
+                    if (!root.instant)
+                        enter.start();
+                    else
+                        reveal.width = Qt.binding(() => row.width);
+                    if (row.item)
+                        root.appeared(row.item.id);
+                }
             }
             Connections {
                 target: root
@@ -196,7 +208,7 @@ Item {
                 x: root.position === "corner" ? row.width - width : 0
                 width: 0
                 height: row.height
-                clip: enter.running
+                clip: enter.running || !row.entered
 
                 Transmission {
                     id: tx
@@ -224,7 +236,7 @@ Item {
                     onReplyOpened: root.replyOpened(row.item.id)
                     onReplySent: text => root.replySent(row.item.id, text)
                     onReplyCancelled: root.replyCancelled(row.item.id)
-                    onTypedOut: if (row.item && row.seen) root.typedOut(row.item.id)
+                    onTypedOut: if (row.item && row.entered) root.typedOut(row.item.id)
                 }
             }
             NumberAnimation {

@@ -268,9 +268,9 @@ Singleton {
         // The same app with a transmission on screen: that transmission shows the newest (FR-017).
         const same = e.appKey !== "" ? stack.find(t => t.appKey === e.appKey && !t.replying) : null;
         if (same) {
+            // The one it replaces on screen stays as it was: read if it was typed out, else unread
+            // (like one that leaves a full stack before it is typed out, FR-018).
             const prev = entries.find(x => x.id === same.id);
-            if (prev)
-                prev.read = true;
             same.ids.push(e.id);
             same.id = e.id;
             same.entry = e;
@@ -452,11 +452,21 @@ Singleton {
             commit(false);
     }
     // The view says the typing is done (or the user completed it).
+    // It can come while a view is being updated from `stack`: applied right after (no binding loop).
+    property var typedQueue: []
     function typed(id: int): void {
-        const t = txOf(id);
-        if (t && !t.typed) {
-            t.typedAt = Date.now();
-            settle(t.typedAt);
+        typedQueue.push({ id: id, at: Date.now() });
+        Qt.callLater(root.applyTyped);
+    }
+    function applyTyped(): void {
+        const list = typedQueue;
+        typedQueue = [];
+        for (const q of list) {
+            const t = txOf(q.id);
+            if (t && !t.typed && t.seen) {
+                t.typedAt = q.at;
+                settle(q.at);
+            }
         }
     }
     // Remaining ms of transmission `id` (null: no time, critical or fixtures).
@@ -972,6 +982,15 @@ Singleton {
     function gv(s: string): string {
         return "'" + s.replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "'";
     }
+    // Several notifications from one app, one after the other (as a script sends them): a fixed
+    // shell loop over argv, the texts never interpreted.
+    function inOrder(app: string, urgency: string, items: var): void {
+        const args = [];
+        for (const it of items)
+            args.push(it[0], it[1]);
+        Quickshell.execDetached(["sh", "-c", 'a=$1; u=$2; shift 2; while [ $# -ge 2 ]; do notify-send -u "$u" -a "$a" -- "$1" "$2"; shift 2; done',
+            "sh", app, urgency].concat(args));
+    }
     function sample(name: string): string {
         const S = Strings.notify.samples;
         const ns = (args) => Quickshell.execDetached(["notify-send"].concat(args));
@@ -992,8 +1011,7 @@ Singleton {
             ns(["-u", "critical", "-a", S.critical.app, S.critical.title, S.critical.body]);
             break;
         case "flood5":
-            for (let i = 1; i <= 5; i++)
-                ns(["-a", S.flood.app, S.flood.title, S.flood.body.arg(i)]);
+            inOrder(S.flood.app, "normal", [1, 2, 3, 4, 5].map(i => [S.flood.title, S.flood.body.arg(i)]));
             break;
         case "long":
             ns(["-a", S.long.app, S.long.title, S.long.body]);
@@ -1005,8 +1023,7 @@ Singleton {
             ns(["-u", "low", "-a", S.low.app, S.low.title, S.low.body]);
             break;
         case "script100":
-            for (let i = 1; i <= 100; i++)
-                ns(["-u", "low", "-a", S.script.app, S.script.title.arg(i), S.script.body.arg(i)]);
+            inOrder(S.script.app, "low", Array.from({ length: 100 }, (_, i) => [S.script.title.arg(i + 1), S.script.body.arg(i + 1)]));
             break;
         case "system":
             system(S.system.title, S.system.body, "normal", false);
