@@ -166,3 +166,16 @@ Branch `004-acabamento`, VM `teste-a` (2 núcleos, 4 GB), `lab/perf` `2026-10-27
 - **Sobras:** domínios `settings` e `wallpaper` no `fixtures.schema.json` da 001; o HUD relê a
   escala sozinho depois do `lab/profile`.
 - **Imagem de revisão:** `~/.local/share/nier-lab/out/004-contraste-revisao.png`.
+
+### Depois das decisões do dono (P2 e "salvar sempre")
+
+`lab/perf` `2026-10-27T215859`, VM `teste-a` (2 núcleos, 4 GB). Tarefas T067–T070.
+
+- **High = P2:** tinta `#2E2C27` e placa de papel a 55% atrás dos textos, só no tom papel. SC-011
+  passa no High nos 8 fundos, em 1080 e hidpi: 6,04 nas cenas, 5,03 no meio-tom, ≥ 4,77 no tom
+  claro. SC-012 continua em 0 níveis. O Normal não mudou.
+- **Salvar sempre:** `SettingsState` guarda os valores do popup em
+  `$XDG_STATE_HOME/rien-os/settings.json`, por cima da config; o `settings reset` limpa; fixtures
+  não leem nem escrevem. Contrato pra 007 e 008: `contracts/settings-state.md`.
+- **Roteiros:** `check-u1` 15/15, `check-003 --profile 1080` 25/25, `check-004` 58/0; log 0 avisos;
+  `qmllint` limpo.

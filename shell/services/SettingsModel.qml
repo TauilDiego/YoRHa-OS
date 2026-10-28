@@ -13,9 +13,11 @@ import "../strings"
 // system (FR-018).
 // Values: toggle → bool, choice → index in `values`, slider → 0–100; actions and infos have none.
 // 004 acabamento: a choice with `"setting": key` is live. Its value is the shell setting's level
-// (Settings.levelOf), and changing it changes the setting for the session (Settings.setSession).
-// Still nothing is written.
+// (Settings.levelOf), and changing it changes and saves the setting (Settings.setLevel).
 // Options are addressed by category id + option id; "cat.opt" keys the maps below.
+// "Salvar sempre" (owner, 2026-10-27; spec 004 amendment (3)): every value changed here is saved in
+// SettingsState as "settings.<cat>.<opt>" (unless the option says "persist": false) and wins over
+// the catalog's value after a restart. reset() clears what was saved.
 Singleton {
     id: root
 
@@ -44,7 +46,23 @@ Singleton {
         if (opt?.setting)
             return Math.max(0, Settings.levelsOf(opt.setting).indexOf(Settings.levelOf(opt.setting)));
         const k = catId + "." + optId;
+        const saved = opt?.persist === false ? undefined : SettingsState.get("settings." + k, undefined);
+        if (saved !== undefined && validValue(opt, saved))
+            return saved;
         return Object.prototype.hasOwnProperty.call(current, k) ? current[k] : null;
+    }
+
+    // Is `v` a value `opt` can take (a saved value is checked before it is used)?
+    function validValue(opt: var, v: var): bool {
+        switch (opt?.type) {
+        case "toggle":
+            return typeof v === "boolean";
+        case "choice":
+            return Number.isInteger(v) && v >= 0 && v < opt.values.length;
+        case "slider":
+            return Number.isInteger(v) && v >= 0 && v <= 100;
+        }
+        return false;
     }
 
     // The text of a value of `opt`, as the row and the card show it.
@@ -106,7 +124,9 @@ Singleton {
     function set(catId: string, optId: string, v: var): void {
         const opt = find(catId, optId);
         if (opt?.setting)
-            Settings.setSession(opt.setting, Settings.levelsOf(opt.setting)[v] ?? "");
+            Settings.setLevel(opt.setting, Settings.levelsOf(opt.setting)[v] ?? "");
+        else if (opt && opt.persist !== false)
+            SettingsState.set("settings." + catId + "." + optId, v);
         const next = Object.assign({}, current);
         next[catId + "." + optId] = v;
         current = next;
@@ -150,18 +170,26 @@ Singleton {
         set(catId, optId, Math.max(0, Math.min(100, Math.round(v * 100))));
     }
 
-    function reset(): void {
+    // The catalog's values; what was saved still wins (value()).
+    function initValues(): void {
         const next = {};
         for (const c of categories)
-            for (const o of c.options) {
-                if (o.setting)
-                    Settings.setSession(o.setting, "");     // back to shell.json / defaults.json
-                else if (hasValue(o))
+            for (const o of c.options)
+                if (!o.setting && hasValue(o))
                     next[c.id + "." + o.id] = o.value;
-            }
         current = next;
         busy = "";
         busyTimer.stop();
+    }
+
+    // Back to the catalog and the config: the saved values are cleared too.
+    function reset(): void {
+        SettingsState.clear("settings.");
+        for (const c of categories)
+            for (const o of c.options)
+                if (o.setting)
+                    Settings.setLevel(o.setting, "");     // back to shell.json / defaults.json
+        initValues();
     }
 
     function dumpValues(): var {
@@ -218,7 +246,7 @@ Singleton {
         needs = data.needs ?? {};
         categories = data.categories;
         error = "";
-        reset();
+        initValues();
     }
 
     function fail(reason: string): void {

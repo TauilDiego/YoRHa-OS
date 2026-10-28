@@ -91,12 +91,12 @@ Singleton {
     // --- end spec 004 ----------------------------------------------------------------------------
 
     // --- 004 acabamento: the top bar's contrast ---------------------------------------------------
-    // "normal" (the approved palettes) or "high" (every text of the bar in the main ink, a heavier
-    // clock), from shell.json / defaults.json. The settings pop-up (Appearance › Bar contrast)
-    // changes it live for the session, without writing any file (spec 003 FR-018); its reset, or a
-    // restart, goes back to the configured value.
+    // "normal" (the approved palettes) or "high" (a darker ink and a paper plate behind the texts
+    // over paper, a heavier clock), from shell.json / defaults.json. The settings pop-up
+    // (Appearance › Bar contrast) changes it live and saves it in SettingsState ("shell.barContrast"),
+    // which wins over the config; its reset goes back to the configured value.
     readonly property var barContrastLevels: ["normal", "high"]
-    property string barContrastSession: ""
+    readonly property string barContrastSaved: String(SettingsState.get("shell.barContrast", ""))
     readonly property string barContrastConfigured: {
         const v = merged.barContrast;
         if (barContrastLevels.includes(v))
@@ -105,7 +105,7 @@ Singleton {
             console.warn(`settings: barContrast must be one of ${barContrastLevels.join(", ")}, using the default`);
         return barContrastLevels.includes(defaults.barContrast) ? defaults.barContrast : "normal";
     }
-    readonly property string barContrast: barContrastLevels.includes(barContrastSession) ? barContrastSession : barContrastConfigured
+    readonly property string barContrast: barContrastLevels.includes(barContrastSaved) ? barContrastSaved : barContrastConfigured
 
     // The shell settings the settings pop-up changes live: an option with `"setting": key` in the
     // catalog is a choice over these values, in this order.
@@ -115,9 +115,12 @@ Singleton {
     function levelOf(key: string): string {
         return key === "barContrast" ? barContrast : "";
     }
-    function setSession(key: string, level: string): void {
-        if (key === "barContrast")
-            barContrastSession = barContrastLevels.includes(level) ? level : "";
+    // Save `level` for `key` (SettingsState, "shell.<key>"); "" goes back to shell.json / defaults.
+    function setLevel(key: string, level: string): void {
+        if (levelsOf(key).includes(level))
+            SettingsState.set("shell." + key, level);
+        else
+            SettingsState.remove("shell." + key);
     }
     // --- end 004 acabamento ------------------------------------------------------------------------
 

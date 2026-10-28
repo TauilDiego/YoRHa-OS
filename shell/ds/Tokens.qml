@@ -262,13 +262,16 @@ Singleton {
         rule: Qt.rgba(150 / 255, 148 / 255, 140 / 255, 0.75)
         alert: "#C0574A"
     }
-    // "Bar contrast: High" (System Settings › Appearance, 004 acabamento): the paper tone with every
-    // secondary text (title, date, values, a dimmed tab) in the main ink. The light tone is the same.
+    // "Bar contrast: High" (System Settings › Appearance; the owner's P2, 2026-10-27): over paper,
+    // every text of the bar (secondary ones too) and the selected tab's plate in a darker ink, and a
+    // paper plate (hudHighPlate) behind the texts that have no tab plate. The light tone is the same.
+    readonly property color hudHighInk: "#2E2C27"
+    readonly property color hudHighPlate: Qt.rgba(0xC9 / 255, 0xC5 / 255, 0xAB / 255, 0.55)
     readonly property HudTone hudPaperHigh: HudTone {
-        ink: root.color.darkGray
-        ink2: root.color.darkGray
+        ink: root.hudHighInk
+        ink2: root.hudHighInk
         rest: root.color.lightGray
-        sel: root.color.darkGray
+        sel: root.hudHighInk
         selInk: root.color.lightYellow
         track: root.color.lightGray
         fill: root.color.darkGray

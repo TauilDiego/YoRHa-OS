@@ -479,7 +479,7 @@ tons:
 | Papel | Uso | Tom papel | Tom claro |
 |---|---|---|---|
 | `ink` | texto principal, hora, tinta da aba normal, rótulos das leituras | `#4E4B42` | `#D7D1B3` |
-| `ink2` | título, data, valores, tinta da aba apagada | `#676458` (High: `#4E4B42`) | `#AFACA1` |
+| `ink2` | título, data, valores, tinta da aba apagada | `#676458` (High: `#2E2C27`) | `#AFACA1` |
 | `rest` | placa da aba, faixas verticais | `#B1AB93` | `#D7D1B3` a 16% |
 | `sel` / `selInk` | placa e tinta da aba em foco (e da destacada) | `#4E4B42` / `#D7D1B3` | `#D7D1B3` / `#4E4B42` |
 | `track` / `fill` | trilho e preenchimento do medidor | `#B1AB93` / `#4E4B42` | `#D7D1B3` a 22% / `#D7D1B3` |
@@ -494,13 +494,22 @@ canal a canal, com alfa. `Label`, `Rule`, `HeaderButton`, `Meter` e `TabBar` rec
 **Contraste da barra** (System Settings › Appearance › Bar contrast; `barContrast` no `shell.json`,
 `"normal"` de padrão; decisão do dono, 2026-10-27):
 - **Normal:** as paletas acima.
-- **High:** no tom papel, título, data, valores e a tinta da aba apagada passam pra `ink`
-  (`Tokens.hudPaperHigh`), e a hora sai em Bold (no Normal, DemiBold). O tom claro é o mesmo.
+- **High** (a P2 escolhida pelo dono): no tom papel, todo texto da barra e a placa da aba em foco
+  usam a tinta `#2E2C27` (`Tokens.hudHighInk`, em `Tokens.hudPaperHigh`), e uma placa de papel
+  `#C9C5AB` a 55% (`Tokens.hudHighPlate`) fica atrás do título, de cada leitura (rótulo, medidor e
+  valor), da data e da hora, com 3 × 2 px de folga. A hora sai em Bold (no Normal, DemiBold). A placa
+  some junto com o tom papel; o tom claro é o mesmo nos dois modos.
 - A `ink2` do tom claro é `#AFACA1` nos dois modos (era `#96948C`): a aba apagada fica ≥ 4,5:1 sobre
   a placa.
 - `Tokens.hudColorAt(papel, tom, high)` dá a cor; `HeaderButton` e `TabBar` recebem `high` (padrão
   `false`), e o resto da UI não muda.
-- O popup troca na hora e vale pra sessão; o `shell.json` vale depois de reiniciar.
+- O popup troca na hora e salva a escolha (ver "Configurações salvas" abaixo).
+
+**Configurações salvas** ("salvar sempre", decisão do dono de 2026-10-27): o que muda no popup de
+configurações fica em `$XDG_STATE_HOME/rien-os/settings.json` (`SettingsState`), por cima do
+`shell.json` e do `defaults.json`, e continua depois de reiniciar. O `settings reset` limpa. Com
+fixtures o arquivo não é lido nem escrito. Os próximos menus (007, 008) usam o mesmo mecanismo; o
+contrato está em `specs/004-wallpaper-system/contracts/settings-state.md`.
 
 **Qual tom:**
 - cenas de papel (`menu`, `rules`, `plain`) → papel;

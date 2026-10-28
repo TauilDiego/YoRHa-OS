@@ -36,6 +36,15 @@ falhava nas paletas aprovadas. O dono decidiu:
   Normal é medido e relatado, sem ser critério;
 - o aviso do Qt 6.12.0 ao abrir um popup é silenciado (FR-024).
 
+**Emenda de 2026-10-27 (3), decisões do dono depois da medição:**
+- **High = P2:** com a tinta principal, o High não chegava a 4,5:1 no tom papel (hora 2,57 na vinheta
+  do canto, abas 3,78, imagem de meio-tom 1,60). O dono escolheu a P2: no tom papel, tinta
+  `#2E2C27` e uma placa de papel (`#C9C5AB` a 55%) atrás dos textos da barra, só no High (FR-028).
+  O Normal não muda.
+- **Salvar sempre:** o que muda no popup de configurações continua depois de reiniciar o shell, num
+  arquivo de estado comum (`$XDG_STATE_HOME/rien-os/settings.json`), que as specs 007 e 008 vão
+  reusar (FR-031, `contracts/settings-state.md`). Revê a FR-018 da 003.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Um fundo igual ao dos menus do jogo (Priority: P1)
@@ -360,9 +369,11 @@ medido nos pixels). Sem dados de teste, gravar rajadas da camuflagem Menu → Da
   | `rule` | régua pontilhada | 78,75,66,1 | 150,148,140,0,75 |
   | `alert` | estado crítico | `#8F3A30` | `#C0574A` |
 
-  O tom papel é igual aos tokens de hoje. **Emenda (2):** com Bar contrast = High, o tom papel usa a
-  tinta principal também na `ink2` (`Tokens.hudPaperHigh`), e a hora sai em Bold no lugar de
-  DemiBold; o tom claro é o mesmo nos dois modos, com a `ink2` clareada de 150,148,140 pra
+  O tom papel é igual aos tokens de hoje. **Emenda (2), com a (3):** com Bar contrast = High, o tom
+  papel usa a tinta `#2E2C27` em `ink`, `ink2` e `sel` (`Tokens.hudPaperHigh`), põe uma placa de
+  papel `#C9C5AB` a 55% (`Tokens.hudHighPlate`) atrás do título, de cada leitura (rótulo, medidor e
+  valor), da data e da hora, com 3 × 2 px de folga, e a hora sai em Bold no lugar de DemiBold. A
+  placa some junto com o tom papel (alfa × (1 − tom)); o tom claro é o mesmo nos dois modos, com a `ink2` clareada de 150,148,140 pra
   175,172,161 (a aba apagada ia a 3,6–4,2:1 sobre a placa). Os componentes da barra (aba, barra de abas, medidor,
   régua e texto) recebem o tom como parâmetro, com 0 (papel) de padrão: a galeria, o popup da 003 e
   tudo que não é a barra MUST continuar idênticos, pixel a pixel.
@@ -372,9 +383,16 @@ medido nos pixels). Sem dados de teste, gravar rajadas da camuflagem Menu → Da
 - **FR-030** (emenda (2)): A opção **Bar contrast** (`Normal` / `High`) MUST aparecer em System
   Settings › Appearance, logo depois de "Top bar height", e trocar a barra na hora, com o popup
   aberto. O valor vem da configuração `barContrast` (`"normal"` / `"high"`, padrão `"normal"` no
-  `defaults.json`, sobrescrito pelo `shell.json`), como as outras configurações do shell. A troca
-  pelo popup vale pra sessão e não grava arquivo (FR-018 da 003); o `settings reset` e o reinício
-  voltam ao valor configurado.
+  `defaults.json`, sobrescrito pelo `shell.json`), como as outras configurações do shell. **Emenda
+  (3):** a troca pelo popup é salva no estado (`shell.barContrast`, FR-031) e vale mais que a config;
+  o `settings reset` volta ao valor configurado.
+- **FR-031** (emenda (3), decisão do dono de 2026-10-27, "salvar sempre"): Todo valor mudado no popup
+  de configurações MUST continuar depois de reiniciar o shell. Um mecanismo comum guarda os valores
+  em `$XDG_STATE_HOME/rien-os/settings.json` (nunca no `~/.config`): lido no início, escrito 250 ms
+  depois da última mudança, de forma atômica, por cima da base (`shell.json` e `defaults.json`). O
+  `settings reset` limpa o estado. Com fixtures, o arquivo não é lido nem escrito. O contrato
+  (chaves, API, a marca `persist` do catálogo) está em `contracts/settings-state.md`, pra ser
+  reusado pelas specs 007 e 008.
 
 ### Key Entities
 
@@ -418,6 +436,10 @@ Cada critério diz qual evidência da VM o comprova (constituição IV).
   contraste é medido e relatado, sem ser critério. Evidência: medição nos screenshots (a cor do
   texto contra o fundo sem a barra, com a placa da aba por cima quando é uma aba), em 1080 e hidpi,
   nos dois modos.
+- **SC-014** (emenda (3)): Sem fixtures, uma opção mudada por teclas reais no popup continua depois de
+  reiniciar o `qs`; o único arquivo escrito fica em `~/.local/state/rien-os/`; o `settings reset`
+  volta ao catálogo e à config, também depois de outro reinício. Evidência: `settings dump` e
+  `hud dump` antes e depois, o arquivo de estado e a lista de arquivos escritos (`lab/check-004`).
 - **SC-012** (US6): A área vazia da barra (sem abas, textos, medidores e régua) fica a ≤ 2 níveis (em
   255) da cena que está embaixo. Evidência: o mesmo fundo fotografado com a barra e sem ela, nas 4
   cenas e nas imagens de teste.

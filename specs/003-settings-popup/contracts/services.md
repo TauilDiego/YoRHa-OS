@@ -31,5 +31,6 @@ mesmas regras: a UI lê dados só dele, e uma leitura que falha nunca lança err
 004 (2026-10-27), junto com o domínio `wallpaper` da 004.
 
 **Regras:**
-- As mudanças só valem em memória (FR-018). Nada é gravado.
+- ~~As mudanças só valem em memória (FR-018). Nada é gravado.~~ Revisto em 2026-10-27 ("salvar
+  sempre"): as mudanças são salvas no estado (`specs/004-wallpaper-system/contracts/settings-state.md`).
 - Catálogo inválido: `categories` vazio, `error` preenchido, um `console.warn` com o motivo.

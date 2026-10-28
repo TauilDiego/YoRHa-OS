@@ -13,7 +13,7 @@ import "../primitives"
 //   when the tab is deselected (Tokens.motion.untouch). The button's own height does not change.
 // Tabs have no Selector (the owner's call): only list items carry the Pod cursor.
 // `tone` (spec 004 US6): the top bar's tone, 0 paper → 1 light (plate, ink and the selected ink).
-// `high` (004 acabamento): the bar's High contrast, a dimmed tab inked like a normal one on paper.
+// `high` (004 acabamento): the bar's High contrast (Tokens.hudPaperHigh over paper).
 Item {
     id: root
 
@@ -137,7 +137,7 @@ Item {
         width: root.width
         height: root.bandH
         visible: root.fill < 1
-        color: Tokens.hudColor("rest", root.tone)
+        color: Tokens.hudColorAt("rest", root.tone, root.high)
     }
 
     Face {
@@ -156,7 +156,7 @@ Item {
         width: root.width
         height: root.stemH
         visible: !root.inked && height > 0
-        color: Tokens.hudColor("sel", root.tone)
+        color: Tokens.hudColorAt("sel", root.tone, root.high)
     }
 
     Rectangle {
@@ -164,9 +164,9 @@ Item {
         height: root.bandH + root.stemH
         visible: width > 0
         clip: true
-        color: Tokens.hudColor("sel", root.tone)
+        color: Tokens.hudColorAt("sel", root.tone, root.high)
 
-        Face { ink: Tokens.hudColor("selInk", root.tone) }
+        Face { ink: Tokens.hudColorAt("selInk", root.tone, root.high) }
     }
 
     MouseArea {
