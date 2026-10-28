@@ -16,6 +16,9 @@ import "../strings"
 // spec 004 US6: the bar has no background of its own. The monitor's wallpaper (and its
 // transitions) shows under it, and its colors follow that wallpaper: `tone`, 0 paper → 1 light,
 // from WallpaperStore.toneMix (set by the monitor's Wallpaper), handed to every piece.
+// 004 acabamento: `high` (Settings.barContrast, System Settings › Appearance › Bar contrast):
+// over paper, a darker ink for every text, a paper plate behind the texts (fading out toward the
+// light tone, where it is not drawn) and a heavier clock.
 PanelWindow {
     id: root
 
@@ -55,6 +58,14 @@ PanelWindow {
 
     // spec 004 US6: this monitor's tone (0 paper → 1 light).
     readonly property real tone: WallpaperStore.toneMix[monitorName] ?? 0
+    readonly property bool high: Settings.barContrast === "high"
+    function ink(role: string): color {
+        return Tokens.hudColorAt(role, root.tone, root.high);
+    }
+    // The High plate behind the texts: paper at 55% over paper, gone in the light tone.
+    readonly property color plate: Qt.rgba(Tokens.hudHighPlate.r, Tokens.hudHighPlate.g, Tokens.hudHighPlate.b,
+                                           Tokens.hudHighPlate.a * Math.max(0, 1 - root.tone))
+    readonly property bool plated: root.high && root.tone < 1
 
     // What the bar shows, for `hud dump` (contracts/ipc.md).
     function dumpEntry(): var {
@@ -77,6 +88,7 @@ PanelWindow {
             // color, so the contrast can be measured on the pixels.
             tone: tone >= 0.5 ? "light" : "paper",
             toneMix: Math.round(tone * 1000) / 1000,
+            contrast: Settings.barContrast,
             texts: textBoxes()
         };
     }
@@ -97,7 +109,7 @@ PanelWindow {
             w: Math.round(label.paintedWidth),
             h: Math.round(label.paintedHeight),
             color: hex(label.color),
-            plate: ""
+            plate: root.plated ? hex(root.plate) : ""
         };
     }
     function textBoxes(): var {
@@ -112,8 +124,8 @@ PanelWindow {
                 y: Math.round(tabBar.y),
                 w: g.w,
                 h: tabBar.bandH,
-                color: hex(Tokens.hudColor(inked ? "selInk" : t.state === "dimmed" ? "ink2" : "ink", root.tone)),
-                plate: hex(Tokens.hudColor(inked ? "sel" : "rest", root.tone))
+                color: hex(root.ink(inked ? "selInk" : t.state === "dimmed" ? "ink2" : "ink")),
+                plate: hex(root.ink(inked ? "sel" : "rest"))
             });
         });
         if (title.visible && title.text !== "")
@@ -137,6 +149,7 @@ PanelWindow {
         width: root.width - 2 * root.margin
         s: root.s
         tone: root.tone
+        high: root.high
         ruleGap: root.ruleGap
         ruleScale: root.s * root.ruleShare
         model: root.tabs.map((t, i) => ({
@@ -171,12 +184,17 @@ PanelWindow {
             s: root.s
             tone: root.tone
             role: "small"
-            color: Tokens.hudColor("ink2", root.tone)
+            color: root.ink("ink2")
             text: Compositor.activeTitle
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             maximumLineCount: 1
             visible: width > 0
+            Plate {
+                x: (title.width - title.paintedWidth) / 2 - padX
+                width: title.paintedWidth + 2 * padX
+                visible: root.plated && title.text !== ""
+            }
         }
 
         Row {
@@ -207,8 +225,9 @@ PanelWindow {
                     s: root.s
                     tone: root.tone
                     role: "headerButton"
-                    color: Tokens.hudColor("ink2", root.tone)
+                    color: root.ink("ink2")
                     text: Clock.dateText
+                    Plate {}
                 }
                 Label {
                     id: timeText
@@ -216,10 +235,31 @@ PanelWindow {
                     s: root.s
                     tone: root.tone
                     role: "headerButton"
+                    // High contrast: one step heavier (DemiBold → Bold), on the variable axis too.
+                    readonly property int weight: root.high ? Font.Bold : textStyle.weight
+                    font.weight: weight
+                    font.variableAxes: ({ "wght": weight })
+                    color: root.ink("ink")
                     text: Clock.timeText
+                    Plate {}
                 }
             }
         }
+    }
+
+    // The High plate behind a text (its parent): a few px around it, under it (z -1). The padding
+    // stays under 4 logical px, inside the box the tests leave out of the bar's empty area.
+    component Plate: Rectangle {
+        readonly property real padX: 3
+        readonly property real padY: 2
+        x: -padX
+        y: -padY
+        z: -1
+        readonly property var host: parent        // the Label it sits behind
+        width: (host?.paintedWidth ?? 0) + 2 * padX
+        height: (host?.paintedHeight ?? 0) + 2 * padY
+        color: root.plate
+        visible: root.plated
     }
 
     // One reading: label, meter, integer percent (+ charging / muted marks).
@@ -240,7 +280,15 @@ PanelWindow {
             s: root.s
             tone: root.tone
             role: "small"
+            color: root.ink("ink")
             text: view.reading.label ?? ""
+            // One plate for the whole reading (label, meter, value), behind them; it ends with the
+            // value's digits, not with the room kept for "100".
+            Plate {
+                y: -readingLabel.y - padY
+                width: readingValue.x + readingValue.paintedWidth + 2 * padX
+                height: view.height + 2 * padY
+            }
         }
         Meter {
             anchors.verticalCenter: parent.verticalCenter
@@ -258,7 +306,7 @@ PanelWindow {
             s: root.s
             tone: root.tone
             role: "small"
-            color: Tokens.hudColor(view.reading.critical ? "alert" : "ink2", root.tone)
+            color: root.ink(view.reading.critical ? "alert" : "ink2")
             text: view.muted ? Strings.muted
                              : Math.round((view.reading.value ?? 0) * 100) + (view.charging ? Strings.charging : "")
             Label {

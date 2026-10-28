@@ -31,6 +31,25 @@
       },
       "required": ["existing", "focused"]
     },
-    "activeWindow": { "type": "string", "description": "Empty string = no active window" }
+    "activeWindow": { "type": "string", "description": "Empty string = no active window" },
+    "settings": { "type": "string", "description": "Caminho de outro catálogo de configurações (spec 003)" },
+    "wallpaper": {
+      "type": "object", "additionalProperties": false,
+      "description": "Spec 004 (data-model, 'Fixture'): a pasta de imagens (relativa ao shell/), a escolha e a transição; com ele nada é escrito no estado e as trocas são instantâneas",
+      "properties": {
+        "folder": { "type": "string" },
+        "all": { "type": "string", "description": "Id do papel de parede de todos os monitores (scene:menu, image:<caminho>)" },
+        "monitors": { "type": "object", "additionalProperties": { "type": "string" } },
+        "transition": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "kind": { "enum": ["camouflage", "wipe", "tiles", "crossfade"] },
+            "cell": { "enum": [16, 24, 32] },
+            "trail": { "type": "integer", "minimum": 400, "maximum": 4000 },
+            "glitch": { "enum": [0, 1, 2] }
+          }
+        }
+      }
+    }
   }
 }

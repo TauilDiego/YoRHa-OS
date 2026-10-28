@@ -51,5 +51,6 @@ lado com o mockup, são a evidência pra aprovação do dono (SC-009): a imagem 
 `~/.local/share/nier-lab/out/003-revisao-sc009.png` (ver [relatorio.md](relatorio.md)).
 
 **Log (cenário 9):** o Qt 6.12.0 escreve um WARN `qt.qpa.wayland.textinput` toda vez que uma janela
-sem campo de texto ganha o teclado (o popup, a galeria). Não é QML e não sai do nosso código. O
-`check-003` conta esse aviso à parte; silenciar ou não fica pro dono decidir.
+sem campo de texto ganha o teclado (o popup, a galeria). Não é QML e não sai do nosso código. Desde
+2026-10-27 (decisão do dono, spec 004 FR-024) ele é silenciado onde o `qs` inicia
+(`QT_LOGGING_RULES=qt.qpa.wayland.textinput.warning=false`), e o `check-003` exige 0 avisos.
