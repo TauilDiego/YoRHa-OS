@@ -21,6 +21,12 @@ quando o menu abre em outra aba.
 `PauseFrame` novo copiado do `PopupFrame` (cópia, contra a FR-032); as quatro páginas sempre
 criadas (mais simples, mas paga os ícones de APPS em toda abertura).
 
+**Revisto na implementação (T016, 2026-10-28):** as quatro páginas são criadas junto com o menu (a
+alternativa "sempre criadas"). A APPS só desenha um ícone, o da prévia (a lista é texto), então o
+custo que o `Loader` pouparia é pequeno; e o `pause dump` precisa do estado de abertura de uma aba
+ainda não visitada (contracts/ipc.md), que só a página sabe montar. O menu continua sendo
+descarregado inteiro ao fechar.
+
 ## R2. O `SUPER + I`: aba SYSTEM, não popup avulso (decisão pedida ao plano)
 
 **Decisão:** o `SUPER + I` (`ALT + I` na VM) passa a abrir o menu de pausa na aba SYSTEM. O popup
@@ -144,6 +150,11 @@ com "o esperado em primeiro".
 - **`Square only`:** o quadrado do jogo (`Square` da 001), grande, no lugar do ícone;
 - **fixtures:** ícones SVG desenhados pelo projeto em `shell/fixtures/pause/icons/` (os glifos
   genéricos do mockup), pra screenshots iguais e nada de ícone de terceiros no repositório.
+
+**Ajuste na T004 (2026-10-28):** os 8 genéricos de categoria são em tinta (`#4E4B42`), como pedido;
+os 16 glifos de teste (`shell/fixtures/pause/icons/`) são só de traço, mas cada um numa cor própria
+(azul, verde, vermelho…). Em tinta, o estilo `Original color` ficaria igual ao `Ink` e os três shots
+do SC-013 não provariam a troca; com cor, a diferença entre os três estilos aparece no screenshot.
 
 **Por quê:** o mockup pedia "o ícone recolorido pro tom do papel"; a silhueta pura (só o alfa em
 tinta) apaga o desenho de ícones cheios, e a colorização do Qt multiplica pela luminância (escurece
@@ -271,6 +282,12 @@ dispatch exit` pro Log out (a wiki do Hyprland desaconselha com uwsm).
   paralelo) adotar; se ela chegar antes da implementação desta spec com outro formato (ex.: uma
   chave do `shell.json` espelhada no catálogo), a T009 se ajusta a ele. É a pergunta 1 do relatório.
 
+**Conferido na T009 (2026-10-28):** o `Bar contrast` (acabamento da 004, mesclado na 007) guarda os
+valores de **todo** o catálogo no `SettingsState` (`$XDG_STATE_HOME/rien-os/settings.json`, chave
+`settings.<categoria>.<opção>`, contracts/settings-state.md da 004). A categoria `menu` usa esse
+mesmo mecanismo sem código a mais: as cinco opções ficam salvas entre sessões (o "salvar sempre" do
+dono), e o `settings reset` as volta ao padrão. Com fixtures, ficam só em memória.
+
 **Por quê:** o catálogo já é a fonte das telas de SYSTEM; um campo opcional e uma função são o
 mínimo pra uma opção ter efeito, sem mudar a 003. Uma categoria nova (e não linhas em
 `appearance`) evita conflito de merge com o `Bar contrast`, que mexe em `appearance`.
@@ -302,7 +319,7 @@ do shell, em memória (FR-001).
 | rodapé | 820 / 846 | igual à 003 |
 
 Sem abas, o `PopupFrame` continua como na 003 (título em 42, régua em 112, corpo em 150/170), então
-o seletor de papel de parede não muda. A `PickerLayout` e a `SettingsPage` ganham `top` (padrão 150
+o seletor de papel de parede não muda. A `PickerLayout` e a `SettingsPage` ganham `startY` (padrão 150
 e 170, os de hoje) pra começar no `bodyTop`. As colunas continuam nas larguras da 004
 (`pickerListW` etc.): o corpo fica mais baixo, não mais estreito, e a lista rola por entradas
 inteiras.

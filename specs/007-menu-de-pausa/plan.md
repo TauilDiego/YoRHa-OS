@@ -7,7 +7,7 @@
 004 completas: a moldura de popup, `GroupedList`, `PickerLayout`, `PreviewCard`, a barra
 transparente com tom).
 
-**Status**: aguardando a aprovação do dono (constituição V). Nenhum código foi escrito.
+**Status**: aprovado pelo dono (27.10; o adaptador do compositor, contracts/compositor.md, em 28.10). Em implementação (tasks.md).
 
 ## Summary
 

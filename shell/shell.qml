@@ -204,7 +204,10 @@ ShellRoot {
             tab: shell.pauseTab
             systemCategory: shell.settingsCategory
             onSystemCategoryChanged: shell.settingsCategory = systemCategory
-            onTabChanged: shell.pauseTab = tab
+            onTabChanged: {
+                shell.pauseTab = tab;
+                shell.pauseLastTab = tab;
+            }
             onCloseRequested: shell.closePause()
             Component.onCompleted: if (shell.pausePendingQuery !== "") search(shell.pausePendingQuery)
         }
@@ -224,7 +227,7 @@ ShellRoot {
         function onLastWindowActionChanged(): void {
             const w = Compositor.lastWindowAction;
             if (w)
-                shell.pauseLastAction = { kind: "window", id: w.address, detail: { op: w.kind, workspace: w.workspace } };
+                shell.pauseLastAction = { kind: "window", id: w.id, detail: { op: w.kind, workspace: w.workspace } };
         }
     }
     Connections {
@@ -379,7 +382,11 @@ ShellRoot {
     // spec 007 (specs/007-menu-de-pausa/contracts/ipc.md): the pause menu.
     IpcHandler {
         target: "pause"
-        function open(): void { shell.openPause(shell.pauseLastTab); }
+        // Already open (or opening): nothing.
+        function open(): void {
+            if (!shell.pauseOpen && !shell.pauseOpening)
+                shell.openPause(shell.pauseLastTab);
+        }
         function close(): void { shell.closePause(); }
         function toggle(): void { shell.togglePause(); }
         function tab(name: string): string {
@@ -432,7 +439,8 @@ ShellRoot {
                     "confirm": SettingsModel.choiceId("menu", "confirm"),
                     "confirm-start": SettingsModel.choiceId("menu", "confirm-start")
                 },
-                lastAction: shell.pauseLastAction
+                lastAction: shell.pauseLastAction,
+                compositor: { backend: Compositor.backendName, capabilities: Compositor.capabilities }
             }));
         }
     }

@@ -59,6 +59,7 @@ Formato do `pause dump`:
     "error": ""
   },
   "lastAction": { "kind": "app", "id": "kitty.desktop", "detail": { "action": -1, "workspace": 0, "ok": true } },
+  "compositor": { "backend": "hyprland", "capabilities": { "workspaceModel": "numbered", "canFloat": true, "canMoveToWorkspace": true, "actsOnAnyWindow": true, "hasGeometry": "rect", "fullscreenKnown": true } },
   "geometry": {
     "s": 0.84,
     "panel": { "x": 154, "y": 87, "w": 1612, "h": 906 },
@@ -72,6 +73,7 @@ Formato do `pause dump`:
 - Uma aba ainda não visitada nesta abertura aparece com o estado de abertura dela (FR-006).
 - `apps.results` são os ids na ordem da busca (vazio sem busca); `apps.entries` é a lista como aparece.
 - `power.dialog`, com o diálogo aberto: `{ "action": "poweroff", "row": "cancel", "blockers": ["pacman: System update in progress"], "keys": ["↑↓ Select", "Enter Confirm", "Esc Cancel"], "geometry": { … } }`.
+- `compositor` (T012a): `{ "backend": "hyprland", "capabilities": { … } }`, o `backendName` e as `capabilities` da fachada do compositor (contracts/compositor.md).
 - `lastAction.kind`: `app`, `window` (`detail`: `{ "op": "focus|move|float|close", "workspace": 2 }`)
   ou `power` (`detail`: `{ "executed": false }` com fixtures).
 - `geometry` (px lógicos da tela, pros cliques): `s`, o painel, cada aba, o item em foco (lista ou
