@@ -125,6 +125,7 @@ tela atual.
 | `wallpaperFolder` | string | `~/Pictures/Wallpapers` | `~` expandido; pasta inexistente = grupo vazio com aviso (caso de borda) |
 | `wallpaperTransition` | string | `camouflage` | Como `Transition.kind` |
 | `camouflage` | `{ cell, trail, glitch }` | `{ 24, 2600, 2 }` | Como `Transition` |
+| `barContrast` (emenda (2)) | `"normal"` / `"high"` | `"normal"` | Fora da lista → padrão + aviso. O popup (Appearance › Bar contrast) troca só na sessão |
 
 ## Fixture (domínio novo `wallpaper`)
 

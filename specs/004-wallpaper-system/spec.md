@@ -25,6 +25,17 @@ baixo, com um tom que acompanha o fundo. Aprovada pelo dono em 2026-10-27, pelo 
 substitui a FR-004 desta spec e a FR-002a da 001 na parte da barra (o HUD pintava a faixa de cima da
 vinheta).
 
+**Emenda de 2026-10-27 (2), "Contraste da barra" (decisão do dono, acabamento da 004):** o SC-011
+falhava nas paletas aprovadas. O dono decidiu:
+- uma opção nova, **Bar contrast** (Normal / High), em System Settings › Appearance (a 003), com
+  Normal de padrão, trocando ao vivo (FR-030);
+- **High**, tom papel: os textos secundários da barra (título, data, valores, tinta da aba apagada)
+  usam a tinta principal no lugar da `ink2`, e a hora fica mais pesada; o tom claro ganha uma `ink2`
+  mais clara, pra aba apagada chegar a 4,5:1 (FR-028);
+- o SC-011 passa a valer pro **High nos dois tons** e pro **tom claro no Normal**; o tom papel no
+  Normal é medido e relatado, sem ser critério;
+- o aviso do Qt 6.12.0 ao abrir um popup é silenciado (FR-024).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Um fundo igual ao dos menus do jogo (Priority: P1)
@@ -309,8 +320,11 @@ medido nos pixels). Sem dados de teste, gravar rajadas da camuflagem Menu → Da
   - o layout de lista + prévia + opções, reutilizável pros próximos menus.
 - **FR-023**: Todo texto fixo MUST ficar em inglês, no lugar central de textos.
 - **FR-024**: Abrir o seletor, navegar, aplicar com cada transição e fechar MUST deixar o log sem erro
-  e sem aviso de QML. O aviso do Qt 6.12.0 que todo popup loga ao abrir (`qt.qpa.wayland.textinput`,
-  da plataforma, não do QML) conta à parte, como na 003.
+  e sem aviso. **Revisto pela emenda (2), 2026-10-27:** o aviso do Qt 6.12.0 que todo popup loga ao
+  abrir (`qt.qpa.wayland.textinput`, um bug da plataforma já corrigido no Qt dev) é silenciado, e só
+  ele: `QT_LOGGING_RULES=qt.qpa.wayland.textinput.warning=false` no ambiente em que o `qs` inicia
+  (o `//@ pragma Env` do `shell.qml` chega tarde demais pro logger do Quickshell 0.3.2; conferido na
+  VM). A regra sai quando o Arch trouxer o Qt corrigido. O log fica com 0 avisos, sem exceção.
 
 **A barra sobre o fundo (US6, emenda de 2026-10-27)**
 
@@ -337,7 +351,7 @@ medido nos pixels). Sem dados de teste, gravar rajadas da camuflagem Menu → Da
   | Papel | Uso | Papel (tom papel) | Claro (tom claro) |
   |---|---|---|---|
   | `ink` | texto principal, hora, tinta da aba normal, rótulos das leituras | 78,75,66,1 | 215,209,179,1 |
-  | `ink2` | título, data, valores, tinta da aba apagada | 103,100,88,1 | 150,148,140,1 |
+  | `ink2` | título, data, valores, tinta da aba apagada | 103,100,88,1 (High: 78,75,66,1) | 175,172,161,1 |
   | `rest` | placa da aba, faixas verticais | 177,171,147,1 | 215,209,179,0,16 |
   | `sel` | placa da aba em foco (e destacada) | 78,75,66,1 | 215,209,179,1 |
   | `selInk` | tinta da aba em foco | 215,209,179,1 | 78,75,66,1 |
@@ -346,11 +360,21 @@ medido nos pixels). Sem dados de teste, gravar rajadas da camuflagem Menu → Da
   | `rule` | régua pontilhada | 78,75,66,1 | 150,148,140,0,75 |
   | `alert` | estado crítico | `#8F3A30` | `#C0574A` |
 
-  O tom papel é igual aos tokens de hoje. Os componentes da barra (aba, barra de abas, medidor,
+  O tom papel é igual aos tokens de hoje. **Emenda (2):** com Bar contrast = High, o tom papel usa a
+  tinta principal também na `ink2` (`Tokens.hudPaperHigh`), e a hora sai em Bold no lugar de
+  DemiBold; o tom claro é o mesmo nos dois modos, com a `ink2` clareada de 150,148,140 pra
+  175,172,161 (a aba apagada ia a 3,6–4,2:1 sobre a placa). Os componentes da barra (aba, barra de abas, medidor,
   régua e texto) recebem o tom como parâmetro, com 0 (papel) de padrão: a galeria, o popup da 003 e
   tudo que não é a barra MUST continuar idênticos, pixel a pixel.
 - **FR-029**: O `hud dump` MUST mostrar, por monitor, o `tone` (`"paper"` ou `"light"`) e o `toneMix`
   (0 = papel, 1 = claro); o `wallpaper dump`, a luminância medida da imagem de cada monitor.
+  **Emenda (2):** e o `contrast` (`"normal"` ou `"high"`).
+- **FR-030** (emenda (2)): A opção **Bar contrast** (`Normal` / `High`) MUST aparecer em System
+  Settings › Appearance, logo depois de "Top bar height", e trocar a barra na hora, com o popup
+  aberto. O valor vem da configuração `barContrast` (`"normal"` / `"high"`, padrão `"normal"` no
+  `defaults.json`, sobrescrito pelo `shell.json`), como as outras configurações do shell. A troca
+  pelo popup vale pra sessão e não grava arquivo (FR-018 da 003); o `settings reset` e o reinício
+  voltam ao valor configurado.
 
 ### Key Entities
 
@@ -388,9 +412,12 @@ Cada critério diz qual evidência da VM o comprova (constituição IV).
 - **SC-009**: O custo de uma transição de camuflagem fica registrado no `lab/perf` (sem meta; a meta
   vem no U6). Evidência: o relatório da sessão.
 - **SC-010**: O dono aprova o visual comparando com o mockup. Evidência: a aprovação.
-- **SC-011** (US6): Todo texto da barra tem contraste ≥ 4,5:1 contra os pixels atrás dele, nas 4 cenas
-  e nas imagens de teste. Evidência: medição nos screenshots (a cor do texto contra o fundo sem a
-  barra, com a placa da aba por cima quando é uma aba), em 1080 e hidpi.
+- **SC-011** (US6, revisto pela emenda (2)): Todo texto da barra tem contraste ≥ 4,5:1 (o 5º percentil
+  dos pixels da caixa do texto) contra os pixels atrás dele, nas 4 cenas e nas imagens de teste,
+  **com Bar contrast = High nos dois tons, e com Normal no tom claro**. Com Normal no tom papel, o
+  contraste é medido e relatado, sem ser critério. Evidência: medição nos screenshots (a cor do
+  texto contra o fundo sem a barra, com a placa da aba por cima quando é uma aba), em 1080 e hidpi,
+  nos dois modos.
 - **SC-012** (US6): A área vazia da barra (sem abas, textos, medidores e régua) fica a ≤ 2 níveis (em
   255) da cena que está embaixo. Evidência: o mesmo fundo fotografado com a barra e sem ela, nas 4
   cenas e nas imagens de teste.

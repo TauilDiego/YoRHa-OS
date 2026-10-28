@@ -44,7 +44,8 @@
         "values": { "type": "array", "items": { "type": "string" }, "minItems": 2, "description": "Só em choice" },
         "step": { "type": "integer", "minimum": 1, "maximum": 50, "description": "Só em slider" },
         "text": { "type": "string", "description": "action: rótulo (Search, Set up, Open); info: o texto mostrado" },
-        "busy": { "type": "string", "description": "Só em action: aviso mostrado no quadro por motion.actionBusy" }
+        "busy": { "type": "string", "description": "Só em action: aviso mostrado no quadro por motion.actionBusy" },
+        "setting": { "enum": ["barContrast"], "description": "Spec 004, emenda (2): só em choice. Liga a opção a uma configuração do shell (Settings): `values` na ordem dos níveis dela (barContrast: normal, high); o valor vem da configuração e a troca vale na hora, pra sessão, sem gravar" }
       },
       "allOf": [
         { "if": { "properties": { "type": { "const": "toggle" } } }, "then": { "required": ["value", "default"], "properties": { "value": { "type": "boolean" }, "default": { "type": "boolean" } } } },

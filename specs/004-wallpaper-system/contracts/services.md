@@ -31,6 +31,8 @@ A UI lê o papel de parede **só** por estes serviços. As entidades estão em
 | Serviço | Acréscimo | Fonte |
 |---|---|---|
 | `Settings` | `reduceMotion`, `wallpaperFolder`, `wallpaperTransition`, `camouflage` | `defaults.json` + `shell.json` (data-model) |
+| `Settings` (emenda (2)) | `barContrast` (`"normal"` / `"high"`), `barContrastSession` (a troca da sessão, pelo popup), `levelsOf(key)`, `levelOf(key)`, `setSession(key, level)` | `defaults.json` + `shell.json`; a sessão vale mais e não é gravada |
+| `SettingsModel` (emenda (2)) | uma opção com `"setting": key` é uma escolha ligada a uma configuração do shell: o valor é o nível de `Settings.levelOf(key)`; mudar chama `Settings.setSession`; `reset()` limpa a sessão | `settings-default.json` (Appearance › Bar contrast) |
 | `Compositor` | `focusedMonitor` (nome da saída) | campo `focused` do `hyprctl monitors -j` que já é lido para as escalas; atualizado nos mesmos eventos |
 | `Fixtures` | domínio `wallpaper` | data-model, "Fixture" |
 

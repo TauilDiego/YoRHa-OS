@@ -1,6 +1,6 @@
 # rien-OS — plano
 
-> Codinome interno. Documento vivo, atualizado em 2026-10-26.
+> Codinome interno. Documento vivo, atualizado em 2026-10-27.
 
 ## 1. O que é
 
@@ -150,6 +150,7 @@ Serpantinum.
 | U3 Menu de pausa | Launcher, janelas, energia | Screenshot de cada aba |
 | U4 Pod e text log | Notificações e OSD | Uma notificação de teste vira transmissão do Pod |
 | U5 Lock e polkit | Tela de bloqueio (PAM) e agente de polkit, testados de verdade na VM | Bloquear, desbloquear e autorizar uma ação funcionam na VM |
+| U5a Boot e login | Splash de boot no Plymouth e tela de login com a UI NieR: tema QML do SDDM ou um greeter em Quickshell (a escolha sai da spec). O bootloader continua o systemd-boot, escolha do dono, então o menu dele não ganha tema | Na VM, um reboot mostra o splash e cai na tela de login nova (screenshots dos dois, do boot até o login); entrar com senha certa abre o Hyprland e com senha errada mostra o erro; o log do boot fica sem erro do tema |
 | U5b i18n | Troca de idioma da UI (inglês padrão; português e outros) | A UI inteira muda de idioma por configuração |
 | U6 Otimização | Medir o custo por quadro, cortar efeitos caros, opção de reduzir movimento | A UI cabe no orçamento numa GPU integrada |
 | U7 Troca | A UI NieR substitui o Serpantinum na sua máquina, só depois de homologada na VM | Você usa um dia inteiro sem voltar pro Serpantinum |
@@ -200,6 +201,11 @@ Serpantinum.
 - **2026-10-26, testes:** o ambiente de testes (VM + containers) é privado e fica fora do
   repositório público.
 - **2026-10-26, U0 concluído** (ambiente privado).
+- **2026-10-27, alternativas de design viram opções:** quando um design tem alternativas, elas
+  viram opções do System Settings, trocadas ao vivo, com a recomendada como padrão. A primeira é o
+  Bar contrast (Normal / High) da spec 004.
+- **2026-10-27, limite do laboratório:** no máximo 4 VMs ligadas ao mesmo tempo, com 2 núcleos e
+  4 GB cada.
 
 ## Histórico
 
