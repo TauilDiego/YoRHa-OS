@@ -115,7 +115,7 @@ tela atual.
 | `focus` | `"list"` / `"options"` | Duas colunas (padrão da 003) |
 | `index` | int | Item em foco na lista (pula os títulos de grupo) |
 | `option` | int | 0 Monitor, 1 Transition, 2 Paper filter (só imagens) |
-| `monitor` | int | 0 = All monitors, depois as saídas em ordem. Só do seletor: volta pra 0 a cada abertura. No `wallpaper dump` sai o rótulo (`All monitors` ou a saída) |
+| `monitor` | int | 0 = All monitors, depois as saídas em ordem. Só do seletor. **Emenda (4), FR-032:** segue o nome da saída escolhida e abre com a última escolha, salva em `wallpaper.pickerMonitor` (`SettingsState`); uma saída desconectada, ou fixtures ativas, = 0. No `wallpaper dump` sai o rótulo (`All monitors` ou a saída) |
 
 ## Settings (acréscimos, `services/Settings.qml`)
 

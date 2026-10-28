@@ -45,6 +45,13 @@ falhava nas paletas aprovadas. O dono decidiu:
   arquivo de estado comum (`$XDG_STATE_HOME/rien-os/settings.json`), que as specs 007 e 008 vão
   reusar (FR-031, `contracts/settings-state.md`). Revê a FR-018 da 003.
 
+**Emenda de 2026-10-28 (4), "O seletor lembra o monitor" (decisão do dono):** o campo Monitor do
+seletor voltava pra "All monitors" a cada abertura. Agora ele lembra a última escolha, também depois
+de reiniciar o shell, no mesmo estado salvo da emenda (3) (`wallpaper.pickerMonitor`, FR-032). Se o
+monitor lembrado não existe mais (desconectado), o campo volta pra "All monitors". Com fixtures nada é
+lido nem escrito e o campo abre sempre em "All monitors", como antes, então os screenshots de
+referência não mudam.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Um fundo igual ao dos menus do jogo (Priority: P1)
@@ -104,6 +111,11 @@ screenshots.
    monitor e a transição; Esc volta pra lista; um segundo Esc fecha o seletor.
 5. **Given** o item "Videos", **When** ele está em foco, **Then** aparece apagado, a prévia diz que vem
    depois e Enter não faz nada.
+6. **Given** o campo Monitor trocado pra uma saída (emenda (4)), **When** o seletor fecha e abre de
+   novo, ou o shell reinicia, **Then** o campo continua nessa saída; **Given** essa saída
+   desconectada, **When** o seletor abre, **Then** o campo está em "All monitors"; **Given** fixtures
+   ativas, **When** o seletor abre, **Then** o campo está em "All monitors" e o arquivo de estado não
+   é lido nem escrito.
 
 ---
 
@@ -393,6 +405,14 @@ medido nos pixels). Sem dados de teste, gravar rajadas da camuflagem Menu → Da
   `settings reset` limpa o estado. Com fixtures, o arquivo não é lido nem escrito. O contrato
   (chaves, API, a marca `persist` do catálogo) está em `contracts/settings-state.md`, pra ser
   reusado pelas specs 007 e 008.
+- **FR-032** (emenda (4), decisão do dono de 2026-10-28): O campo **Monitor** do seletor MUST abrir
+  com a última escolha do usuário (uma saída ou "All monitors"), também depois de reiniciar o shell,
+  guardada no estado da FR-031 com a chave `wallpaper.pickerMonitor` (o nome da saída, ou `"all"`).
+  Só uma troca do campo pelo usuário escreve a chave. Se a saída lembrada não estiver conectada, o
+  campo abre em "All monitors" (a chave fica, e a saída volta a ser escolhida quando reaparecer). Com
+  fixtures, o arquivo não é lido nem escrito e o campo abre sempre em "All monitors". O `settings
+  reset` não mexe nessa chave (ela não é do popup de configurações). Revê a nota "volta pra 0 a cada
+  abertura" do `data-model.md`.
 
 ### Key Entities
 
@@ -440,6 +460,11 @@ Cada critério diz qual evidência da VM o comprova (constituição IV).
   reiniciar o `qs`; o único arquivo escrito fica em `~/.local/state/rien-os/`; o `settings reset`
   volta ao catálogo e à config, também depois de outro reinício. Evidência: `settings dump` e
   `hud dump` antes e depois, o arquivo de estado e a lista de arquivos escritos (`lab/check-004`).
+- **SC-015** (emenda (4)): Sem fixtures, o campo Monitor trocado por teclas reais pra uma saída
+  continua nela ao reabrir o seletor e depois de reiniciar o `qs`, e volta pra "All monitors" quando a
+  saída some; com fixtures ele abre em "All monitors" e o arquivo de estado fica intocado. Evidência:
+  `wallpaper dump` (campo `monitor`) a cada passo, o arquivo de estado e screenshots, com uma segunda
+  saída headless do Hyprland na VM (`lab/check-004`).
 - **SC-012** (US6): A área vazia da barra (sem abas, textos, medidores e régua) fica a ≤ 2 níveis (em
   255) da cena que está embaixo. Evidência: o mesmo fundo fotografado com a barra e sem ela, nas 4
   cenas e nas imagens de teste.

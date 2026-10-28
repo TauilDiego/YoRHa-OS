@@ -36,6 +36,11 @@ reiniciar o shell. Emenda (3) da spec 004; revê a FR-018 da 003. As specs 007 (
   índice; slider: 0–100);
 - `shell.<chave>`: as configurações do shell trocadas ao vivo pelo popup (`shell.barContrast`:
   `"normal"` / `"high"`), lidas pelo `Settings`;
+- `wallpaper.<id>`: o que o seletor de papel de parede lembra (emenda (4) da 004, FR-032):
+  `wallpaper.pickerMonitor`: o nome da saída do campo Monitor, ou `"all"`. Escrita só quando o
+  usuário troca o campo; uma saída que não está conectada abre como "All monitors" (a chave fica).
+  O `settings reset` não mexe nela. Com fixtures o seletor nem lê a chave (abre sempre em "All
+  monitors");
 - `pause.…` (007) e `notifications.…` (008): reservados pras próximas specs.
 
 ## Catálogo de um menu (`settings.schema.json` da 003)
@@ -58,3 +63,6 @@ barra lê `barContrast`) vai pro `Settings`, com `levelsOf`/`levelOf`/`setLevel`
 `lab/check-004`, bloco "saved settings": sem fixtures, duas opções mudadas por teclas reais
 continuam depois de reiniciar o `qs`; o único arquivo escrito fica em `~/.local/state/rien-os/`;
 o `settings reset` volta ao catálogo e esvazia o estado, também depois de outro reinício.
+Bloco "o seletor lembra o monitor" (emenda (4), SC-015): o campo Monitor trocado por teclas reais
+continua ao reabrir e depois de reiniciar o `qs`, com uma segunda saída headless; volta pra "All
+monitors" quando ela some; com fixtures o estado é ignorado e o arquivo fica intocado.

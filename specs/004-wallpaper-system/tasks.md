@@ -224,6 +224,21 @@ medido e a área vazia contra a cena sem a barra; sem fixtures, rajadas da camuf
 
 ---
 
+<!-- seletor lembra o monitor (004-seletor-monitor): início -->
+## Phase 11: O seletor lembra o monitor (decisão do dono, 2026-10-28)
+
+> Branch `004-seletor-monitor` (sai da `main`), lab `lab-004-monitor` (sai da `lab-004-acab`), VM
+> `teste-c` (2 núcleos, 4 GB), `lab/perf --kind 004`. Emenda (4) da spec: FR-032, cenário 6 da US2,
+> SC-015.
+
+- [ ] T071 Emenda (4) da spec antes do código (FR-032, cenário 6 da US2, SC-015); `data-model.md` (Picker), `contracts/settings-state.md` (chave `wallpaper.pickerMonitor`) e `quickstart.md`
+- [ ] T072 `WallpaperPicker.qml`: o campo Monitor segue um nome de saída (`""` = todos); abre com `SettingsState.get("wallpaper.pickerMonitor")` só quando o estado é persistido (com fixtures, sempre "All monitors"); a troca pelo usuário salva; uma saída que não está conectada vira "All monitors"
+- [ ] T073 `lab/check-004`: bloco "o seletor lembra o monitor" sem fixtures, com uma segunda saída headless do Hyprland: teclas reais, reabrir, reiniciar o `qs`, a saída removida, de volta; e com fixtures, o estado ignorado e intocado
+- [ ] T074 Validar na `teste-c` (`lab/perf --kind 004 --task 004/T074`): `check-u1`, `check-003 --profile 1080` e `check-004` sem FAIL
+<!-- seletor lembra o monitor (004-seletor-monitor): fim -->
+
+---
+
 ## Dependencies & Execution Order
 
 - **Setup (T001–T007):** o T001 vem primeiro e pode parar tudo (sem shader na VM, sem camuflagem).

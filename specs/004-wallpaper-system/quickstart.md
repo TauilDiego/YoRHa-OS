@@ -44,6 +44,7 @@ Ela inclui os domínios da `hud-default.json`, pra barra também ficar fixa. O f
 | 10 | SC-010 | Imagem final: as 4 cenas, o seletor aberto, uma imagem com e sem filtro e 6 quadros da camuflagem, ao lado do mockup | O dono aprova |
 | 11 | Bordas | `Settings.wallpaperFolder` numa pasta inexistente (via `shell.json` na VM); `ipc call wallpaper set image:/nao/existe all`; troca no meio de outra (dois `set` com 300 ms entre eles, sem fixtures) | Grupo IMAGES com o aviso de onde pôr imagens; `set` responde erro; a segunda troca parte da tela atual, sem pulo (rajada) |
 | 12 | Galeria | `ipc call gallery open`, `lab/shot galeria` | Seção Wallpaper com as cenas, o filtro, o quadro congelado de cada transição e a lista com e sem foco |
+| 13 ⚙ | SC-015 | Sem fixtures, com uma segunda saída (`hyprctl output create headless RIEN-2`): `lab/key alt-w`, `→`, `→ →` (Monitor = `RIEN-2`), `esc esc`; reabrir com `alt-w` e `dump`; `lab/ssh 'pkill -x qs'`, reabrir e `dump`; `hyprctl output remove RIEN-2`, reabrir e `dump`; criar de novo e reabrir; depois, com fixtures e o mesmo arquivo de estado, reabrir | `monitor` = `RIEN-2` ao reabrir e depois do reinício; o estado tem `wallpaper.pickerMonitor = "RIEN-2"`; sem a saída, `All monitors` (o estado continua); com ela de volta, `RIEN-2`; com fixtures, `All monitors` e o arquivo com o mesmo sha256 |
 
 ## Fechamento
 
