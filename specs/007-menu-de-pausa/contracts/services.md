@@ -34,6 +34,8 @@ formato `#/$defs/appsFile` de [pause-fixtures.schema.json](pause-fixtures.schema
 
 ## `Compositor` (acréscimos)
 
+> **28.10:** a partir da T012a, o `Compositor` vira uma fachada sobre um backend por compositor. Os nomes abaixo continuam, com `id` no lugar de `address`. Veja `contracts/compositor.md`.
+
 | Membro | Tipo | Notas |
 |---|---|---|
 | `windows` | lista de `Window` (data-model) | Real: `hyprctl clients -j` relido nos eventos (research R7); fixture: domínio `windows` |
