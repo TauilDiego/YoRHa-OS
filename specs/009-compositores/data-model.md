@@ -78,7 +78,7 @@ Mais a regra de detecção (§1: a variável de ambiente que a sessão define). 
 ## Medida de custo
 
 Uma linha de `lab/009/custo.tsv`: `compositor`, `rodada` (1–3), `boot_ate_ui_s`, `ram_parado_mb`,
-`cpu_parado_pct`, `perf_id`, `nota`. Regras: mesma VM (2 núcleos, 4 GB), perfil 1080, `--headless`, a
+`cpu_parado_pct`, `perf_id`, `nota`. Regras: mesma VM (4 núcleos, 4 GB, decisão do dono de 2026-10-28), perfil 1080, `--headless`, a
 mesma UI (`main`), sem fixtures, sem janela aberta; a mediana e a maior diferença entre rodadas vão pro
 relatório (FR-032, SC-009). Detalhes da coleta em [research.md](research.md) R10.
 

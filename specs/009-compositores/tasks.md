@@ -20,14 +20,20 @@ exportado. `shellcheck` nos scripts novos e mudados.
   `rien-OS-private-wt/lab-009`). Todo o código do lab e as amostras ficam lá.
 
 **Recursos e regras de execução** (plano, "Decisões do dono sobre o plano"):
+- **2026-10-28 (dono):** as VMs passam a usar **4 núcleos** (`NIER_LAB_CPUS=4 NIER_LAB_MEM=4G`); o custo
+  (T042) é medido com 4 núcleos nos três compositores, e o relatório registra isso;
 - no máximo **2 VMs deste estudo** ao mesmo tempo e **4 no total** (a 007 usa `teste-a`, a 008 usa
   `teste-b`); antes de cada `lab/up`, contar as VMs ligadas pelos `.pid`; com 4, esperar;
-- `NIER_LAB_CPUS=2 NIER_LAB_MEM=4G` sempre; `NIER_LAB_VM=<vm>` em todo comando;
+- `NIER_LAB_CPUS=4 NIER_LAB_MEM=4G` (até 2026-10-28 17h, 2 núcleos); `NIER_LAB_VM=<vm>` em todo comando;
 - sem subagentes: as partes do Niri e do Mango são feitas pelo mesmo agente (as tarefas `[P]` podem rodar
   em duas VMs ao mesmo tempo, ou em sequência);
 - pacotes na data fixa `LAB_ALA_DATE=2026/10/28` (P1);
 - nunca tocar `teste-a`/`teste-b` ligadas nem branches de outros agentes; promoção da `hypr-iso` só na
   `lab-009`.
+
+**Pausa (2026-10-28 ~17:07, dono offline):** estado em `lab/009/estado-pausa.md` (branch `lab-009`). Em
+andamento: T012 (`check-004` interrompido em 35/0; refazer), T022 (feito no Niri; falta o Mango), T025
+(Niri feito), T028 e T035 (Niri feitos), T032 (amostras coletadas, falta o índice). Retomar pelo T012.
 
 **Paradas obrigatórias:** (a) spike 0 falhando (T003); (b) qualquer decisão do dono; (c) fim da Phase 8
 (relatório etapa 1 e folha de notas prontos, T046).
@@ -44,9 +50,9 @@ exportado. `shellcheck` nos scripts novos e mudados.
 **Purpose**: fixar o estado inicial do lab e provar que o Niri e o Mango sobem na VM invisível com 3D
 antes de escrever qualquer coisa pra eles (research A4, R4).
 
-- [ ] T001 Criar `lab/009/` (subpastas `versoes/`, `ui/`, `amostras/`, `rajadas/`, `sessao/`, `spikes/`) e o retrato `lab/009/bases.sha256` (`sha256sum` de `basic`, `arch-limpo`, `hypr-base` e `arch-iso` em `$LAB_HOME/vms/`, resolvendo os links), mais `lab/009/inicio.txt` com `lab/ls` e as VMs ligadas no começo; commit na `lab-009` (SC-002)
-- [ ] T002 Conferir o espelho do Arch Linux Archive de 2026/10/28 (`https://archive.archlinux.org/repos/2026/10/28/`) e as versões que ele dá pros pacotes do estudo (`hyprland`, `niri`, `mangowm`, `quickshell`, `qt6-base`, `mesa`, `wlr-randr`, `grim`), lendo os bancos `extra.db`/`core.db` no host só com `curl` + `tar` (sem pacman no host); guardar em `lab/009/versoes/ala-2026-10-28.txt` (P1, research R15)
-- [ ] T003 **Spike 0 (3D), `lab/perf --task 009/T003`:** camada descartável `spike-3d` sobre a `arch-iso`; com `--soft` (sem sessão) apontar o pacman pro espelho de 2026/10/28, `pacman -Syu` e instalar `niri mangowm quickshell kitty grim wlr-randr jq`; login automático no tty1 com `bash_profile` provisório (`exec niri-session`); religar com `--headless` (virgl + `egl-headless`) e conferir: o Niri sobe, `grim` captura (`lab/shot`), `niri msg --json outputs` responde pelo `lab/ipc`; trocar pro `exec mango` e conferir o mesmo com `mmsg get all-monitors` e `wlr-randr --json`; anotar como achar o `MANGO_INSTANCE_SIGNATURE` (formato, `systemctl --user show-environment`, `/proc/<pid>/environ`), o `NIRI_SOCKET`, o `XDG_CURRENT_DESKTOP` e as versões; apagar a camada. Resultado em `lab/009/spikes/3d.md`. **Se o Niri ou o Mango não subirem com `--headless`, PARAR e relatar (P3)**
+- [x] T001 Criar `lab/009/` (subpastas `versoes/`, `ui/`, `amostras/`, `rajadas/`, `sessao/`, `spikes/`) e o retrato `lab/009/bases.sha256` (`sha256sum` de `basic`, `arch-limpo`, `hypr-base` e `arch-iso` em `$LAB_HOME/vms/`, resolvendo os links), mais `lab/009/inicio.txt` com `lab/ls` e as VMs ligadas no começo; commit na `lab-009` (SC-002) — **feito:** retrato em `lab/009/bases.sha256`
+- [x] T002 Conferir o espelho do Arch Linux Archive de 2026/10/28 (`https://archive.archlinux.org/repos/2026/10/28/`) e as versões que ele dá pros pacotes do estudo (`hyprland`, `niri`, `mangowm`, `quickshell`, `qt6-base`, `mesa`, `wlr-randr`, `grim`), lendo os bancos `extra.db`/`core.db` no host só com `curl` + `tar` (sem pacman no host); guardar em `lab/009/versoes/ala-2026-10-28.txt` (P1, research R15) — **feito:** `lab/009/versoes/ala-2026-10-28.txt` (Hyprland 0.56.2-4, niri 26.04-1, mangowm 0.18.3-1, quickshell 0.3.2-1)
+- [x] T003 **Spike 0 (3D), `lab/perf --task 009/T003`:** camada descartável `spike-3d` sobre a `arch-iso`; com `--soft` (sem sessão) apontar o pacman pro espelho de 2026/10/28, `pacman -Syu` e instalar `niri mangowm quickshell kitty grim wlr-randr jq`; login automático no tty1 com `bash_profile` provisório (`exec niri-session`); religar com `--headless` (virgl + `egl-headless`) e conferir: o Niri sobe, `grim` captura (`lab/shot`), `niri msg --json outputs` responde pelo `lab/ipc`; trocar pro `exec mango` e conferir o mesmo com `mmsg get all-monitors` e `wlr-randr --json`; anotar como achar o `MANGO_INSTANCE_SIGNATURE` (formato, `systemctl --user show-environment`, `/proc/<pid>/environ`), o `NIRI_SOCKET`, o `XDG_CURRENT_DESKTOP` e as versões; apagar a camada. Resultado em `lab/009/spikes/3d.md`. **Se o Niri ou o Mango não subirem com `--headless`, PARAR e relatar (P3)** — **feito:** **passou**: os dois sobem com `--headless`, `grim` e IPC ok (`lab/perf` 2026-10-28T164121; `lab/009/spikes/3d.md`); achado: laço do `niri-session` no `bash_profile`, corrigido com guarda
 
 **Checkpoint**: os dois sobem com 3D invisível, ou o estudo parou pra o dono decidir.
 
@@ -58,9 +64,9 @@ antes de escrever qualquer coisa pra eles (research A4, R4).
 (`up`). **Depois do T006, os contratos ficam congelados**; uma divergência achada depois corrige o
 contrato antes do código.
 
-- [ ] T004 `lab/lib.sh`: `compositor_of <vm>` (`NIER_LAB_COMPOSITOR` → `vms/<vm>.compositor` → sobe o `.base` → `hyprland`); `GUEST_ENV` acrescenta `NIRI_SOCKET` e `MANGO_INSTANCE_SIGNATURE` só quando existem (forma achada no T003), sem mudar as variáveis de hoje; conferir com `bash -n`, `shellcheck` e, numa VM do Hyprland já ligada pelo estudo (não `teste-a`/`teste-b`), que o `GUEST_ENV` gera o mesmo ambiente de antes (contrato §1–§2)
-- [ ] T005 [P] `lab/ls`: coluna `COMPOSITOR` (de `compositor_of`), sem mudar as outras colunas (contrato §1)
-- [ ] T006 [P] `lab/up`: com `compositor_of` `niri` ou `mango`, recusar `--soft` e o fallback "sem GPU" do `--headless` com `"o <compositor> exige 3D"` (código 1); Hyprland sem mudança (comparar a linha do QEMU gerada antes e depois com um QEMU falso, como no T004 da 006) (contrato §3, research A4). **Congela os contratos**
+- [x] T004 `lab/lib.sh`: `compositor_of <vm>` (`NIER_LAB_COMPOSITOR` → `vms/<vm>.compositor` → sobe o `.base` → `hyprland`); `GUEST_ENV` acrescenta `NIRI_SOCKET` e `MANGO_INSTANCE_SIGNATURE` só quando existem (forma achada no T003), sem mudar as variáveis de hoje; conferir com `bash -n`, `shellcheck` e, numa VM do Hyprland já ligada pelo estudo (não `teste-a`/`teste-b`), que o `GUEST_ENV` gera o mesmo ambiente de antes (contrato §1–§2) — **feito:** `GUEST_ENV` idêntico no Hyprland (diff do `env` na `teste-hiso`)
+- [x] T005 [P] `lab/ls`: coluna `COMPOSITOR` (de `compositor_of`), sem mudar as outras colunas (contrato §1) — **feito:** coluna COMPOSITOR
+- [x] T006 [P] `lab/up`: com `compositor_of` `niri` ou `mango`, recusar `--soft` e o fallback "sem GPU" do `--headless` com `"o <compositor> exige 3D"` (código 1); Hyprland sem mudança (comparar a linha do QEMU gerada antes e depois com um QEMU falso, como no T004 da 006) (contrato §3, research A4). **Congela os contratos** — **feito:** `--soft` recusado na `teste-niri`
 
 **Checkpoint**: as ferramentas sabem o compositor de cada VM; nada mudou pro Hyprland.
 
@@ -74,11 +80,11 @@ promovida dentro da `lab-009`.
 **Independent Test**: `teste-hiso` sobre a `hypr-iso` passa em `check-u1` 15/0, `check-003` 25/0 (1080 e
 hidpi) e `check-004` 58/0; `sha256sum -c lab/009/bases.sha256` dá OK.
 
-- [ ] T007 [US1] `lab/guest/hyprland.lua`: acrescentar `ALT+1…5` (área N) e, no fim, um `dofile` protegido de `~/.config/hypr/local.lua` (só se existir); nenhuma outra linha muda (FR-011, P2, contrato §5)
-- [ ] T008 [US1] `lab/provision/hypr-base.sh`: com `LAB_ALA_DATE`, apontar o `/etc/pacman.d/mirrorlist` pro espelho daquela data antes do `pacman -Sy`; sem a variável, exatamente como hoje; gravar `~/.config/nier-lab/compositor` e imprimir as versões (contrato §4)
-- [ ] T009 [US1] `lab/guest/nier-ui-run`: uma linha que grava a hora do início do `qs` e o `/proc/uptime` em `~/nier/ui.start` (igual nos três; research R10); conferir que o resto não muda
-- [ ] T010 [US1] `lab/bootstrap`: passos `arch-iso` (pelo `lab/install-iso`, se faltar), `hypr-iso` (`new --from arch-iso`, cópia por `tar`, `LAB_TZ` + `LAB_ALA_DATE=2026/10/28`, `hypr-base.sh`, `down`, `freeze`, marca `hyprland`), sem tocar nos passos de hoje; conferir que não refaz o que existe (contrato §6)
-- [ ] T011 [US1] Montar a `hypr-iso` pelo `lab/bootstrap` (`lab/perf --task 009/T011`); `lab/009/versoes/hyprland.txt`; `lab/ls` mostra a camada congelada com base `arch-iso` e compositor `hyprland`
+- [x] T007 [US1] `lab/guest/hyprland.lua`: acrescentar `ALT+1…5` (área N) e, no fim, um `dofile` protegido de `~/.config/hypr/local.lua` (só se existir); nenhuma outra linha muda (FR-011, P2, contrato §5) — **feito**
+- [x] T008 [US1] `lab/provision/hypr-base.sh`: com `LAB_ALA_DATE`, apontar o `/etc/pacman.d/mirrorlist` pro espelho daquela data antes do `pacman -Sy`; sem a variável, exatamente como hoje; gravar `~/.config/nier-lab/compositor` e imprimir as versões (contrato §4) — **feito**
+- [x] T009 [US1] `lab/guest/nier-ui-run`: uma linha que grava a hora do início do `qs` e o `/proc/uptime` em `~/nier/ui.start` (igual nos três; research R10); conferir que o resto não muda — **feito**
+- [x] T010 [US1] `lab/bootstrap`: passos `arch-iso` (pelo `lab/install-iso`, se faltar), `hypr-iso` (`new --from arch-iso`, cópia por `tar`, `LAB_TZ` + `LAB_ALA_DATE=2026/10/28`, `hypr-base.sh`, `down`, `freeze`, marca `hyprland`), sem tocar nos passos de hoje; conferir que não refaz o que existe (contrato §6) — **feito**
+- [x] T011 [US1] Montar a `hypr-iso` pelo `lab/bootstrap` (`lab/perf --task 009/T011`); `lab/009/versoes/hyprland.txt`; `lab/ls` mostra a camada congelada com base `arch-iso` e compositor `hyprland` — **feito:** `hypr-iso` congelada (`lab/perf` 2026-10-28T165024)
 - [ ] T012 [US1] `teste-hiso` sobre a `hypr-iso` com `NIER_LAB_PROFILE=hidpi`, `lab/sync` da `main` (`a3a9120`), `check-u1`, `check-003` (1080 e hidpi) e `check-004` (`lab/perf --task 009/T012`); guardar os resumos em `lab/009/fase0.md`. **Só com 15/0, 25/0 e 58/0** segue pro T013; com FAIL, registrar a diferença, não promover e relatar
 - [ ] T013 [US1] Promoção na `lab-009`: base padrão do `lab/new` = `hypr-iso`; o `dev` de um lab vazio nasce da `hypr-iso`; README do lab (árvore de camadas); a `hypr-base` continua no `bootstrap` e no disco (FR-003, FR-005)
 
@@ -94,11 +100,11 @@ ferramenta × compositor.
 **Independent Test**: `lab/bootstrap` cria as duas bases; em `teste-niri` e `teste-mango` as 10
 ferramentas e os 5 atalhos em ALT têm prova; o Hyprland continua 15/0, 25/0, 58/0.
 
-- [ ] T014 [P] [US2] `lab/guest/niri/config.kdl` (atalhos do lab e nativos em ALT, `spawn-at-startup` do `nier-ui-run`, sem cantos arredondados, animações padrão, `cursor`) e `lab/guest/niri/bash_profile` (`exec niri-session` no tty1); validar com `niri validate` na VM do T016 (contrato §5)
-- [ ] T015 [P] [US2] `lab/guest/mango/config.conf` (atalhos do lab e nativos em ALT, `exec_once` do `nier-ui-run`, sem blur, animações padrão, cursor) e `lab/guest/mango/bash_profile` (`exec mango`); validar com `mango -c … -p` na VM do T017 (contrato §5)
-- [ ] T016 [P] [US2] `lab/provision/niri-base.sh` (contrato §4: data fixa, comuns, `niri`, login automático, config, `nier-ui-run`, fuso, versões) e o passo `niri-base` no `lab/bootstrap` (marca `niri`)
-- [ ] T017 [P] [US2] `lab/provision/mango-base.sh` (contrato §4: data fixa, comuns, `mangowm wlr-randr`, login automático, config, `nier-ui-run`, fuso, versões) e o passo `mango-base` no `lab/bootstrap` (marca `mango`)
-- [ ] T018 [US2] Rodar o `lab/bootstrap` (`lab/perf --task 009/T018`): cria a `niri-base` e a `mango-base` (até 2 VMs ao mesmo tempo); rodar de novo e conferir que não faz nada (SC-003); `lab/009/versoes/{niri,mango}.txt`
+- [x] T014 [P] [US2] `lab/guest/niri/config.kdl` (atalhos do lab e nativos em ALT, `spawn-at-startup` do `nier-ui-run`, sem cantos arredondados, animações padrão, `cursor`) e `lab/guest/niri/bash_profile` (`exec niri-session` no tty1); validar com `niri validate` na VM do T016 (contrato §5) — **feito:** `niri validate`: config válida
+- [x] T015 [P] [US2] `lab/guest/mango/config.conf` (atalhos do lab e nativos em ALT, `exec_once` do `nier-ui-run`, sem blur, animações padrão, cursor) e `lab/guest/mango/bash_profile` (`exec mango`); validar com `mango -c … -p` na VM do T017 (contrato §5) — **feito**
+- [x] T016 [P] [US2] `lab/provision/niri-base.sh` (contrato §4: data fixa, comuns, `niri`, login automático, config, `nier-ui-run`, fuso, versões) e o passo `niri-base` no `lab/bootstrap` (marca `niri`) — **feito**
+- [x] T017 [P] [US2] `lab/provision/mango-base.sh` (contrato §4: data fixa, comuns, `mangowm wlr-randr`, login automático, config, `nier-ui-run`, fuso, versões) e o passo `mango-base` no `lab/bootstrap` (marca `mango`) — **feito**
+- [x] T018 [US2] Rodar o `lab/bootstrap` (`lab/perf --task 009/T018`): cria a `niri-base` e a `mango-base` (até 2 VMs ao mesmo tempo); rodar de novo e conferir que não faz nada (SC-003); `lab/009/versoes/{niri,mango}.txt` — **feito:** `niri-base` e `mango-base` congeladas (`lab/perf` 165035 e 165046); segunda passada não fez nada
 - [ ] T019 [P] [US2] `lab/profile`: `case` por compositor — Niri: `niri msg output <saída> mode …` + `scale …`, leitura de `niri msg --json outputs`; Mango: `wlr-randr --output … --mode … --scale …`, leitura de `wlr-randr --json`; Hyprland igual (contrato §3)
 - [ ] T020 [P] [US2] `lab/sync`: escreve só a config do compositor da VM (`hyprland.lua` / `niri/config.kdl` / `mango/config.conf`) e recarrega e reinicia o `nier-ui-run` do jeito de cada um; Hyprland igual (contrato §3)
 - [ ] T021 [P] [US2] `lab/click` (tamanho lógico por compositor) e `lab/cursor` (Hyprland: `setcursor`; Niri e Mango: tema instalado + a opção da config) (contrato §3)
@@ -136,7 +142,7 @@ tabela corrigida ([contracts/amostras.md](contracts/amostras.md)).
 **Independent Test**: `lab/009/amostras/index.tsv` com 100% das células do Niri e do Mango com estado;
 `tabela-s6.md` gerada; `capabilities.json` com os três.
 
-- [ ] T030 [US4] `lab/009/amostras/cenarios.md`: os comandos de cada compositor pra chegar em `S0`, `S1` (kitty `nier-a` e `nier-b` flutuante na área 1, `nier-c` em tela cheia na área 2, foco no `nier-a`), `S2` (hidpi) e `S3` (duas saídas, se o T034 der)
+- [x] T030 [US4] `lab/009/amostras/cenarios.md`: os comandos de cada compositor pra chegar em `S0`, `S1` (kitty `nier-a` e `nier-b` flutuante na área 1, `nier-c` em tela cheia na área 2, foco no `nier-a`), `S2` (hidpi) e `S3` (duas saídas, se o T034 der) — **feito**
 - [ ] T031 [P] [US4] Amostras do Hyprland (referência), `L01`–`L10` + `Q-deteccao`, em `lab/009/amostras/hyprland/` (`lab/perf --task 009/T031`)
 - [ ] T032 [P] [US4] Amostras do Niri, `L01`–`L10`, `Q-niri-tela-cheia` (testar a inferência tamanho da janela = tamanho lógico da saída), `Q-niri-flutuante`, `Q-niri-coluna`, `Q-deteccao`, `L06` com 10 s de `event-stream` (`lab/perf --task 009/T032`)
 - [ ] T033 [P] [US4] Amostras do Mango, `L01`–`L10`, `Q-mango-acao-fora-de-foco` (`dispatch … client,<id>` em mover, fechar, focar), `Q-mango-tag-por-janela`, `Q-mango-eventos` (`mmsg watch`), `Q-deteccao` (`lab/perf --task 009/T033`)
