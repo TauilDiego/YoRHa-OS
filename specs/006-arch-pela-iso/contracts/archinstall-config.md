@@ -22,7 +22,7 @@ laboratório** (FR-014, research R6). Todo o resto é o que um usuário escolher
   "version": "4.5",
   "script": "guided",
   "archinstall-language": "English",
-  "locale_config": { "kb_layout": "us", "sys_enc": "UTF-8", "sys_lang": "en_US.UTF-8" },
+  "locale_config": { "kb_layout": "us", "sys_enc": "UTF-8", "sys_lang": "en_US" },
   "timezone": "UTC",
   "ntp": true,
   "kernels": ["linux"],
@@ -143,5 +143,14 @@ runcmd:
 
 - **Só abre a porta.** O `cidata` não leva a configuração nem as credenciais: elas vão pelo SSH
   (research R2).
+- **Implementado com um item a mais** (2026-10-27): o `user-data` também grava
+  `/etc/ssh/sshd_config.d/90-rien-lab.conf` com `PerSourcePenaltyExemptList 10.0.2.2/32` e recarrega o
+  sshd antes do marcador. Vale só pro sistema da ISO (não vai pro instalado) e evita que o sshd recuse
+  o lab depois da rajada de conexões da sonda de boot ([lab-install-iso.md](lab-install-iso.md),
+  "Notas da implementação").
+- **Conferido no spike (T001):** o cloud-init 26.2 da ISO 2026.10.01 acha o `cidata` sozinho; o
+  marcador sai na serial em ~43 s. O plano B (`script=`) não foi preciso.
+- **`sys_lang`** fica `en_US` (sem `.UTF-8`), como no exemplo do archinstall; o `--dry-run` aceitou a
+  configuração padrão sem aviso.
 - **O marcador na serial** é o sinal de que o cloud-init rodou. Se ele não aparecer em 3 minutos, o
   passo 4 falha com "cloud-init não achou o cidata" e o `console.png` mostra a tela.

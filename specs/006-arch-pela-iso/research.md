@@ -120,7 +120,12 @@ Opções avaliadas:
     (`archinstall.lib.crypt.crypt_yescrypt`), por SSH: a senha passa por `stdin`, nunca na linha de
     comando, e nada roda no host além do SSH.
 - **Validação antes de apagar o disco (FR-013):** `archinstall --config … --creds … --silent
-  --dry-run` lê e valida tudo (incluindo o `validate_bootloader_layout`) sem tocar no disco.
+  --dry-run` lê e valida a configuração sem tocar no disco.
+  - **Medido (T018):** um campo inválido (sistema de arquivos inexistente) é recusado com código 1.
+    Mas o `validate_bootloader_layout` **não** pegou um systemd-boot sem ESP: a configuração passou
+    no `--dry-run` e só falhou na instalação ("Could not detect boot at mountpoint /mnt"). O
+    `--dry-run` é a primeira barreira, não a única; o sucesso continua exigindo a instalação e o
+    segundo boot.
 - **Cuidado: código de saída.** No fluxo `guided` do 4.5, algumas recusas (por exemplo, a validação do
   carregador) chamam `error()` e **retornam** sem levantar exceção. Então o código 0 **não** prova a
   instalação. O sucesso exige: código 0 **e** a linha de conclusão no `install.log` **e** o segundo boot
@@ -236,6 +241,12 @@ deixar folga pros agentes em paralelo:
 | Instalação (download ~700 MB + pacstrap + mkinitcpio + carregador) | 3–8 min | depende da banda e do mirror |
 | Desligar, segundo boot pelo disco, conferências | 30–60 s | a `basic` leva ~7 s do boot ao SSH (relatórios do `lab/perf`); o sistema novo deve ficar na mesma ordem |
 | **Total, com a ISO já baixada** | **≈ 5–11 min** | meta da SC-001: < 10 min, limite 20 min |
+
+**Medido (2026-10-27, 2 CPUs, 4 GB, `lab/perf`):** download da ISO 476 s (1,64 GB, ~3,4 MB/s);
+verificação 4 s; boot da ISO até o SSH 40–44 s, e até o `is-system-running` ~48–64 s; `--dry-run`
+8–9 s; instalação 246–258 s, dos quais 210–219 s são o `pacstrap` da base (703 MiB de pacotes);
+segundo boot até o SSH 7–10 s; **total 335–340 s (5,6 min)**. Camada: **1749 MB** depois do
+`fstrim` (704 MB são o cache do pacman no `@pkg`).
 
 Disco (em `~/.local/share/nier-lab/`):
 - ISO: 1,64 GB (uma vez por versão fixada); `cidata`: < 1 MB por execução;

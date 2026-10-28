@@ -134,3 +134,29 @@ resumo:
 | 5 | A instalação falhou ou passou do tempo |
 | 6 | O sistema instalado não subiu ou falhou numa conferência |
 | 130 | Interrompido |
+
+## Notas da implementação (2026-10-27)
+
+A interface, os passos, os arquivos e os códigos acima valem como estão. A implementação acrescentou:
+
+- **Porta própria:** o `install-iso` escolhe a primeira porta a partir de 2240 que não está ouvindo
+  nem em nenhum `run/*.port` (o `lib.sh` cai na 2222 quando a VM de um agente está desligada).
+- **SSH com nova tentativa:** todo comando mandado pelo SSH é idempotente e tenta de novo no código
+  255 (até ~1 min). Motivo: o sshd (OpenSSH ≥ 9.8) tem `PerSourcePenalties`, todo o lab chega pelo NAT
+  do QEMU (10.0.2.2), e a sonda de boot do `lab/perf` deixa uma rajada de conexões sem autenticação
+  quando o sshd sobe; o sshd então recusa o lab por 15 s ou mais. Na ISO, o `cidata` isenta o
+  10.0.2.2 (`/etc/ssh/sshd_config.d/90-rien-lab.conf`, só no sistema da ISO) e recarrega o sshd.
+- **Instalação num `systemd-run` na ISO** (`rien-archinstall`, `RemainAfterExit`, `RuntimeMaxSec` =
+  `--timeout`): uma queda do SSH não mata o archinstall; o host lê `SubState`, `Result` e
+  `ExecMainStatus` da unidade e copia a saída pra `install.live.log`.
+- **Recusa no `--dry-run`:** código ≠ 0, **ou** `- ERROR -`/`Traceback` no log do archinstall, **ou**
+  nenhum `user_configuration.json` salvo. O `disk-after-dry-run.txt` mostra o disco sem tabela nem
+  assinatura.
+- **Arquivos a mais na pasta de saída:** `dry-run.log`, `dry-run.install.log`, `disk-after-dry-run.txt`,
+  `config.source.json`, `config.sent.json`, `iso-sshd.log`, `ssh.log`, `ssh-retries.log` (se houve),
+  `fstrim.txt`, `packages.txt`, `journal-warnings.txt`.
+- **Conferências:** `swap` sai `/dev/zram0`; `subvols` inclui também `var/lib/machines` e
+  `var/lib/portables` (criados pelo systemd); `archinstall_log` = `yes` (o archinstall copia o log pro
+  sistema instalado).
+- **Testes de falha:** `lab/iso/testes/invalida.json` (código 4) e `lab/iso/testes/sem-esp.json`
+  (passa no `--dry-run` do archinstall 4.5, falha na instalação, código 5).
