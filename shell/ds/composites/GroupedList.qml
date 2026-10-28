@@ -18,6 +18,9 @@ import "../base"
 // (hoveredIndex, activated) without moving `currentIndex`.
 // The parent sets the size. Taller content scrolls at once, by whole entries, so the current item
 // with its rails (and its group's title, when it is the group's first) is always in view.
+// spec 007: `search` ({ query, count } or null) puts the SearchHeader on top, where the group
+// titles would be (the model then has no titles); `emptyText`, with no item, is a line in
+// medium-gray in place of the items; `trailingRole` is the role of the items' trailing text.
 Item {
     id: root
 
@@ -28,11 +31,17 @@ Item {
     property bool focused: true
     property bool wrap: true
     property bool keysEnabled: true
+    property var search: null                    // spec 007
+    property string emptyText: ""
+    property string trailingRole: "small"
 
     signal activated(int index)
     signal hoveredIndex(int index)
 
-    readonly property var entries: Array.isArray(model) ? model : []
+    readonly property var modelEntries: Array.isArray(model) ? model : []
+    readonly property bool noItems: !modelEntries.some(e => isItem(e))
+    readonly property var entries: (search ? [{ searchLine: true }] : []).concat(modelEntries,
+        noItems && emptyText !== "" ? [{ emptyLine: emptyText }] : [])
     // For each entry, its item index (-1 for titles and notes); and each item's entry index.
     readonly property var itemOf: {
         const out = [];
@@ -66,7 +75,8 @@ Item {
     implicitHeight: contentHeight
 
     function isItem(e: var): bool {
-        return e !== null && typeof e === "object" && e.group === undefined && e.note === undefined;
+        return e !== null && typeof e === "object" && e.group === undefined && e.note === undefined
+            && e.searchLine === undefined && e.emptyLine === undefined;
     }
 
     // The entry object of item `index` (null when out of range).
@@ -158,6 +168,8 @@ Item {
                     readonly property int item: root.itemOf[index] ?? -1
                     readonly property bool isItem: item >= 0
                     readonly property bool isGroup: !isItem && modelData?.group !== undefined
+                    readonly property bool isSearch: modelData?.searchLine === true
+                    readonly property bool isEmpty: modelData?.emptyLine !== undefined
                     readonly property bool dim: isItem && modelData?.dim === true
                     readonly property Item row: isItem ? listItem : null
 
@@ -166,13 +178,42 @@ Item {
                     readonly property int topPad: isGroup && index > 0 ? root.groupTop : 0
                     width: column.width
                     height: isItem ? listItem.height
+                          : isSearch ? searchHeader.height + root.groupBottom
+                          : isEmpty ? emptyLabel.height
                           : isGroup ? topPad + caption.size + root.groupBottom : caption.height
+
+                    SearchHeader {
+                        id: searchHeader
+                        width: parent.width
+                        height: entry.isSearch ? implicitHeight : 0
+                        visible: entry.isSearch
+                        s: root.s
+                        query: String(root.search?.query ?? "")
+                        count: Number(root.search?.count ?? 0)
+                    }
+
+                    // "No apps match.": the mockup's 23 px line, 8 px above and below, 16 px in.
+                    Label {
+                        id: emptyLabel
+                        x: Tokens.px(16, root.s)
+                        width: parent.width - x
+                        height: entry.isEmpty ? implicitHeight + Tokens.px(16, root.s) : 0
+                        topPadding: Tokens.px(8, root.s)
+                        visible: entry.isEmpty
+                        s: root.s
+                        role: "standard"
+                        font.weight: Font.Medium
+                        font.variableAxes: ({ "wght": Font.Medium })
+                        wrapMode: Text.Wrap
+                        text: String(entry.modelData?.emptyLine ?? "")
+                        color: Tokens.color.mediumGray
+                    }
 
                     Label {
                         id: caption
                         y: entry.topPad - (entry.isGroup ? Math.round((implicitHeight - size) / 2) : 0)
                         width: parent.width
-                        visible: !entry.isItem
+                        visible: !entry.isItem && !entry.isSearch && !entry.isEmpty
                         s: root.s
                         role: "small"
                         wrapMode: Text.Wrap
@@ -186,7 +227,7 @@ Item {
                         visible: entry.isItem
                         s: root.s
                         variant: root.variant
-                        trailingRole: "small"
+                        trailingRole: root.trailingRole
                         text: String(entry.modelData?.label ?? "")
                         trailing: String(entry.modelData?.trailing ?? "")
                         state: entry.item === root.currentIndex ? (root.focused ? "hovered" : "selected")

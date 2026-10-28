@@ -1,0 +1,602 @@
+{
+ "apps": [
+  {
+   "id": "kitty.desktop",
+   "name": "kitty",
+   "genericName": "Terminal emulator",
+   "description": "A fast terminal that draws with the GPU. Tabs, splits and ligatures.",
+   "category": "System",
+   "icon": "fixtures/pause/icons/terminal.svg",
+   "command": [
+    "kitty"
+   ],
+   "keywords": [
+    "shell",
+    "prompt",
+    "command",
+    "console"
+   ],
+   "uses": 412,
+   "pinned": true,
+   "windowClass": "kitty",
+   "actions": [
+    {
+     "name": "New OS window",
+     "command": [
+      "kitty",
+      "--single-instance=no"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "firefox.desktop",
+   "name": "Firefox",
+   "genericName": "Web browser",
+   "description": "Browse the web. Bookmarks, tabs and private windows.",
+   "category": "Network",
+   "icon": "fixtures/pause/icons/browser.svg",
+   "command": [
+    "firefox"
+   ],
+   "keywords": [
+    "web",
+    "internet",
+    "www"
+   ],
+   "uses": 230,
+   "pinned": true,
+   "windowClass": "firefox",
+   "actions": [
+    {
+     "name": "New window",
+     "command": [
+      "firefox",
+      "--new-window"
+     ]
+    },
+    {
+     "name": "New private window",
+     "command": [
+      "firefox",
+      "--private-window"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "thunar.desktop",
+   "name": "Thunar",
+   "genericName": "File manager",
+   "description": "Browse and organize the files on this computer.",
+   "category": "System",
+   "icon": "fixtures/pause/icons/files.svg",
+   "command": [
+    "thunar"
+   ],
+   "keywords": [
+    "folder",
+    "files",
+    "explorer"
+   ],
+   "uses": 98,
+   "pinned": true,
+   "windowClass": "thunar"
+  },
+  {
+   "id": "nvim.desktop",
+   "name": "Neovim",
+   "genericName": "Text editor",
+   "description": "Edit text and code in the terminal. Opens inside the terminal.",
+   "category": "Development",
+   "icon": "fixtures/pause/icons/code.svg",
+   "command": [
+    "nvim"
+   ],
+   "keywords": [
+    "vim",
+    "editor",
+    "code"
+   ],
+   "uses": 175,
+   "pinned": true,
+   "terminal": true,
+   "windowClass": "nvim"
+  },
+  {
+   "id": "blueman-manager.desktop",
+   "name": "Bluetooth Manager",
+   "genericName": "Bluetooth",
+   "description": "Pair, connect and forget Bluetooth devices.",
+   "category": "System",
+   "icon": "fixtures/pause/icons/radio.svg",
+   "command": [
+    "blueman-manager"
+   ],
+   "keywords": [
+    "devices",
+    "pair",
+    "headphones"
+   ],
+   "uses": 6,
+   "windowClass": "blueman-manager"
+  },
+  {
+   "id": "btop.desktop",
+   "name": "btop",
+   "genericName": "System monitor",
+   "description": "Processes, CPU, memory, disks and network at a glance. Opens inside the terminal.",
+   "category": "System",
+   "icon": "fixtures/pause/icons/monitor.svg",
+   "command": [
+    "btop"
+   ],
+   "keywords": [
+    "task",
+    "manager",
+    "processes",
+    "cpu"
+   ],
+   "uses": 31,
+   "terminal": true,
+   "windowClass": "btop"
+  },
+  {
+   "id": "cafe-pomodoro.desktop",
+   "name": "Café Pomodoro",
+   "genericName": "Focus timer",
+   "description": "Work in 25-minute rounds with short breaks in between.",
+   "category": "Office",
+   "icon": "",
+   "command": [
+    "cafe-pomodoro"
+   ],
+   "keywords": [
+    "timer",
+    "focus",
+    "break"
+   ],
+   "uses": 2,
+   "windowClass": "cafe-pomodoro"
+  },
+  {
+   "id": "gnome-calculator.desktop",
+   "name": "Calculator",
+   "genericName": "Calculator",
+   "description": "Arithmetic, scientific functions and unit conversion.",
+   "category": "Office",
+   "icon": "",
+   "command": [
+    "gnome-calculator"
+   ],
+   "keywords": [
+    "math",
+    "calculate"
+   ],
+   "uses": 44,
+   "windowClass": "gnome-calculator"
+  },
+  {
+   "id": "chromium.desktop",
+   "name": "Chromium",
+   "genericName": "Web browser",
+   "description": "The open-source browser that Chrome is built on.",
+   "category": "Network",
+   "icon": "fixtures/pause/icons/browser.svg",
+   "command": [
+    "chromium"
+   ],
+   "keywords": [
+    "web",
+    "internet"
+   ],
+   "uses": 18,
+   "windowClass": "chromium"
+  },
+  {
+   "id": "discord.desktop",
+   "name": "Discord",
+   "genericName": "Chat",
+   "description": "Voice, video and text chat with friends and communities.",
+   "category": "Network",
+   "icon": "fixtures/pause/icons/chat.svg",
+   "command": [
+    "discord"
+   ],
+   "keywords": [
+    "voice",
+    "messages"
+   ],
+   "uses": 25,
+   "windowClass": "discord"
+  },
+  {
+   "id": "org.gnome.Evince.desktop",
+   "name": "Document Viewer",
+   "genericName": "Document viewer",
+   "description": "Read PDF, PostScript and comic book files.",
+   "category": "Office",
+   "icon": "fixtures/pause/icons/pdf.svg",
+   "command": [
+    "evince"
+   ],
+   "keywords": [
+    "pdf",
+    "ebook",
+    "djvu"
+   ],
+   "uses": 33,
+   "windowClass": "evince"
+  },
+  {
+   "id": "gimp.desktop",
+   "name": "GIMP",
+   "genericName": "Image editor",
+   "description": "Retouch photos, compose images and draw.",
+   "category": "Graphics",
+   "icon": "fixtures/pause/icons/image.svg",
+   "command": [
+    "gimp"
+   ],
+   "keywords": [
+    "photo",
+    "paint",
+    "picture"
+   ],
+   "uses": 12,
+   "windowClass": "gimp"
+  },
+  {
+   "id": "imv.desktop",
+   "name": "Image Viewer",
+   "genericName": "Image viewer",
+   "description": "Open pictures quickly and flip through a folder.",
+   "category": "Graphics",
+   "icon": "fixtures/pause/icons/image.svg",
+   "command": [
+    "imv"
+   ],
+   "keywords": [
+    "picture",
+    "photo"
+   ],
+   "uses": 57,
+   "windowClass": "imv"
+  },
+  {
+   "id": "inkscape.desktop",
+   "name": "Inkscape",
+   "genericName": "Vector graphics editor",
+   "description": "Draw logos, diagrams and illustrations that scale to any size.",
+   "category": "Graphics",
+   "icon": "fixtures/pause/icons/image.svg",
+   "command": [
+    "inkscape"
+   ],
+   "keywords": [
+    "svg",
+    "vector",
+    "drawing"
+   ],
+   "uses": 9,
+   "windowClass": "inkscape"
+  },
+  {
+   "id": "krita.desktop",
+   "name": "Krita",
+   "genericName": "Digital painting",
+   "description": "Paint and sketch, with brushes made for drawing tablets.",
+   "category": "Graphics",
+   "icon": "fixtures/pause/icons/image.svg",
+   "command": [
+    "krita"
+   ],
+   "keywords": [
+    "paint",
+    "draw",
+    "tablet"
+   ],
+   "uses": 3,
+   "windowClass": "krita"
+  },
+  {
+   "id": "libreoffice-calc.desktop",
+   "name": "LibreOffice Calc",
+   "genericName": "Spreadsheet",
+   "description": "Spreadsheets, formulas and charts.",
+   "category": "Office",
+   "icon": "fixtures/pause/icons/editor.svg",
+   "command": [
+    "libreoffice",
+    "--calc"
+   ],
+   "keywords": [
+    "table",
+    "sheet"
+   ],
+   "uses": 20,
+   "windowClass": "libreoffice-calc",
+   "actions": [
+    {
+     "name": "New spreadsheet",
+     "command": [
+      "libreoffice",
+      "--calc"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "libreoffice-writer.desktop",
+   "name": "LibreOffice Writer",
+   "genericName": "Word processor",
+   "description": "Write letters, reports and books.",
+   "category": "Office",
+   "icon": "fixtures/pause/icons/editor.svg",
+   "command": [
+    "libreoffice",
+    "--writer"
+   ],
+   "keywords": [
+    "document",
+    "text"
+   ],
+   "uses": 27,
+   "windowClass": "libreoffice-writer",
+   "actions": [
+    {
+     "name": "New document",
+     "command": [
+      "libreoffice",
+      "--writer"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mousepad.desktop",
+   "name": "Mousepad",
+   "genericName": "Text editor",
+   "description": "A simple editor for plain text files.",
+   "category": "Office",
+   "icon": "fixtures/pause/icons/editor.svg",
+   "command": [
+    "mousepad"
+   ],
+   "keywords": [
+    "notepad",
+    "text"
+   ],
+   "uses": 15,
+   "windowClass": "mousepad"
+  },
+  {
+   "id": "mpv.desktop",
+   "name": "mpv",
+   "genericName": "Media player",
+   "description": "Play videos and music from files or links.",
+   "category": "Media",
+   "icon": "fixtures/pause/icons/video.svg",
+   "command": [
+    "mpv",
+    "--player-operation-mode=pseudo-gui",
+    "--"
+   ],
+   "keywords": [
+    "video",
+    "movie",
+    "music"
+   ],
+   "uses": 61,
+   "windowClass": "mpv"
+  },
+  {
+   "id": "pavucontrol.desktop",
+   "name": "Volume Control",
+   "genericName": "Sound mixer",
+   "description": "Volume of each app, output and microphone.",
+   "category": "Media",
+   "icon": "fixtures/pause/icons/wave.svg",
+   "command": [
+    "pavucontrol"
+   ],
+   "keywords": [
+    "sound",
+    "audio",
+    "mixer",
+    "pipewire"
+   ],
+   "uses": 22,
+   "windowClass": "pavucontrol"
+  },
+  {
+   "id": "rhythmbox.desktop",
+   "name": "Rhythmbox",
+   "genericName": "Music player",
+   "description": "Play and organize your music collection and podcasts.",
+   "category": "Media",
+   "icon": "fixtures/pause/icons/music.svg",
+   "command": [
+    "rhythmbox"
+   ],
+   "keywords": [
+    "audio",
+    "songs",
+    "podcast"
+   ],
+   "uses": 14,
+   "windowClass": "rhythmbox"
+  },
+  {
+   "id": "steam.desktop",
+   "name": "Steam",
+   "genericName": "Game launcher",
+   "description": "Buy, install and play games.",
+   "category": "Game",
+   "icon": "fixtures/pause/icons/game.svg",
+   "command": [
+    "steam"
+   ],
+   "keywords": [
+    "games",
+    "store"
+   ],
+   "uses": 11,
+   "windowClass": "steam"
+  },
+  {
+   "id": "org.gnome.TextEditor.desktop",
+   "name": "Text Editor",
+   "genericName": "Text editor",
+   "description": "Write and edit plain text, with tabs and a spell checker.",
+   "category": "Office",
+   "icon": "fixtures/pause/icons/editor.svg",
+   "command": [
+    "gnome-text-editor"
+   ],
+   "keywords": [
+    "notepad",
+    "txt"
+   ],
+   "uses": 7,
+   "windowClass": "gnome-text-editor"
+  },
+  {
+   "id": "thunderbird.desktop",
+   "name": "Thunderbird",
+   "genericName": "Mail client",
+   "description": "Read and write email, with calendars and contacts.",
+   "category": "Network",
+   "icon": "fixtures/pause/icons/mail.svg",
+   "command": [
+    "thunderbird"
+   ],
+   "keywords": [
+    "email",
+    "calendar"
+   ],
+   "uses": 40,
+   "windowClass": "thunderbird",
+   "actions": [
+    {
+     "name": "Write new message",
+     "command": [
+      "thunderbird",
+      "-compose"
+     ]
+    },
+    {
+     "name": "Open address book",
+     "command": [
+      "thunderbird",
+      "-addressbook"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "transmission-gtk.desktop",
+   "name": "Transmission",
+   "genericName": "BitTorrent client",
+   "description": "Download and share files over BitTorrent.",
+   "category": "Network",
+   "icon": "fixtures/pause/icons/files.svg",
+   "command": [
+    "transmission-gtk"
+   ],
+   "keywords": [
+    "torrent",
+    "download"
+   ],
+   "uses": 4,
+   "windowClass": "transmission-gtk"
+  },
+  {
+   "id": "code.desktop",
+   "name": "Visual Studio Code",
+   "genericName": "Code editor",
+   "description": "Edit code with extensions, debugging and git built in.",
+   "category": "Development",
+   "icon": "fixtures/pause/icons/code.svg",
+   "command": [
+    "code"
+   ],
+   "keywords": [
+    "ide",
+    "programming"
+   ],
+   "uses": 52,
+   "windowClass": "code"
+  },
+  {
+   "id": "vlc.desktop",
+   "name": "VLC",
+   "genericName": "Media player",
+   "description": "Play almost any video or audio file, disc or stream.",
+   "category": "Media",
+   "icon": "fixtures/pause/icons/video.svg",
+   "command": [
+    "vlc"
+   ],
+   "keywords": [
+    "video",
+    "dvd",
+    "stream"
+   ],
+   "uses": 8,
+   "windowClass": "vlc"
+  },
+  {
+   "id": "nm-connection-editor.desktop",
+   "name": "Network Connections",
+   "genericName": "Network settings",
+   "description": "Edit Wi-Fi, cable and VPN connections.",
+   "category": "System",
+   "icon": "fixtures/pause/icons/radio.svg",
+   "command": [
+    "nm-connection-editor"
+   ],
+   "keywords": [
+    "wifi",
+    "vpn",
+    "ethernet"
+   ],
+   "uses": 5,
+   "windowClass": "nm-connection-editor"
+  },
+  {
+   "id": "rien-ghost.desktop",
+   "name": "Ghost Tool",
+   "genericName": "Test app",
+   "description": "A test entry whose command is not installed: opening it only logs why.",
+   "category": "Other",
+   "icon": "",
+   "command": [
+    "rien-ghost-tool"
+   ],
+   "keywords": [
+    "missing"
+   ],
+   "uses": 0,
+   "windowClass": "rien-ghost"
+  },
+  {
+   "id": "obs.desktop",
+   "name": "OBS Studio",
+   "genericName": "Screen recorder",
+   "description": "Record the screen and stream it live.",
+   "category": "Media",
+   "icon": "fixtures/pause/icons/video.svg",
+   "command": [
+    "obs"
+   ],
+   "keywords": [
+    "record",
+    "stream",
+    "capture"
+   ],
+   "uses": 6,
+   "windowClass": "com.obsproject.Studio"
+  }
+ ]
+}

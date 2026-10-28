@@ -298,6 +298,10 @@ galeria (Tab), com os estados abaixo.
   - o fade de abertura vale pros dois juntos.
 - **Fechamento em duas fases:** some e solta o teclado na hora; a janela sai 150 ms depois.
 - **Reuso:** a mesma moldura serve o seletor de papel de parede (spec 004).
+- **Variante com abas (spec 007):** com `tabs`, o painel desenha a barra de abas do jogo em y 26
+  (abas de 214 × 47, sem pipa; a aberta desce até a régua pontilhada em y 83), o título em y 127 com
+  a data e a hora à direita, a régua lisa em y 189 e o corpo a partir de y 221 (`bodyTop`). Sem
+  `tabs`, nada muda. É a moldura do menu de pausa (§9).
 
 ### Lista de categorias sem foco (`CursorList`, `focused: false`)
 

@@ -16,7 +16,7 @@ Singleton {
     // Reduced motion: fades, the selector blink and wallpaper transitions become instant.
     readonly property bool reduceMotion: typeof merged.reduceMotion === "boolean" ? merged.reduceMotion : defaults.reduceMotion
 
-    readonly property var defaults: parse(defaultsFile.text(), "defaults.json") ?? ({ uiScale: 1.0, barHeight: 68, vignette: true, wallpaperMotion: true, reduceMotion: false })
+    readonly property var defaults: parse(defaultsFile.text(), "defaults.json") ?? ({ uiScale: 1.0, barHeight: 68, vignette: true, wallpaperMotion: true, reduceMotion: false, terminal: ["kitty"] })
     readonly property var user: userFile.loaded ? (parse(userFile.text(), userFile.path) ?? ({})) : ({})
     readonly property var merged: Object.assign({}, defaults, user)
 
@@ -89,6 +89,19 @@ Singleton {
         return "";
     }
     // --- end spec 004 ----------------------------------------------------------------------------
+
+    // --- spec 007: the terminal that runs terminal apps (APPS, research R4) -----------------------
+    // An argv prefix: a terminal app opens as [...terminal, "-e", ...its command]. A non-empty list
+    // of non-empty strings; anything else falls back to the default with a warning.
+    readonly property var terminal: {
+        const ok = v => Array.isArray(v) && v.length > 0 && v.every(x => typeof x === "string" && x !== "");
+        if (ok(merged.terminal))
+            return merged.terminal;
+        if (merged.terminal !== undefined)
+            console.warn("settings: terminal must be a non-empty list of strings, using the default");
+        return ok(defaults.terminal) ? defaults.terminal : ["kitty"];
+    }
+    // --- end spec 007 ----------------------------------------------------------------------------
 
     FileView {
         id: defaultsFile

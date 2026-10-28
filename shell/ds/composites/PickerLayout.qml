@@ -23,6 +23,14 @@ import "../../strings"
 // it. `keys` are the hints of the focus, for the pop-up's footer.
 //   options: [{ id, label, values: [text] }]; values: option id → index of its current value;
 //   info: [{ label, value }].
+// spec 007 (the pause menu's APPS and WINDOWS): `startY` (game px, 150 by default) is where the columns
+// start; `searchHeader` ({ query, count } or null) and `emptyText` go to the GroupedList; an option
+// can have a `type`:
+//   choice  (default) as above;
+//   toggle  ◂ ON ▸ / ◂ OFF ▸ (its value 0/1): ← → and Enter flip it;
+//   action  label + arrow (`text`): Enter or a click emits triggered(option); → does nothing and ←
+//           goes back to the list.
+// Keys it doesn't use (Tab, letters, Backspace) stay unaccepted, for the page around it.
 FocusScope {
     id: root
 
@@ -37,10 +45,17 @@ FocusScope {
     property string optionsTitle: Strings.wallpaper.options
     property string applyLabel: Strings.wallpaper.keyApply
     default property alias preview: previewSlot.data
+    // spec 007
+    property real startY: 150
+    property var searchHeader: null
+    property string emptyText: ""
+    property string trailingRole: "small"
+    readonly property GroupedList groupedList: list
 
     signal applied(int index)
     signal picked(int option, int value)
     signal closeRequested()
+    signal triggered(int option)
 
     readonly property int count: list.count
     readonly property bool currentDim: list.itemData(index)?.dim === true
@@ -56,7 +71,11 @@ FocusScope {
     }
 
     function lengthOf(i: int): int {
-        return options[i]?.values?.length ?? 0;
+        return typeOf(i) === "toggle" ? 2 : (options[i]?.values?.length ?? 0);
+    }
+
+    function typeOf(i: int): string {
+        return String(options[i]?.type ?? "choice");
     }
 
     function enterOptions(): void {
@@ -80,6 +99,16 @@ FocusScope {
 
     // A value changed by ← → or an arrow: no wrapping; `back` (keys only) leaves on ← at the start.
     function step(i: int, dir: int, back: bool): void {
+        const t = typeOf(i);
+        if (t === "action") {
+            if (dir < 0 && back)
+                column = "list";
+            return;
+        }
+        if (t === "toggle") {
+            picked(i, valueOf(i) ? 0 : 1);
+            return;
+        }
         const v = valueOf(i), n = lengthOf(i);
         if (dir < 0 && v <= 0) {
             if (back)
@@ -93,6 +122,10 @@ FocusScope {
 
     // Enter or a click on a row: the next value, wrapping.
     function advance(i: int): void {
+        if (typeOf(i) === "action") {
+            triggered(i);
+            return;
+        }
         const n = lengthOf(i);
         if (n > 0)
             picked(i, (valueOf(i) + 1) % n);
@@ -168,8 +201,11 @@ FocusScope {
     // --- what the footer says --------------------------------------------------------------------
     readonly property var keys: {
         const W = Strings.wallpaper, K = Strings.settings;
-        if (column === "options")
-            return [{ key: K.keyUpDown, label: W.keySelect }, { key: K.keyLeftRight, label: W.keyChange }, { key: K.keyEsc, label: W.keyBack }];
+        if (column === "options") {
+            const o = options[option];
+            const mid = o?.type === "action" ? { key: K.keyEnter, label: String(o.text ?? "") } : { key: K.keyLeftRight, label: W.keyChange };
+            return [{ key: K.keyUpDown, label: W.keySelect }, mid, { key: K.keyEsc, label: W.keyBack }];
+        }
         const out = [{ key: K.keyUpDown, label: W.keySelect }];
         if (count > 0 && !currentDim)
             out.push({ key: K.keyEnter, label: applyLabel });
@@ -207,7 +243,7 @@ FocusScope {
 
     // --- layout ----------------------------------------------------------------------------------
     // The columns start at y 150 and stop 24 px above the footer rule (88 px above the bottom).
-    readonly property int topY: u(150)
+    readonly property int topY: u(startY)
     readonly property int bottomY: height - u(Tokens.space.popupH - 820) - u(24)
 
     GroupedList {
@@ -221,6 +257,9 @@ FocusScope {
         currentIndex: root.index
         focused: root.column === "list"
         keysEnabled: false
+        search: root.searchHeader
+        emptyText: root.emptyText
+        trailingRole: root.trailingRole
         onHoveredIndex: i => root.noteHover("list", i)
         onActivated: i => {
             root.column = "list";
@@ -273,7 +312,7 @@ FocusScope {
                     s: root.s
                     contentScale: Tokens.space.pickerOptionScale
                     option: Object.assign({ type: "choice" }, modelData)
-                    value: root.valueOf(index)
+                    value: modelData?.type === "toggle" ? root.valueOf(index) !== 0 : root.valueOf(index)
                     focused: root.column === "options" && index === root.option
 
                     onHoveredChanged: if (hovered) root.noteHover("options", index)

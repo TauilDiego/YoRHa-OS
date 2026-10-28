@@ -57,6 +57,15 @@ Singleton {
         return "";
     }
 
+    // spec 007: the stable id of a choice's value in use (its `ids`), "" without `ids`, without the
+    // option or out of range. Bindings that call it follow the value live (it reads `current`).
+    function choiceId(catId: string, optId: string): string {
+        const opt = find(catId, optId);
+        if (opt?.type !== "choice" || !Array.isArray(opt.ids))
+            return "";
+        return String(opt.ids[value(catId, optId)] ?? "");
+    }
+
     function display(catId: string, optId: string): string {
         return textOf(find(catId, optId), value(catId, optId));
     }
@@ -179,6 +188,9 @@ Singleton {
                 if (o.type === "choice" && !(Array.isArray(o.values) && o.values.length >= 2
                         && Number.isInteger(o.value) && o.value >= 0 && o.value < o.values.length))
                     return `${where}: a choice needs values and an index`;
+                if (o.ids !== undefined && !(o.type === "choice" && Array.isArray(o.ids) && o.ids.length === o.values.length
+                        && o.ids.every(x => typeof x === "string" && x !== "") && new Set(o.ids).size === o.ids.length))
+                    return `${where}: ids are one unique, non-empty string per value`;
                 if (o.type === "slider" && !(Number.isInteger(o.value) && o.value >= 0 && o.value <= 100
                         && Number.isInteger(o.step) && o.step >= 1))
                     return `${where}: a slider needs a value 0–100 and a step`;

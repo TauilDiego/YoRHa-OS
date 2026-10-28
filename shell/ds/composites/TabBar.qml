@@ -19,6 +19,7 @@ Item {
     property var model: []
     property real ruleGap: 10                    // game px between the tabs and the rule
     property real ruleScale: s                   // scale of the rule's dotted pattern
+    property real tabWidth: 0                    // spec 007: game px per tab; 0 = fit the label
 
     // Index of the tab under the pointer, or -1.
     readonly property int hoveredIndex: hover.index
@@ -89,6 +90,7 @@ Item {
                 text: entry.label ?? ""
                 state: entry.state ?? "normal"
                 reachRule: true
+                fixedWidth: root.tabWidth
                 ruleY: root.ruleY
                 onClicked: root.activated(index)
                 onHoveredChanged: Qt.callLater(hover.sync)

@@ -133,6 +133,172 @@ Singleton {
         revision++;
     }
 
+    // --- spec 007: windows and workspaces (contracts/services.md, research R7/R8) ------------------
+    // windows: [{ address, appClass, title, workspace (-1 = special), workspaceName, monitor, x, y, w,
+    // h (logical px, relative to the monitor), floating, focused, focusOrder (0 = focused) }].
+    // Fixture "windows": the path of a file (pause-fixtures.schema.json, windowsFile); its windows
+    // live in memory, so the actions change them there and nothing reaches the compositor.
+    readonly property bool fixedWindows: Fixtures.has("windows")
+    readonly property string windowsFixturePath: fixedWindows ? Fixtures.resolve(String(Fixtures.get("windows") ?? "")) : ""
+    property var fixedWindowList: []
+    property var fixedMonitorList: []
+    property string windowsError: ""
+    property var liveWindows: []
+    property var liveWorkspaces: []
+    property var liveMonitors: []
+    property int windowsRevision: 0
+    property var lastWindowAction: null          // { kind, address, workspace }
+
+    readonly property var windows: fixedWindows ? fixedWindowList : liveWindows
+    readonly property var monitorList: fixedWindows ? fixedMonitorList : liveMonitors
+    readonly property var workspaceList: {
+        if (!fixedWindows)
+            return liveWorkspaces;
+        const by = {};
+        for (const w of fixedWindowList) {
+            const key = String(w.workspace);
+            by[key] = by[key] ?? { id: w.workspace, name: w.workspaceName, monitor: w.monitor, windows: [] };
+            by[key].windows.push(w.address);
+        }
+        return Object.values(by).sort((a, b) => (a.id < 0 ? 99 : a.id) - (b.id < 0 ? 99 : b.id));
+    }
+
+    function windowAt(address: string): var {
+        return windows.find(w => w.address === address) ?? null;
+    }
+
+    // One window object in the shape above, from a fixture entry or a `hyprctl clients -j` one.
+    function fixtureWindow(w: var, i: int): var {
+        const ws = Number(w.workspace);
+        return {
+            address: String(w.address), appClass: String(w.class ?? ""), title: String(w.title ?? ""),
+            workspace: ws, workspaceName: String(w.workspaceName ?? (ws < 0 ? "special" : String(ws))),
+            monitor: String(w.monitor ?? ""), x: Number(w.x) || 0, y: Number(w.y) || 0,
+            w: Math.max(1, Number(w.w) || 1), h: Math.max(1, Number(w.h) || 1),
+            floating: w.floating === true, focused: w.focused === true, focusOrder: w.focused === true ? 0 : i + 1
+        };
+    }
+
+    function loadWindowsFixture(text: string): void {
+        try {
+            const d = JSON.parse(text);
+            if (!Array.isArray(d?.monitors) || d.monitors.length === 0 || !Array.isArray(d.windows))
+                throw new Error("needs monitors and windows");
+            fixedMonitorList = d.monitors.map(m => ({ name: String(m.name), w: Number(m.w), h: Number(m.h), x: 0, y: 0, focused: m.focused === true }));
+            fixedWindowList = d.windows.map((w, i) => fixtureWindow(w, i));
+            windowsError = "";
+        } catch (e) {
+            failWindows(`${windowsFixturePath}: ${e}`);
+        }
+        windowsRevision++;
+    }
+
+    function failWindows(reason: string): void {
+        console.warn(`compositor: windows fixture unusable, ${reason}`);
+        fixedWindowList = [];
+        fixedMonitorList = [];
+        windowsError = "unavailable";
+    }
+
+    FileView {
+        id: windowsFixture
+        path: root.windowsFixturePath
+        printErrors: false
+        blockLoading: true
+        onLoaded: root.loadWindowsFixture(text())
+        onLoadFailed: root.failWindows(`cannot read ${path}`)
+    }
+    onFixedWindowsChanged: {
+        windowsError = "";
+        lastWindowAction = null;
+        windowsRevision++;
+    }
+
+    // Back to the fixture file's windows (a fixture loaded again, `pause reset`).
+    function resetWindowsFixture(): void {
+        if (fixedWindows)
+            windowsFixture.reload();
+        lastWindowAction = null;
+    }
+
+    // A fixture window changed in memory (the actions under a fixture).
+    function editFixed(address: string, change: var): void {
+        fixedWindowList = fixedWindowList.map(w => w.address === address ? Object.assign({}, w, change) : w);
+        windowsRevision++;
+    }
+
+    function validAddress(address: string): bool {
+        return /^0x[0-9a-f]+$/.test(address);
+    }
+
+    function note(kind: string, address: string, ws: int): string {
+        lastWindowAction = { kind: kind, address: address, workspace: ws };
+        return "ok";
+    }
+
+    // Go to the window: its workspace, and the focus. Returns "ok" or "error: …".
+    function focusWindow(address: string): string {
+        const w = windowAt(address);
+        if (!validAddress(address) || !w)
+            return `error: unknown window ${address}`;
+        if (fixedWindows) {
+            let order = 1;
+            fixedWindowList = fixedWindowList.map(x => Object.assign({}, x, {
+                focused: x.address === address, focusOrder: x.address === address ? 0 : order++
+            }));
+            windowsRevision++;
+        } else {
+            dispatchWindow("focus", address, 0);
+        }
+        return note("focus", address, w.workspace);
+    }
+
+    // Move the window to workspace `ws` (1–10) without following it.
+    function moveWindow(address: string, ws: int): string {
+        const w = windowAt(address);
+        if (!validAddress(address) || !w)
+            return `error: unknown window ${address}`;
+        if (!(Number.isInteger(ws) && ws >= 1 && ws <= 10)) {
+            console.warn(`compositor: workspace ${ws} is not 1–10, nothing sent`);
+            return `error: workspace ${ws} is not 1–10`;
+        }
+        if (fixedWindows)
+            editFixed(address, { workspace: ws, workspaceName: String(ws) });
+        else
+            dispatchWindow("move", address, ws);
+        return note("move", address, ws);
+    }
+
+    function toggleFloating(address: string): string {
+        const w = windowAt(address);
+        if (!validAddress(address) || !w)
+            return `error: unknown window ${address}`;
+        if (fixedWindows)
+            editFixed(address, { floating: !w.floating });
+        else
+            dispatchWindow("float", address, 0);
+        return note("float", address, w.workspace);
+    }
+
+    // Ask the window to close (the app may ask first). Under a fixture it is gone at once.
+    function closeWindow(address: string): string {
+        const w = windowAt(address);
+        if (!validAddress(address) || !w)
+            return `error: unknown window ${address}`;
+        if (fixedWindows) {
+            fixedWindowList = fixedWindowList.filter(x => x.address !== address);
+            windowsRevision++;
+        } else {
+            dispatchWindow("close", address, 0);
+        }
+        return note("close", address, w.workspace);
+    }
+
+    // The real dispatch (frente B): research R8.
+    function dispatchWindow(op: string, address: string, ws: int): void {
+    }
+    // --- end spec 007 ------------------------------------------------------------------------------
+
     onFixedWorkspacesChanged: fixedFocus = 0
     onFixedFocusChanged: bump()
 
@@ -141,6 +307,7 @@ Singleton {
         function onDataChanged() {
             root.fixedFocus = 0;
             root.bump();
+            root.resetWindowsFixture();
         }
     }
 

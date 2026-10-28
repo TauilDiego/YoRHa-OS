@@ -167,4 +167,124 @@ Singleton {
         readonly property string manyMonitors: "%1 monitors"
     }
     // --- end spec 004 ----------------------------------------------------------------------------
+
+    // --- spec 007: pause menu ---------------------------------------------------------------------
+    readonly property PauseStrings pause: PauseStrings {}
+    component PauseStrings: QtObject {
+        // tabs: label, title and subtitle (the title row under the tab bar)
+        readonly property var tabs: ({
+            apps: { label: "APPS", title: "APPS", subtitle: "-Launcher" },
+            windows: { label: "WINDOWS", title: "WINDOWS", subtitle: "-Open Windows" },
+            system: { label: "SYSTEM", title: "SYSTEM", subtitle: "-Settings" },
+            power: { label: "POWER", title: "POWER", subtitle: "-Session" }
+        })
+        // the footer's left text
+        readonly property string appsFooter: "%1 apps · type to search"        // %1 = how many
+        readonly property string windowsFooter: "%1 windows · %2 workspaces"
+        readonly property string powerFooter: "Up %1"                          // %1 = uptime
+        // key hints (the keys themselves are Strings.settings.key*)
+        readonly property string keyTab: "Tab"
+        readonly property string nextTab: "Next tab"
+        readonly property string open: "Open"
+        readonly property string options: "Options"
+        readonly property string clear: "Clear"
+        readonly property string focus: "Focus"
+        readonly property string actions: "Actions"
+        readonly property string confirm: "Confirm"
+        readonly property string cancel: "Cancel"
+        // APPS: groups, search, preview, options, info
+        readonly property string pinned: "PINNED"
+        readonly property string allApps: "ALL APPS"
+        readonly property string search: "SEARCH"
+        readonly property string results: "%1 RESULTS"
+        readonly property string oneResult: "1 RESULT"
+        readonly property string noMatch: "No apps match."
+        readonly property string noMatchTitle: "No match"
+        readonly property string noMatchText: "Check the spelling, or search by what the app does."
+        readonly property string opened: "Opened: %1 times"
+        readonly property string openedOnce: "Opened: once"
+        readonly property string neverOpened: "Not opened yet"
+        readonly property string appOptions: "Options"
+        readonly property string workspace: "Workspace"
+        readonly property string current: "Current"
+        readonly property string pinnedOption: "Pinned"
+        readonly property string category: "Category"
+        readonly property string command: "Command"
+        readonly property string windows: "Windows"
+        readonly property string inTerminal: "%1 · in a terminal"
+        readonly property string none: "—"
+        readonly property var categories: ({
+            System: "System", Network: "Network", Media: "Media", Office: "Office",
+            Development: "Development", Graphics: "Graphics", Game: "Game", Other: "Other"
+        })
+        // WINDOWS
+        readonly property string workspaceN: "WORKSPACE %1"
+        readonly property string special: "SPECIAL"
+        readonly property string groupNote: "%1 · %2"                          // monitor · count
+        readonly property string focusedMark: "●"
+        readonly property string noWindows: "No open windows."
+        readonly property string noWindowsText: "No open windows. Open an app in APPS."
+        readonly property string windowActions: "Actions"
+        readonly property string floating: "Floating"
+        readonly property string close: "Close"
+        readonly property string go: "Go"
+        readonly property string app: "App"
+        readonly property string monitor: "Monitor"
+        readonly property string size: "Size"
+        readonly property string sizeValue: "%1 × %2"
+        readonly property string tiled: "Tiled"
+        readonly property string floatingState: "Floating"
+        readonly property string windowFoot: "%1 · %2"                         // Tiled · 1280 × 720
+        readonly property string mapEmpty: "Empty"
+        // POWER: the actions, what they do, what happens now, why one is off, the dialog
+        readonly property var powerLabels: ({
+            lock: "Lock", logout: "Log out", suspend: "Suspend",
+            hibernate: "Hibernate", reboot: "Reboot", poweroff: "Shut down"
+        })
+        readonly property var powerTexts: ({
+            lock: "Locks the screen. Your apps keep running, and your password unlocks it.",
+            logout: "Ends the session and goes back to the login screen.",
+            suspend: "Keeps the session in memory and sleeps. A key or opening the lid wakes it.",
+            hibernate: "Saves the session to disk and turns the computer off.",
+            reboot: "Closes every app and starts the computer again.",
+            poweroff: "Closes every app and turns the computer off."
+        })
+        readonly property string windowsWillClose: "%1 open windows will close."
+        readonly property string oneWindowWillClose: "1 open window will close."
+        readonly property string noWindowWillClose: "No open window will close."
+        readonly property string sessionStays: "The session stays as it is."
+        readonly property string unsavedMayAsk: "Apps with unsaved work may ask first."
+        readonly property string notSupported: "Not supported on this machine."
+        readonly property string notAllowed: "Not allowed."
+        readonly property string holding: "%1: %2"                             // who: why
+        readonly property string dialogTitle: "%1?"                            // Shut down?
+        readonly property string confirmation: "Confirmation"
+        readonly property string asked: "Asked"
+        readonly property string noneAsked: "None"
+        readonly property string now: "Now"
+        readonly property string available: "Available"
+        readonly property string unavailable: "Unavailable"
+        readonly property string refused: "The system refused: %1"
+        readonly property string lastRefused: "Last time, the system refused %1: %2"
+        readonly property string running: "Asking the system…"
+        // the status card
+        readonly property string status: "Status"
+        readonly property string user: "USER"
+        readonly property string host: "HOST"
+        readonly property string uptime: "UPTIME"
+        readonly property string battery: "BATTERY"
+        readonly property string windowsCount: "WINDOWS"
+        readonly property string noError: "NO ERROR"
+        readonly property string noBattery: "—"
+        readonly property string uptimeHM: "%1h %2m"
+        readonly property string uptimeM: "%1m"
+        readonly property string uptimeD: "%1d %2h"
+        readonly property string charging: "%1% +"
+        readonly property string percent: "%1%"
+        // short errors when a tab's test data is missing or broken (the card says it; the log says why)
+        readonly property string appsError: "App data unavailable."
+        readonly property string windowsError: "Window data unavailable."
+        readonly property string sessionError: "Session data unavailable."
+    }
+    // --- end spec 007 -----------------------------------------------------------------------------
 }

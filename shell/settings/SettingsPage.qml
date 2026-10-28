@@ -26,6 +26,10 @@ FocusScope {
     property int category: 0
     property string column: "categories"        // "categories" | "options"
     property int option: 0
+    // spec 007 (the pause menu's SYSTEM tab): where the lists start (game px; their captions sit 34
+    // above), and hints added to the footer's keys.
+    property real startY: 170
+    property var extraKeys: []
 
     signal closeRequested()
 
@@ -202,7 +206,12 @@ FocusScope {
         };
     }
 
+    // The extra hints go before Esc, as in the pause menu's mockup ("… Tab Next tab, Esc Close").
     readonly property var keys: {
+        const b = baseKeys, last = b[b.length - 1];
+        return last?.key === Strings.settings.keyEsc ? b.slice(0, -1).concat(extraKeys, [last]) : b.concat(extraKeys);
+    }
+    readonly property var baseKeys: {
         const S = Strings.settings;
         if (!cat)
             return [{ key: S.keyEsc, label: S.close }];
@@ -223,13 +232,13 @@ FocusScope {
     // --- layout ----------------------------------------------------------------------------------
     // Lists start at y 170 with their items (the rails go 7 px above); the footer rule sits
     // 88 px above the panel's bottom, and the columns stop 24 px before it.
-    readonly property int listsY: u(170)
+    readonly property int listsY: u(startY)
     readonly property int optionsX: u(480)
     readonly property int bottomY: height - u(Tokens.space.popupH - 820) - u(24)
 
     Label {
         x: categoryList.x + categoryList.itemX
-        y: root.u(136)
+        y: root.u(root.startY - 34)
         s: root.s
         role: "small"
         text: Strings.settings.categories
@@ -259,7 +268,7 @@ FocusScope {
     // The options column's caption: the category's name and how many settings it has.
     Row {
         x: root.optionsX
-        y: root.u(136)
+        y: root.u(root.startY - 34)
         spacing: root.u(14)
         visible: root.cat !== null
 

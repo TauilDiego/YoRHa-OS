@@ -1,0 +1,104 @@
+{
+ "monitors": [
+  {
+   "name": "Virtual-1",
+   "w": 1920,
+   "h": 1080,
+   "focused": true
+  }
+ ],
+ "windows": [
+  {
+   "address": "0x55d1c0a3f2b0",
+   "class": "kitty",
+   "title": "~/projects/rien-OS",
+   "workspace": 1,
+   "monitor": "Virtual-1",
+   "x": 10,
+   "y": 78,
+   "w": 945,
+   "h": 992
+  },
+  {
+   "address": "0x55d1c0a40110",
+   "class": "firefox",
+   "title": "Hyprland Wiki — Mozilla Firefox",
+   "workspace": 1,
+   "monitor": "Virtual-1",
+   "x": 965,
+   "y": 78,
+   "w": 945,
+   "h": 992
+  },
+  {
+   "address": "0x55d1c0a41a20",
+   "class": "kitty",
+   "title": "btop",
+   "workspace": 2,
+   "monitor": "Virtual-1",
+   "x": 10,
+   "y": 78,
+   "w": 945,
+   "h": 992,
+   "focused": true
+  },
+  {
+   "address": "0x55d1c0a42c80",
+   "class": "kitty",
+   "title": "~/notes",
+   "workspace": 2,
+   "monitor": "Virtual-1",
+   "x": 965,
+   "y": 78,
+   "w": 945,
+   "h": 992
+  },
+  {
+   "address": "0x55d1c0a43e90",
+   "class": "thunar",
+   "title": "Downloads — Thunar",
+   "workspace": 2,
+   "monitor": "Virtual-1",
+   "x": 560,
+   "y": 300,
+   "w": 800,
+   "h": 520,
+   "floating": true
+  },
+  {
+   "address": "0x55d1c0a450f0",
+   "class": "libreoffice-writer",
+   "title": "report-draft.odt — LibreOffice Writer",
+   "workspace": 3,
+   "monitor": "Virtual-1",
+   "x": 10,
+   "y": 78,
+   "w": 945,
+   "h": 992
+  },
+  {
+   "address": "0x55d1c0a46350",
+   "class": "mpv",
+   "title": "sample-clip.mkv — mpv",
+   "workspace": 3,
+   "monitor": "Virtual-1",
+   "x": 965,
+   "y": 78,
+   "w": 945,
+   "h": 992
+  },
+  {
+   "address": "0x55d1c0a475b0",
+   "class": "kitty",
+   "title": "scratch",
+   "workspace": -1,
+   "monitor": "Virtual-1",
+   "x": 360,
+   "y": 190,
+   "w": 1200,
+   "h": 700,
+   "workspaceName": "special:scratchpad",
+   "floating": true
+  }
+ ]
+}

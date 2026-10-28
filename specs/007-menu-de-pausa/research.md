@@ -95,6 +95,16 @@ adiados pelo dono. O `pause tab <aba>` já deixa ligá-los depois só na config 
 **Por quê:** é a API pronta do Quickshell, com os `.desktop` já interpretados e observados, sem
 dependência nova. `execDetached` não usa shell.
 
+**Spike (T003, 2026-10-27, `teste-c`, Quickshell 0.3.2, `lab/perf` `2026-10-27T215958-vm-teste-c-007-spike`):**
+- um `.desktop` copiado pra `~/.local/share/applications/` aparece em `DesktopEntries.applications`
+  em ≈0,1 s (`applicationsChanged`), e some no mesmo tempo quando é apagado. O rascunho está em
+  `rien-OS-private/lab/mockups/desktop-spike/`;
+- **mas** a pasta tem que existir quando o shell sobe: com `~/.local/share/applications/` criada
+  depois, o Quickshell não a observa. O `check-007` cria a pasta antes de reiniciar o shell; o
+  instalador (S3) deve criá-la também;
+- o `DesktopEntry.id` vem **sem** o `.desktop` (`kitty`, `rien-test`): o serviço `Apps` acrescenta
+  o sufixo, pra os ids reais e os da fixture terem a mesma forma (`kitty.desktop`).
+
 **Alternativas:**
 - ler os `.desktop` à mão com `FileView` (reimplementar a spec freedesktop, as prioridades e o
   observador);
@@ -191,6 +201,16 @@ processos, mas sofre das mesmas manias com config em Lua; fica pra quando o Quic
 Resultado no `research.md` e na tarefa. Se alguma não existir com esse nome, o adaptador usa a forma
 que funcionar, sem mudar o contrato (`Compositor.focusWindow` etc.).
 
+**Resultado do spike (T003, Hyprland 0.56.2):** as quatro expressões existem com esses nomes e
+fazem o esperado, sem ajuste na tabela:
+- `hl.dsp.focus({ window = "address:0x…" })` numa janela de outra área de trabalho troca a área e dá
+  o foco (não precisa do `focus({ workspace })` antes);
+- `hl.dsp.window.move({ workspace = 4, follow = false, window = … })` na janela em foco da área 2
+  leva a janela pra 4 e o monitor **fica** na 2 (o `follow = false` é o "silent");
+- `hl.dsp.window.float({ action = "toggle", window = … })` alterna o `floating`;
+- `hl.dsp.window.close({ window = … })` fecha (o kitty sem processo fecha na hora);
+- uma expressão errada responde `error: … attempt to call a nil value` (código 7), sem efeito.
+
 ## R9. Sessão e energia: logind, por argv
 
 **Decisão:** um serviço novo, `Session`, que só chama programas por argv (nada de shell):
@@ -218,6 +238,16 @@ que funcionar, sem mudar o contrato (`Compositor.focusWindow` etc.).
 **Por quê:** é o caminho padrão do systemd, sem dependência nova (`busctl`, `loginctl` e
 `systemctl` vêm no `systemd`); `--json=short` dá saída estável pra ler; o polkit permite essas
 ações pra sessão ativa local sem agente (as que pedem senha falham e caem na "recusa").
+
+**Spike (T003):** dentro da sessão gráfica (o `qs` roda nela), `CanSuspend`, `CanHibernate`,
+`CanReboot` e `CanPowerOff` respondem `{"type":"s","data":["yes"]}`; por SSH (sessão não ativa)
+respondem `challenge`, então o roteiro lê as capacidades pelo `pause dump`, nunca pelo SSH. A VM diz
+`yes` até pra `Hibernate` (sem swap): o motivo "apagado" só aparece com a fixture. `ListInhibitors`
+com um `systemd-inhibit --what=shutdown --who=pacman --mode=block` rodando na sessão devolve
+`{"type":"a(ssssuu)","data":[[["shutdown","pacman","System update in progress","block",1000,1233]]]}`
+(um `systemd-inhibit` lançado por SSH falha: precisa da sessão ativa). `loginctl lock-session` sai
+com 0 e o sinal `org.freedesktop.login1.Session.Lock` aparece em `sudo busctl monitor` (o monitor
+precisa de root). `uwsm check is-active` sai com 0 na VM (sessão do uwsm).
 
 **Na VM:** não há locker instalado, então a prova do `Lock` é o sinal no barramento
 (`busctl monitor org.freedesktop.login1`, dentro da VM) e não um screenshot. A sessão da VM é do uwsm

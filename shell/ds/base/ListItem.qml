@@ -54,11 +54,11 @@ Item {
 
     // Ink sweep, as in HeaderButton.
     property real sweep: 0
-    readonly property real fill: Tokens.frozen ? (inked ? 1 : 0) : sweep
+    readonly property real fill: Tokens.instant ? (inked ? 1 : 0) : sweep
     readonly property int inkW: Math.round(width * fill)
     onInkedChanged: {
         sweepAnim.stop();
-        if (inked && !Tokens.frozen)
+        if (inked && !Tokens.instant)
             sweepAnim.start();
         else
             sweep = inked ? 1 : 0;
