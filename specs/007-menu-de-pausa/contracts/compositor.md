@@ -1,6 +1,8 @@
 # Contrato: adaptador do compositor
 
-**Status:** proposta de 2026-10-28, aguardando aprovação do dono. Entra na 007 antes da frente B
+**Status:** aprovado pelo dono em 2026-10-28 (tarefa T012a). Implementado na T012a: fachada +
+`HyprlandBackend.qml` + `NullBackend.qml`; o `NiriBackend` e o `MangoBackend` ficam pro estudo 009 (até
+lá, `niri` e `mango` caem no `NullBackend`, com um aviso no log). Entra na 007 antes da frente B
 (WINDOWS), porque é nela que o código preso ao Hyprland quase dobra.
 
 **Por quê:** o dono quer experimentar o Niri e o Mango (MangoWC), além do Hyprland. Hoje só o
@@ -34,9 +36,9 @@ shell/services/compositor/
   4. `XDG_CURRENT_DESKTOP` contendo `mango` → Mango (a confirmar no 009);
   5. nenhum → `NullBackend`, com um aviso no log.
 
-  O backend é criado por um `Loader`, então só o arquivo escolhido é carregado. **A confirmar:** se
-  o `import Quickshell.Hyprland` dentro de um arquivo que não é carregado custa algo fora do
-  Hyprland.
+  O backend é criado por um `Loader`, então só o arquivo escolhido é carregado. **Conferido na
+  T012a:** com `NIER_COMPOSITOR=none`, o `HyprlandBackend.qml` não é compilado (nenhum `import
+  Quickshell.Hyprland` acontece) e a barra e o menu abrem com 0 erros de QML.
 
 ## 2. Tipos
 
@@ -111,6 +113,7 @@ readonly property var windows           // [Window]
 readonly property string activeTitle
 readonly property bool fullscreen
 signal changed()                        // a fachada sobe revision/windowsRevision
+function activeIndexOn(monitor): int    // a área mostrada no monitor (0 = nenhuma conhecida); a regra das abas da barra
 function refresh(what)                  // "monitors" | "windows" | "fullscreen" | "all"
 function focusWorkspace(key)
 function focusWindow(id)
