@@ -18,6 +18,9 @@ import "../strings"
 // Enter (or a click) applies the item on the chosen monitor, or on all of them, with the chosen
 // transition; the transition and the paper filter take effect as soon as they change. Opens with
 // the cursor on what its monitor shows. shell.qml picks the screen and unloads it after closing.
+// Amendment (4), FR-032: the Monitor field opens with the user's last choice, saved in SettingsState
+// ("wallpaper.pickerMonitor"); an output that isn't connected opens as All monitors. With fixtures
+// the saved choice is neither read nor written: the field always opens on All monitors.
 PopupWindow {
     id: root
 
@@ -42,12 +45,24 @@ PopupWindow {
     property string currentId: ""
     readonly property int index: Math.max(0, items.findIndex(w => w.id === currentId))
     readonly property var item: items[index] ?? null
-    property int monitor: 0                      // 0 = all monitors, then `screens` in order
+    // The Monitor field follows an output name ("" = all monitors), so an output plugged or
+    // unplugged meanwhile doesn't move it; `monitor` is its value: 0 = all, then `screens` in order.
+    property string monitorName: ""
+    readonly property int monitor: screens.findIndex(sc => sc.name === monitorName) + 1
+    readonly property string monitorKey: "wallpaper.pickerMonitor"
 
     onIndexChanged: layout.index = index
 
+    // The saved Monitor choice, if its output is connected (never with fixtures).
+    function savedMonitor(): string {
+        if (!SettingsState.persisted)
+            return "";
+        const name = SettingsState.get(monitorKey, "all");
+        return typeof name === "string" && screens.some(sc => sc.name === name) ? name : "";
+    }
+
     function restart(): void {
-        monitor = 0;
+        monitorName = savedMonitor();
         currentId = WallpaperStore.resolve(screenName) || (items[0]?.id ?? "");
         layout.restart(index);
     }
@@ -96,7 +111,7 @@ PopupWindow {
         return out;
     }
     readonly property var values: ({
-        monitor: Math.min(monitor, screens.length),
+        monitor: monitor,
         transition: Math.max(0, kinds.indexOf(WallpaperStore.transition.kind)),
         filter: filterOn ? 0 : 1
     })
@@ -128,7 +143,7 @@ PopupWindow {
         if (!w?.available)
             return;
         currentId = w.id;
-        const r = WallpaperStore.set(w.id, monitor === 0 ? "all" : (screens[monitor - 1]?.name ?? "all"));
+        const r = WallpaperStore.set(w.id, monitor === 0 ? "all" : monitorName);
         if (r !== "ok")
             console.info(`wallpaper picker: ${r}`);
     }
@@ -136,7 +151,9 @@ PopupWindow {
     function pick(o: int, v: int): void {
         switch (options[o]?.id) {
         case "monitor":
-            monitor = v;
+            monitorName = v === 0 ? "" : (screens[v - 1]?.name ?? "");
+            if (SettingsState.persisted)
+                SettingsState.set(monitorKey, monitorName || "all");
             break;
         case "transition":
             WallpaperStore.setTransition(kinds[v]);
