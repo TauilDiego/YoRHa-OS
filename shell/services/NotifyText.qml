@@ -18,9 +18,11 @@ Singleton {
         return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
 
-    // The app's body → safe styled text: only well-formed <b>, <i>, <u> survive; line breaks become <br>.
+    // The app's body → safe styled text: only well-formed <b>, <i>, <u> survive; line breaks become <br>;
+    // links become their text; <img>, <script> (with its content) and every other tag go.
     function sanitize(markup: var): string {
-        const src = String(markup ?? "");
+        // A script or style block goes with its content (it is never text meant for the reader).
+        const src = String(markup ?? "").replace(/<(script|style)\b[^<>]*>[\s\S]*?<\/\1\s*>/gi, "");
         const tagRe = /<\/?([A-Za-z][A-Za-z0-9]*)\b[^<>]*>/g;
         let out = "";
         let last = 0;

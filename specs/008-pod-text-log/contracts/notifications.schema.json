@@ -70,7 +70,7 @@
     },
     "state": {
       "type": "object",
-      "description": "$XDG_STATE_HOME/rien-os/notifications.json (only the keys the user changed)",
+      "description": "Unused since the T013 amendment: the choices live in the 004 SettingsState (settings.json, keys notifications.<key>). Kept as the shape of the dump's prefs.",
       "additionalProperties": false,
       "required": ["version"],
       "properties": {

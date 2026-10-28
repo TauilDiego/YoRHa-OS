@@ -16,11 +16,13 @@ UI; só o `Compositor` fala com o Hyprland. Entidades em [../data-model.md](../d
 | `set(key, value)` | `"ok"` / `"error: …"` | Valida, aplica na hora, grava o estado (não com fixtures) |
 | `setDnd(on)` | void | Atalho do `set("dnd", on)` |
 | `reset()` | void | Volta tudo ao padrão do projeto + `shell.json` e apaga as escolhas do estado |
-| **fonte viva** (research R13) | `liveValue(key)`, `setLiveValue(key, v)`, `liveValues(key)`, sinal `liveChanged()` | O que o `SettingsModel` usa. `liveValue` de uma escolha devolve o **índice** em `liveValues(key)`; de um toggle, o bool |
+| **opção viva** (research R13, emenda da T013) | `levelsOf(key)`, `levelOf(key)`, `setLevel(key, v)`, `labelsOf(key)` | A mesma API de opção viva do `Settings` da 004 (`specs/004-wallpaper-system/contracts/settings-state.md`). `levelsOf` são os valores na ordem do catálogo (toggle: `[false, true]`; `monitor`: `""` + as saídas); `labelsOf`, os rótulos do `Strings` |
+| `dump()` | objeto | Os valores + `origin` (pro `notify dump`) |
 
 Fontes: `config/defaults.json` (bloco `notifications`) → `$XDG_CONFIG_HOME/rien-os/shell.json` (bloco
-`notifications`, só lido) → `$XDG_STATE_HOME/rien-os/notifications.json` (lido e escrito). Fixture:
-`notifications.prefs` e `notifications.dnd` (em memória).
+`notifications`, só lido) → as escolhas salvas no `SettingsState` da 004 (chaves `notifications.<chave>`,
+em `$XDG_STATE_HOME/rien-os/settings.json`, lido e escrito pelo `SettingsState`). Fixture:
+`notifications.prefs` e `notifications.dnd`; com fixtures o `SettingsState` vive só na memória (FR-043).
 
 ### `NotifyStore` — o servidor, o log e a tela (US1–US4, US6)
 
@@ -79,7 +81,7 @@ Fontes: `Pipewire.defaultAudioSink`/`defaultAudioSource` (`Quickshell.Services.P
 | Serviço | Acréscimo | Fonte |
 |---|---|---|
 | `Compositor` | `focusedFullscreen: bool`; `focusedMonitor` atualizado também no evento `focusedmon` | `hyprctl activewindow -j` nos eventos `fullscreen`, `activewindow`, `workspace` (R10, R11). Fixture: `notifications.fullscreen` |
-| `SettingsModel` | campo `live` nas opções; `liveSources` (`{ notify: NotifyPrefs }`); `values` vivos (`valuesFrom`); `isLive(cat, opt)`; `reset()` não toca as vivas; `dumpValues()` mostra o valor vivo | research R13 |
+| `SettingsModel` | o campo `"setting"` da 004 vale também pra `"notify.<chave>"` (choice ou toggle, valor e rótulos do `NotifyPrefs`, `Monitor` com as saídas); `isLive(cat, opt)`, `liveIds()`; `reset()` não toca as opções das notificações (elas têm o `notify prefsReset`); `dumpValues()` mostra o valor vivo | research R13 (emenda da T013) |
 | `Settings` | bloco `notifications` lido de `defaults.json` + `shell.json` (validado) e exposto como `Settings.notifications` (objeto); quem aplica a precedência com o estado é o `NotifyPrefs` | data-model |
 | `Fixtures` | domínio `notifications` | contracts/notifications.schema.json |
 

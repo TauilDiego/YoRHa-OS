@@ -57,7 +57,8 @@ usuários já esperam; entra na lista base na S3). Na VM de teste: `libnotify`, 
 **Storage** (research R14):
 - `shell/config/defaults.json` → bloco `notifications` (gerenciado);
 - `$XDG_CONFIG_HOME/rien-os/shell.json` → bloco `notifications` (do usuário, só lido);
-- `$XDG_STATE_HOME/rien-os/notifications.json` → as escolhas e o não perturbe;
+- `$XDG_STATE_HOME/rien-os/settings.json` (o `SettingsState` da 004, chaves `notifications.<chave>`) → as
+  escolhas e o não perturbe (emenda da T013);
 - `$XDG_STATE_HOME/rien-os/text-log.json` → o log salvo, modo 600, só com `Text log: Saved`.
 
 **Testing**: evidência na VM:
@@ -178,7 +179,7 @@ shell/
 │   ├── NotifyText.qml             # novo (funções puras)
 │   ├── Osd.qml                    # novo
 │   ├── Compositor.qml             # + focusedFullscreen, focusedmon
-│   ├── SettingsModel.qml          # + opções vivas (live, liveSources, valuesFrom)
+│   ├── SettingsModel.qml          # + "setting": "notify.<chave>" (o mecanismo da 004)
 │   ├── Settings.qml               # + bloco notifications
 │   └── qmldir                     # + os quatro
 ├── settings/SettingsPage.qml      # + Osd.suppress no foco de volume/mudo/brilho

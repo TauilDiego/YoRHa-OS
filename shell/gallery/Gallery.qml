@@ -11,6 +11,7 @@ import "../popup"
 import "../services"
 import "../strings"
 import "../wallpaper"
+import "notify"
 
 // Design system gallery (US3, FR-016): every piece in every state, each with its name, laid out
 // like a NieR menu page. Full screen on the Overlay layer; opened and closed over IPC
@@ -116,7 +117,7 @@ PanelWindow {
         anchors.fill: parent
         focus: true
         Keys.onEscapePressed: root.closeRequested()
-        Keys.onTabPressed: root.page = (root.page + 1) % 3     // spec 003: page 2; spec 004: page 3
+        Keys.onTabPressed: root.page = (root.page + 1) % 4     // spec 003: page 2; spec 004: page 3; spec 008: page 4
 
         Rectangle {
             anchors.fill: parent
@@ -669,6 +670,17 @@ PanelWindow {
             anchors.fill: parent
             active: root.page === 2
             sourceComponent: page3
+        }
+
+        // --- spec 008: page 4 (Tab), the band and its pieces (FR-034) ----------------------------------
+        Loader {
+            anchors.fill: parent
+            active: root.page === 3
+            sourceComponent: GalleryNotify {
+                readonly property var window: QsWindow.window
+                s: root.s
+                dpr: Tokens.scaleOf(window?.screen?.name ?? "")
+            }
         }
     }
 

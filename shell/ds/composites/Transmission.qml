@@ -37,6 +37,7 @@ Item {
     property bool showLife: true
     property bool replying: false
     property bool live: true                     // the app still listens (preview: false dims the actions)
+    property real stillAt: -1                    // ≥ 0: the body still at that fraction of its typing (gallery)
     property var arcs: [[640, 250, 230, 180, 280], [640, 250, 237, 180, 280], [-60, 330, 260, 290, 340]]
 
     signal typedOut()
@@ -205,6 +206,7 @@ Item {
                 ms: root.typeMs
                 restartKey: root.typeKey
                 instant: root.instant
+                stillAt: root.stillAt
                 maxLines: root.preview ? root.nt.previewLines : root.nt.lines
                 onDone: root.typedOut()
             }

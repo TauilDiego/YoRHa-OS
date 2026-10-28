@@ -114,16 +114,17 @@ Cada valor tem a origem (`state`, `user`, `default`) pro `notify dump`. Valor in
 `shell.json` → padrão + `console.info` (não `warn`, FR-037); valor inválido no estado → padrão e o
 estado é regravado.
 
-**Arquivo de estado** (`$XDG_STATE_HOME/rien-os/notifications.json`):
-`{ "version": 1, "dnd": false, "prefs": { "position": "corner", … } }` — só as chaves que o usuário
-mudou.
+**Onde as escolhas ficam** (emenda da T013): no `SettingsState` da 004
+(`$XDG_STATE_HOME/rien-os/settings.json`, `{ "version": 1, "values": { … } }`), com as chaves
+`notifications.dnd`, `notifications.position`, … — só as que o usuário mudou. Não existe um
+`notifications.json` próprio.
 
 ## Categoria `notifications` do catálogo (`settings-default.json`)
 
-Entra depois de `sound`. Cada opção tem `live: "notify.<chave>"`, `desc` (FR-042) e `values` (rótulos
-em inglês, do `Strings`); `value`/`default` no catálogo são só referência (o valor vem da fonte viva).
-A opção `monitor` tem `valuesFrom: "notify.monitor"`. Toggles vivos (`dnd`, `typing`) não usam `key`
-nem `needs`.
+Entra depois de `sound`. Cada opção tem `"setting": "notify.<chave>"` (o campo da 004, emenda da
+T013); o rótulo, a `desc` (FR-042) e os `values` vêm do `Strings` (pelo `NotifyPrefs.labelsOf`), e
+`value`/`default` no catálogo são só referência (o valor vem do `NotifyPrefs`). Os valores da opção
+`monitor` são as saídas do momento. Toggles vivos (`dnd`, `typing`) não usam `key` nem `needs`.
 
 ## Estado do log aberto (`LogPage`)
 

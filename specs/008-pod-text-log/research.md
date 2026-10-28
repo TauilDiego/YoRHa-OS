@@ -179,14 +179,22 @@ fica marcado **(spike T004)** e é a primeira coisa a rodar.
   T013 confere antes de escrever).
 - **Alternativas:** um popup de opções próprio das notificações (contra a regra do dono: as opções
   ficam nas configurações do sistema); tornar todo o `SettingsModel` real (fora do escopo).
+- **Emenda (T013, 2026-10-28):** a "Bar contrast" da 004 chegou antes, com o campo `"setting":
+  "<chave>"` e a API `levelsOf`/`levelOf`/`setLevel`, e com o `SettingsState` ("salvar sempre",
+  `specs/004-wallpaper-system/contracts/settings-state.md`, que já reservava o prefixo
+  `notifications.`). A 008 adota os dois: as opções da categoria usam `"setting": "notify.<chave>"`, o
+  `NotifyPrefs` expõe a mesma API (mais `labelsOf`, pros rótulos do `Strings`), e o `SettingsModel`
+  manda as chaves `notify.*` pra ele. O campo `live`, os `liveSources` e o `valuesFrom` não existem.
 
 ## R14. Onde as escolhas e o log ficam guardados (FR-019, FR-040)
 
 - **Decisão:**
   - padrões do projeto em `shell/config/defaults.json`, bloco `notifications` (gerenciado);
   - o `shell.json` do usuário pode sobrescrever cada chave (só lido, como na 004);
-  - as escolhas e o não perturbe em `$XDG_STATE_HOME/rien-os/notifications.json` (vale mais que os
-    dois de cima; escrito pelo `NotifyPrefs`);
+  - as escolhas e o não perturbe no `SettingsState` da 004 (`$XDG_STATE_HOME/rien-os/settings.json`,
+    chaves `notifications.<chave>`; vale mais que os dois de cima). **Emenda da T013:** era um
+    `notifications.json` próprio, escrito pelo `NotifyPrefs`; o `SettingsState` já faz isso (leitura
+    no início, escrita atômica juntada, nada com fixtures);
   - o log salvo em `$XDG_STATE_HOME/rien-os/text-log.json`, só com `Saved`.
 - **Permissão do log salvo (SC-015):** antes da primeira escrita, `install -m 600 /dev/null <arquivo>`
   (argv). O `FileView` escreve atômico (arquivo temporário + rename); se o rename não mantiver o 600

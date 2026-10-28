@@ -97,7 +97,7 @@ Rectangle {
                 lifeFrac: 0.62
                 lifeMs: 0
                 showLife: false
-                Component.onCompleted: half.children[3].children[4].children[0].stillAt = 0.5
+                stillAt: 0.5
             }
         }
         Section {
