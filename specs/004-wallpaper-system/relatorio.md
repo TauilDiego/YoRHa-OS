@@ -179,3 +179,18 @@ Branch `004-acabamento`, VM `teste-a` (2 núcleos, 4 GB), `lab/perf` `2026-10-27
   não leem nem escrevem. Contrato pra 007 e 008: `contracts/settings-state.md`.
 - **Roteiros:** `check-u1` 15/15, `check-003 --profile 1080` 25/25, `check-004` 58/0; log 0 avisos;
   `qmllint` limpo.
+
+### Emenda (4): o seletor lembra o monitor (2026-10-28)
+
+`lab/perf` `2026-10-28T161207`, VM `teste-c` (2 núcleos, 4 GB). Tarefas T071–T074, branch
+`004-seletor-monitor`.
+
+- **Comportamento:** o campo Monitor abre com a última escolha (`wallpaper.pickerMonitor` no
+  `settings.json` do estado, o nome da saída ou `"all"`), também depois de reiniciar o `qs`. Uma saída
+  desconectada abre como All monitors, sem apagar a chave (volta a valer quando a saída reaparece).
+  Com fixtures o seletor nem lê a chave: abre sempre em All monitors, e as trocas não são lembradas.
+- **Prova:** a VM tem uma saída só; o `check-004` cria uma segunda com `hyprctl output create headless
+  RIEN-2`. Teclas reais (ALT+W → → →), reabrir, reiniciar, remover a saída, recriar, fixtures (arquivo
+  com o mesmo sha256) e All monitors salvo como `"all"`: 5 PASS novos.
+- **Roteiros:** `check-u1` 15/15, `check-003 --profile 1080` 25/25 (na segunda rodada; a primeira
+  teve o SC-005 da 003 fora da faixa por tempo da VM), `check-004` 63/0; log 0 avisos; `qmllint` limpo.

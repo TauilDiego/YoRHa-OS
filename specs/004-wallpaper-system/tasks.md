@@ -231,10 +231,10 @@ medido e a área vazia contra a cena sem a barra; sem fixtures, rajadas da camuf
 > `teste-c` (2 núcleos, 4 GB), `lab/perf --kind 004`. Emenda (4) da spec: FR-032, cenário 6 da US2,
 > SC-015.
 
-- [ ] T071 Emenda (4) da spec antes do código (FR-032, cenário 6 da US2, SC-015); `data-model.md` (Picker), `contracts/settings-state.md` (chave `wallpaper.pickerMonitor`) e `quickstart.md`
-- [ ] T072 `WallpaperPicker.qml`: o campo Monitor segue um nome de saída (`""` = todos); abre com `SettingsState.get("wallpaper.pickerMonitor")` só quando o estado é persistido (com fixtures, sempre "All monitors"); a troca pelo usuário salva; uma saída que não está conectada vira "All monitors"
-- [ ] T073 `lab/check-004`: bloco "o seletor lembra o monitor" sem fixtures, com uma segunda saída headless do Hyprland: teclas reais, reabrir, reiniciar o `qs`, a saída removida, de volta; e com fixtures, o estado ignorado e intocado
-- [ ] T074 Validar na `teste-c` (`lab/perf --kind 004 --task 004/T074`): `check-u1`, `check-003 --profile 1080` e `check-004` sem FAIL
+- [x] T071 Emenda (4) da spec antes do código (FR-032, cenário 6 da US2, SC-015); `data-model.md` (Picker), `contracts/settings-state.md` (chave `wallpaper.pickerMonitor`) e `quickstart.md`
+- [x] T072 `WallpaperPicker.qml`: o campo Monitor segue um nome de saída (`""` = todos); abre com `SettingsState.get("wallpaper.pickerMonitor")` só quando o estado é persistido (com fixtures, sempre "All monitors"); a troca pelo usuário salva; uma saída que não está conectada vira "All monitors"
+- [x] T073 `lab/check-004`: bloco "o seletor lembra o monitor" sem fixtures, com uma segunda saída headless do Hyprland: teclas reais, reabrir, reiniciar o `qs`, a saída removida, de volta; e com fixtures, o estado ignorado e intocado
+- [x] T074 Validar na `teste-c` (`lab/perf` 2026-10-28T161207, `--kind 004 --task 004/T074`): `check-u1` **15/15** (`out/004-monitor-check-u1`), `check-003 --profile 1080` **25/25** (`out/004-monitor-check-003-b`; a primeira rodada deu 24/1 no SC-005, a piscada medida em ≈134 ms numa rajada, fora da faixa 180–300; o cenário 8 sozinho deu ≈256 ms e a rodada inteira de novo, 25/0: tempo da VM de 2 núcleos, não a mudança), `check-004` **63 PASS / 0 FAIL** (`out/004-monitor-check-004`, os 58 de antes + 5 do SC-015), log 0 erros e 0 avisos em 14 inícios do `qs`, `qmllint` limpo. Screenshots `monitor-*.png` na pasta do `check-004`
 <!-- seletor lembra o monitor (004-seletor-monitor): fim -->
 
 ---
