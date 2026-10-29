@@ -19,7 +19,7 @@
 
 ## Cursores
 
-- **rien-OS Cursors** (`system/cursors/`): desenho próprio, vetorial, com os 39 formatos e a
+- **YoRHa-OS Cursors** (`system/cursors/`): desenho próprio, vetorial, com os 39 formatos e a
   composição do **NieR Cursors**, de **Beinsezii**
   ([github.com/Beinsezii/NieR-Cursors](https://github.com/Beinsezii/NieR-Cursors)), licença MIT
   (Copyright (c) 2020 Beinsezii). Os dois cursores de carregamento usam os quadros renderizados
@@ -34,5 +34,5 @@ próprio arquivo. Por enquanto não há nenhum.
 
 ## Marcas
 
-NieR:Automata e YoRHa são marcas da Square Enix. O rien-OS é um projeto de fã, sem afiliação. Não
+NieR:Automata e YoRHa são marcas da Square Enix. O YoRHa-OS é um projeto de fã, sem afiliação. Não
 distribuímos fontes, sons, imagens nem vídeos do jogo.

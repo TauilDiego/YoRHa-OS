@@ -28,7 +28,7 @@ Fonte única dos valores do `docs/design-system.md`. Todos os tamanhos estão em
 | `vignette` | bool | true | — |
 | `wallpaperMotion` | bool | true | Movimento do fundo (H4); o IPC `wallpaper motion` sobrepõe até reiniciar |
 
-Origem: `shell/config/defaults.json`, sobrescrito por `$XDG_CONFIG_HOME/rien-os/shell.json`.
+Origem: `shell/config/defaults.json`, sobrescrito por `$XDG_CONFIG_HOME/yorha-os/shell.json`.
 
 ## Workspace (do `services/Compositor.qml`)
 

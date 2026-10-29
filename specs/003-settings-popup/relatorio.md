@@ -57,7 +57,7 @@ imagem de revisão abaixo.
 
 ## Evidência por critério
 
-As sessões estão em `~/projects/rien-OS-relatorios/runs/<id>`. A evidência fica em
+As sessões estão em `~/projects/YoRHa-OS-relatorios/runs/<id>`. A evidência fica em
 `~/.local/share/nier-lab/out/`.
 
 | Critério | Resultado | Evidência |
@@ -126,7 +126,7 @@ Feita com `SPECIFY_FEATURE_DIRECTORY=specs/003-settings-popup`; não há `extens
 | ID | Categoria | Gravidade | Onde | Achado | O que foi feito |
 |---|---|---|---|---|---|
 | I1 | Inconsistência | MÉDIA | spec.md (Status), plan.md (Constitution Check V) | Spec "aguardando aprovação" e plano "⏳", mas os dois foram aprovados | Status e ✅ atualizados |
-| I2 | Inconsistência | MÉDIA | spec.md US1, FR-007 | "papel com grid": o dono tirou o grid de todo o rien-OS em 2026-10-27, e a implementação não tem grid | Texto ajustado |
+| I2 | Inconsistência | MÉDIA | spec.md US1, FR-007 | "papel com grid": o dono tirou o grid de todo o YoRHa-OS em 2026-10-27, e a implementação não tem grid | Texto ajustado |
 | I3 | Inconsistência | MÉDIA | spec.md (Suposições), research.md R11 | "movimento reduzido ainda não existe": `Settings.reduceMotion` entrou com a 004 e o popup respeita | Texto ajustado, com o mecanismo (`Tokens.instant`) |
 | I4 | Inconsistência | MÉDIA | quickstart.md | Preparação sem o boot hidpi, `lab/burst <região> 16` com a assinatura antiga, `check-003` "1–9" | Reescrito em torno do `check-003 [--profile]` |
 | I5 | Inconsistência | BAIXA | plan.md (estrutura, escopo) | Faltavam `PopupFrame`, `ListItem`/`Selector` e o catálogo longo; contagem de componentes antiga | Árvore e escopo atualizados |

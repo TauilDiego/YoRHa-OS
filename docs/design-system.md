@@ -1,4 +1,4 @@
-# Design system do rien-OS
+# Design system do YoRHa-OS
 
 > Rascunho pra discussão. Baseado na biblioteca **"NieR: Automata - UI"**, de
 > [tyleo](https://tyleo.com) ([Figma Community](https://www.figma.com/community/file/1598348131070316402/nier-automata-ui),
@@ -118,7 +118,7 @@ Cantos sempre retos (raio 0).
 ### Botão-aba (`header-button`)
 
 Tem ícone (quadrado) + texto e mede 214×47. São 7px entre o quadrado e o texto. No Figma, a
-borda esquerda reserva espaço pro cursor; no rien-OS, as abas não têm seletor (ver §5).
+borda esquerda reserva espaço pro cursor; no YoRHa-OS, as abas não têm seletor (ver §5).
 
 | Estado | Fundo | Quadrado e texto | Cursor |
 |---|---|---|---|
@@ -172,7 +172,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 
 - **Barra de abas:**
   - uma faixa vertical à esquerda;
-  - as abas (o Figma põe o seletor na aba em foco; no rien-OS, não, ver §5);
+  - as abas (o Figma põe o seletor na aba em foco; no YoRHa-OS, não, ver §5);
   - a régua pontilhada embaixo.
 - **Lista com cursor:** faixas verticais + itens + barra de rolagem + seletor.
 - **Card de status:** pares rótulo/valor alinhados, medidor, fileira de quadrados vazios e um
@@ -182,7 +182,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 
 ## 5. Desvios pro desktop (decididos em 2026-10-27)
 
-| Ponto | No jogo (1080p) | No rien-OS |
+| Ponto | No jogo (1080p) | No YoRHa-OS |
 |---|---|---|
 | Altura da barra do topo | Aba de 47px, texto 27px | **Revisado (2026-10-27):** barra de 68px, configurável de 28 a 96. De cima pra baixo: 3px de papel, a aba (33px, `s ≈ 0,70`), um vão de 17px de jogo (12px) e a régua pontilhada **na escala do jogo** (`s × 1,0`: pontos de 4px, padrão de 20px de altura), nítida em pixels físicos inteiros. A aba em foco desce até a régua por uma haste animada (`motion.touch`, 160 ms, logo depois da tinta; recolhe em `motion.untouch`, 120 ms). A versão cheia fica pros menus de tela inteira |
 | Escala | Fixa em 1080p | Tokens em medidas do jogo × fator da tela × `uiScale` (ver "Escala") |
@@ -247,7 +247,7 @@ convertidas pra 1080p (×1,2). As imagens ficam só no repositório privado, pra
   de fechar.
 - **Realce de item:** a faixa varre da esquerda pra direita junto com os trilhos, em ≈100–150 ms
   com desaceleração. A spec usa 0,15 s (token `motion.highlight`).
-- **Cursor:** parado. O rien-OS acrescenta um blink suave quando ele troca de item (ver §5).
+- **Cursor:** parado. O YoRHa-OS acrescenta um blink suave quando ele troca de item (ver §5).
 - **Fechar o menu:** a tela se desfaz em estilhaços triangulares, em ≈300–500 ms.
 - **Estado danificado:** aberração cromática e glitch no texto.
 - Os tempos ficam em tokens, pra calibrar depois com gravação a 60 fps no laboratório.
@@ -375,5 +375,5 @@ atual:
 
 Componentes, tokens e anatomia baseados em **"NieR: Automata - UI"**, de **tyleo**,
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). As páginas de screenshots do jogo
-desse arquivo não foram usadas. NieR:Automata é marca da Square Enix; o rien-OS é um projeto de
+desse arquivo não foram usadas. NieR:Automata é marca da Square Enix; o YoRHa-OS é um projeto de
 fã, sem relação com ela.
