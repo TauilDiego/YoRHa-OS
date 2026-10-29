@@ -5,6 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "../strings"
+import "appsearch.js" as AppSearch
 
 // The apps of the pause menu's APPS tab (spec 007, contracts/services.md): every app, the pinned
 // ones and how many times each was opened. One app (data-model "App"):
@@ -97,25 +98,110 @@ Singleton {
         return out;
     }
 
-    // The ids that match `query`, best first (research R5; frente A).
+    // The ids that match `query`, best first (research R5, appsearch.js).
     function search(query: string): var {
-        return [];
+        return AppSearch.rank(apps, query).map(a => a.id);
+    }
+
+    // An argv without the .desktop field codes (%f %U %i …; "%%" is a "%"); an argument that was
+    // only codes goes away (research R4).
+    function cleanArgv(argv: var): var {
+        const out = [];
+        for (const arg of argv ?? []) {
+            const a = String(arg);
+            const clean = a.replace(/%([fFuUdDnNickvm%])/g, (m, c) => c === "%" ? "%" : "");
+            if (clean !== "" || a === "")
+                out.push(clean);
+        }
+        return out;
     }
 
     // Open app `id` (action -1 = the app itself, else its action's index) on workspace `ws` (0 =
-    // where the user is, else 1–10). Returns "ok" or "error: …" (frente A).
+    // where the user is, else 1–10: the user is taken there first). Never through a shell: the
+    // executable is looked up first by a fixed script that gets the name as an argument, then the
+    // argv runs detached (research R4, FR-012). Returns "ok" once the launch is on its way
+    // (lastLaunch says how it ended) or "error: …". A use is counted only when it really opened.
     function launch(id: string, action: int, ws: int): string {
         const a = byId(id);
         if (!a)
             return `error: unknown app ${id}`;
-        lastLaunch = { id: id, action: action, workspace: ws, command: a.command, ok: false, reason: "not wired yet" };
+        const act = action >= 0 ? (a.actions[action] ?? null) : null;
+        if (action >= 0 && !act)
+            return `error: ${id} has no action ${action}`;
+        const argv = cleanArgv(act ? act.command : a.command);
+        const where = Math.max(0, Math.min(10, Math.floor(Number(ws) || 0)));
+        const command = a.terminal ? Settings.terminal.concat(["-e"], argv) : argv;
+        const job = { id: id, action: action, workspace: where, command: command, dir: a.workingDirectory,
+                      check: a.terminal ? [Settings.terminal[0], argv[0]] : [argv[0]] };
+        if (argv.length === 0 || argv[0] === "") {
+            failLaunch(job, "empty command");
+            return "error: empty command";
+        }
+        lastLaunch = { id: id, action: action, workspace: where, command: command, ok: false, reason: "checking" };
+        launchQueue = launchQueue.concat([job]);
+        checkNext();
         return "ok";
+    }
+
+    property var launchQueue: []
+
+    function checkNext(): void {
+        if (checker.running || launchQueue.length === 0)
+            return;
+        checker.job = launchQueue[0];
+        launchQueue = launchQueue.slice(1);
+        checker.running = true;
+    }
+
+    function checked(job: var, code: int, missing: string): void {
+        if (code !== 0) {
+            failLaunch(job, `${missing || job.check[0]} not found`);
+        } else {
+            if (job.workspace > 0)
+                Compositor.focus(job.workspace);
+            const ctx = { command: job.command };
+            if (job.dir)
+                ctx.workingDirectory = job.dir;
+            Quickshell.execDetached(ctx);
+            countUse(job.id);
+            lastLaunch = { id: job.id, action: job.action, workspace: job.workspace, command: job.command, ok: true, reason: "" };
+            console.info(`apps: opened ${job.id}: ${job.command.join(" ")}${job.workspace > 0 ? ` on workspace ${job.workspace}` : ""}`);
+        }
+        Qt.callLater(root.checkNext);
+    }
+
+    function failLaunch(job: var, reason: string): void {
+        console.warn(`apps: cannot open ${job.id}: ${reason}`);
+        lastLaunch = { id: job.id, action: job.action, workspace: job.workspace, command: job.command, ok: false, reason: reason };
+    }
+
+    function countUse(id: string): void {
+        const u = Object.assign({}, uses);
+        u[id] = Number(u[id] ?? 0) + 1;
+        uses = u;
+        stateChanged();
     }
 
     function setPinned(id: string, on: bool): void {
         if (!byId(id) || pinnedIds.includes(id) === on)
             return;
         pinnedIds = on ? pinnedIds.concat([id]) : pinnedIds.filter(x => x !== id);
+        stateChanged();
+    }
+
+    // Pins or uses changed: saved with the real apps (US5); with the fixture, memory only.
+    function stateChanged(): void {
+    }
+
+    // The executable lookup: a fixed script, the names as its arguments (never interpreted).
+    Process {
+        id: checker
+        property var job: null
+        command: ["sh", "-c", 'for c do command -v -- "$c" >/dev/null 2>&1 || { printf %s "$c"; exit 1; }; done', "sh"].concat(job?.check ?? [])
+        stdout: StdioCollector {
+            id: checkerOut
+        }
+        onExited: (code, status) => root.checked(checker.job, code, checkerOut.text.trim())
     }
 
     // --- the fixture ---------------------------------------------------------------------------------

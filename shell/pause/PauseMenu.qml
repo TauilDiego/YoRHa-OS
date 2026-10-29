@@ -64,6 +64,12 @@ PopupWindow {
         return true;
     }
 
+    // Text that may go to APPS's search: something, and no control character in it (C0, DEL,
+    // C1). Delete sends "\x7f", which is past " " and used to slip into the query.
+    function printable(text: string): bool {
+        return text.length > 0 && !/[\u0000-\u001f\u007f-\u009f]/.test(text);
+    }
+
     function step(dir: int): void {
         setTab(tabIds[(tabIndex + dir + tabIds.length) % tabIds.length]);
     }
@@ -166,7 +172,7 @@ PopupWindow {
             } else if (event.key === Qt.Key_Backtab) {
                 root.step(-1);
                 event.accepted = true;
-            } else if (root.tab === "apps" && event.text.length > 0 && event.text >= " "
+            } else if (root.tab === "apps" && root.printable(event.text)
                        && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))) {
                 appsPage.type(event.text);
                 event.accepted = true;
