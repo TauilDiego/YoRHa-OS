@@ -612,6 +612,150 @@ agrupada com e sem foco e o layout inteiro em miniatura.
   <tipo> | camouflage <cell> <trail> <glitch> | filter <caminho> <true|false> | picker
   <open|close|toggle> | dump`.
 
+<!-- spec 008 (008-pod-text-log): início -->
+## 9. Transmissões, OSD e text log (spec 008)
+
+O YoRHa-OS é o servidor de notificações da sessão. Cada notificação vira uma **transmissão**, como as
+falas do Pod; o histórico é o **text log**; volume, microfone e brilho mostram um **OSD**. Tudo que
+passa pela tela usa o mesmo material, a **faixa**, tirado da faixa de tutorial do jogo (§6). Medidas
+em px do jogo (1080p) × escala da tela; tokens em `Tokens.notify`.
+
+### A faixa (`Band`)
+
+- **Material:** tinta `#1E1D19` a 84% (`band`), retícula de pontos pretos a 32% num passo de 5 px
+  (um ladrilho estático, sem shader), contorno interno claro a 10% (`bandEdge`, legível sobre o fundo
+  escuro), arcos finos de 2 px a 14% (`bandLine`, um `Shape` estático) e sombra chapada de 3 px a
+  22% embaixo. Cantos retos, **sem desfoque**, nada anima dentro dela.
+- **Bloco da urgência:** 14 px na esquerda: baixa `medium-gray`, normal `light-yellow`, crítica
+  `alert` `#8F3A30`. São os únicos usos do `alert` na fase, junto com a etiqueta `CRITICAL` e o
+  quadradinho das críticas no log.
+- **Texto:** claro `#E6E1C8` (`bandText`); hora, `×N` e contornos secundários a 62% (`bandText2`).
+
+### A transmissão (`Transmission`)
+
+De cima pra baixo, com o conteúdo a 36 px do bloco:
+- **quem fala:** quadradinho de 12, o nome (`bandWho` 17/600), `×N` quando agrupada, a etiqueta
+  `CRITICAL` e a hora à direita (`bandTime`); com o mouse por cima, o × (26) no lugar da hora;
+- **título:** uma linha, `bandTitle` 23/600, com reticências;
+- **corpo:** `bandBody` 19/500, até 4 linhas digitadas (`TypedText`); quando corta, `More in log`;
+- **imagem** (opcional): 72 × 72 à direita do corpo, cortada no centro, moldura de 2 px;
+- **progresso** (opcional): a trilha translúcida (`bandTrack`, `#D7D1B3` a 22%, a altura do `hp-bar`)
+  com o preenchimento `light-yellow` e o número à direita. **Emenda de 2026-10-29 (decisão do dono):**
+  a trilha do mockup, não o `Meter` invertido;
+- **ações:** até 3 botões de ação na ordem do app, e `Reply` quando o app aceita resposta;
+- **campo de resposta:** uma linha (36 px) com o fundo a 25% de preto e a linha clara de 2 px
+  embaixo; `Enter Send · Esc Cancel` à direita. É o único momento em que uma transmissão pega o
+  teclado;
+- **linha de tempo:** 3 px embaixo, encolhendo com o tempo que falta; parada com o mouse por cima.
+
+**Texto digitado (`TypedText`):** o corpo entra a 90 caracteres por segundo com um cursor de bloco
+no fim, acelerando pra nunca passar de 700 ms; o título e quem fala aparecem inteiros. O mouse
+completa na hora; uma substituição digita só a partir do primeiro caractere diferente. Com movimento
+reduzido, dados de teste ou `Typing: Off`, o texto aparece inteiro, sem cursor.
+
+**Movimento:** entra varrendo da borda (150 ms, `motion.highlight`), sai com fade de 150 ms; as outras
+da pilha deslizam. Troca de posição sem animação, mantendo o tempo.
+
+**Tempos** (depois da digitação): o que o app pedir; senão, baixa 4 s, normal 6 s + 1 s a cada 80
+caracteres além de 120 (no máximo 12 s), crítica sem limite; `Duration` Short × 0,66, Long × 1,5.
+
+### A pilha e as três posições (`TransmissionStack`)
+
+| Posição | Onde | Ordem |
+|---|---|---|
+| **Corner** (de fábrica) | 12 abaixo da barra, 16 da direita, 540 de largura, 12 entre elas | a mais nova em cima |
+| **Top band** | faixas da largura do monitor logo abaixo da barra, o texto numa coluna com 360 de margem dos lados, 2 px entre elas | a mais nova em cima |
+| **Subtitle** | embaixo, no centro, 1100 de largura, 210 acima da borda (a área do OSD fica livre) | a mais nova embaixo |
+
+- **Limite:** 3 na tela (`On screen`: 3, 1, 5); a mais velha sai pro log; as que saem antes de
+  terminar de digitar contam como não lidas e a linha `+N in log` aparece embaixo da pilha (o clique
+  abre o log).
+- **Agrupamento:** o mesmo app, com a anterior ainda na tela, vira uma transmissão só, com `×N`.
+
+### A faixa crítica (`CriticalBand`)
+
+A largura do monitor, logo abaixo da barra (encostada nela no `Top band`): o bloco `alert`, arcos, o
+texto numa coluna de até 1080 a partir de 360 da esquerda (quem fala 20, título 30, corpo 23, até 3
+linhas), as ações embaixo e, à direita (a 62 da borda), `◂ 1/N ▸` quando há mais de uma e o × (30).
+Altura mínima 230; entra varrendo da esquerda (200 ms). Não some sozinha nem conta no limite; a
+pilha desce pra baixo dela.
+
+### Botão de ação (`ActionButton`) e etiquetas (`Tag`)
+
+- **Botão:** contorno claro de 2 px, 32 de altura, texto `bandAction` 16/600 a 14 px das bordas;
+  com o mouse por cima (ou `on`), a tinta clara varre da esquerda (150 ms) e o texto fica escuro;
+  apagado (o app fechou) a 35%.
+- **Etiquetas:** `CRITICAL` (texto claro sobre `alert`) e `NEW` (contorno de 1,5 px), `bandTag` 13/600.
+
+### OSD (`OsdView`, `OsdWindow`)
+
+Uma faixa de 600 × 72 centrada no monitor em foco: quadradinho, o nome (`osdLabel` 20/600, numa
+coluna de 168), o medidor de 300 na trilha translúcida (apagado a 35% no mudo; cheio acima de 100) e
+o número com algarismos tabulares (`osdValue` 23/500). `VOLUME`, `MUTE` (o medidor apagado), `MIC ON` /
+`MIC OFF` (sem medidor) e `BRIGHTNESS`. Fica 1,2 s depois da última mudança e atualiza no lugar;
+nunca há dois. Não pega teclado nem mouse e aparece também com o não perturbe.
+
+| `OSD position` | Onde |
+|---|---|
+| **Bottom** (de fábrica) | 110 acima da borda de baixo |
+| **Top** | 12 abaixo da barra, ou da faixa crítica quando há uma |
+
+### O contador da barra (`LogCounter`)
+
+Antes do relógio: um quadradinho de 9, `LOG 3` (as não lidas), escondido com zero; `DND 3` com o não
+perturbe ligado. Segue o tom da barra (§8, "A barra sobre o fundo"): tinta sobre o papel, claro sobre
+o fundo escuro. O clique abre o log.
+
+### O text log (`LogPage`)
+
+O layout de lista + prévia + opções (§8, `PickerLayout { fluid: true; lazyList: true }`), numa peça
+sem janela que se ajusta ao corpo que recebe:
+- **no popup** (`LogPopup`, `ALT + N` na VM): a moldura da 003, título `LOG -Transmissions`;
+- **na aba do menu de pausa** (spec 007): `LogPage { host: "pause"; s; width; height }` no corpo da
+  aba; a moldura lê `title`, `subtitle`, `footerLeft` e `keys` da página, e abrir a aba faz
+  `NotifyStore.logOpen = true` e `markAllRead()`.
+
+Colunas:
+- **lista:** NOW (última hora) e EARLIER; cada linha com o quadradinho (`alert` nas críticas), quem
+  fala em peso 600, o título, a hora, `×N` e `NEW`. Só as linhas à vista são criadas (`lazy`), então
+  um log de 100 abre tão rápido quanto um de 10 (≈ 60–100 ms na VM);
+- **meio:** a transmissão em foco, inteira, na faixa (`layout: "preview"`, até 9 linhas), digitada de
+  novo a cada troca, com as ações que ainda valem; "The app closed this notification." ou "From an
+  earlier session." quando não valem; APP, RECEIVED, URGENCY e STATUS embaixo;
+- **opções:** `Do not disturb` (toggle), `Show` (All, Unread, Critical) e `Clear all` (ação); depois
+  UNREAD, KEPT (n / limite) e SERVER.
+
+Teclas: lista ↑↓, Enter a ação padrão, Delete dispensa (o foco vai pra próxima), → opções, Esc
+fecha; opções ↑↓, ←→ mudam, Enter, Esc volta. O rodapé mostra só as que valem.
+
+**Acréscimos às peças da 003/004:** `ListItem.lead`, `.tag` e `.markColor`; `GroupedList.lazy`;
+`PickerLayout.fluid`, `.lazyList` e as opções `toggle` (0/1) e `action` (sinal `triggered`), com os
+mesmos nomes da branch da 007.
+
+### Opções, tokens e comandos
+
+- **Categoria Notifications** das configurações (vale de verdade, troca ao vivo, guardada em
+  `~/.local/state/yorha-os/`): `Do not disturb`, `Position`, `OSD position`, `System voice` (Relay 01,
+  YoRHa-OS, System), `Text log` (Session only, Saved), `Log size` (100, 50, 200), `Monitor`,
+  `On screen`, `Duration`, `Typing`, `In fullscreen` (Hold, Show).
+- **Tokens** (`Tokens.notify`): as cores da faixa acima; `block` 14; `stackW` 540, `stackGap` 12,
+  `stackRight` 16, `stackTop` 12; `topPad` 360; `subtitleW` 1100, `subtitleBottom` 210; `critMinH`
+  230, `critCol` 1080, `critSide` 62; `imageSize` 72; `actionH` 32; `lines` 4, `critLines` 3,
+  `previewLines` 9; `osdW` 600, `osdH` 72, `osdBottom` 110, `osdTop` 12, `osdMeterW` 300; `cps` 90,
+  `typeMaxMs` 700, `lowMs` 4000, `normalMs` 6000, `maxMs` 12000, `osdHold` 1200, `sweep` e `fade`
+  150. Papéis de texto novos em `Tokens.type`: `bandWho`, `bandTitle`, `bandBody`, `bandTime`,
+  `bandAction`, `bandTag`, `critWho`, `critTitle`, `critBody`, `osdLabel`, `osdValue`.
+- **Comandos:** `qs ipc call notify open | close | toggle | isOpen | dnd <on|off|toggle> | clear |
+  dismissAll | invoke <id> <ação> | osd <volume|mic|brightness> <valor> <mudo> | sample <nome> |
+  pref <chave> <valor> | prefsReset | dump`. Atalhos provisórios na VM: `ALT + N` (log) e
+  `ALT + CTRL + N` (não perturbe); no sistema, `SUPER` no lugar de `ALT`, pendentes do dono.
+
+A galeria mostra tudo isso nas páginas 4 e 5 (Tab três e quatro vezes): a faixa sobre o papel e
+sobre o escuro, as transmissões (digitando, com ações, com imagem e resposta aberta, com progresso,
+`×5`), a faixa crítica com `1/2`, o botão de ação e as etiquetas, o OSD nos quatro tipos, as três
+posições em miniatura, o contador nos dois tons e a `LogPage` nos dois corpos (popup e menu de pausa).
+<!-- spec 008 (008-pod-text-log): fim -->
+
 ## Créditos
 
 Componentes, tokens e anatomia baseados em **"NieR: Automata - UI"**, de **tyleo**,

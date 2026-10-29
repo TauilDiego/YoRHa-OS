@@ -254,8 +254,8 @@ congelado.**
 
 **Independent Test**: `lab/check-008 --only osd,osd-quiet` (SC-008).
 
-- [ ] T041 [P] [US5] `shell/ds/composites/OsdView.qml`: `Band` 600×72, quadradinho, rótulo (168), `Meter` invertido de 300 (35% no mudo; cheio acima de 100), número tabular à direita; `MIC ON/OFF` sem medidor. Na galeria: volume, mudo, microfone, brilho — **Frente C**
-- [ ] T042 [P] [US5] `Osd` real (research R12), em `shell/services/Osd.qml`:
+- [x] T041 [P] [US5] `shell/ds/composites/OsdView.qml`: `Band` 600×72, quadradinho, rótulo (168), `Meter` invertido de 300 (35% no mudo; cheio acima de 100), número tabular à direita; `MIC ON/OFF` sem medidor. Na galeria: volume, mudo, microfone, brilho — **Frente C** — **feito** (`lab/perf` 2026-10-29T113600, `teste-b`): a faixa de 600 × 72 com o medidor na trilha translúcida (emenda do contrato, decisão do dono), MUTE com o medidor a 35% (`out/check-008-1080-20261029-113819/osd-mudo.png`), 120 com o medidor cheio (`osd-120.png`); na galeria, os quatro tipos
+- [x] T042 [P] [US5] `Osd` real (research R12), em `shell/services/Osd.qml`:
   - **volume e mudo:** `Pipewire.defaultAudioSink.audio`, valor real `round(volume × 100)`;
   - **microfone:** `defaultAudioSource.audio.muted`;
   - **sem OSD** no primeiro valor nem na troca de nó;
@@ -263,10 +263,10 @@ congelado.**
   - **tempo:** 1200 ms depois da última mudança, atualiza no lugar;
   - **`suppress(kind, on)`.**
 
-  **Frente C**
-- [ ] T043 [P] [US5] `shell/notify/OsdWindow.qml` + `shell/shell.qml`: `PanelWindow` `Overlay` do tamanho do OSD, `mask` vazia, teclado `None`, namespace `yorha-osd`, só enquanto há OSD. Embaixo a `osdBottom` do monitor em foco (a posição `Top` vem na US7); aparece com DND; `osd.box` no `dump` — **Frente C**
-- [ ] T044 [P] [US5] `shell/settings/SettingsPage.qml`: `Osd.suppress("volume", …)` com o foco em `sound.volume`/`sound.mute`, `"brightness"` em `display.brightness` (FR-029) — **Frente C**
-- [ ] T045 [US5] `lab/check-008` blocos `osd` (`lab/key volumeup` ×3, `wpctl get-volume`, `lab/burst`, mudo, `notify osd brightness 40`, volume 120%) e `osd-quiet`
+  **Frente C** — **feito** (`lab/perf` 2026-10-29T113600, `teste-b`): 64 → 66 na primeira tecla real e um OSD só depois de três mudanças, com o valor do `wpctl` (70); some 1232 ms (1080) e 1222 ms (hidpi) depois da última (SC-008); MIC OFF / MIC ON pelo mudo do source. **Corrigido no lab:** o source nulo era `Audio/Source/Virtual`, e o Quickshell não dá `audio` a esse tipo de nó (um microfone de verdade é `Audio/Source`): o `lab/provision-step notify` cria o source como `Audio/Source`
+- [x] T043  [P] [US5] `shell/notify/OsdWindow.qml` + `shell/shell.qml`: `PanelWindow` `Overlay` do tamanho do OSD, `mask` vazia, teclado `None`, namespace `yorha-osd`, só enquanto há OSD. Embaixo a `osdBottom` do monitor em foco (a posição `Top` vem na US7); aparece com DND; `osd.box` no `dump` — **Frente C** — **feito** (`lab/perf` 2026-10-29T113600, `teste-b`): embaixo, centrado, a 110 da borda (`osd.box` `{x: 659, y: 895, w: 600, h: 72}` em 1080); aparece com o não perturbe e não entra no log; uma camada `yorha-osd` só
+- [x] T044 [P] [US5] `shell/settings/SettingsPage.qml`: `Osd.suppress("volume", …)` com o foco em `sound.volume`/`sound.mute`, `"brightness"` em `display.brightness` (FR-029) — **Frente C** — **feito** (`lab/perf` 2026-10-29T113600, `teste-b`): com o foco em Sound › Volume e em Mute (teclas reais), o `wpctl` de fora não mostra OSD; com o popup fechado, volta a mostrar (bloco `osd-quiet`). O brilho fica pra homologação (a VM não tem luz de fundo)
+- [x] T045 [US5] `lab/check-008` blocos `osd` (`lab/key volumeup` ×3, `wpctl get-volume`, `lab/burst`, mudo, `notify osd brightness 40`, volume 120%) e `osd-quiet` — **feito** (`lab/perf` 2026-10-29T113600, `teste-b`): `lab/check-008 --only osd,osd-quiet` **11/0** em 1080 (`out/check-008-1080-20261029-113819`) e hidpi (`out/check-008-hidpi-20261029-114054`)
 
 ---
 

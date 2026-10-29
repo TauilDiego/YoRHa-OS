@@ -151,9 +151,11 @@ FocusScope {
     PickerLayout {
         id: layout
         x: 0
-        y: root.host === "popup" ? root.u(150) : 0
+        // In the pop-up, the columns start at the frame's y 150 and stop 24 above the footer rule; in a
+        // pause-menu tab the body is all theirs, less the list's rails above and the cards' edge below.
+        y: root.host === "popup" ? root.u(150) : root.u(20)
         width: root.width
-        height: root.host === "popup" ? root.height - y - root.u(Tokens.space.popupH - 820) - root.u(24) : root.height
+        height: root.host === "popup" ? root.height - y - root.u(Tokens.space.popupH - 820) - root.u(24) : root.height - y - root.u(8)
         s: root.s
         fluid: true
         lazyList: true
