@@ -8,14 +8,14 @@
 **Status**: Aprovada pelo dono em 2026-10-28, com os pesos e a regra da recomendação propostos, e as três
 respostas da seção "Clarifications"
 
-**Input**: O PRD do estudo 009 (`rien-OS-private/central/prd-009-compositores.md`, de 2026-10-28),
+**Input**: O PRD do estudo 009 (`YoRHa-OS-private/central/prd-009-compositores.md`, de 2026-10-28),
 aprovado pelo dono como direção, com as respostas dele no §6. Resumo do pedido: colocar o **Niri** e o
 **MangoWC (Mango)** no laboratório, ao lado do **Hyprland**, com a nossa UI rodando, e comparar os três
 com números, pra o dono decidir entre ficar só no Hyprland, suportar mais de um ou trocar o padrão.
 
 ## Contexto
 
-O rien-OS foi feito pro Hyprland. O dono gostou de dois outros compositores: o **Niri** (o que ele achou
+O YoRHa-OS foi feito pro Hyprland. O dono gostou de dois outros compositores: o **Niri** (o que ele achou
 mais parecido com o macOS, com colunas que rolam) e o **Mango** (que tem coisas interessantes). Antes de
 decidir qualquer coisa, ele quer **usar os dois com a nossa UI**, sem tocar no sistema dele, e ter
 números pra comparar com o Hyprland.
@@ -305,7 +305,7 @@ leitor refaz a conta com outros pesos só com o documento.
    primeira etapa, **Then** ele traz as notas técnicas, a evidência de cada critério de experiência e a
    folha de notas, e diz que a recomendação espera o dono; nenhuma nota de experiência é do agente.
 4. **Given** o documento pronto, **When** o estudo termina, **Then** existe uma entrada no
-   `central/resumao.md` com o resultado, os commits e as decisões pro dono, e a rien-OS Central lista os
+   `central/resumao.md` com o resultado, os commits e as decisões pro dono, e a YoRHa-OS Central lista os
    comandos e camadas novos.
 
 ### Edge Cases
@@ -468,7 +468,7 @@ leitor refaz a conta com outros pesos só com o documento.
 - **FR-039**: O relatório MUST trazer a tabela §6 do contrato corrigida como **proposta de mudança**; o
   estudo não edita a branch da 007.
 - **FR-040**: O estudo MUST deixar uma entrada no `central/resumao.md` (resultado, commits, decisões pro
-  dono) e atualizar a rien-OS Central com os comandos e as camadas novas.
+  dono) e atualizar a YoRHa-OS Central com os comandos e as camadas novas.
 
 **Isolamento**
 

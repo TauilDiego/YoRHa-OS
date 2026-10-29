@@ -5,7 +5,7 @@
 **Input**: Feature specification from `specs/009-compositores/spec.md` (aprovada pelo dono em 2026-10-28,
 com os pesos, a regra da recomendação e as três respostas da seção "Clarifications")
 
-**Laboratório**: branch privada `lab-009` (`rien-OS-private-wt/lab-009`): a `lab-s2` com a `lab-004-acab`
+**Laboratório**: branch privada `lab-009` (`YoRHa-OS-private-wt/lab-009`): a `lab-s2` com a `lab-004-acab`
 (`eeccbc5`) e, depois, a `lab-s2` de novo com a `lab-sonda` (`d7bac80`).
 
 ## Decisões que valem pro plano
@@ -150,7 +150,7 @@ specs/009-compositores/
 ### Source Code (repositório privado, branch `lab-009`)
 
 ```text
-rien-OS-private/lab/
+YoRHa-OS-private/lab/
 ├── lib.sh                    # + compositor_of; GUEST_ENV exporta NIRI_SOCKET e as variáveis da sessão
 ├── bootstrap                 # + arch-iso (pelo install-iso), hypr-iso, niri-base, mango-base; a antiga continua
 ├── new                       # base padrão: hypr-iso depois da promoção (até lá, hypr-base)

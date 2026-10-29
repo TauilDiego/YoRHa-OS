@@ -1,6 +1,6 @@
 # Contrato: o laboratório com três compositores
 
-Como o lab privado (`rien-OS-private/lab/`, branch `lab-009`) passa a lidar com Hyprland, Niri e Mango.
+Como o lab privado (`YoRHa-OS-private/lab/`, branch `lab-009`) passa a lidar com Hyprland, Niri e Mango.
 **Regra de ouro:** no Hyprland, todo comando faz exatamente o que faz hoje (os roteiros `check-u1`,
 `check-003` e `check-004` provam). Os comandos dos compositores vêm do [research](../research.md) (R4–R7)
 e são conferidos no spike 0, na VM; uma divergência corrige este contrato antes do código.

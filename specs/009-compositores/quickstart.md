@@ -1,7 +1,7 @@
 # Quickstart: validar o estudo 009 no laboratório
 
 Roteiro pra provar cada critério de sucesso da [spec](spec.md). Tudo roda pelo lab privado
-(`rien-OS-private/lab/`, branch `lab-009`), nunca no sistema do dono. Todo bloco fica dentro de uma
+(`YoRHa-OS-private/lab/`, branch `lab-009`), nunca no sistema do dono. Todo bloco fica dentro de uma
 sessão `lab/perf` (`--kind 009 --task 009/T…`), e o relato cita o resumo do relatório.
 
 **Regras de VM** (valem pra todos os cenários):
@@ -11,7 +11,7 @@ sessão `lab/perf` (`--kind 009 --task 009/T…`), e o relato cita o resumo do r
 
 ```
 export NIER_LAB_CPUS=2 NIER_LAB_MEM=4G
-L=~/projects/nier-os-project/rien-OS-private-wt/lab-009/lab
+L=~/projects/nier-os-project/YoRHa-OS-private-wt/lab-009/lab
 ```
 
 ## 0. Antes de tudo: o retrato das bases (SC-002)
@@ -51,7 +51,7 @@ $L/ls                              # hypr-iso congelada, base arch-iso, composit
 export NIER_LAB_VM=teste-hiso
 $L/new teste-hiso --from hypr-iso
 NIER_LAB_PROFILE=hidpi $L/up teste-hiso
-$L/sync --src ~/projects/nier-os-project/nier-os/shell     # a main (a3a9120)
+$L/sync --src ~/projects/nier-os-project/YoRHa-OS/shell     # a main (a3a9120)
 $L/check-u1; $L/check-003; $L/check-003 --profile hidpi; $L/check-004
 $L/down teste-hiso; $L/perf end --result pass|fail
 ```
@@ -76,7 +76,7 @@ for c in niri mango; do
   export NIER_LAB_VM=teste-$c
   $L/new teste-$c --from $c-base
   $L/up teste-$c
-  $L/sync --src ~/projects/nier-os-project/nier-os/shell
+  $L/sync --src ~/projects/nier-os-project/YoRHa-OS/shell
   $L/shot; $L/ipc env | grep -E 'WAYLAND|NIRI|XDG_CURRENT'
   $L/profile 1080; $L/profile hidpi; $L/profile 1080
   $L/key alt-ret; $L/shot kitty; $L/key alt-q; $L/shot fechou

@@ -8,7 +8,7 @@ Sync Impact Report
 - Templates: nenhum muda.
 - Anterior (1.0.1 → 1.1.0): o princípio I passou a aceitar containers no ambiente de testes.
 -->
-# rien-OS Constitution
+# YoRHa-OS Constitution
 
 Nome provisório. É uma personalização do Arch Linux (Hyprland primeiro, Niri depois) com uma
 UI própria inspirada em NieR:Automata. O roteiro geral está em `PLAN.md`; esta constituição

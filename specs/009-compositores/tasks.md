@@ -14,10 +14,10 @@ screenshots, amostras, `ui.log`, saídas de comando e relatórios `lab/perf`, se
 exportado. `shellcheck` nos scripts novos e mudados.
 
 **Caminhos**:
-- `specs/009-compositores/…` e `docs/estudo-compositores.md` = repositório público `nier-os` (branch
-  `009-compositores`, worktree `nier-os-wt/spec009`);
-- `lab/…` = repositório privado `rien-OS-private` (branch `lab-009`, worktree
-  `rien-OS-private-wt/lab-009`). Todo o código do lab e as amostras ficam lá.
+- `specs/009-compositores/…` e `docs/estudo-compositores.md` = repositório público `YoRHa-OS` (branch
+  `009-compositores`, worktree `YoRHa-OS-wt/spec009`);
+- `lab/…` = repositório privado `YoRHa-OS-private` (branch `lab-009`, worktree
+  `YoRHa-OS-private-wt/lab-009`). Todo o código do lab e as amostras ficam lá.
 
 **Recursos e regras de execução** (plano, "Decisões do dono sobre o plano"):
 - **2026-10-28 (dono):** as VMs passam a usar **4 núcleos** (`NIER_LAB_CPUS=4 NIER_LAB_MEM=4G`); o custo
@@ -183,7 +183,7 @@ experiência; recomendação "pendente: notas do dono".
 - [ ] T043 [US6] Notas técnicas (IPC, risco de manutenção, custo, empacotamento) por compositor, com as âncoras aprovadas e a evidência, em `lab/009/notas-tecnicas.md`; eliminatórios conferidos (FR-035)
 - [ ] T044 [US6] `docs/estudo-compositores.md`, etapa 1 (repositório público, branch `009-compositores`): as seções do [contrato do relatório](contracts/relatorio.md), a tabela §6 corrigida como proposta, o que fica pra S5, as fontes; sem caminhos do host nem dados pessoais (FR-036–FR-039, FR-042, SC-011)
 - [ ] T045 [US1] Recriar as `teste-*` sobre a `hypr-iso`, uma por vez, só as livres naquela hora (`lab/ls`, `pgrep -af qemu-system`, `.pid` com processo vivo, nenhuma camada com ela como base); as ocupadas vão pendentes pro resumão (FR-004, C1)
-- [ ] T046 [US6] Fechamento: `sha256sum -c lab/009/bases.sha256` (4 × OK), conferir nos relatórios `lab/perf` do estudo que só rodaram ferramentas do lab no host e que nunca houve mais de 2 VMs do estudo nem 4 no total (SC-002, SC-012); entrada no `rien-OS-private/central/resumao.md` (resultados, commits, pendências do dono, a 0.57 como tarefa à parte); a Central atualizada com os comandos e camadas novos. **PARAR e relatar** (parada c), com a lista dos screenshots e rajadas que melhor mostram visão geral, colunas e animações de cada compositor
+- [ ] T046 [US6] Fechamento: `sha256sum -c lab/009/bases.sha256` (4 × OK), conferir nos relatórios `lab/perf` do estudo que só rodaram ferramentas do lab no host e que nunca houve mais de 2 VMs do estudo nem 4 no total (SC-002, SC-012); entrada no `YoRHa-OS-private/central/resumao.md` (resultados, commits, pendências do dono, a 0.57 como tarefa à parte); a Central atualizada com os comandos e camadas novos. **PARAR e relatar** (parada c), com a lista dos screenshots e rajadas que melhor mostram visão geral, colunas e animações de cada compositor
 
 **Checkpoint**: etapa 1 entregue; o estudo espera a folha do dono.
 

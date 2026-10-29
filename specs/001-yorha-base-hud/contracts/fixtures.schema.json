@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "rien-os/shell/fixtures/1",
+  "$id": "yorha-os/shell/fixtures/1",
   "title": "HUD test data (every domain is optional; a missing domain means real data)",
   "type": "object",
   "additionalProperties": false,
