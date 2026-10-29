@@ -54,7 +54,7 @@ As 7 categorias e as opções do mockup aprovado, com estes ids:
 | `keyboard` | `layout: choice`, `caps: choice`, `delay: choice`, `rate: slider`, `shortcuts: action` |
 | `power` | `battery: info`, `profile: choice`, `screen-off: choice`, `suspend: choice`, `lid: choice` |
 
-Os textos, valores e padrões são os do mockup (`rien-OS-private/lab/mockups/configuracoes/index.html`).
+Os textos, valores e padrões são os do mockup (`YoRHa-OS-private/lab/mockups/configuracoes/index.html`).
 Nada disso mexe no sistema: até "Vignette" e "Reduce motion" são só dados aqui (FR-018). Ligar
 opções de verdade fica pra uma spec futura.
 

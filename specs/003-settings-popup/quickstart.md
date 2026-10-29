@@ -1,14 +1,14 @@
 # Quickstart: validar a 003 no laboratório
 
 Este é o roteiro que prova cada critério de sucesso com evidência da VM (princípio IV). Tudo roda no
-ambiente privado (`rien-OS-private/lab`) e **dentro de uma sessão de medição**. Nada disso roda na
+ambiente privado (`YoRHa-OS-private/lab`) e **dentro de uma sessão de medição**. Nada disso roda na
 máquina do dono. O `lab/check-003` automatiza os cenários 1–11, como o `lab/check-u1` faz com a 001,
 e roda o roteiro inteiro num perfil (`--profile 1080|hidpi`) ou só alguns cenários (`--only 2,5`).
 
 ## Preparação
 
 ```sh
-cd ~/projects/rien-OS-private
+cd ~/projects/YoRHa-OS-private
 export NIER_LAB_VM=teste-a NIER_LAB_PROFILE=hidpi   # boot no hidpi: aí os dois modos existem
 lab/perf begin "003: validação do popup de configurações" --kind 003-validacao --task 003
 lab/up teste-a
@@ -46,7 +46,7 @@ lab/down teste-a
 lab/perf end --result pass --note "003 validada"
 ```
 
-O relatório do `lab/perf` vai pro `rien-OS-relatorios`. Os screenshots dos cenários 2 e 3, lado a
+O relatório do `lab/perf` vai pro `YoRHa-OS-relatorios`. Os screenshots dos cenários 2 e 3, lado a
 lado com o mockup, são a evidência pra aprovação do dono (SC-009): a imagem fica em
 `~/.local/share/nier-lab/out/003-revisao-sc009.png` (ver [relatorio.md](relatorio.md)).
 

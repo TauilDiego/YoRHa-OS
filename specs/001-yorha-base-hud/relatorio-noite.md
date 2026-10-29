@@ -113,26 +113,26 @@ Evidência em `~/.local/share/nier-lab/out/check-u1-20261027-015500/`, mais a se
 - **CPU:** 660 s de CPU nas VMs; no host, de −1,9 a +3,9 pp acima da base; pico de 21%.
 - **RAM:** pico de 2,7 GB por VM.
 - **Pressão nos seus processos:** no máximo 1,8 s de espera de CPU por sessão.
-- Detalhes em `~/projects/rien-OS-relatorios/HISTORY.md`.
+- Detalhes em `~/projects/YoRHa-OS-relatorios/HISTORY.md`.
 
 ## Commits (nada foi enviado pro GitHub)
 
-- **`nier-os`, branch `001-yorha-base-hud`:**
+- **`YoRHa-OS`, branch `001-yorha-base-hud`:**
   - design system, spec, plano e tarefas;
   - contrato;
   - merges dos 4 agentes;
   - correções.
 
   Use `git log --oneline main..001-yorha-base-hud`.
-- **`rien-OS-private`, branch `lab-u1`:** `lab/perf`, várias VMs, fixtures na VM, `diffshot`,
+- **`YoRHa-OS-private`, branch `lab-u1`:** `lab/perf`, várias VMs, fixtures na VM, `diffshot`,
   perfil hidpi, `check-u1`, referências.
-- **`rien-OS-relatorios`, `main`:** um commit por sessão de teste.
+- **`YoRHa-OS-relatorios`, `main`:** um commit por sessão de teste.
 - A `main` de cada repositório ficou intocada. O merge é seu.
 
 ## Como ver
 
 ```sh
-cd ~/projects/rien-OS-private
+cd ~/projects/YoRHa-OS-private
 export NIER_LAB_VM=teste-c
 lab/up teste-c && lab/check-u1          # roda tudo de novo e junta a evidência
 lab/ipc 'qs -p ~/nier/ui ipc call gallery open' && lab/shot galeria
@@ -155,7 +155,7 @@ lab/up teste-c --window                 # ou ver numa janela (ALT+Enter abre o k
 ## Segunda noite (2026-10-27, madrugada) — cursor próprio, 39 formatos
 
 **Pronto:**
-- **Tema `rien_cursors`** (spec 002, revisada): desenho próprio, vetorial (hyprcursor + XCursor
+- **Tema `yorha_cursors`** (spec 002, revisada): desenho próprio, vetorial (hyprcursor + XCursor
   de reserva), com os **39 formatos** do NieR Cursors de Beinsezii, os mesmos aliases e
   hotspots, no estilo aprovado na seta. As animações (espera, progresso, proibido com glitch)
   funcionam nos dois formatos.
@@ -189,7 +189,7 @@ lab/up teste-c --window                 # ou ver numa janela (ALT+Enter abre o k
 
 **Ver de novo:**
 ```sh
-cd ~/projects/rien-OS-private && export NIER_LAB_VM=teste-c
+cd ~/projects/YoRHa-OS-private && export NIER_LAB_VM=teste-c
 NIER_LAB_PROFILE=hidpi lab/up teste-c --window   # ou 1080 pro Dell
 lab/profile hidpi && lab/sync --no-env && lab/cursor
 ```
