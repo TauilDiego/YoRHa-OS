@@ -7,7 +7,7 @@ a `main` (001–004, 006, 007). Os números do boot são os da análise 4K
 (`YoRHa-OS-private/pessoal/referencias/jogo/boot-analise.md`). O login é o do protótipo aprovado
 (artefato 28209760, v3.2).
 
-**Status**: aguardando a aprovação do dono.
+**Status**: aprovado pelo dono em 29.10 ("sim manda bala"), com a saída da lista em 0,4 s e os 0,9 s do jogo como opção (`exit=game`).
 
 ## Summary
 
