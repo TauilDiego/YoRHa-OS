@@ -83,7 +83,7 @@ FocusScope {
         { id: "show", label: str.show, values: [str.showAll, str.showUnread, str.showCritical] },
         { id: "clear", label: str.clearAll, type: "action", text: str.clear }
     ]
-    readonly property var values: ({ dnd: NotifyPrefs.dnd, show: filter })
+    readonly property var values: ({ dnd: NotifyPrefs.dnd ? 1 : 0, show: filter })
     readonly property var info: [
         { label: str.unread, value: String(NotifyStore.entries.filter(e => e.isNew).length) },
         { label: str.kept, value: str.keptOf.arg(NotifyStore.entries.length).arg(NotifyPrefs.logSize) },
@@ -156,6 +156,7 @@ FocusScope {
         height: root.host === "popup" ? root.height - y - root.u(Tokens.space.popupH - 820) - root.u(24) : root.height
         s: root.s
         fluid: true
+        lazyList: true
         focus: true
         entries: root.rows
         options: root.options
@@ -169,13 +170,13 @@ FocusScope {
         onPicked: (o, v) => {
             const id = root.options[o]?.id;
             if (id === "dnd")
-                NotifyPrefs.setDnd(v === true);
+                NotifyPrefs.setDnd(v === 1);
             else if (id === "show") {
                 root.filter = v;
                 layout.index = 0;
             }
         }
-        onInvoked: o => {
+        onTriggered: o => {
             if (root.options[o]?.id === "clear") {
                 NotifyStore.clear();
                 layout.column = "list";

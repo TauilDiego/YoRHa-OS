@@ -27,9 +27,11 @@ import "../../strings"
 //   fluid    the columns and the top come from the layout's own width and height, in the proportions
 //            of the 1612×908 frame, and the layout fills its whole rect (no room for a title or a
 //            footer: the host draws those), so the same body fits the pop-up and a pause-menu tab;
-//   options of type "toggle" ({ id, label, type: "toggle" }; values: id → bool; ←→ and Enter flip
+//   options of type "toggle" ({ id, label, type: "toggle" }; values: id → 0/1; ←→ and Enter flip
 //            it) and "action" ({ id, label, type: "action", text }: the text and ▸; Enter or a click →
-//            invoked(option); ← goes back to the list, → does nothing).
+//            triggered(option); ← goes back to the list, → does nothing; the footer says Enter <text>).
+//            The same names as branch 007-menu-de-pausa, which made the same addition in parallel;
+//   lazyList the list creates only the rows in view (GroupedList.lazy), for a long log.
 // The default (fluid: false, choices only) is spec 004's picker, unchanged.
 FocusScope {
     id: root
@@ -45,11 +47,12 @@ FocusScope {
     property string optionsTitle: Strings.wallpaper.options
     property string applyLabel: Strings.wallpaper.keyApply
     property bool fluid: false
+    property bool lazyList: false               // spec 008: the GroupedList makes only the rows in view
     default property alias preview: previewSlot.data
 
     signal applied(int index)
-    signal picked(int option, var value)
-    signal invoked(int option)
+    signal picked(int option, int value)
+    signal triggered(int option)
     signal closeRequested()
 
     readonly property int count: list.count
@@ -68,9 +71,7 @@ FocusScope {
     function typeOf(i: int): string {
         return String(options[i]?.type ?? "choice");
     }
-    function valueOf(i: int): var {
-        if (typeOf(i) === "toggle")
-            return values[options[i]?.id] === true;
+    function valueOf(i: int): int {
         return Number(values[options[i]?.id] ?? 0);
     }
 
@@ -100,7 +101,7 @@ FocusScope {
     // A value changed by ← → or an arrow: no wrapping; `back` (keys only) leaves on ← at the start.
     function step(i: int, dir: int, back: bool): void {
         if (typeOf(i) === "toggle") {
-            picked(i, !valueOf(i));
+            picked(i, valueOf(i) ? 0 : 1);
             return;
         }
         if (typeOf(i) === "action") {
@@ -122,11 +123,11 @@ FocusScope {
     // Enter or a click on a row: the next value, wrapping (a toggle flips, an action runs).
     function advance(i: int): void {
         if (typeOf(i) === "toggle") {
-            picked(i, !valueOf(i));
+            picked(i, valueOf(i) ? 0 : 1);
             return;
         }
         if (typeOf(i) === "action") {
-            invoked(i);
+            triggered(i);
             return;
         }
         const n = lengthOf(i);
@@ -206,7 +207,7 @@ FocusScope {
         const W = Strings.wallpaper, K = Strings.settings;
         if (column === "options") {
             if (typeOf(option) === "action")
-                return [{ key: K.keyUpDown, label: W.keySelect }, { key: K.keyEnter, label: String(options[option]?.label ?? "") }, { key: K.keyEsc, label: W.keyBack }];
+                return [{ key: K.keyUpDown, label: W.keySelect }, { key: K.keyEnter, label: String(options[option]?.text ?? "") }, { key: K.keyEsc, label: W.keyBack }];
             return [{ key: K.keyUpDown, label: W.keySelect }, { key: K.keyLeftRight, label: W.keyChange }, { key: K.keyEsc, label: W.keyBack }];
         }
         const out = [{ key: K.keyUpDown, label: W.keySelect }];
@@ -257,6 +258,7 @@ FocusScope {
         height: Math.min(implicitHeight, root.bottomY - y)
         s: root.s
         model: root.entries
+        lazy: root.lazyList
         currentIndex: root.index
         focused: root.column === "list"
         keysEnabled: false

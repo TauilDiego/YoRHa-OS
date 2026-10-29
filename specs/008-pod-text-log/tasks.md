@@ -203,21 +203,21 @@ congelado.**
 
 **Independent Test**: `lab/check-008 --only actions,reply` (SC-004).
 
-- [ ] T032 [P] [US3] `shell/ds/base/ActionButton.qml` (contorno de 2 px, varredura clara no hover, `enabled: false` a 35%) e, na `Transmission`, as ações (até 3, na ordem do app) e o campo de resposta de uma linha (só com `replying`; Enter → `replySent`, Esc → `replyCancelled`). Na galeria, com a resposta aberta — **Frente A**
-- [ ] T033 [P] [US3] `NotifyStore`:
+- [x] T032 [P] [US3] `shell/ds/base/ActionButton.qml` (contorno de 2 px, varredura clara no hover, `enabled: false` a 35%) e, na `Transmission`, as ações (até 3, na ordem do app) e o campo de resposta de uma linha (só com `replying`; Enter → `replySent`, Esc → `replyCancelled`). Na galeria, com a resposta aberta — **Frente A** — **feito** (`lab/perf` 2026-10-29T105454, `teste-b`): os botões Open e Snooze embaixo do texto, na ordem do app (`out/check-008-1080-20261029-105645/actions.png`); o campo de resposta abre dentro da transmissão (`reply-aberto.png`); na galeria, a transmissão com a resposta aberta (página 4)
+- [x] T033 [P] [US3] `NotifyStore`:
   - `invoke(id, action)`: `NotificationAction.invoke()`; fecha se não `resident` (FR-013); `answered`;
   - `reply(id, text)`: `sendInlineReply`;
   - `dismiss`, `hide`, `hideAll`, `clear`;
   - `alive: false` quando o app fecha (`closed` com `CloseRequested`);
   - sair da tela nunca chama `dismiss`/`expire` (FR-008).
 
-  **Frente B**
-- [ ] T034 [US3] `NotifyLayer`:
+  **Frente B** — **feito** (`lab/perf` 2026-10-29T105454, `teste-b`): a ação chega no `notify-send --wait` (`later`, `default`), a entrada fica `answered` e `alive: false`; o clique direito só esconde (a entrada continua viva); o `CloseNotification` do app tira da tela e deixa a entrada com `alive: false`; o Clear all avisa o app (`closed 2` no `lab/notify-client`)
+- [x] T034 [US3] `NotifyLayer`:
   - teclado `WlrKeyboardFocus.OnDemand` só enquanto uma transmissão está com `replying`, e uma por vez;
   - volta a `None` ao mandar ou cancelar (FR-014, FR-015);
   - o tempo pausa com o campo aberto.
 
-  `lab/check-008` blocos `actions` e `reply` (cliques pela `box`, `hyprctl activewindow` antes e depois)
+  `lab/check-008` blocos `actions` e `reply` (cliques pela `box`, `hyprctl activewindow` antes e depois) — **feito** (`lab/perf` 2026-10-29T105454, `teste-b`): o teclado é `Exclusive` só com o campo aberto (decisão do spike T004, item 5); o tempo para com o campo aberto e volta a correr depois do Esc; a janela em foco é a mesma antes e depois e um comando digitado chega no kitty (FR-014, FR-015). `lab/check-008 --only actions,reply` **12/0** em 1080 (`out/check-008-1080-20261029-105645`) e hidpi (`out/check-008-hidpi-20261029-105806`). O `dump` ganhou `screen[].controls` (as caixas dos botões e do campo) pros cliques
 
 ---
 
@@ -227,13 +227,13 @@ congelado.**
 
 **Independent Test**: `lab/check-008 --only log-keys,gallery` (SC-009, SC-016).
 
-- [ ] T035 [P] [US4] `shell/ds/base/ListItem.qml` + `shell/ds/composites/GroupedList.qml`: `lead` (peso 600, até 150, reticências), `tag` (`Tag` com contorno antes do `trailing`), `markColor`. Vazios = como antes; conferir que o seletor da 004 dá o mesmo screenshot (`lab/diffshot` contra a `004-wallpaper-system`) — **Frente D**
-- [ ] T036 [P] [US4] `shell/ds/composites/PickerLayout.qml`:
+- [x] T035 [P] [US4] `shell/ds/base/ListItem.qml` + `shell/ds/composites/GroupedList.qml`: `lead` (peso 600, até 150, reticências), `tag` (`Tag` com contorno antes do `trailing`), `markColor`. Vazios = como antes; conferir que o seletor da 004 dá o mesmo screenshot (`lab/diffshot` contra a `004-wallpaper-system`) — **Frente D** — **feito** (`lab/perf` 2026-10-29T111419, `teste-b`): o seletor da `004-wallpaper-system` e o da 008, com a `wallpaper-default.json` e as mesmas teclas (ALT + W; ↓ →), dão **0 px** de diferença, aberto e nas opções (`out/008-t035-picker-111815`). **Novo (decisão do dono, 2026-10-29):** `GroupedList.lazy`: só as linhas à vista (e uma margem, em blocos de 8) são criadas, cada uma no lugar calculado pelo tipo (item, título); sem `lazy` a lista da 004 não muda
+- [x] T036 [P] [US4] `shell/ds/composites/PickerLayout.qml`:
   - `fluid` (colunas e topo a partir de `width`/`height`, nas proporções do quadro de 1612 × 908);
   - opções `type: "action"` (valor = `text` + ▸; Enter/clique → `invoked`; ←/→ nada).
 
-  Com `fluid: false`, o seletor da 004 dá o mesmo screenshot. **Antes, conferir se a 007 já fez o mesmo** (plan.md, "Dependências") — **Frente D**
-- [ ] T037 [US4] `shell/notify/LogPreview.qml` + `shell/notify/LogPage.qml` (contracts/components.md; data-model "Estado do log aberto"):
+  Com `fluid: false`, o seletor da 004 dá o mesmo screenshot. **Antes, conferir se a 007 já fez o mesmo** (plan.md, "Dependências") — **Frente D** — **feito** (`lab/perf` 2026-10-29T111419, `teste-b`): a `007-menu-de-pausa` fez o mesmo acréscimo em paralelo (opções `toggle` e `action`, sinal `triggered`); a 008 adotou os nomes dela (`triggered`, toggle 0/1, rodapé `Enter <text>`), com a emenda em `contracts/components.md`. O texto do `PickerLayout` ainda difere entre as duas: o merge fica pro dono (ver decisões pendentes). Mais `lazyList` (a lista preguiçosa). Seletor da 004: 0 px (T035)
+- [x] T037 [US4] `shell/notify/LogPreview.qml` + `shell/notify/LogPage.qml` (contracts/components.md; data-model "Estado do log aberto"):
   - **lista:** NOW (última hora) / EARLIER, filtrada por `Show`;
   - **meio:** a `Transmission` `"preview"` digitando de novo a cada troca; até ela chegar da Frente A, um `Card` com o texto;
   - **ações:** apagadas com a frase de fechada, ou "From an earlier session.";
@@ -242,9 +242,9 @@ congelado.**
   - **saída:** `title`/`subtitle`/`footerLeft`/`keys`/`dumpState()`/`restart()`.
 
   **Frente D**
-- [ ] T038 [US4] `shell/notify/LogPopup.qml` + `shell/shell.qml`: abre e fecha como os outros popups (monitor em foco relido, duas fases), um popup por vez (abrir o log fecha configurações e seletor, e vice-versa); `notify open|close|toggle|isOpen`; `dump.page` — **Frente D**
-- [ ] T039 [P] [US4] `shell/hud/LogCounter.qml` + `shell/hud/Hud.qml`: `LOG n` antes do relógio, escondido com 0 e sem DND, `DND n` com DND; o tom da barra (004 US6, `Tokens.hudColor`); clique → `notify open`; `hud dump` com `log` e `texts` `role: "log"` — **Frente D**
-- [ ] T040 [US4] Ligar o log ao store: `logOpen` (as novas entram na lista marcadas `NEW`, FR-027), `markAllRead()` ao abrir (FR-024), `+N in log` → abre o log. `lab/check-008` bloco `log-keys` com teclas reais (SC-009), e o "log abre em ≤ 0,3 s logo depois" da enxurrada (SC-005; no bloco `flood` ele é só `INFO`, ver T027: a `GroupedList` cria um delegado por entrada e passa perto do limite). Anotar em `contracts/components.md` o que a 007 usa (já escrito; conferir)
+- [x] T038 — **feito** (`lab/perf` 2026-10-29T111419, `teste-b`):  [US4] `shell/notify/LogPopup.qml` + `shell/shell.qml`: abre e fecha como os outros popups (monitor em foco relido, duas fases), um popup por vez (abrir o log fecha configurações e seletor, e vice-versa); `notify open|close|toggle|isOpen`; `dump.page` — **Frente D** — **feito** (`lab/perf` 2026-10-29T111419, `teste-b`): ALT + N, `notify open`/`toggle`; um popup por vez: abrir o log fecha configurações e seletor, e eles fecham o log
+- [x] T039 [P] [US4] `shell/hud/LogCounter.qml` + `shell/hud/Hud.qml`: `LOG n` antes do relógio, escondido com 0 e sem DND, `DND n` com DND; o tom da barra (004 US6, `Tokens.hudColor`); clique → `notify open`; `hud dump` com `log` e `texts` `role: "log"` — **Frente D** — **feito** (`lab/perf` 2026-10-29T111419, `teste-b`): `LOG 2` na barra depois de duas não lidas, o clique nele abre o log e zera; `hud dump texts` com `role: "log"` (`LOG`, `1`); os dois tons na galeria (T053)
+- [x] T040 [US4] Ligar o log ao store: `logOpen` (as novas entram na lista marcadas `NEW`, FR-027), `markAllRead()` ao abrir (FR-024), `+N in log` → abre o log. `lab/check-008` bloco `log-keys` com teclas reais (SC-009), e o "log abre em ≤ 0,3 s logo depois" da enxurrada (SC-005; no bloco `flood` ele é só `INFO`, ver T027: a `GroupedList` cria um delegado por entrada e passa perto do limite). Anotar em `contracts/components.md` o que a 007 usa (já escrito; conferir) — **feito** (`lab/perf` 2026-10-29T111419, `teste-b`): o log abre em **58 ms** (1080) e **99 ms** (hidpi) depois da enxurrada de 100, antes 136–325 ms (SC-005 vira critério no bloco `flood`); abrir marca tudo como lido (`unread: 0`, o contador some); com o log aberto a nova entra na lista marcada NEW e não na tela (FR-027); `+3 in log` → clique abre o log e a linha some. `lab/check-008 --only flood,log-keys`: **21/0** em hidpi (`out/check-008-hidpi-20261029-111707`), e o `log-keys` completo 21/0 em 1080 (`out/check-008-1080-20261029-112026`). A seção da 007 em `contracts/components.md` continua certa
 
 ---
 

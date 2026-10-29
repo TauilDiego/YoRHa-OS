@@ -678,7 +678,9 @@ PanelWindow {
             active: root.page === 3
             sourceComponent: GalleryNotify {
                 readonly property var window: QsWindow.window
-                s: root.s
+                // Its three columns need the 1920 game px of width: narrower than 16:9 (2560×1600),
+                // the page scales by the width instead, so the third column stays on screen.
+                s: Math.min(root.s, root.width > 0 ? root.width / 1920 : root.s)
                 dpr: Tokens.scaleOf(window?.screen?.name ?? "")
             }
         }
