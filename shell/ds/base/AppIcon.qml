@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Effects
+import Quickshell.Io
 import ".."
 import "../primitives"
 import "appicon.js" as AppIconState
@@ -22,7 +23,11 @@ Item {
     property real size: Tokens.space.appIconSize
 
     readonly property string shown: source !== "" ? source : fallback
-    readonly property bool shaderOk: duotone.status !== ShaderEffect.Error
+    // The compiled shader is looked for first, so a missing one never reaches the ShaderEffect
+    // (whose own errors would repeat on every opening of the menu).
+    readonly property url shaderUrl: Qt.resolvedUrl("../../shaders/duotone.frag.qsb")
+    readonly property bool shaderFound: style === "ink" && qsbProbe.loaded
+    readonly property bool shaderOk: style !== "ink" || (shaderFound && duotone.status !== ShaderEffect.Error)
     // What is drawn, for a dump: ink, ink-fallback, color, square or none.
     readonly property string drawn: style === "square" ? "square"
         : shown === "" || picture.status === Image.Error ? "none"
@@ -46,8 +51,8 @@ Item {
     ShaderEffect {
         id: duotone
         anchors.fill: parent
-        visible: root.style === "ink" && root.shaderOk && picture.status === Image.Ready
-        fragmentShader: Qt.resolvedUrl("../../shaders/duotone.frag.qsb")
+        visible: root.style === "ink" && root.shaderFound && root.shaderOk && picture.status === Image.Ready
+        fragmentShader: root.shaderFound ? root.shaderUrl : ""
 
         property variant source: picture
         property color ink: Tokens.color.darkGray
@@ -57,7 +62,7 @@ Item {
     MultiEffect {
         anchors.fill: parent
         visible: root.style === "ink" && !root.shaderOk && picture.status === Image.Ready
-        source: visible ? picture : null
+        source: picture
         colorization: 1
         colorizationColor: Tokens.color.darkGray
     }
@@ -69,11 +74,24 @@ Item {
         size: Math.round(root.size * 0.46)
     }
 
-    onShaderOkChanged: warnFallback()
-    Component.onCompleted: warnFallback()
+    FileView {
+        id: qsbProbe
+        path: String(root.shaderUrl).replace(/^file:\/\//, "")
+        blockLoading: true
+        printErrors: false
+        onLoadFailed: root.warnFallback()
+    }
+
+    Connections {
+        target: duotone
+        function onStatusChanged(): void {
+            if (duotone.status === ShaderEffect.Error)
+                root.warnFallback();
+        }
+    }
 
     function warnFallback(): void {
-        if (!shaderOk && AppIconState.firstWarning())
+        if (AppIconState.firstWarning())
             console.warn("app icon: shaders/duotone.frag.qsb is missing (run shaders/build.sh); ink icons use MultiEffect");
     }
 }
