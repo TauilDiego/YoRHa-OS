@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Shapes
 import ".."
 import "../primitives"
 import "../base"
@@ -39,11 +40,16 @@ Item {
 
     implicitHeight: Math.max(u(nt.critMinH), u(nt.critPadTop) + column.height + u(nt.critPadBottom))
 
+    // The sweep reveals the band from the left: `reveal` clips to progress × width while it runs. The
+    // content keeps the band's full width (the controls stay anchored to the monitor's right edge).
+    property real progress: 1
+    readonly property bool shown: entries.length > 0
+
     Item {
         id: reveal
-        width: root.width
+        width: Math.round(root.width * root.progress)
         height: root.height
-        clip: sweep.running
+        clip: root.progress < 1
 
         Band {
             width: root.width
@@ -160,8 +166,7 @@ Item {
         // The page and the ×, on the right.
         Row {
             id: side
-            anchors.right: parent.right
-            anchors.rightMargin: root.u(root.nt.critSide)
+            x: root.width - root.u(root.nt.critSide) - width
             y: root.u(36)
             spacing: root.u(14)
 
@@ -170,6 +175,7 @@ Item {
                 visible: root.entries.length > 1
                 spacing: root.u(10)
                 Tri {
+                    id: prevTri
                     pointsLeft: true
                     end: root.page === 0
                     onTapped: root.pageStepped(-1)
@@ -185,12 +191,14 @@ Item {
                     color: Tokens.notify.bandText2
                 }
                 Tri {
+                    id: nextTri
                     pointsLeft: false
                     end: root.page >= root.entries.length - 1
                     onTapped: root.pageStepped(1)
                 }
             }
             Rectangle {
+                id: closeBtn
                 anchors.verticalCenter: parent.verticalCenter
                 width: root.u(root.nt.critClose)
                 height: width
@@ -213,8 +221,19 @@ Item {
         }
     }
 
-    // ◂ / ▸
-    component Tri: Canvas {
+    // The controls' boxes in the band's coordinates (for `notify dump`, so tests can click them):
+    // { prev, next, close }, prev/next null with one page.
+    function controlBoxes(): var {
+        const box = it => {
+            const p = it.mapToItem(root, 0, 0);
+            return { x: Math.round(p.x), y: Math.round(p.y), w: Math.round(it.width), h: Math.round(it.height) };
+        };
+        const paged = entries.length > 1;
+        return { prev: paged ? box(prevTri) : null, next: paged ? box(nextTri) : null, close: box(closeBtn) };
+    }
+
+    // ◂ / ▸ (a static Shape: a Canvas here painted nothing until something asked it to repaint)
+    component Tri: Item {
         id: tri
         property bool pointsLeft: true
         property bool end: false
@@ -223,22 +242,18 @@ Item {
         width: root.u(11)
         height: root.u(16)
         opacity: end ? 0.3 : 1
-        onPaint: {
-            const ctx = getContext("2d");
-            ctx.reset();
-            ctx.fillStyle = Tokens.notify.bandText2;
-            ctx.beginPath();
-            if (pointsLeft) {
-                ctx.moveTo(width, 0);
-                ctx.lineTo(0, height / 2);
-                ctx.lineTo(width, height);
-            } else {
-                ctx.moveTo(0, 0);
-                ctx.lineTo(width, height / 2);
-                ctx.lineTo(0, height);
+        Shape {
+            anchors.fill: parent
+            preferredRendererType: Shape.CurveRenderer
+            ShapePath {
+                strokeWidth: -1
+                fillColor: Tokens.notify.bandText2
+                startX: tri.pointsLeft ? tri.width : 0
+                startY: 0
+                PathLine { x: tri.pointsLeft ? 0 : tri.width; y: tri.height / 2 }
+                PathLine { x: tri.pointsLeft ? tri.width : 0; y: tri.height }
+                PathLine { x: tri.pointsLeft ? tri.width : 0; y: 0 }
             }
-            ctx.closePath();
-            ctx.fill();
         }
         MouseArea {
             anchors.fill: parent
@@ -249,19 +264,25 @@ Item {
         }
     }
 
-    // Appearing: the band sweeps in from the left (200 ms in the mockup), unless instant.
+    // Appearing: the band sweeps in from the left (200 ms in the mockup), unless instant; again each
+    // time it comes back after being empty.
     NumberAnimation {
         id: sweep
-        target: reveal
-        property: "width"
+        target: root
+        property: "progress"
         from: 0
-        to: root.width
+        to: 1
         duration: 200
         easing.type: Easing.OutCubic
     }
-    Component.onCompleted: {
-        if (sweepIn && !instant)
-            sweep.start();
+    function sweepNow(): void {
+        if (shown && sweepIn && !instant)
+            sweep.restart();
+        else {
+            sweep.stop();
+            progress = 1;
+        }
     }
-    onWidthChanged: if (!sweep.running) reveal.width = width
+    onShownChanged: sweepNow()
+    Component.onCompleted: sweepNow()
 }

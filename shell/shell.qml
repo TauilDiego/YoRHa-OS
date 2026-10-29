@@ -597,9 +597,12 @@ ShellRoot {
             for (const t of d.screen) {
                 const b = boxes[t.monitor]?.stack.find(x => x.id === t.id);
                 t.box = b ? { x: b.x, y: b.y, w: b.w, h: b.h } : null;
+                t.controls = b?.controls ?? null;
             }
-            if (d.critical)
+            if (d.critical) {
                 d.critical.box = boxes[d.critical.monitor]?.critical ?? null;
+                d.critical.controls = boxes[d.critical.monitor]?.controls ?? null;
+            }
             d.more = Object.values(boxes).map(b => b.stack.find(x => x.id === "more")).find(x => x) ?? null;
             d.osd = Osd.dump();
             const osdWin = shell.osdLoaded ? shell.osdItem : null;

@@ -7,7 +7,7 @@ description: "Tarefas da 008: Pod e text log (notificações e OSD)"
 **Input**: `specs/008-pod-text-log/` (plan.md, spec.md, research.md, data-model.md, contracts/,
 quickstart.md)
 
-**Status**: plano aprovado pelo dono. MVP (T001–T027) pronto em 2026-10-28; US2+ (T028+) não começadas.
+**Status**: plano aprovado pelo dono. MVP (T001–T027) pronto em 2026-10-28; US2 (T028–T031) pronta em 2026-10-29.
 
 **Tests**: a spec não pede testes automatizados. A prova de cada tarefa é a evidência da VM
 (princípio IV): `qs ipc call notify dump` (e `hud dump`, `settings dump`), screenshot, `lab/diffshot`,
@@ -190,9 +190,9 @@ congelado.**
 
 **Independent Test**: `lab/check-008 --only urgency` (SC-003).
 
-- [ ] T028 [P] [US2] `shell/ds/base/Tag.qml` (`CRITICAL` sobre `alert`, `NEW` com contorno) e as urgências na `Transmission` (bloco `medium-gray` / `light-yellow` / `alert`; `Tag CRITICAL` ao lado de quem fala). Os únicos usos do `alert` são os da FR-010 — **Frente A**
-- [ ] T029 [P] [US2] `shell/ds/composites/CriticalBand.qml`: a largura do monitor, a coluna de 1080 centrada, arcos, até 3 linhas de corpo, ações embaixo, `1/N` com ◂ ▸ (`pageStepped`) e ×, altura mínima 230. Na galeria, com `1/2` — **Frente A**
-- [ ] T030 [P] [US2] `NotifyStore`: as críticas vão pra `critical` (fora do limite da pilha, a mais nova primeiro, `page`), nunca expiram; os tempos `low`/`normal` da FR-007; as críticas passam por cima de `held` (US6) — **Frente B**
+- [x] T028 [P] [US2] `shell/ds/base/Tag.qml` (`CRITICAL` sobre `alert`, `NEW` com contorno) e as urgências na `Transmission` (bloco `medium-gray` / `light-yellow` / `alert`; `Tag CRITICAL` ao lado de quem fala). Os únicos usos do `alert` são os da FR-010 — **Frente A** — **feito** (`lab/perf` 2026-10-29T102807, `teste-b` recriada, 4 núcleos): `lab/check-008 --only urgency` lê o pixel do bloco no screenshot: baixa `#676458`, normal `#D7D1B3`, crítica `#8F3A30`, em 1080 e hidpi (`out/check-008-1080-20261029-103510/urgency-cores.png`)
+- [x] T029 [P] [US2] `shell/ds/composites/CriticalBand.qml`: a largura do monitor, a coluna de 1080 centrada, arcos, até 3 linhas de corpo, ações embaixo, `1/N` com ◂ ▸ (`pageStepped`) e ×, altura mínima 230. Na galeria, com `1/2` — **Frente A** — **feito** (`lab/perf` 2026-10-29T102807, `teste-b` recriada, 4 núcleos). **Corrigido:** o ◂ 1/2 ▸ e o × saíam no canto esquerdo (ancorados num `reveal` cuja largura a varredura deixava errada; agora a varredura é um `progress` que só recorta) e os triângulos (um `Canvas`) não pintavam; viraram um `Shape`. O `dump` ganhou `critical.controls` (◂, ▸, ×) pros cliques: ▸ → 2/2, ◂ → 1/2, × tira a crítica em foco e as duas ficam no log, vivas (`urgency-paginas.png`)
+- [x] T030 [P] [US2] `NotifyStore`: as críticas vão pra `critical` (fora do limite da pilha, a mais nova primeiro, `page`), nunca expiram; os tempos `low`/`normal` da FR-007; as críticas passam por cima de `held` (US6) — **Frente B** — **feito** (`lab/perf` 2026-10-29T102807, `teste-b` recriada, 4 núcleos): baixa 3961/3994 ms e normal 5974/5984 ms depois de digitadas (1080/hidpi), a crítica na faixa em 65 s; com o não perturbe ligado a normal vai pro log e a crítica aparece (`urgency-dnd.png`). Fim da US2: `lab/check-008 --only urgency` **13/0** em 1080 (`out/check-008-1080-20261029-103510`) e hidpi (`out/check-008-hidpi-20261029-103819`); regressão `check-u1` 15/0, `check-003` 25/0; `check-004` 57/1, com a falha (`Failed to load configuration`) causada por uma edição da US4 sincronizada no meio da rodada, refeita no fim da US3
 - [x] T031 [US2] `NotifyLayer`: a `CriticalBand` logo abaixo da barra, e a pilha com `topInset` abaixo dela enquanto ela está na tela; `critical.box` no `dump`. `lab/check-008` bloco `urgency` (o `dump` a cada segundo por 65 s; screenshot da faixa) — **feito** (`lab/perf` 2026-10-28T170342, `teste-b`, 4 núcleos): `lab/check-008 --only urgency` 6/0 (`out/check-008-1080-20261028-170435`): baixa saiu 3984 ms e normal 5960 ms depois de digitadas, a crítica ainda na faixa em 65 s, a pilha abaixo da faixa. T028–T030 ainda sem marcar: falta conferir as cores do bloco por urgência, a paginação ◂ ▸ por clique e a crítica com `held` (US6)
 
 ---

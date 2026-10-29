@@ -161,8 +161,15 @@ PanelWindow {
     function dumpBoxes(): var {
         return {
             stack: stack.boxes(),
-            critical: band.visible ? { x: 0, y: Math.round(band.y), w: Math.round(band.width), h: Math.round(band.height) } : null
+            critical: band.visible ? { x: 0, y: Math.round(band.y), w: Math.round(band.width), h: Math.round(band.height) } : null,
+            controls: band.visible ? root.shifted(band.controlBoxes(), Math.round(band.y)) : null
         };
+    }
+    function shifted(boxes: var, dy: int): var {
+        const out = {};
+        for (const k of Object.keys(boxes))
+            out[k] = boxes[k] ? { x: boxes[k].x, y: boxes[k].y + dy, w: boxes[k].w, h: boxes[k].h } : null;
+        return out;
     }
     readonly property real critBottom: band.visible ? band.y + band.height : 0
 }

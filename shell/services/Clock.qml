@@ -11,7 +11,10 @@ Singleton {
     readonly property var fixedDate: Fixtures.has("clock") ? parseLocal(Fixtures.get("clock")) : null
     // `clock.date` can still be undefined for a moment during a hot reload (seen since spec 008):
     // the current time then, instead of a QML warning.
-    readonly property date date: fixedDate ?? clock.date ?? new Date()
+    readonly property date date: {
+        const d = root.fixedDate ?? clock?.date;
+        return d instanceof Date && !isNaN(d.getTime()) ? d : new Date();
+    }
     readonly property string dateText: Qt.formatDateTime(date, "yyyy.MM.dd")
     readonly property string timeText: Qt.formatDateTime(date, "HH:mm:ss")
 

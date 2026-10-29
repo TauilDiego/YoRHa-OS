@@ -58,6 +58,10 @@ Formato do `notify dump`:
 
 - `screen[].box`, `critical.box` e `osd.box`: px lógicos do monitor (pros cliques dos testes e pra
   conferir as posições, SC-014).
+- **Acréscimo de 2026-10-29 (pros cliques dos testes):** `screen[].controls` =
+  `{ "buttons": [{ "label", "x", "y", "w", "h" }], "field": caixa ou null }` (os botões de ação e o
+  Reply, na ordem; o campo de resposta aberto) e `critical.controls` = `{ "prev", "next", "close" }`
+  (◂, ▸ e ×; `prev`/`next` `null` com uma página só), nas mesmas coordenadas.
 - `screen[].remaining`: `null` com fixtures; `critical` nunca expira.
 - `entries`: só as 20 primeiras (o `dump` de uma enxurrada fica pequeno); `log.ids` traz todas.
 - `osd`: `null` sem OSD na tela.
