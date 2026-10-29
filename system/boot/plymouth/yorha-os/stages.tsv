@@ -1,0 +1,81 @@
+# The boot stages of the YoRHa-OS boot screen (spec 011, data-model.md): systemd unit -> our line.
+# Columns, separated by one tab:
+#   pattern  the raw unit name systemd sends (systemd-journald.service, dev-zram0.swap). At most one
+#            "*": exact, prefix*, *suffix or prefix*suffix. The first pattern that matches wins.
+#   label    the line, in English, at most 48 characters, ASCII only (the initramfs draws nothing
+#            else). Never a technical name, never a text of the game. "-" = no line of its own: the
+#            unit is only counted in its group.
+#   group    services, volumes, devices, network or session (the generic line, "Starting system
+#            services (12)"); "-" = not shown at all (targets, slices, sockets...).
+# gen/embed-stages.py puts this table into yorha-os.script; run it after every change.
+
+# --- devices and kernel
+systemd-udevd.service	Starting the device manager	devices
+systemd-udev-trigger.service	Scanning the hardware	devices
+systemd-udev-settle.service	Waiting for the hardware	devices
+systemd-modules-load.service	Loading kernel modules	devices
+kmod-static-nodes.service	Creating device nodes	devices
+systemd-vconsole-setup.service	Setting up the console	devices
+systemd-zram-setup@*.service	Preparing compressed memory	devices
+systemd-backlight@*.service	Restoring screen brightness	devices
+systemd-rfkill.service	Restoring radio switches	devices
+alsa-restore.service	Restoring sound levels	devices
+alsa-state.service	Restoring sound levels	devices
+bluetooth.service	Starting Bluetooth	devices
+
+# --- volumes
+systemd-fsck-root.service	Checking the root volume	volumes
+systemd-fsck@*.service	Checking file systems	volumes
+systemd-remount-fs.service	Remounting the root volume	volumes
+home.mount	Mounting the home volume	volumes
+boot.mount	Mounting the boot partition	volumes
+efi.mount	Mounting the boot partition	volumes
+tmp.mount	Mounting temporary storage	volumes
+var-log.mount	Mounting the log volume	volumes
+dev-zram*.swap	Activating compressed swap	volumes
+*.swap	Activating swap space	volumes
+
+# --- system services
+systemd-journald.service	Starting the system journal	services
+systemd-journal-flush.service	Saving the boot journal	services
+systemd-sysctl.service	Applying kernel settings	services
+systemd-random-seed.service	Loading the random seed	services
+systemd-tmpfiles-setup.service	Creating system files and folders	services
+dbus-broker.service	Starting the message bus	services
+dbus.service	Starting the message bus	services
+upower.service	Starting the power monitor	services
+power-profiles-daemon.service	Starting power profiles	services
+tuned-ppd.service	Starting power profiles	services
+cups.service	Starting the print service	services
+
+# --- network
+NetworkManager.service	Starting the network manager	network
+systemd-networkd.service	Starting the network manager	network
+systemd-resolved.service	Starting name resolution	network
+iwd.service	Starting wireless networking	network
+wpa_supplicant.service	Starting wireless networking	network
+systemd-timesyncd.service	Synchronizing the clock	network
+sshd.service	Starting remote access	network
+
+# --- session
+systemd-logind.service	Starting the login manager	session
+polkit.service	Starting the authorization service	session
+systemd-user-sessions.service	Allowing user sessions	session
+user@*.service	Preparing a user session	session
+sddm.service	Starting the login screen	session
+
+# --- not shown
+plymouth-*.service	-	-
+*.target	-	-
+*.slice	-	-
+*.scope	-	-
+*.socket	-	-
+*.timer	-	-
+*.path	-	-
+*.device	-	-
+
+# --- everything else is only counted
+*.mount	-	volumes
+*.automount	-	volumes
+*.service	-	services
+*	-	services

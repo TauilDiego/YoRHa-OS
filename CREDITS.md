@@ -16,7 +16,12 @@
   - arquivo: `shell/assets/fonts/MPLUS1[wght].ttf` (fonte variável, tirada de
     [google/fonts](https://github.com/google/fonts/tree/main/ofl/mplus1));
   - uso: fonte padrão da UI, no lugar das fontes comerciais do jogo. Também é a fonte da tela de
-    login e da tela de boot (spec 011), instalada no sistema pelo módulo de boot e login.
+    login e da tela de boot (spec 011), instalada no sistema pelo módulo de boot e login;
+  - a tela de boot usa uma versão derivada, "YoRHa-OS Boot"
+    (`system/boot/plymouth/yorha-os/assets/font/YoRHaOSBoot.ttf`, com o `OFL.txt` ao lado): a
+    instância estática de peso 600, cortada no latim e renomeada, porque o Plymouth do initramfs
+    carrega um arquivo só e não escolhe peso de fonte variável. Gerada por `gen/assets.py`, sob a
+    mesma OFL 1.1 (a M PLUS 1 não tem nome reservado).
 
 ## Cursores
 

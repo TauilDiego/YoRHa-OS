@@ -1,0 +1,921 @@
+# YoRHa-OS boot screen (spec 011): the system check list of the game's boot screen, written with
+# the real boot stages and our own text. Numbers from the 4K analysis of the game's boot
+# (YoRHa-OS-private/pessoal/referencias/jogo/boot-analise.md), in 1080p px, scaled by the screen's
+# height. Layers, bottom to top:
+#   content    the watermark, the header, the lines, the cursor and the loading ring (the only layer
+#              the interference bands tear)
+#   bands      interference bands: a patch of background, the torn content moved 3.5 px to the left,
+#              the darkening and the faint rings
+#   film       the LCD mesh (a tile), never torn
+#   vignette   the side vignette
+#   overlay    black: the fade in, the exit and the global flicker
+# The lens (the red channel pulled towards the centre) is a red copy of each text, moved by its
+# position on the screen; the glow is a blurred copy (scaled down and up again).
+# In the shutdown and reboot modes (US5) only the passage band is shown, over black.
+#
+# Cost: each line is rendered once (the text, its red copy, its glow), a piece per frame before it
+# starts, and typed by cropping that image at the letters' places (the font's advances come in the
+# generated block). In the initramfs the label plugin is label-freetype, which draws only ASCII;
+# after the switch to the real root it is label-pango. Boot texts stay ASCII.
+
+# @generated-begin (gen/embed-stages.py, from config, stages.tsv and the font; do not edit by hand)
+cfg_exit = "fast";
+cfg_effects = "full";
+cfg_debug = "off";
+CW_AVG = 597;
+CW[" "] = 277; CW["!"] = 327; CW["#"] = 681; CW["$"] = 644; CW["%"] = 928; CW["&"] = 714; CW["'"] = 305; CW["("] = 409; CW[")"] = 409; CW["*"] = 525; CW["+"] = 695; CW[","] = 321;
+CW["-"] = 431; CW["."] = 320; CW["/"] = 502; CW["0"] = 643; CW["1"] = 643; CW["2"] = 643; CW["3"] = 643; CW["4"] = 643; CW["5"] = 643; CW["6"] = 643; CW["7"] = 643; CW["8"] = 643;
+CW["9"] = 643; CW[":"] = 353; CW[";"] = 371; CW["<"] = 718; CW["="] = 759; CW[">"] = 718; CW["?"] = 581; CW["@"] = 839; CW["A"] = 710; CW["B"] = 666; CW["C"] = 713; CW["D"] = 708;
+CW["E"] = 634; CW["F"] = 641; CW["G"] = 773; CW["H"] = 730; CW["I"] = 308; CW["J"] = 603; CW["K"] = 710; CW["L"] = 633; CW["M"] = 880; CW["N"] = 748; CW["O"] = 833; CW["P"] = 648;
+CW["Q"] = 826; CW["R"] = 693; CW["S"] = 649; CW["T"] = 670; CW["U"] = 733; CW["V"] = 699; CW["W"] = 941; CW["X"] = 712; CW["Y"] = 690; CW["Z"] = 653; CW["["] = 481; CW["]"] = 481;
+CW["^"] = 637; CW["_"] = 606; CW["`"] = 305; CW["a"] = 557; CW["b"] = 620; CW["c"] = 542; CW["d"] = 620; CW["e"] = 569; CW["f"] = 469; CW["g"] = 620; CW["h"] = 612; CW["i"] = 286;
+CW["j"] = 316; CW["k"] = 596; CW["l"] = 286; CW["m"] = 868; CW["n"] = 612; CW["o"] = 601; CW["p"] = 620; CW["q"] = 620; CW["r"] = 443; CW["s"] = 502; CW["t"] = 481; CW["u"] = 602;
+CW["v"] = 544; CW["w"] = 790; CW["x"] = 558; CW["y"] = 551; CW["z"] = 550; CW["{"] = 515; CW["|"] = 350; CW["}"] = 515; CW["~"] = 721;
+st_n = 0;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-udevd.service"; st_b[st_n] = ""; st_alen[st_n] = 21; st_blen[st_n] = 0; st_label[st_n] = "Starting the device manager"; st_group[st_n] = "devices"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-udev-trigger.service"; st_b[st_n] = ""; st_alen[st_n] = 28; st_blen[st_n] = 0; st_label[st_n] = "Scanning the hardware"; st_group[st_n] = "devices"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-udev-settle.service"; st_b[st_n] = ""; st_alen[st_n] = 27; st_blen[st_n] = 0; st_label[st_n] = "Waiting for the hardware"; st_group[st_n] = "devices"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-modules-load.service"; st_b[st_n] = ""; st_alen[st_n] = 28; st_blen[st_n] = 0; st_label[st_n] = "Loading kernel modules"; st_group[st_n] = "devices"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "kmod-static-nodes.service"; st_b[st_n] = ""; st_alen[st_n] = 25; st_blen[st_n] = 0; st_label[st_n] = "Creating device nodes"; st_group[st_n] = "devices"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-vconsole-setup.service"; st_b[st_n] = ""; st_alen[st_n] = 30; st_blen[st_n] = 0; st_label[st_n] = "Setting up the console"; st_group[st_n] = "devices"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = "systemd-zram-setup@"; st_b[st_n] = ".service"; st_alen[st_n] = 19; st_blen[st_n] = 8; st_label[st_n] = "Preparing compressed memory"; st_group[st_n] = "devices"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = "systemd-backlight@"; st_b[st_n] = ".service"; st_alen[st_n] = 18; st_blen[st_n] = 8; st_label[st_n] = "Restoring screen brightness"; st_group[st_n] = "devices"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-rfkill.service"; st_b[st_n] = ""; st_alen[st_n] = 22; st_blen[st_n] = 0; st_label[st_n] = "Restoring radio switches"; st_group[st_n] = "devices"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "alsa-restore.service"; st_b[st_n] = ""; st_alen[st_n] = 20; st_blen[st_n] = 0; st_label[st_n] = "Restoring sound levels"; st_group[st_n] = "devices"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "alsa-state.service"; st_b[st_n] = ""; st_alen[st_n] = 18; st_blen[st_n] = 0; st_label[st_n] = "Restoring sound levels"; st_group[st_n] = "devices"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "bluetooth.service"; st_b[st_n] = ""; st_alen[st_n] = 17; st_blen[st_n] = 0; st_label[st_n] = "Starting Bluetooth"; st_group[st_n] = "devices"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-fsck-root.service"; st_b[st_n] = ""; st_alen[st_n] = 25; st_blen[st_n] = 0; st_label[st_n] = "Checking the root volume"; st_group[st_n] = "volumes"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = "systemd-fsck@"; st_b[st_n] = ".service"; st_alen[st_n] = 13; st_blen[st_n] = 8; st_label[st_n] = "Checking file systems"; st_group[st_n] = "volumes"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-remount-fs.service"; st_b[st_n] = ""; st_alen[st_n] = 26; st_blen[st_n] = 0; st_label[st_n] = "Remounting the root volume"; st_group[st_n] = "volumes"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "home.mount"; st_b[st_n] = ""; st_alen[st_n] = 10; st_blen[st_n] = 0; st_label[st_n] = "Mounting the home volume"; st_group[st_n] = "volumes"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "boot.mount"; st_b[st_n] = ""; st_alen[st_n] = 10; st_blen[st_n] = 0; st_label[st_n] = "Mounting the boot partition"; st_group[st_n] = "volumes"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "efi.mount"; st_b[st_n] = ""; st_alen[st_n] = 9; st_blen[st_n] = 0; st_label[st_n] = "Mounting the boot partition"; st_group[st_n] = "volumes"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "tmp.mount"; st_b[st_n] = ""; st_alen[st_n] = 9; st_blen[st_n] = 0; st_label[st_n] = "Mounting temporary storage"; st_group[st_n] = "volumes"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "var-log.mount"; st_b[st_n] = ""; st_alen[st_n] = 13; st_blen[st_n] = 0; st_label[st_n] = "Mounting the log volume"; st_group[st_n] = "volumes"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = "dev-zram"; st_b[st_n] = ".swap"; st_alen[st_n] = 8; st_blen[st_n] = 5; st_label[st_n] = "Activating compressed swap"; st_group[st_n] = "volumes"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = ""; st_b[st_n] = ".swap"; st_alen[st_n] = 0; st_blen[st_n] = 5; st_label[st_n] = "Activating swap space"; st_group[st_n] = "volumes"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-journald.service"; st_b[st_n] = ""; st_alen[st_n] = 24; st_blen[st_n] = 0; st_label[st_n] = "Starting the system journal"; st_group[st_n] = "services"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-journal-flush.service"; st_b[st_n] = ""; st_alen[st_n] = 29; st_blen[st_n] = 0; st_label[st_n] = "Saving the boot journal"; st_group[st_n] = "services"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-sysctl.service"; st_b[st_n] = ""; st_alen[st_n] = 22; st_blen[st_n] = 0; st_label[st_n] = "Applying kernel settings"; st_group[st_n] = "services"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-random-seed.service"; st_b[st_n] = ""; st_alen[st_n] = 27; st_blen[st_n] = 0; st_label[st_n] = "Loading the random seed"; st_group[st_n] = "services"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-tmpfiles-setup.service"; st_b[st_n] = ""; st_alen[st_n] = 30; st_blen[st_n] = 0; st_label[st_n] = "Creating system files and folders"; st_group[st_n] = "services"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "dbus-broker.service"; st_b[st_n] = ""; st_alen[st_n] = 19; st_blen[st_n] = 0; st_label[st_n] = "Starting the message bus"; st_group[st_n] = "services"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "dbus.service"; st_b[st_n] = ""; st_alen[st_n] = 12; st_blen[st_n] = 0; st_label[st_n] = "Starting the message bus"; st_group[st_n] = "services"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "upower.service"; st_b[st_n] = ""; st_alen[st_n] = 14; st_blen[st_n] = 0; st_label[st_n] = "Starting the power monitor"; st_group[st_n] = "services"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "power-profiles-daemon.service"; st_b[st_n] = ""; st_alen[st_n] = 29; st_blen[st_n] = 0; st_label[st_n] = "Starting power profiles"; st_group[st_n] = "services"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "tuned-ppd.service"; st_b[st_n] = ""; st_alen[st_n] = 17; st_blen[st_n] = 0; st_label[st_n] = "Starting power profiles"; st_group[st_n] = "services"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "cups.service"; st_b[st_n] = ""; st_alen[st_n] = 12; st_blen[st_n] = 0; st_label[st_n] = "Starting the print service"; st_group[st_n] = "services"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "NetworkManager.service"; st_b[st_n] = ""; st_alen[st_n] = 22; st_blen[st_n] = 0; st_label[st_n] = "Starting the network manager"; st_group[st_n] = "network"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-networkd.service"; st_b[st_n] = ""; st_alen[st_n] = 24; st_blen[st_n] = 0; st_label[st_n] = "Starting the network manager"; st_group[st_n] = "network"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-resolved.service"; st_b[st_n] = ""; st_alen[st_n] = 24; st_blen[st_n] = 0; st_label[st_n] = "Starting name resolution"; st_group[st_n] = "network"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "iwd.service"; st_b[st_n] = ""; st_alen[st_n] = 11; st_blen[st_n] = 0; st_label[st_n] = "Starting wireless networking"; st_group[st_n] = "network"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "wpa_supplicant.service"; st_b[st_n] = ""; st_alen[st_n] = 22; st_blen[st_n] = 0; st_label[st_n] = "Starting wireless networking"; st_group[st_n] = "network"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-timesyncd.service"; st_b[st_n] = ""; st_alen[st_n] = 25; st_blen[st_n] = 0; st_label[st_n] = "Synchronizing the clock"; st_group[st_n] = "network"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "sshd.service"; st_b[st_n] = ""; st_alen[st_n] = 12; st_blen[st_n] = 0; st_label[st_n] = "Starting remote access"; st_group[st_n] = "network"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-logind.service"; st_b[st_n] = ""; st_alen[st_n] = 22; st_blen[st_n] = 0; st_label[st_n] = "Starting the login manager"; st_group[st_n] = "session"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "polkit.service"; st_b[st_n] = ""; st_alen[st_n] = 14; st_blen[st_n] = 0; st_label[st_n] = "Starting the authorization service"; st_group[st_n] = "session"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "systemd-user-sessions.service"; st_b[st_n] = ""; st_alen[st_n] = 29; st_blen[st_n] = 0; st_label[st_n] = "Allowing user sessions"; st_group[st_n] = "session"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = "user@"; st_b[st_n] = ".service"; st_alen[st_n] = 5; st_blen[st_n] = 8; st_label[st_n] = "Preparing a user session"; st_group[st_n] = "session"; st_n++;
+st_kind[st_n] = 0; st_a[st_n] = "sddm.service"; st_b[st_n] = ""; st_alen[st_n] = 12; st_blen[st_n] = 0; st_label[st_n] = "Starting the login screen"; st_group[st_n] = "session"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = "plymouth-"; st_b[st_n] = ".service"; st_alen[st_n] = 9; st_blen[st_n] = 8; st_label[st_n] = ""; st_group[st_n] = "-"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = ""; st_b[st_n] = ".target"; st_alen[st_n] = 0; st_blen[st_n] = 7; st_label[st_n] = ""; st_group[st_n] = "-"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = ""; st_b[st_n] = ".slice"; st_alen[st_n] = 0; st_blen[st_n] = 6; st_label[st_n] = ""; st_group[st_n] = "-"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = ""; st_b[st_n] = ".scope"; st_alen[st_n] = 0; st_blen[st_n] = 6; st_label[st_n] = ""; st_group[st_n] = "-"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = ""; st_b[st_n] = ".socket"; st_alen[st_n] = 0; st_blen[st_n] = 7; st_label[st_n] = ""; st_group[st_n] = "-"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = ""; st_b[st_n] = ".timer"; st_alen[st_n] = 0; st_blen[st_n] = 6; st_label[st_n] = ""; st_group[st_n] = "-"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = ""; st_b[st_n] = ".path"; st_alen[st_n] = 0; st_blen[st_n] = 5; st_label[st_n] = ""; st_group[st_n] = "-"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = ""; st_b[st_n] = ".device"; st_alen[st_n] = 0; st_blen[st_n] = 7; st_label[st_n] = ""; st_group[st_n] = "-"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = ""; st_b[st_n] = ".mount"; st_alen[st_n] = 0; st_blen[st_n] = 6; st_label[st_n] = ""; st_group[st_n] = "volumes"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = ""; st_b[st_n] = ".automount"; st_alen[st_n] = 0; st_blen[st_n] = 10; st_label[st_n] = ""; st_group[st_n] = "volumes"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = ""; st_b[st_n] = ".service"; st_alen[st_n] = 0; st_blen[st_n] = 8; st_label[st_n] = ""; st_group[st_n] = "services"; st_n++;
+st_kind[st_n] = 1; st_a[st_n] = ""; st_b[st_n] = ""; st_alen[st_n] = 0; st_blen[st_n] = 0; st_label[st_n] = ""; st_group[st_n] = "services"; st_n++;
+# @generated-end
+
+# ---------------------------------------------------------------- screen, scale, colors, fonts
+W = Window.GetWidth();
+H = Window.GetHeight();
+S = H / 1080;
+MODE = Plymouth.GetMode();
+FONT = "YoRHa-OS Boot";
+BAND_FONT = "M PLUS 1";                 # the shutdown runs from the mounted system: pango, any weight
+PT = 0.75;                              # font sizes are points at 96 dpi: px * 0.75
+ASC = 1160 / (1160 + 288);              # the font's ascender share of a text image's height
+TXT_R = 223 / 255; TXT_G = 218 / 255; TXT_B = 210 / 255;
+BG_G = 24 / 255; BG_B = 20 / 255;       # the red copy keeps the background's green and blue
+ALERT_R = 192 / 255; ALERT_G = 87 / 255; ALERT_B = 74 / 255;
+LENS = 0.0021;                          # red channel scale towards the centre (0.21 %)
+GLOW = 0.35;                            # opacity of the blurred copy
+TEAR = 3.5;                             # the tear, 7 px at 4K
+
+fun round (v) {
+    if (v < 0) return -Math.Int(-v + 0.5);
+    return Math.Int(v + 0.5);
+}
+
+fun font (px) {
+    return global.FONT + " " + Math.Max(1, round(px * global.S * global.PT));
+}
+
+fun pad2 (i) {
+    if (i < 10) return "0" + i;
+    return "" + i;
+}
+
+# A text in its three images: the text, its red copy (the lens) and its glow (blurred copy).
+fun text_set (s, px, r, g, b) {
+    ts.main = Image.Text(s, r, g, b, 1, font(px));
+    ts.red = Image.Text(s, r, global.BG_G, global.BG_B, 1, font(px));
+    ts.glow = glow_of(ts.main);
+    return ts;
+}
+
+fun glow_of (img) {
+    w = img.GetWidth();
+    h = img.GetHeight();
+    return img.Scale(Math.Int(w / 2) + 1, Math.Int(h / 2) + 1).Scale(w, h);
+}
+
+# A new text set from three images (a fresh object: script variables share objects).
+fun make_set (m, r, g) {
+    ts.main = m;
+    ts.red = r;
+    ts.glow = g;
+    return ts;
+}
+
+# The three images cropped to [x0, x1) of their width.
+fun crop_set (ts, x0, x1) {
+    h = ts.main.GetHeight();
+    c.main = ts.main.Crop(x0, 0, x1 - x0, h);
+    c.red = ts.red.Crop(x0, 0, x1 - x0, h);
+    c.glow = ts.glow.Crop(x0, 0, x1 - x0, h);
+    return c;
+}
+
+# ---------------------------------------------------------------- content items
+# An item is something on the content layer: a main sprite and, for texts, the red copy and the
+# glow. The interference bands tear every item they cross.
+n_items = 0;
+
+fun item_new (z, fx) {
+    i = global.n_items;
+    global.n_items++;
+    global.items[i].z = z;
+    global.items[i].fx = fx;
+    global.items[i].on = 0;
+    global.items[i].op = 1;
+    global.items[i].x = 0;
+    global.items[i].y = 0;
+    global.items[i].dx = 0;
+    global.items[i].dy = 0;
+    global.items[i].smain = Sprite();
+    global.items[i].smain.SetZ(z + 2);
+    global.items[i].smain.SetOpacity(0);
+    if (fx) {
+        global.items[i].sred = Sprite();
+        global.items[i].sred.SetZ(z + 1);
+        global.items[i].sred.SetOpacity(0);
+        global.items[i].sglow = Sprite();
+        global.items[i].sglow.SetZ(z);
+        global.items[i].sglow.SetOpacity(0);
+    }
+    return i;
+}
+
+fun item_show (i) {
+    op = global.items[i].op;
+    if (!global.items[i].on) op = 0;
+    global.items[i].smain.SetOpacity(op);
+    if (global.items[i].fx) {
+        global.items[i].sred.SetOpacity(op);
+        global.items[i].sglow.SetOpacity(op * global.GLOW);
+    }
+}
+
+fun item_place (i, x, y) {
+    x = round(x);
+    y = round(y);
+    global.items[i].x = x;
+    global.items[i].y = y;
+    global.items[i].smain.SetPosition(x, y, global.items[i].z + 2);
+    if (global.items[i].fx) {
+        w = global.items[i].main.GetWidth();
+        h = global.items[i].main.GetHeight();
+        dx = round(global.LENS * (global.W / 2 - (x + w / 2)));
+        dy = round(global.LENS * (global.H / 2 - (y + h / 2)));
+        global.items[i].dx = dx;
+        global.items[i].dy = dy;
+        global.items[i].sred.SetPosition(x + dx, y + dy, global.items[i].z + 1);
+        global.items[i].sglow.SetPosition(x, y, global.items[i].z);
+    }
+}
+
+# A text set (fx items) at (x, y).
+fun item_text (i, ts, x, y) {
+    global.items[i].main = ts.main;
+    global.items[i].smain.SetImage(ts.main);
+    global.items[i].red = ts.red;
+    global.items[i].sred.SetImage(ts.red);
+    global.items[i].sglow.SetImage(ts.glow);
+    global.items[i].on = 1;
+    item_place(i, x, y);
+    item_show(i);
+}
+
+# A single image (items without fx) at (x, y).
+fun item_image (i, img, x, y) {
+    global.items[i].main = img;
+    global.items[i].smain.SetImage(img);
+    global.items[i].on = 1;
+    item_place(i, x, y);
+    item_show(i);
+}
+
+fun item_opacity (i, op) {
+    if (global.items[i].op == op) return;
+    global.items[i].op = op;
+    item_show(i);
+}
+
+fun item_hide (i) {
+    if (!global.items[i].on) return;
+    global.items[i].on = 0;
+    item_show(i);
+}
+
+# ---------------------------------------------------------------- the clock
+# Plymouth's boot progress callback brings the real time (~30 times a second); without it, frames.
+clock = 0;
+clock_seen = 0;
+frame = 0;
+t = 0;
+t0 = -1;
+
+fun progress_cb (duration, progress) {
+    global.clock = duration;
+    global.clock_seen = 1;
+}
+Plymouth.SetBootProgressFunction(progress_cb);
+
+fun tick () {
+    global.frame++;
+    if (global.clock_seen) global.t = global.clock;
+    else global.t = global.frame / 50;
+    if (global.t0 < 0) global.t0 = global.t;
+}
+
+# ================================================================ shutdown and reboot (US5)
+# Only the passage band, over black, already open (the login's band closes into it, research R10).
+fun band_screen (text) {
+    Window.SetBackgroundTopColor(0, 0, 0);
+    Window.SetBackgroundBottomColor(0, 0, 0);
+    by = round(global.H * 903 / 2160);
+    bh = round(global.H * 383 / 2160);
+    global.band_fill = Sprite(Image("assets/px-band.png").Scale(global.W, bh));
+    global.band_fill.SetPosition(0, by, 10);
+    p = Math.Clamp(round(10 * global.S), 5, 20);
+    global.band_dots = Sprite(Image("assets/band-dots-" + p + ".png").Tile(global.W, bh));
+    global.band_dots.SetPosition(0, by, 11);
+    cw = round(900 * global.H / 2160);
+    global.band_capl = Sprite(Image("assets/band-cap-l.png").Scale(cw, bh));
+    global.band_capl.SetPosition(0, by, 12);
+    global.band_capr = Sprite(Image("assets/band-cap-r.png").Scale(cw, bh));
+    global.band_capr.SetPosition(global.W - cw, by, 12);
+    img = Image.Text(text, 138 / 255, 137 / 255, 135 / 255, 1, global.BAND_FONT + " " + Math.Max(1, round(21 * global.S * global.PT)));
+    global.band_text = Sprite(img);
+    global.band_text.SetPosition(round(global.W / 2 - img.GetWidth() / 2), round(by + bh / 2 - img.GetHeight() / 2), 13);
+}
+
+if (MODE == "shutdown") band_screen("Shutting down…");
+else if (MODE == "reboot") band_screen("Rebooting…");
+else {
+
+# ================================================================ boot: the check list (US2)
+Window.SetBackgroundTopColor(27 / 255, 24 / 255, 20 / 255);
+Window.SetBackgroundBottomColor(27 / 255, 24 / 255, 20 / 255);
+EFFECTS = cfg_effects == "full";
+EXIT_DUR = 0.4;
+if (cfg_exit == "game") EXIT_DUR = 0.9;
+
+# ---- the fixed layers: film, vignette, overlay
+film_p = Math.Clamp(round(7 * S), 4, 16);
+film = Sprite(Image("assets/film-" + film_p + ".png").Tile(W, H));
+film.SetPosition(0, 0, 60);
+vignette = Sprite(Image("assets/vignette.png").Scale(W, H));
+vignette.SetPosition(0, 0, 70);
+overlay = Sprite(Image("assets/px-black.png").Scale(W, H));
+overlay.SetPosition(0, 0, 80);
+overlay.SetOpacity(1);
+overlay_op = 1;
+
+# ---- watermark (our wordmark, no emblem), faint
+WM_ALPHA = 0.12;
+wm1 = item_new(4, 0);
+wm2 = item_new(4, 0);
+wm1_img = Image.Text("YoRHa-OS", TXT_R, TXT_G, TXT_B, 1, font(156));
+wm2_img = Image.Text("SYSTEM INTERFACE", TXT_R, TXT_G, TXT_B, 1, font(30));
+items[wm1].op = WM_ALPHA;
+items[wm2].op = WM_ALPHA;
+item_image(wm1, wm1_img, W / 2 - 210 * S, 606 * S - ASC * wm1_img.GetHeight());
+item_image(wm2, wm2_img, W / 2 - 198 * S, 666 * S - ASC * wm2_img.GetHeight());
+
+# ---- header: "STARTUP" big and "-System check" small, with the dots (three items of their own)
+HEAD_X = 99;
+HEAD_BASE = 126;
+head1 = item_new(20, 1);
+head2 = item_new(20, 1);
+init_ts = text_set("STARTUP", 60, TXT_R, TXT_G, TXT_B);
+item_text(head1, init_ts, HEAD_X * S, HEAD_BASE * S - ASC * init_ts.main.GetHeight());
+init_x = HEAD_X * S + init_ts.main.GetWidth() + 12 * S;
+init_ts = text_set("-System check", 24, TXT_R, TXT_G, TXT_B);
+item_text(head2, init_ts, init_x, HEAD_BASE * S - ASC * init_ts.main.GetHeight());
+init_x = init_x + init_ts.main.GetWidth();
+dot_ts = text_set(".", 24, TXT_R, TXT_G, TXT_B);
+for (init_k = 0; init_k < 3; init_k++) {
+    head_dot[init_k] = item_new(20, 1);
+    item_text(head_dot[init_k], dot_ts, init_x + init_k * dot_ts.main.GetWidth(), HEAD_BASE * S - ASC * dot_ts.main.GetHeight());
+}
+head_dots = 3;
+
+fun header_dots () {
+    # 1.156 s cycle: none 0.15 s, "." 0.34, ".." 0.34, "..." 0.36
+    p = global.t - Math.Int(global.t / 1.156) * 1.156;
+    d = 3;
+    if (p < 0.153) d = 0;
+    else if (p < 0.493) d = 1;
+    else if (p < 0.833) d = 2;
+    if (d == global.head_dots) return;
+    global.head_dots = d;
+    for (k = 0; k < 3; k++) {
+        if (k < d) {
+            global.items[global.head_dot[k]].on = 1;
+            item_show(global.head_dot[k]);
+        } else item_hide(global.head_dot[k]);
+    }
+}
+
+# ---- the loading ring (the cursor's Loading_Circle, light on dark), top right, 60 frames/s
+RING_PX = round(64 * S);
+ring = item_new(22, 0);
+ring_frame = -1;
+
+fun ring_update () {
+    f = Math.Int(global.t * 60) % 90;
+    if (f == global.ring_frame) return;
+    global.ring_frame = f;
+    if (!global.ring_img[f]) global.ring_img[f] = Image("assets/ring/ring-" + pad2(f) + ".png").Scale(global.RING_PX, global.RING_PX);
+    item_image(global.ring, global.ring_img[f], global.W - 145.5 * global.S - global.RING_PX / 2, 82.5 * global.S - global.RING_PX / 2);
+}
+
+# ---- the list
+LINE_X = 129;
+LINE_BASE = 211.5;
+LINE_STEP = 42;
+LINE_PX = 24;
+ROWS = Math.Int((1020 - LINE_BASE) / LINE_STEP) + 1;
+CPS = 77;                    # letters per second
+CPS_FIRST = 20;              # the first line, the system "waking up"
+GAP = 0.11;                  # between lines
+fail_ts = text_set("[FAIL]", LINE_PX, ALERT_R, ALERT_G, ALERT_B);
+cursor_ts = text_set("_", LINE_PX, TXT_R, TXT_G, TXT_B);
+
+for (init_r = 0; init_r < ROWS; init_r++) {
+    row_body[init_r] = item_new(20, 1);
+    row_head[init_r] = item_new(20, 1);
+    row_stat[init_r] = item_new(20, 1);
+}
+cursor = item_new(20, 1);
+
+n_lines = 0;                 # lines started
+first = 0;                   # the first line on the screen
+cur = -1;                    # the line being typed (or the last one)
+next_at = 0;                 # when the next line may start
+cursor_since = 0;
+q_head = 1000;               # the queue; room below q_head for urgent lines (failures)
+q_tail = 1000;
+prep_text = "";              # the next line, rendered a piece per frame before it starts
+prep_stage = 0;
+
+GROUPS[0] = "devices"; GROUPS[1] = "volumes"; GROUPS[2] = "services"; GROUPS[3] = "network"; GROUPS[4] = "session";
+GEN["devices"] = "Setting up devices";
+GEN["volumes"] = "Mounting volumes";
+GEN["services"] = "Starting system services";
+GEN["network"] = "Starting network services";
+GEN["session"] = "Preparing the session";
+GEN1["devices"] = "Setting up a device";
+GEN1["volumes"] = "Mounting a volume";
+GEN1["services"] = "Starting a system service";
+GEN1["network"] = "Starting a network service";
+GEN1["session"] = "Preparing the session";
+for (init_g = 0; init_g < 5; init_g++) cnt[GROUPS[init_g]] = 0;
+
+fun line_text (label, st) {
+    if (st == "fail") return label + " ... [FAIL]";
+    if (st == "ok") return label + " ... [ OK ]";
+    return label;
+}
+
+fun enqueue (label, unit, st, urgent) {
+    if (urgent) {
+        global.q_head--;
+        k = global.q_head;
+    } else {
+        k = global.q_tail;
+        global.q_tail++;
+    }
+    global.q_label[k] = label;
+    global.q_unit[k] = unit;
+    global.q_status[k] = st;
+    if (unit != "") global.q_of[unit] = k + 1;
+}
+
+# The first pattern of the catalog that matches the unit name, or -1.
+fun stage_of (name) {
+    len = name.Length();
+    for (i = 0; i < global.st_n; i++) {
+        if (global.st_kind[i] == 0) {
+            if (name == global.st_a[i]) return i;
+        } else {
+            la = global.st_alen[i];
+            lb = global.st_blen[i];
+            if (len >= la + lb) {
+                if ((la == 0 || name.SubString(0, la) == global.st_a[i]) && (lb == 0 || name.SubString(len - lb, len) == global.st_b[i])) return i;
+            }
+        }
+    }
+    return -1;
+}
+
+fun status_cb (name) {
+    if (global.exiting) return;
+    if (global.seen[name]) return;
+    global.seen[name] = 1;
+    i = stage_of(name);
+    if (i < 0) return;
+    g = global.st_group[i];
+    if (g == "-") return;
+    if (global.st_label[i] == "") {
+        global.cnt[g] = global.cnt[g] + 1;
+        global.counted[name] = 1;
+        return;
+    }
+    enqueue(global.st_label[i], name, "ok", 0);
+}
+Plymouth.SetUpdateStatusFunction(status_cb);
+
+fun root_cb () {
+    if (!global.exiting) enqueue("Mounting the root volume", "", "ok", 0);
+}
+Plymouth.SetRootMountedFunction(root_cb);
+
+# A unit failed (yorha-boot-watch): its line turns to failure (a unit that failed after it started),
+# or a line of its own comes first.
+# During the exit there is no time to type: the failure's line shows at once.
+fun fail_unit (name) {
+    k = global.line_of[name];
+    if (k) {
+        k = k - 1;
+        global.ln_status[k] = "fail";
+        if (global.ln_done[k]) line_finish(k);
+        return;
+    }
+    q = global.q_of[name];
+    if (q) {
+        # still waiting for its turn: it goes first, or a fast boot's exit would drop it
+        label = global.q_label[q - 1];
+        global.q_dead[q - 1] = 1;
+    } else {
+        # systemd tells Plymouth only of the units that became active, so a failed unit usually
+        # arrives here first: its name in the catalog, or its group's generic line
+        i = stage_of(name);
+        g = "services";
+        if (i >= 0 && global.st_group[i] != "-") g = global.st_group[i];
+        if (global.counted[name] && global.cnt[g] > 0) global.cnt[g] = global.cnt[g] - 1;
+        global.counted[name] = 0;
+        label = global.GEN1[g];
+        if (i >= 0 && global.st_label[i] != "") label = global.st_label[i];
+    }
+    if (global.exiting) line_now(label, name, "fail");
+    else enqueue(label, name, "fail", 1);
+}
+
+fun line_y (k) {
+    return global.LINE_BASE * global.S + (k - global.first) * global.LINE_STEP * global.S;
+}
+
+# Where each letter of the line starts (px): the font's advances (generated block), scaled to the
+# rendered line's width. Both label plugins place letters by them.
+fun line_widths (k, s, width) {
+    len = s.Length();
+    acc = 0;
+    for (j = 0; j < len; j++) {
+        a = global.CW[s.CharAt(j)];
+        if (!a) a = global.CW_AVG;
+        global.ln_pw[k][j] = acc;
+        acc = acc + a;
+    }
+    f = width / acc;
+    for (j = 0; j < len; j++) global.ln_pw[k][j] = round(global.ln_pw[k][j] * f);
+    global.ln_pw[k][len] = width;
+}
+
+fun line_place (k, it, ts, x) {
+    item_text(it, ts, x, line_y(k) - global.ASC * ts.main.GetHeight());
+}
+
+# The finished line: the whole image, and a failure's status in the alert color over it.
+fun line_finish (k) {
+    r = k % global.ROWS;
+    x = global.LINE_X * global.S;
+    ts = global.ln_ts[k];
+    item_hide(global.row_head[r]);
+    if (global.ln_status[k] == "fail") {
+        # the body drawn again on its own (failures are rare): the status lands exactly after it
+        body = text_set(global.ln_label[k] + " ... ", global.LINE_PX, global.TXT_R, global.TXT_G, global.TXT_B);
+        line_place(k, global.row_body[r], body, x);
+        line_place(k, global.row_stat[r], global.fail_ts, x + body.main.GetWidth());
+        global.ln_w[k] = body.main.GetWidth() + global.fail_ts.main.GetWidth();
+    } else {
+        line_place(k, global.row_body[r], ts, x);
+        item_hide(global.row_stat[r]);
+        global.ln_w[k] = ts.main.GetWidth();
+    }
+    item_opacity(global.row_body[r], 1);
+}
+
+fun place_rows () {
+    for (k = global.first; k < global.n_lines; k++) {
+        r = k % global.ROWS;
+        its[0] = global.row_body[r];
+        its[1] = global.row_head[r];
+        its[2] = global.row_stat[r];
+        for (m = 0; m < 3; m++) {
+            it = its[m];
+            if (global.items[it].on) item_place(it, global.items[it].x, line_y(k) - global.ASC * global.items[it].main.GetHeight());
+        }
+    }
+}
+
+fun line_start (label, unit, st, ts) {
+    k = global.n_lines;
+    global.n_lines++;
+    r = k % global.ROWS;
+    item_hide(global.row_body[r]);
+    item_hide(global.row_head[r]);
+    item_hide(global.row_stat[r]);
+    if (k - global.first >= global.ROWS) {
+        global.first = k - global.ROWS + 1;
+        place_rows();
+    }
+    s = line_text(label, st);
+    global.ln_label[k] = label;
+    global.ln_status[k] = st;
+    global.ln_full[k] = s;
+    global.ln_ts[k] = ts;
+    line_widths(k, s, ts.main.GetWidth());
+    global.ln_unit[k] = unit;
+    global.ln_born[k] = global.t;
+    global.ln_cps[k] = global.CPS;
+    if (k == 0) global.ln_cps[k] = global.CPS_FIRST;
+    global.ln_n[k] = 0;
+    global.ln_done[k] = 0;
+    if (unit != "") global.line_of[unit] = k + 1;
+    global.cur = k;
+    item_hide(global.cursor);
+}
+
+# A line shown whole, at once (failures during the exit). The line being typed finishes first.
+fun line_now (label, unit, st) {
+    k = global.cur;
+    if (k >= 0 && !global.ln_done[k]) {
+        global.ln_done[k] = 1;
+        line_finish(k);
+    }
+    line_start(label, unit, st, text_set(line_text(label, st), global.LINE_PX, global.TXT_R, global.TXT_G, global.TXT_B));
+    k = global.cur;
+    global.ln_n[k] = global.ln_full[k].Length();
+    global.ln_done[k] = 1;
+    line_finish(k);
+}
+
+# The letter at the head: drawn from the line itself, the first letter ~45 % of the time.
+fun head_index (s) {
+    if (Math.Random() < 0.45) return 0;
+    j = Math.Int(Math.Random() * s.Length());
+    if (s.CharAt(j) == " ") j = 0;
+    return j;
+}
+
+# Line k with n letters: the first n - 1 and a head letter drawn from the line.
+fun line_type (k, n) {
+    r = k % global.ROWS;
+    x = global.LINE_X * global.S;
+    ts = global.ln_ts[k];
+    w = global.ln_pw[k][n - 1];
+    if (w > 0) line_place(k, global.row_body[r], crop_set(ts, 0, w), x);
+    else item_hide(global.row_body[r]);
+    j = head_index(global.ln_full[k]);
+    a = global.ln_pw[k][j];
+    b = global.ln_pw[k][j + 1];
+    if (b > a) line_place(k, global.row_head[r], crop_set(ts, a, b), x + w);
+    else item_hide(global.row_head[r]);
+}
+
+# The next line of the queue is rendered before its turn: a piece per frame (~10 ms each).
+fun line_prepare () {
+    q = global.q_head;
+    s = line_text(global.q_label[q], global.q_status[q]);
+    if (s != global.prep_text) {
+        global.prep_text = s;
+        global.prep_stage = 0;
+    }
+    if (global.prep_stage == 0) global.prep_main = Image.Text(s, global.TXT_R, global.TXT_G, global.TXT_B, 1, font(global.LINE_PX));
+    else if (global.prep_stage == 1) global.prep_red = Image.Text(s, global.TXT_R, global.BG_G, global.BG_B, 1, font(global.LINE_PX));
+    else if (global.prep_stage == 2) global.prep_glow = glow_of(global.prep_main);
+    else return 1;
+    global.prep_stage++;
+    return 0;
+}
+
+# Skip the queue entries that moved to the front (failures).
+fun queue_trim () {
+    while (global.q_head < global.q_tail && global.q_dead[global.q_head]) global.q_head++;
+}
+
+fun list_update () {
+    k = global.cur;
+    if (k >= 0 && !global.ln_done[k]) {
+        e = global.t - global.ln_born[k];
+        len = global.ln_full[k].Length();
+        n = Math.Min(len, Math.Int(e * global.ln_cps[k]) + 1);
+        if (n != global.ln_n[k]) {
+            global.ln_n[k] = n;
+            if (n < len) line_type(k, n);
+            else {
+                global.ln_done[k] = 1;
+                line_finish(k);
+                global.next_at = global.t + global.GAP;
+                global.cursor_since = global.next_at;
+            }
+        }
+        # born dim (45 %) for its first ~50 ms
+        if (!global.ln_done[k]) {
+            r = k % global.ROWS;
+            op = 1;
+            if (e < 0.051) op = 0.45 + 0.55 * e / 0.051;
+            item_opacity(global.row_body[r], op);
+            item_opacity(global.row_head[r], op);
+        }
+        return;
+    }
+    if (global.exiting) return;
+    queue_trim();
+    if (global.q_head == global.q_tail) {
+        # the queue is empty: the units counted so far become generic lines
+        for (g = 0; g < 5; g++) {
+            gn = global.GROUPS[g];
+            if (global.cnt[gn] > 0) {
+                enqueue(global.GEN[gn] + " (" + global.cnt[gn] + ")", "", "ok", 0);
+                global.cnt[gn] = 0;
+            }
+        }
+    }
+    if (global.q_head < global.q_tail) {
+        if (line_prepare() && global.t >= global.next_at) {
+            q = global.q_head;
+            global.q_head++;
+            if (global.q_unit[q] != "") global.q_of[global.q_unit[q]] = 0;
+            line_start(global.q_label[q], global.q_unit[q], global.q_status[q], make_set(global.prep_main, global.prep_red, global.prep_glow));
+            global.prep_text = "";
+            return;
+        }
+    }
+    # waiting: the cursor blinks after the last line, 0.49 s on, 0.49 s off
+    if (k >= 0 && global.t >= global.cursor_since && global.q_head == global.q_tail) {
+        if (Math.Int((global.t - global.cursor_since) / 0.49) % 2 == 0) {
+            x = round(global.LINE_X * global.S + global.ln_w[k]);
+            if (!global.items[global.cursor].on || global.items[global.cursor].x != x) line_place(k, global.cursor, global.cursor_ts, x);
+        } else item_hide(global.cursor);
+    } else item_hide(global.cursor);
+}
+
+# ---- interference bands, the tear, the flicker
+# Quantiles of the exponential and of the band height's lognormal (median 364 px at 4K, sigma
+# 0.64), so the script draws them without logarithms.
+EXPQ[0] = 0.032; EXPQ[1] = 0.098; EXPQ[2] = 0.170; EXPQ[3] = 0.247; EXPQ[4] = 0.330; EXPQ[5] = 0.421;
+EXPQ[6] = 0.521; EXPQ[7] = 0.633; EXPQ[8] = 0.758; EXPQ[9] = 0.901; EXPQ[10] = 1.068; EXPQ[11] = 1.269;
+EXPQ[12] = 1.520; EXPQ[13] = 1.857; EXPQ[14] = 2.367; EXPQ[15] = 3.466;
+LOGNQ[0] = 0.304; LOGNQ[1] = 0.430; LOGNQ[2] = 0.524; LOGNQ[3] = 0.609; LOGNQ[4] = 0.690; LOGNQ[5] = 0.773;
+LOGNQ[6] = 0.859; LOGNQ[7] = 0.951; LOGNQ[8] = 1.051; LOGNQ[9] = 1.164; LOGNQ[10] = 1.293; LOGNQ[11] = 1.449;
+LOGNQ[12] = 1.643; LOGNQ[13] = 1.909; LOGNQ[14] = 2.325; LOGNQ[15] = 3.294;
+
+fun quantile (table) {
+    u = Math.Random() * 15;
+    i = Math.Int(u);
+    return table[i] + (table[i + 1] - table[i]) * (u - i);
+}
+
+GFRAME = 0.017;              # one frame of the game (58.8 frames/s)
+N_BANDS = 3;
+N_PIECES = 24;
+if (EFFECTS) {
+    # full-screen images the bands crop their strips from
+    full_bg = Image("assets/px-bg.png").Scale(W, H);
+    full_black = Image("assets/px-black.png").Scale(W, H);
+    full_rings = Image("assets/rings.png");
+    if (full_rings.GetWidth() != W || full_rings.GetHeight() != H) full_rings = full_rings.Scale(W, H);
+    for (init_b = 0; init_b < N_BANDS; init_b++) {
+        band[init_b].on = 0;
+        band[init_b].patch = Sprite(); band[init_b].patch.SetZ(40); band[init_b].patch.SetOpacity(0);
+        band[init_b].dark = Sprite(); band[init_b].dark.SetZ(45); band[init_b].dark.SetOpacity(0);
+        band[init_b].rings = Sprite(); band[init_b].rings.SetZ(46); band[init_b].rings.SetOpacity(0);
+        for (init_p = 0; init_p < N_PIECES; init_p++) {
+            band[init_b].piece[init_p] = Sprite();
+            band[init_b].piece[init_p].SetOpacity(0);
+        }
+    }
+}
+next_band = -1;
+flick_until = 0;
+flick_a = 0;
+next_flick = -1;
+wm_until = 0;
+wm_a = 0;
+next_wm = -1;
+
+# One piece of an image cut by the band [y0, y1), moved to the left; returns the next free piece.
+fun tear_piece (b, p, img, x, y, op, z, y0, y1) {
+    if (p >= global.N_PIECES || op <= 0) return p;
+    h = img.GetHeight();
+    a = Math.Max(y0, y);
+    e = Math.Min(y1, y + h);
+    if (e <= a) return p;
+    global.band[b].piece[p].SetImage(img.Crop(0, a - y, img.GetWidth(), e - a));
+    global.band[b].piece[p].SetPosition(x - round(global.TEAR * global.S), a, z);
+    global.band[b].piece[p].SetOpacity(op);
+    return p + 1;
+}
+
+# The tear is cut once, when the band appears: a band lasts 1 to 8 frames.
+fun band_tear (b) {
+    y0 = global.band[b].y;
+    y1 = global.band[b].y + global.band[b].h;
+    p = 0;
+    for (i = 0; i < global.n_items; i++) {
+        if (global.items[i].on && global.items[i].op > 0) {
+            x = global.items[i].x;
+            y = global.items[i].y;
+            if (global.items[i].fx) p = tear_piece(b, p, global.items[i].red, x + global.items[i].dx, y + global.items[i].dy, global.items[i].op, 41, y0, y1);
+            p = tear_piece(b, p, global.items[i].main, x, y, global.items[i].op, 42, y0, y1);
+        }
+    }
+    while (p < global.N_PIECES) {
+        global.band[b].piece[p].SetOpacity(0);
+        p++;
+    }
+}
+
+fun band_start (b) {
+    h = round(0.168 * quantile(global.LOGNQ) * global.H);
+    h = Math.Clamp(h, round(0.03 * global.H), round(0.8 * global.H));
+    y = round((Math.Random() * (1 - h / global.H * 0.6) - h / global.H * 0.2) * global.H);
+    y0 = Math.Max(0, y);
+    y1 = Math.Min(global.H, y + h);
+    if (y1 - y0 < 2) return;
+    global.band[b].on = 1;
+    global.band[b].y = y0;
+    global.band[b].h = y1 - y0;
+    global.band[b].until = global.t + (1 + Math.Int(Math.Random() * 8)) * global.GFRAME;
+    global.band[b].patch.SetImage(global.full_bg.Crop(0, y0, global.W, y1 - y0));
+    global.band[b].patch.SetPosition(0, y0, 40);
+    global.band[b].patch.SetOpacity(1);
+    global.band[b].dark.SetImage(global.full_black.Crop(0, y0, global.W, y1 - y0));
+    global.band[b].dark.SetPosition(0, y0, 45);
+    global.band[b].dark.SetOpacity(0.06 + Math.Random() * 0.13);
+    global.band[b].rings.SetImage(global.full_rings.Crop(0, y0, global.W, y1 - y0));
+    global.band[b].rings.SetPosition(0, y0, 46);
+    global.band[b].rings.SetOpacity(1);
+    band_tear(b);
+}
+
+fun band_stop (b) {
+    global.band[b].on = 0;
+    global.band[b].patch.SetOpacity(0);
+    global.band[b].dark.SetOpacity(0);
+    global.band[b].rings.SetOpacity(0);
+    for (p = 0; p < global.N_PIECES; p++) global.band[b].piece[p].SetOpacity(0);
+}
+
+fun effects_update (start) {
+    t = global.t;
+    if (global.next_band < 0) {
+        global.next_band = start;
+        global.next_flick = start + quantile(global.EXPQ) * 1.2;
+        global.next_wm = start + quantile(global.EXPQ) * 0.65;
+    }
+    for (b = 0; b < global.N_BANDS; b++) if (global.band[b].on && t >= global.band[b].until) band_stop(b);
+    while (t >= global.next_band) {
+        due = global.next_band;
+        global.next_band = due + 0.143 * quantile(global.EXPQ);
+        if (t - due < 0.1) {
+            b = 0;
+            while (b < global.N_BANDS && global.band[b].on) b++;
+            if (b < global.N_BANDS) band_start(b);
+        }
+    }
+    if (t >= global.next_flick) {
+        global.flick_until = t + (1 + Math.Int(Math.Random() * 3)) * global.GFRAME;
+        global.flick_a = 0.035 + Math.Random() * 0.02;
+        global.next_flick = t + quantile(global.EXPQ) * 1.2;
+    }
+    if (t >= global.next_wm) {
+        d = 1 + Math.Int(Math.Random() * 8);
+        if (Math.Random() >= 0.85) d = 10 + Math.Int(Math.Random() * 13);
+        global.wm_until = t + d * global.GFRAME;
+        global.wm_a = 0.05 + Math.Random() * 0.07;
+        global.next_wm = t + quantile(global.EXPQ) * 0.65;
+    }
+    wm = global.WM_ALPHA;
+    if (t < global.wm_until) wm = global.WM_ALPHA * (1 - global.wm_a);
+    item_opacity(global.wm1, wm);
+    item_opacity(global.wm2, wm);
+}
+
+# ---- messages: the exit, the failures; anything else becomes a line
+exiting = 0;
+exit_t0 = 0;
+
+fun message_cb (text) {
+    len = text.Length();
+    if (len >= 6 && text.SubString(0, 6) == "yorha:") {
+        if (text == "yorha:exit") {
+            if (!global.exiting) {
+                global.exiting = 1;
+                global.exit_t0 = global.t;
+                # the queue is dropped (the boot never waits for the list), but not its failures
+                for (q = global.q_head; q < global.q_tail; q++) {
+                    if (!global.q_dead[q] && global.q_status[q] == "fail") line_now(global.q_label[q], global.q_unit[q], "fail");
+                }
+                global.q_head = global.q_tail;
+                item_hide(global.cursor);
+            }
+        } else if (len > 11 && text.SubString(0, 11) == "yorha:fail:") {
+            fail_unit(text.SubString(11, len));
+        }
+        return;
+    }
+    if (!global.exiting && len > 0) enqueue(text, "", "", 0);
+}
+Plymouth.SetMessageFunction(message_cb);
+
+# ---- debug: the frame rate, once a second (config debug=on, lab only)
+dbg = -1;
+if (cfg_debug == "on") dbg = item_new(90, 0);
+dbg_t = -1;
+dbg_f = 0;
+
+fun debug_update () {
+    if (global.dbg_t < 0) {
+        global.dbg_t = global.t;
+        global.dbg_f = global.frame;
+        return;
+    }
+    if (global.t - global.dbg_t < 1) return;
+    fps = (global.frame - global.dbg_f) / (global.t - global.dbg_t);
+    s = "fps " + Math.Int(fps * 10) / 10 + "  t " + Math.Int(global.t * 10) / 10 + "  lines " + global.n_lines + "  queue " + (global.q_tail - global.q_head) + "  " + global.W + "x" + global.H;
+    img = Image.Text(s, 0.6, 0.9, 0.6, 1, font(18));
+    item_image(global.dbg, img, 20 * global.S, global.H - 40 * global.S);
+    global.dbg_t = global.t;
+    global.dbg_f = global.frame;
+}
+
+# ---- every frame
+enqueue("Kernel loaded", "", "ok", 0);
+
+fun refresh_cb () {
+    tick();
+    t = global.t;
+    e = t - global.t0;
+    ring_update();
+    header_dots();
+    list_update();
+    if (global.EFFECTS && e >= 1.0) effects_update(global.t0 + 1.0);
+    # the overlay: fade in from black (~1 s, linear), the exit in steps of 3 game frames, the flicker
+    scene = Math.Min(1, e / 1.0);
+    if (global.exiting) {
+        x = t - global.exit_t0;
+        if (x >= global.EXIT_DUR) scene = 0;
+        else scene = scene * (0.9 - 0.8 * (Math.Int(x / (3 * global.GFRAME)) * 3 * global.GFRAME) / global.EXIT_DUR);
+    }
+    fl = 0;
+    if (t < global.flick_until) fl = global.flick_a;
+    op = 1 - scene * (1 - fl);
+    if (op != global.overlay_op) {
+        global.overlay_op = op;
+        global.overlay.SetOpacity(op);
+    }
+    if (global.dbg >= 0) debug_update();
+}
+Plymouth.SetRefreshFunction(refresh_cb);
+
+}

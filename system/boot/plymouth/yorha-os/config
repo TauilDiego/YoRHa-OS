@@ -1,0 +1,9 @@
+# Options of the YoRHa-OS boot screen (contracts/plymouth-theme.md); the first value is the default.
+# The Plymouth script can't read files, so gen/embed-stages.py copies these values into
+# yorha-os.script: run it after a change, then rebuild the initramfs.
+#   exit     fast = the list fades out in 0.4 s | game = the game's 0.9 s (costs 0.5 s of boot)
+#   effects  full | calm = no interference bands, tear or flicker (reduced motion)
+#   debug    off | on = a frame-rate counter in the corner (lab only)
+exit=fast
+effects=full
+debug=off
