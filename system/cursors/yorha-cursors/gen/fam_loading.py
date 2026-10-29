@@ -1,12 +1,12 @@
 """Loading cursors: NieR Cursors' own frames (Beinsezii, MIT), which render the game's loading ring
-from Blender, recolored to the rien-OS palette. Everything else stays theirs: 90 frames at 60 fps,
+from Blender, recolored to the YoRHa-OS palette. Everything else stays theirs: 90 frames at 60 fps,
 the eight sizes, every alpha value. Only the color changes, through a lightness ramp from their
 brown tones to the style's palette.
 
 Cursor_Loading keeps our ship and puts their small ring over it, where they put it.
 
 The frames come from their release (upstream.lock); build.sh fetches it and points
-RIEN_UPSTREAM at the unpacked theme. Needs Pillow and numpy.
+YORHA_UPSTREAM at the unpacked theme. Needs Pillow and numpy.
 """
 import os
 import struct
@@ -47,7 +47,7 @@ _DST_L = (_luma(_rgb(CORE_RING)), _luma(_rgb(CORE)), SRC_L[2], SRC_L[3])
 
 
 def recolor(rgba):
-    """RGBA uint8 array (straight alpha) → the same pixels in the rien-OS palette."""
+    """RGBA uint8 array (straight alpha) → the same pixels in the YoRHa-OS palette."""
     out = rgba.copy()
     lum = np.interp(_luma(rgba[..., :3].astype(float)), SRC_L, _DST_L)
     for ch in range(3):
@@ -74,9 +74,9 @@ def read_xcursor(path):
 
 
 def _upstream(name):
-    root = os.environ.get("RIEN_UPSTREAM")
+    root = os.environ.get("YORHA_UPSTREAM")
     if not root:
-        raise RuntimeError("RIEN_UPSTREAM is not set (build.sh fetches NieR Cursors per upstream.lock)")
+        raise RuntimeError("YORHA_UPSTREAM is not set (build.sh fetches NieR Cursors per upstream.lock)")
     return read_xcursor(os.path.join(root, "nier", name))
 
 
@@ -97,7 +97,7 @@ def _ship(size):
     import tempfile
     import ship
     from style import Canvas
-    c = Canvas("rien-OS cursor (Cursor_Loading).")
+    c = Canvas("YoRHa-OS cursor (Cursor_Loading).")
     ship.draw(c, "up_left")
     with tempfile.TemporaryDirectory() as tmp:
         svg, png = os.path.join(tmp, "s.svg"), os.path.join(tmp, "s.png")

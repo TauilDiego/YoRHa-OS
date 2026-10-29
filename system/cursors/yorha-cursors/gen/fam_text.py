@@ -2,7 +2,7 @@
 cores, like the original's dots."""
 from style import Canvas, rotate_about
 
-ATTRIBUTION = "rien-OS cursor ({}). Shapes after NieR Cursors by Beinsezii (MIT)."
+ATTRIBUTION = "YoRHa-OS cursor ({}). Shapes after NieR Cursors by Beinsezii (MIT)."
 
 
 def _ibeam(name, deg):

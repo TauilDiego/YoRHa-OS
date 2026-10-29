@@ -8,7 +8,7 @@ same heads. The hotspot of every shape here is the center (64, 64), where the do
 from style import (Canvas, DEPTH, DETAIL_W, LIGHT, OUTLINE, SIDE_BOTTOM, SIDE_RIGHT, pts_path,
                    rotate_about, fmt)
 
-ATTRIBUTION = "rien-OS cursor ({}). Shapes after NieR Cursors by Beinsezii (MIT)."
+ATTRIBUTION = "YoRHa-OS cursor ({}). Shapes after NieR Cursors by Beinsezii (MIT)."
 
 # --- head geometry (128-grid px) ---------------------------------------------------------------
 EDGE_TIP = 6.4          # side heads: distance from the tip to the grid edge (= the tee hotspots)

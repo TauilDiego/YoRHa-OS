@@ -11,7 +11,7 @@ adicionar um seletor [...] a minha ideia é fazer um sistema próprio pra contro
 [...] a ideia é que fique o mais fiel ao fundo do jogo. que não tem esse 'quadriculado' que a gente
 adicionou". Decisões tomadas no mockup aprovado
 (https://claude.ai/artifact/UW66HpHwKmEshV1CeJmWke; cópia em
-`rien-OS-private/lab/mockups/papel-de-parede/index.html`):
+`YoRHa-OS-private/lab/mockups/papel-de-parede/index.html`):
 - **fundo:** cena "Menu", sem grid e sem grão;
 - **transição:** uma opção do usuário; de fábrica, a camuflagem (célula 24 px, rastro longo, falhas visíveis);
 - **primeiro corte:** as quatro cenas e as imagens da pasta do usuário;

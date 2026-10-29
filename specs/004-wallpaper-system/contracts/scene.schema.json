@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/TauilDiego/rien-OS/specs/004-wallpaper-system/contracts/scene.schema.json",
-  "title": "rien-OS wallpaper scene (shell/wallpaper/scenes/<id>.json)",
+  "$id": "https://github.com/TauilDiego/YoRHa-OS/specs/004-wallpaper-system/contracts/scene.schema.json",
+  "title": "YoRHa-OS wallpaper scene (shell/wallpaper/scenes/<id>.json)",
   "description": "Parameters of a procedural scene. The geometry of the arcs and beams lives in the Scene component (the measured layout); a scene only switches layers, colors and motion.",
   "type": "object",
   "required": ["name", "description", "kind", "paper", "layers", "lineAlpha", "motion"],

@@ -7,7 +7,7 @@ import random
 import ship
 from style import Canvas
 
-ATTRIBUTION = "rien-OS cursor ({}). Shapes after NieR Cursors by Beinsezii (MIT); the ship from NieR:Automata's hacking game."
+ATTRIBUTION = "YoRHa-OS cursor ({}). Shapes after NieR Cursors by Beinsezii (MIT); the ship from NieR:Automata's hacking game."
 
 
 def _ship(direction, name):

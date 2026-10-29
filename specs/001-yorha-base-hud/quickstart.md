@@ -1,13 +1,13 @@
 # Quickstart: validar o U1 no laboratório
 
 Este é o roteiro que prova cada critério de sucesso com evidência da VM (princípio IV). Tudo
-roda no ambiente privado (`rien-OS-private/lab`) e **dentro de uma sessão de medição**. Nada
+roda no ambiente privado (`YoRHa-OS-private/lab`) e **dentro de uma sessão de medição**. Nada
 disso roda na máquina do dono.
 
 ## Preparação
 
 ```sh
-cd ~/projects/rien-OS-private
+cd ~/projects/YoRHa-OS-private
 lab/perf begin "U1: validação do HUD" --kind u1-validacao --task 001
 lab/up dev
 lab/sync --env NIER_FIXTURES=~/nier/ui/fixtures/hud-default.json   # manda shell/ + liga as fixtures
@@ -45,7 +45,7 @@ lab/down
 lab/perf end --result pass --note "U1 validado"
 ```
 
-O relatório (custo no host + guest + screenshots com hash) vai pro `rien-OS-relatorios`. Os
+O relatório (custo no host + guest + screenshots com hash) vai pro `YoRHa-OS-relatorios`. Os
 screenshots e o `dump` são a evidência pra revisão do dono (SC-006, aprovado em 2026-10-27).
 
 Os cenários 1–5, 7, 8, 10 e o lint estão automatizados em `lab/check-u1` (repositório privado).

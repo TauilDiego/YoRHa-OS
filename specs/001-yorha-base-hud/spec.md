@@ -7,7 +7,7 @@
 **Status**: Aprovada pelo dono em 2026-10-27 (alinhada com o design system em `docs/design-system.md`).
 Visual aprovado pelo dono (SC-006) em 2026-10-27. Revisões do mesmo dia registradas no T039.
 
-**Input**: User description: "U1 — Base visual: design system YoRHa (inspirado na UI de NieR:Automata) e o HUD (barra do topo) da UI rien-OS, rodando no Quickshell dentro da VM do laboratório. Design system: paleta papel/tinta (#D1CDB7 fundo, #BAB5A1 fraco, #DCD8C0 claro, #454138 tinta, um vermelho só pra alerta), grid fino no fundo, quadrado como marcador, item de menu que pinta da esquerda pra direita com trilhos acima/abaixo e sombra deslocada, cursor que balança, títulos em caixa alta com sombra, painel com faixa de cabeçalho escura, medidor estilo barra de HP, linha dupla. HUD: barra no topo com workspaces como abas do menu de pausa (01, 02...; ativo invertido, vazios apagados, clique troca), telemetria CPU/MEM/VOL/BAT com medidores, relógio e data, título da janela ativa. Os dados vêm de serviços que aceitam fixtures (relógio fixo, bateria 87%, etc.) pra screenshots determinísticos. Sem blur. Verificação por screenshot no lab."
+**Input**: User description: "U1 — Base visual: design system YoRHa (inspirado na UI de NieR:Automata) e o HUD (barra do topo) da UI YoRHa-OS, rodando no Quickshell dentro da VM do laboratório. Design system: paleta papel/tinta (#D1CDB7 fundo, #BAB5A1 fraco, #DCD8C0 claro, #454138 tinta, um vermelho só pra alerta), grid fino no fundo, quadrado como marcador, item de menu que pinta da esquerda pra direita com trilhos acima/abaixo e sombra deslocada, cursor que balança, títulos em caixa alta com sombra, painel com faixa de cabeçalho escura, medidor estilo barra de HP, linha dupla. HUD: barra no topo com workspaces como abas do menu de pausa (01, 02...; ativo invertido, vazios apagados, clique troca), telemetria CPU/MEM/VOL/BAT com medidores, relógio e data, título da janela ativa. Os dados vêm de serviços que aceitam fixtures (relógio fixo, bateria 87%, etc.) pra screenshots determinísticos. Sem blur. Verificação por screenshot no lab."
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -213,7 +213,7 @@ com dados de teste, dois screenshots seguidos saem iguais.
   régua pontilhada embaixo, na escala do jogo (revisado pelo dono em 2026-10-27: era 40px, com
   vão de ≈2px e régua bem menor).
 - **FR-010**: O HUD MUST mostrar, da esquerda pra direita:
-  1. a marca do sistema: as duas faixas verticais do jogo, sem nome nem logo (o nome rien-OS não
+  1. a marca do sistema: as duas faixas verticais do jogo, sem nome nem logo (o nome YoRHa-OS não
      aparece no HUD; fica pros menus);
   2. as abas de workspace;
   3. o título da janela ativa (centralizado);
