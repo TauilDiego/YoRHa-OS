@@ -44,7 +44,7 @@ Rectangle {
     }
 
     component Host: Column {
-        id: host
+        id: hostCol
         property string name
         property string kind
         property real bodyH
@@ -52,11 +52,11 @@ Rectangle {
         Label {
             s: root.s
             role: "small"
-            text: host.name
+            text: hostCol.name
         }
         Rectangle {
             width: root.u(Tokens.space.popupW * root.k)
-            height: root.u(host.bodyH * root.k)
+            height: root.u(hostCol.bodyH * root.k)
             color: Tokens.color.lightYellow
             border.width: Tokens.line(1, root.s)
             border.color: Tokens.color.darkGray
@@ -65,7 +65,7 @@ Rectangle {
                 anchors.fill: parent
                 s: root.s * root.k
                 dpr: root.dpr
-                host: host.kind
+                host: hostCol.kind
                 focus: false
                 active: false
             }
