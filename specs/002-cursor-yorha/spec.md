@@ -42,12 +42,12 @@ aba da barra e dentro do texto do kitty, em 1080p e no perfil hidpi.
 
 ## Requirements *(mandatory)*
 
-- **FR-001**: O tema de cursor padrão MUST ser o **rien-OS Cursors**, com os **39 formatos** do
+- **FR-001**: O tema de cursor padrão MUST ser o **YoRHa-OS Cursors**, com os **39 formatos** do
   NieR Cursors de Beinsezii (MIT), os mesmos aliases e hotspots do original, e o Adwaita de
   reserva pro que faltar. 37 formatos são desenho próprio, vetorial (SVG). Os dois de carregamento
   seguem a FR-007.
 - **FR-002**: O estilo MUST ser o aprovado pelo dono na seta (2026-10-27), aplicado a todos os
-  formatos por um módulo único (`system/cursors/rien-cursors/gen/style.py`):
+  formatos por um módulo único (`system/cursors/yorha-cursors/gen/style.py`):
   - **forma:** a nave do minigame de hacking do jogo, inclinada pra cima e pra esquerda, com a
     traseira em 75% do comprimento do jogo;
   - **placas:** claras, com chanfro (luz de cima e da esquerda) e contorno de tinta;
@@ -61,7 +61,7 @@ aba da barra e dentro do texto do kitty, em 1080p e no perfil hidpi.
   (`system/cursors/defaults.conf`).
 - **FR-004**: Os fontes (geradores Python + SVG) MUST ficar no repositório, pequenos; o tema é
   montado por `system/cursors/build.sh` num container. O único download é o release do NieR
-  Cursors pra FR-007, conferido pelo sha256 de `rien-cursors/upstream.lock`.
+  Cursors pra FR-007, conferido pelo sha256 de `yorha-cursors/upstream.lock`.
 - **FR-005**: O crédito ao Beinsezii (MIT) MUST ficar em `CREDITS.md` e no `NOTICE` instalado
   junto do tema.
 - **FR-006**: Os formatos animados (espera, progresso, proibido) MUST manter a animação no
@@ -75,13 +75,13 @@ aba da barra e dentro do texto do kitty, em 1080p e no perfil hidpi.
     cima, na posição e no tamanho dela. A borda de fora do círculo, onde a seta e o losango dela
     passavam por baixo, é refeita a partir do lado limpo dessa mesma borda.
   - **Formato:** os dois são raster (PNG por tamanho), não vetoriais
-    (`system/cursors/rien-cursors/gen/fam_loading.py`).
+    (`system/cursors/yorha-cursors/gen/fam_loading.py`).
 
 ## Success Criteria *(mandatory)*
 
 - **SC-001**: Screenshots na VM mostram a seta sobre o papel e sobre o kitty, a mão sobre uma
   aba da barra e o I de texto no kitty, nas duas escalas.
-- **SC-002**: O tema ativo na VM é `rien_cursors` (hyprcursor), sem erros de cursor no log do
+- **SC-002**: O tema ativo na VM é `yorha_cursors` (hyprcursor), sem erros de cursor no log do
   Hyprland.
 - **SC-003**: A folha de contato mostra os 39 formatos ao lado dos originais, legíveis em 48 px
   sobre o papel e sobre o terminal.

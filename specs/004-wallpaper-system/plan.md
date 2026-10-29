@@ -51,8 +51,8 @@ Toda a verificação fica no laboratório privado, dentro de `lab/perf`. O labor
 
 **Storage**:
 - `shell/config/defaults.json` (gerenciado: pasta, transição de fábrica, `reduceMotion`);
-- `$XDG_CONFIG_HOME/rien-os/shell.json` (do usuário, só lido);
-- `$XDG_STATE_HOME/rien-os/wallpaper.json` (estado: escolha por monitor, transição, filtros
+- `$XDG_CONFIG_HOME/yorha-os/shell.json` (do usuário, só lido);
+- `$XDG_STATE_HOME/yorha-os/wallpaper.json` (estado: escolha por monitor, transição, filtros
   desligados);
 - `shell/wallpaper/scenes/*.json` (as cenas de fábrica);
 - `shell/fixtures/wallpapers/` (imagens de teste).
@@ -130,7 +130,7 @@ specs/004-wallpaper-system/
 │   ├── services.md      # WallpaperCatalog, WallpaperStore e acréscimos em Settings/Compositor/Fixtures
 │   ├── ipc.md           # alvo `wallpaper` estendido
 │   ├── scene.schema.json  # formato de uma cena (shell/wallpaper/scenes/*.json)
-│   └── state.schema.json  # formato do estado ($XDG_STATE_HOME/rien-os/wallpaper.json)
+│   └── state.schema.json  # formato do estado ($XDG_STATE_HOME/yorha-os/wallpaper.json)
 ├── checklists/requirements.md
 └── tasks.md             # /speckit-tasks
 ```
@@ -167,7 +167,7 @@ shell/
     ├── wallpaper-default.json   # domínio `wallpaper`: pasta de teste, escolha, transição
     └── wallpapers/              # ruins.jpg, dunes.png, "parede 'teste' #1 (larga).png", quebrada.jpg (gerados)
 
-rien-OS-private/lab/             # (privado)
+YoRHa-OS-private/lab/             # (privado)
 ├── guest/hyprland.lua           # ALT + W → ipc call wallpaper picker toggle
 ├── sync                         # depois do rsync, roda shell/shaders/build.sh na VM se algum .frag mudou
 ├── check-004                    # roteiro do quickstart (cores, grid, teclas, rajadas, estado)

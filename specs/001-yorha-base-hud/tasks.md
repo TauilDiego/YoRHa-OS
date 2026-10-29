@@ -11,9 +11,9 @@ description: "Tarefas do U1: base visual YoRHa e HUD"
 de `lab/perf begin/end`.
 
 **Caminhos**:
-- `shell/…` = repositório público `nier-os`;
-- `lab/…` = repositório privado `rien-OS-private`, irmão do público
-  (`~/projects/rien-OS-private/lab/`).
+- `shell/…` = repositório público `YoRHa-OS`;
+- `lab/…` = repositório privado `YoRHa-OS-private`, irmão do público
+  (`~/projects/YoRHa-OS-private/lab/`).
 
 ## Formato: `[ID] [P?] [Story] Descrição`
 
@@ -48,7 +48,7 @@ agentes paralelos, e criar o esqueleto do `shell/`.
 - [x] T009 Baixar a M PLUS 1 variável (`MPLUS1[wght].ttf`) e o `OFL.txt` do repositório `google/fonts` (`ofl/mplus1/`) para `shell/assets/fonts/`, e acrescentar o crédito em `CREDITS.md`
 - [x] T010 Criar `shell/ds/Tokens.qml` (singleton) com os grupos `color`, `type`, `shadow`, `space`, `motion` e `vignette` do data-model.md, mais as funções `line(v, s)` ("≥ 1 e inteiro") e `px(v, s)`. Carrega a fonte por `FontLoader`, usa "FOT-Rodin ProN"/"Helvetica Now Micro" quando estiverem em `Qt.fontFamilies()`, e `Tokens.frozen` (antes `motion.frozen`) segue `Fixtures.active`, definido pelo `shell.qml`. Também guarda `monitorScales` e as funções `snap`/`hair`/`scaleOf` (T048)
 - [x] T011 [P] Criar `shell/strings/Strings.qml` (singleton): `CPU`, `MEM`, `VOL`, `BAT`, `SYSTEM` e os nomes da galeria, todos em inglês (FR-018)
-- [x] T012 [P] Criar `shell/config/defaults.json` (hoje: `uiScale` 1, `barHeight` 68, `vignette` true, `wallpaperMotion` true; no U1 era `barHeight` 40) e `shell/services/Settings.qml` (singleton, `FileView` + `JSON.parse`), que sobrescreve com `$XDG_CONFIG_HOME/rien-os/shell.json`. Validação do data-model: `uiScale` "0,5–3,0, fora usa o padrão e registra um aviso"; `barHeight` "limitado a 28–96" (era 28–48)
+- [x] T012 [P] Criar `shell/config/defaults.json` (hoje: `uiScale` 1, `barHeight` 68, `vignette` true, `wallpaperMotion` true; no U1 era `barHeight` 40) e `shell/services/Settings.qml` (singleton, `FileView` + `JSON.parse`), que sobrescreve com `$XDG_CONFIG_HOME/yorha-os/shell.json`. Validação do data-model: `uiScale` "0,5–3,0, fora usa o padrão e registra um aviso"; `barHeight` "limitado a 28–96" (era 28–48)
 - [x] T013 [P] Criar `shell/services/Fixtures.qml` (singleton): lê o JSON de `NIER_FIXTURES` (`Quickshell.env`), expõe `active`, `source`, `data`, `load(path)` e `clear()`; um domínio ausente fica `undefined` (contracts/fixtures.schema.json)
 - [x] T014 [P] Criar as fixtures em `shell/fixtures/`: `hud-default.json` (workspaces 1–3 com o 2 em foco, CPU 23, MEM 41, VOL 64, BAT 87, "kitty — ~/projetos", 2026-10-26T13:37:00), `hud-live-ws.json` (igual, sem `workspaces`), `battery-low.json`, `no-battery.json`, `muted.json`, `long-title.json` e `no-window.json`
 - [x] T015 Criar `shell/shell.qml`: `ShellRoot` com os `IpcHandler` `gallery` (`open`, `close`, `toggle`, `isOpen`), `fixtures` (`load`, `clear`) e `hud` (`dump`), conforme contracts/ipc.md. `dump` devolve `[]` até a US1
@@ -123,7 +123,7 @@ screenshots iguais; `lab/perf` com e sem movimento.
 
 - [x] T041 [US4] Spec (História 4, FR-019–FR-021, SC-009/SC-010), design system §2/§5 e contratos atualizados
 - [x] T042 [US4] `shell/ds/primitives/PaperDecor.qml`: arcos e feixes desenhados uma vez num Canvas (linhas na grade física), `phase` 0–1 movendo as camadas por transformação, sem repintar
-- [x] T043 [US4] `shell/wallpaper/Wallpaper.qml`: `PanelWindow` por monitor na camada Background (namespace `rien-wallpaper`), `GridBackground` + `PaperDecor` + `Vignette`; `Timer` de 10 passos/s parado com `Tokens.frozen` ou `Settings.wallpaperMotion: false`
+- [x] T043 [US4] `shell/wallpaper/Wallpaper.qml`: `PanelWindow` por monitor na camada Background (namespace `yorha-wallpaper`), `GridBackground` + `PaperDecor` + `Vignette`; `Timer` de 10 passos/s parado com `Tokens.frozen` ou `Settings.wallpaperMotion: false`
 - [x] T044 [US4] `Settings.wallpaperMotion` (padrão true), `Variants` no `shell.qml` e IPC `wallpaper` (`motion(on)`, `isMoving()`)
 - [x] T045 [US4] `lab/check-u1`: SC-009 (workspace vazio + dois screenshots iguais)
 - [x] T046 [US4] Validar no lab: check-u1 completo, hidpi nítido, e duas sessões `lab/perf` de 60 s (com e sem movimento) pro SC-010
@@ -143,7 +143,7 @@ screenshots iguais; `lab/perf` com e sem movimento.
 ## Phase 8: Revisões do dono depois da noite (2026-10-27)
 
 **Purpose**: registrar as mudanças pedidas pelo dono depois do relatório da noite. Cada uma tem
-commit e sessão `lab/perf` (relatórios em `~/projects/rien-OS-relatorios/runs/`).
+commit e sessão `lab/perf` (relatórios em `~/projects/YoRHa-OS-relatorios/runs/`).
 
 - [x] T047 [US1] Abas da barra sem o seletor no HUD (`showSelector: false`); `hud dump` ganha `x`/`w` por aba. Commit `0679ff7`; sessão `2026-10-27T020713-vm-teste-c-u1-abas-da-barra-sem-seletor`
 - [x] T048 Régua nítida no hidpi (marcas na grade física, `Tokens.snap`/`hair` com a escala do `Compositor`) e recarga sem erro na barra. Commit `60e5262`; sessão `2026-10-27T032945-vm-teste-b-regua-nitida-no-hidpi-reload-sem-referen`
@@ -181,5 +181,5 @@ Depois das peças:
 
 1. **MVP = US1:** Setup + Foundational + US1 já entregam a barra completa, com evidência.
 2. Depois US2 (interação) e US3 (galeria). As duas podem correr em paralelo depois do MVP.
-3. Cada fase termina com evidência no lab e relatório no `rien-OS-relatorios`. Nenhuma tarefa é
+3. Cada fase termina com evidência no lab e relatório no `YoRHa-OS-relatorios`. Nenhuma tarefa é
    marcada `[x]` sem prova.
