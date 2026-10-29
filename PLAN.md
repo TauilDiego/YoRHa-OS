@@ -147,7 +147,7 @@ Serpantinum.
 | U0 Laboratório | Ambiente de testes privado (VM + containers), com sync e screenshot | Uma mudança em `shell/` aparece no ambiente de testes em segundos, com screenshot como prova |
 | U1 Base visual | Design system (tokens, componentes, shaders), fixtures e HUD | Screenshot do HUD com dados de teste |
 | U2 Estudo de instalação | Métodos A–D comparados, com o HUD como carga (8.4) | `docs/estudo-instalacao.md` escrito e método escolhido |
-| U3 Menu de pausa | Launcher, janelas, energia | Screenshot de cada aba |
+| U3 Menu de pausa ✅ | Launcher, janelas, energia | Screenshot de cada aba |
 | U4 Pod e text log | Notificações e OSD | Uma notificação de teste vira transmissão do Pod |
 | U5 Lock e polkit | Tela de bloqueio (PAM) e agente de polkit, testados de verdade na VM | Bloquear, desbloquear e autorizar uma ação funcionam na VM |
 | U5a Boot e login | Splash de boot no Plymouth e tela de login com a UI NieR: tema QML do SDDM ou um greeter em Quickshell (a escolha sai da spec). O bootloader continua o systemd-boot, escolha do dono, então o menu dele não ganha tema | Na VM, um reboot mostra o splash e cai na tela de login nova (screenshots dos dois, do boot até o login); entrar com senha certa abre o Hyprland e com senha errada mostra o erro; o log do boot fica sem erro do tema |
