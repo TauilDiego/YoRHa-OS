@@ -230,7 +230,8 @@ e ver que continua fixado.
   quadro, em vez de quebrar; as outras abas funcionam; o log registra.
 - **Tela pequena ou escala alta:** o painel encolhe junto (fração da tela, como a 003); os textos
   cortam com reticências sem vazar das colunas; a lista rola em linhas inteiras, com a pipa sempre
-  visível.
+  visível: a primeira e a última linha à vista nunca ficam cortadas, pelo teclado ou pela roda do
+  mouse (a roda rola uma linha por passo, só quando a lista não cabe; decisão do dono, 28.10, T043).
 - **Movimento reduzido ou fixtures ativas:** nada anima (fade, varredura, blink, haste da aba).
 - **Opção do menu mudada em SYSTEM com o menu aberto:** vale na hora, sem fechar nem reabrir (ex.:
   o estilo dos ícones muda a prévia de APPS assim que o usuário volta pra aba).
@@ -300,7 +301,8 @@ e ver que continua fixado.
     fica sempre o quadrado do jogo;
   - **opções** (`Card` com `OptionRow`): `Open` (ação), as ações próprias do app (ação, uma por
     linha), `Workspace ◂ Current ▸` (escolha: a atual ou 01–10, onde o app abre) e `Pinned ◂ ON ▸`
-    (liga/desliga); embaixo, as informações `CATEGORY`, `COMMAND` e `WINDOWS`.
+    (liga/desliga); embaixo, as informações `CATEGORY`, `COMMAND` e `WINDOWS`. Na busca sem
+    resultado, o card de opções some, como no mockup (decisão do dono, 28.10, T043).
 - **FR-010**: Com o foco em APPS, toda letra, número ou símbolo digitado MUST ir pra busca, que
   aparece no alto da coluna (`SEARCH` + a consulta + `N RESULTS`) no lugar dos grupos. A busca não
   diferencia maiúsculas nem acentos e procura no nome, no nome genérico, nas palavras-chave e no
@@ -465,8 +467,8 @@ e ver que continua fixado.
 Cada critério diz qual evidência da VM o comprova (constituição IV).
 
 - **SC-001** ("pronto quando" do PLAN): com dados de teste, um screenshot de cada uma das 4 abas,
-  do diálogo de `Shut down` e da busca de APPS com resultado e sem resultado (6 telas), em
-  1920x1080 @1 e em 2560x1600 @1,25. Evidência: os 12 screenshots e o estado exportado de cada um.
+  do diálogo de `Shut down` e da busca de APPS com resultado e sem resultado (7 telas), em
+  1920x1080 @1 e em 2560x1600 @1,25. Evidência: os 14 screenshots e o estado exportado de cada um.
 - **SC-002**: com fixtures, dois screenshots seguidos de cada aba são idênticos (0 px de diferença).
   Evidência: os screenshots e a diferença.
 - **SC-003**: do desktop até um app aberto, por teclas reais enviadas à VM, bastam no máximo 5

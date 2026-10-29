@@ -180,7 +180,7 @@ specs/007-menu-de-pausa/
 shell/
 ├── shell.qml                    # LazyLoader → PauseMenu (no lugar do SettingsPopup); IpcHandler `pause`; `settings` vira alias; um popup por vez
 ├── pause/                       # novo
-│   ├── PauseMenu.qml            # PopupWindow com abas, Loaders por aba, Tab/Shift+Tab, texto → APPS, dump
+│   ├── PauseMenu.qml            # PopupWindow com abas, as 4 páginas criadas com o menu (R1 revisto na T016), Tab/Shift+Tab, texto → APPS, dump
 │   ├── AppsPage.qml             # PickerLayout + prévia (AppIcon) + opções do app + busca
 │   ├── WindowsPage.qml          # PickerLayout + WorkspaceMap + ações da janela
 │   └── PowerPage.qml            # GroupedList + DescriptionCard + StatusCard + ConfirmDialog

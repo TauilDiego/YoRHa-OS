@@ -7,7 +7,7 @@ description: "Tarefas da 007: menu de pausa (U3)"
 **Input**: `specs/007-menu-de-pausa/` (plan.md, spec.md, research.md, data-model.md, contracts/,
 quickstart.md)
 
-**Status**: plano e tarefas aprovados pelo dono (27.10; a T012a em 28.10). Fases 1–3 em andamento na `007-menu-de-pausa`; as frentes A, B e C saem depois da T022.
+**Status**: plano e tarefas aprovados pelo dono (27.10; a T012a em 28.10). Fases 1–8 feitas na `007-menu-de-pausa` (as frentes A, B e C juntadas na T043, 28.10); falta a aprovação do dono (SC-012).
 
 **Decisões do dono (28.10, depois da T022):** aceitas as quatro do agente: a altura das páginas é `startY` (o Qt recusa `top`); as quatro páginas são criadas junto com o menu; os ícones de teste de APPS são coloridos, pra o SC-013 provar a troca de estilo; a fixture de hibernação é `na`.
 
@@ -18,7 +18,7 @@ QML sem erro, sempre dentro de `lab/perf begin/end`.
 **Caminhos**:
 - `shell/…`, `specs/…`, `docs/…` = repositório público `nier-os`;
 - `lab/…` = repositório privado `rien-OS-private`, branch `lab-007`
-  (`~/projects/rien-OS-private-wt/lab007/lab/`).
+  (`~/projects/nier-os-project/rien-OS-private-wt/lab-007/lab/`; a T001 a criou como `lab007`, o caminho de hoje é este).
 
 **VMs:** no máximo 4 ao mesmo tempo, cada uma com `NIER_LAB_CPUS=2 NIER_LAB_MEM=4G` (limite do
 dono). O contrato e a US1 usam a `teste-a`; as frentes usam `teste-a`, `teste-b` e `teste-c`. Se
@@ -220,7 +220,12 @@ a POWER continua com as colunas próprias (o card da direita é o `StatusCard`, 
 três ajustes a mais na `PickerLayout` pra uma página só); (3) o `lab/README.md` documenta os
 ajudantes do `check-007` e a lição do `pkill -f` dentro do `lab/ssh`; o `lab/click` ganhou a roda;
 (4) o lembrete da S3 (criar `~/.local/share/applications/` antes de subir o shell) está no `PLAN.md`
-e nas premissas da `spec.md`.
+e nas premissas da `spec.md`. (5) Depois da aprovação do dono ("Seguir e corrigir a última
+linha", 28.10): a última linha à vista também fica inteira (a janela da lista termina embaixo da
+última linha que cabe), conferida no `check-007` (`scroll.cutBottom`) em APPS e WINDOWS com
+`pause-long`; `lab/perf` `2026-10-28T232150-vm-teste-a-007-t043-ultima-linha-inteira-desenvolvi`
+(`check-007 --only apps,windows` 23/0; `check-004` 58/0, só `us2-filtro-off` e `us2-video` mudam,
+pelo corte).
 
 **Evidência da T043 (28.10, `teste-a`/`teste-b`/`teste-c`, 2 núcleos, 4 GB):** `lab/perf`
 `2026-10-28T215058-vm-teste-a-007-t043-desenvolvimento-rolagem-e-optio` (desenvolvimento: `check-007
@@ -237,11 +242,39 @@ dele; `check-004`: a lista do seletor a 0 px em todos os shots sem rolagem, e os
 (`us2-filtro-off`, `us2-video`) passaram a mostrar a lista a partir de `Menu` inteiro, em vez do
 título `SCENES` cortado ao meio (é a correção); o resto da diferença está no fundo animado e no
 cursor, fora da lista.
-- [ ] T044 `shell/gallery/Gallery.qml`: a página 4 (Tab três vezes), carregada só enquanto aparece, com as peças da seção "Galeria" do contracts/components.md
-- [ ] T045 `docs/design-system.md`: seção "§9 Menu de pausa (spec 007)" com a moldura com abas e a geometria do R12, as quatro páginas, os componentes novos (com os estados), os acréscimos em `PopupFrame`, `PickerLayout`, `GroupedList` e `SettingsPage`, as opções de `Pause menu`, as teclas e os comandos `pause`
-- [ ] T046 Validar tudo (`lab/perf begin "007: validação"`, `teste-a`): o `lab/check-007` inteiro nos dois perfis (cenários ⚙ 1–7, 9–13, 15 e 16 do quickstart), com a rajada do SC-008, o log e o `qmllint` do SC-010, o shot da galeria do SC-011 e o SC-013 completo; o `lab/check-003` e o `lab/check-004` sem regressão
-- [ ] T047 Imagem de revisão pro dono (SC-012): as 12 telas do cenário 1 e os 3 estilos de ícone, ao lado do mockup, e o `specs/007-menu-de-pausa/relatorio.md` com o resumo dos relatórios do `lab/perf`, os desvios e as pendências
-- [ ] T048 Rodar o `/speckit-analyze` e corrigir o que ele achar nos artefatos
+- [x] T044 `shell/gallery/Gallery.qml`: a página 4 (Tab três vezes), carregada só enquanto aparece, com as peças da seção "Galeria" do contracts/components.md
+- [x] T045 `docs/design-system.md`: seção "§9 Menu de pausa (spec 007)" com a moldura com abas e a geometria do R12, as quatro páginas, os componentes novos (com os estados), os acréscimos em `PopupFrame`, `PickerLayout`, `GroupedList` e `SettingsPage`, as opções de `Pause menu`, as teclas e os comandos `pause`
+- [x] T046 Validar tudo (`lab/perf begin "007: validação"`, `teste-a`): o `lab/check-007` inteiro nos dois perfis (cenários ⚙ 1–7, 9–13, 15 e 16 do quickstart), com a rajada do SC-008, o log e o `qmllint` do SC-010, o shot da galeria do SC-011 e o SC-013 completo; o `lab/check-003` e o `lab/check-004` sem regressão
+- [x] T047 Imagem de revisão pro dono (SC-012): as 14 telas do cenário 1 (7 por perfil; antes contadas como 12, corrigido na T048) e os 3 estilos de ícone, ao lado do mockup, e o `specs/007-menu-de-pausa/relatorio.md` com o resumo dos relatórios do `lab/perf`, os desvios e as pendências
+- [x] T048 Rodar o `/speckit-analyze` e corrigir o que ele achar nos artefatos
+
+**Evidência da fase 8 (28–29.10, `teste-a`/`teste-b`/`teste-c`, 2 núcleos, 4 GB):**
+- **T044:** `lab/perf` `2026-10-28T235012-vm-teste-a-007-t044-galeria-desenvolvimento` (bloco
+  `gallery` novo do `check-007`, 3/0 nos dois perfis); a página 4 cabe em 16:10. O contador da galeria
+  passou a 2/4, 3/4 e 4/4; o `check-004` volta da página 3 à 1 com Tab Tab. Shots
+  `out/007-t046-007-gallery/galeria-007-1080.png` e `galeria-007-hidpi.png`.
+- **T045:** `docs/design-system.md` §9 (moldura com abas e a geometria do R12, as quatro páginas, os
+  componentes novos com os estados, os acréscimos em `PopupFrame`, `PickerLayout`
+  (`optionsVisible`), `GroupedList` (linhas inteiras e roda) e `SettingsPage`, as opções, os atalhos
+  e os comandos `pause`), sem VM.
+- **T046:** `lab/perf` `2026-10-28T235337-vm-teste-a-007-validacao` (`check-007 --profile both`
+  71/1: o único FAIL foi o bloco `gallery` em hidpi, pelo desenho do ponteiro; o roteiro passou a
+  tirar o ponteiro do caminho), `2026-10-28T235337-vm-teste-b-007-validacao` (`check-u1` 15/0,
+  `check-004` 58/0), `2026-10-28T235417-vm-teste-c-007-validacao` (`check-003` 25/0 em 1080 e em
+  hidpi, `check-007 --only reboot` 3/0, `qmllint` na VM limpo) e
+  `2026-10-29T000458-vm-teste-a-007-validacao-galeria-sc-008-pause-broke` (`check-007 --only gallery`
+  3/0 nos dois perfis; a rajada do SC-008 à mão: no ↓ a pipa some e volta em ≤ 0,21 s, nenhum quadro
+  com pipa nas abas; `pause-broken`: erro curto em APPS, WINDOWS e POWER, SYSTEM anda). Log com 0
+  erros e 0 avisos de QML (só a linha `expected-warn`). A referência da 003 em hidpi passa a ser
+  `out/007-t046-003-hidpi`.
+- **T047:** `lab/perf` `2026-10-29T001018-container-teste-a-007-imagem-de-revisao-sc-012`:
+  `out/007-revisao-sc012.png` (o mockup renderizado no container `nier-lab-chromium` × VM 1080 × VM
+  hidpi nas 7 telas do cenário 1, e os 3 estilos de ícone) e `specs/007-menu-de-pausa/relatorio.md`.
+- **T048:** análise à mão pelo `/speckit-analyze` (sem violação da constituição; todas as FR e SC com
+  tarefa); corrigidos o SC-001 (7 telas, 14 shots), a FR-009 (card Options na busca sem resultado), o
+  caso de borda da rolagem, o `plan.md` (páginas criadas com o menu), o caminho e o status do
+  `tasks.md`, os cenários manuais do quickstart e o uso do `check-007`. Achados e perguntas no
+  `relatorio.md`.
 
 ---
 
