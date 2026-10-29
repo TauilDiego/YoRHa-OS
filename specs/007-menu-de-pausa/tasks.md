@@ -107,14 +107,21 @@ escolhido, opções do app, Enter abre e fecha o menu.
 **Independent Test**: com o catálogo de teste, as 10 consultas do SC-004 por `pause search`; com
 teclas reais, `ALT + Escape`, `k i t`, Enter abre um kitty de verdade em ≤ 2 s (SC-003).
 
-- [ ] T023 [P] [US2] `shell/services/appsearch.js` (`.pragma library`): `normalize`, `tier` e `rank` (research R5, FR-010), sem dependência de QML
-- [ ] T024 [P] [US2] `shell/shaders/duotone.frag` (GLSL 440, uniforms `ink` e `paper`, luminância → mistura × alfa) e `shell/ds/base/AppIcon.qml` com os estilos `ink`/`color`/`square`, o fallback em `MultiEffect` sem o `.qsb` (um aviso só) e o ícone genérico quando `source` está vazio. Conferir que o `lab/sync` compila o shader na VM sem aviso
-- [ ] T025 [P] [US2] `shell/services/Apps.qml`: `listed(order)` com `az`/`used`, `search` pela `appsearch.js`, `windowsOf` e as contagens pelo `Compositor.windows`, `setPinned` (em memória por enquanto), `launch` com os códigos de campo removidos, o terminal, a checagem do executável (`sh -c 'command -v -- "$1"' sh <argv0>`), a área de trabalho (`Compositor.focus` antes) e o `execDetached` (research R4), mais o `lastLaunch`
-- [ ] T026 [P] [US2] `shell/pause/AppsPage.qml`: a `PickerLayout` com a lista (grupos, ou o `SearchHeader` com os resultados, ou `No apps match.`), a prévia (`Card` com `mark`, `AppIcon` de 160 numa área `light-gray` de 512 × 288, a descrição), as opções (`Open`, as ações do app, `Workspace ◂ Current ▸`, `Pinned ◂ ON ▸`) e as informações (`CATEGORY`, `COMMAND`, `WINDOWS`); `type`/`backspace`/`clear`; o Esc da lista limpa a busca ou fecha; Enter/`Open` abre e fecha o menu; mudar `Pinned` move o app de grupo com a pipa junto (FR-013); rodapé e teclas da FR-014; `dumpState()`
-- [ ] T027 [P] [US2] As opções da frente A ao vivo: `iconStyle`, `order` e `runningApp` da `AppsPage` ligados a `SettingsModel.choiceId("menu", …)`; com `Go to window`, Enter num app com janela vai pra janela mais recente dele (`Compositor.focusWindow`, `lastAction.kind: window`)
-- [ ] T028 [P] [US2] Validar (`lab/perf begin "007: APPS"`, `teste-a`): bloco `apps` do `lab/check-007` com os cenários 3 (SC-003, kitty real com `pause-live.json`), 4 (SC-004, as 10 consultas), as telas de APPS e das duas buscas do cenário 1 nos dois perfis, a metade APPS do cenário 13 (3 estilos de ícone, a ordem, o app com janela) e as bordas de APPS do cenário 15 (comando inexistente com `WARN` e sem uso a mais, nomes longos, rolagem com `pause-long.json`)
+- [x] T023 [P] [US2] `shell/services/appsearch.js` (`.pragma library`): `normalize`, `tier` e `rank` (research R5, FR-010), sem dependência de QML
+- [x] T024 [P] [US2] `shell/shaders/duotone.frag` (GLSL 440, uniforms `ink` e `paper`, luminância → mistura × alfa) e `shell/ds/base/AppIcon.qml` com os estilos `ink`/`color`/`square`, o fallback em `MultiEffect` sem o `.qsb` (um aviso só) e o ícone genérico quando `source` está vazio. Conferir que o `lab/sync` compila o shader na VM sem aviso
+- [x] T025 [P] [US2] `shell/services/Apps.qml`: `listed(order)` com `az`/`used`, `search` pela `appsearch.js`, `windowsOf` e as contagens pelo `Compositor.windows`, `setPinned` (em memória por enquanto), `launch` com os códigos de campo removidos, o terminal, a checagem do executável (`sh -c 'command -v -- "$1"' sh <argv0>`), a área de trabalho (`Compositor.focus` antes) e o `execDetached` (research R4), mais o `lastLaunch`
+- [x] T026 [P] [US2] `shell/pause/AppsPage.qml`: a `PickerLayout` com a lista (grupos, ou o `SearchHeader` com os resultados, ou `No apps match.`), a prévia (`Card` com `mark`, `AppIcon` de 160 numa área `light-gray` de 512 × 288, a descrição), as opções (`Open`, as ações do app, `Workspace ◂ Current ▸`, `Pinned ◂ ON ▸`) e as informações (`CATEGORY`, `COMMAND`, `WINDOWS`); `type`/`backspace`/`clear`; o Esc da lista limpa a busca ou fecha; Enter/`Open` abre e fecha o menu; mudar `Pinned` move o app de grupo com a pipa junto (FR-013); rodapé e teclas da FR-014; `dumpState()`
+- [x] T027 [P] [US2] As opções da frente A ao vivo: `iconStyle`, `order` e `runningApp` da `AppsPage` ligados a `SettingsModel.choiceId("menu", …)`; com `Go to window`, Enter num app com janela vai pra janela mais recente dele (`Compositor.focusWindow`, `lastAction.kind: window`)
+- [x] T028 [P] [US2] Validar (`lab/perf begin "007: APPS"`, `teste-a`): bloco `apps` do `lab/check-007` com os cenários 3 (SC-003, kitty real com `pause-live.json`), 4 (SC-004, as 10 consultas), as telas de APPS e das duas buscas do cenário 1 nos dois perfis, a metade APPS do cenário 13 (3 estilos de ícone, a ordem, o app com janela) e as bordas de APPS do cenário 15 (comando inexistente com `WARN` e sem uso a mais, nomes longos, rolagem com `pause-long.json`)
 
 **Checkpoint**: o dono já pode usar o menu no lugar do launcher, com dados de teste.
+
+**Evidência da fase 4 (28.10, `teste-a`, 2 núcleos, 4 GB):** `lab/perf` `2026-10-28T211127-vm-teste-a-007-apps-desenvolvimento-t023-t027`
+(desenvolvimento) e `2026-10-28T211652-vm-teste-a-007-apps` (T028: `check-007 --only apps` 12/0 em
+1080 e hidpi, com o SC-003 em ≈0,3 s depois do Enter, as 10 consultas do SC-004, os 3 estilos de
+ícone do SC-013, o Delete fora da busca; o fallback do shader sem o `.qsb` com um aviso só; `qmllint`
+limpo). Também corrigido: o `PauseMenu` deixava o Delete (`\x7f`) e outros caracteres de controle
+irem pra busca.
 
 ---
 
@@ -162,12 +169,17 @@ acompanhando ao vivo.
 **Independent Test**: um `.desktop` novo aparece em ≤ 2 s com o menu aberto; um app fixado continua
 fixado depois de reiniciar o shell; janelas abrindo e fechando com o menu aberto (SC-009, US5).
 
-- [ ] T039 [P] [US5] Frente A, `shell/services/Apps.qml`, fonte real (research R4): `DesktopEntries.applications` (ids repetidos descartados), a categoria mapeada pras 8 do projeto, `Quickshell.iconPath(icon, true)` com o genérico da categoria quando falta, `runInTerminal`, `startupClass`, as ações, e a lista refeita no `applicationsChanged`
-- [ ] T040 [P] [US5] Frente A, estado dos apps (research R11): `$XDG_STATE_HOME/rien-os/apps.json` lido no início e gravado com `FileView` (`atomicWrites`) a cada fixar e a cada uso; arquivo ilegível começa vazio com uma linha no log; nada é gravado com a fixture `apps`; `~/.config` nunca é tocado
-- [ ] T041 [P] [US5] Frente A, validar (`lab/perf begin "007: APPS reais"`, `teste-a`): bloco `live` do `lab/check-007`, metade dos apps (cenário 10, SC-009: o `rien-test.desktop` em ≤ 2 s, o fixado depois de `pkill -x qs`, o `apps.json` na VM, `~/.config/rien-os/` intacto) e um shot de APPS com os apps reais da VM
+- [x] T039 [P] [US5] Frente A, `shell/services/Apps.qml`, fonte real (research R4): `DesktopEntries.applications` (ids repetidos descartados), a categoria mapeada pras 8 do projeto, `Quickshell.iconPath(icon, true)` com o genérico da categoria quando falta, `runInTerminal`, `startupClass`, as ações, e a lista refeita no `applicationsChanged`
+- [x] T040 [P] [US5] Frente A, estado dos apps (research R11): `$XDG_STATE_HOME/rien-os/apps.json` lido no início e gravado com `FileView` (`atomicWrites`) a cada fixar e a cada uso; arquivo ilegível começa vazio com uma linha no log; nada é gravado com a fixture `apps`; `~/.config` nunca é tocado
+- [x] T041 [P] [US5] Frente A, validar (`lab/perf begin "007: APPS reais"`, `teste-a`): bloco `live` do `lab/check-007`, metade dos apps (cenário 10, SC-009: o `rien-test.desktop` em ≤ 2 s, o fixado depois de `pkill -x qs`, o `apps.json` na VM, `~/.config/rien-os/` intacto) e um shot de APPS com os apps reais da VM
 - [ ] T042 [P] [US5] Frente B, validar (`lab/perf begin "007: WINDOWS ao vivo"`, `teste-b`): bloco `live`, metade das janelas (US5, cenário 2: com WINDOWS aberto, abrir e fechar janelas por `lab/ipc`, o `dump` acompanha em ≤ 1 s e a pipa fica no mesmo item ou vai pro vizinho; uma janela que muda de título)
 
 **Checkpoint**: o menu está pronto pra substituir o launcher do Serpantinum na U7.
+
+**Evidência da frente A na fase 7 (28.10, `teste-a`):** `lab/perf` `2026-10-28T212938-vm-teste-a-007-apps-reais-desenvolvimento-t039-t040`
+(desenvolvimento) e `2026-10-28T213342-vm-teste-a-007-apps-reais` (T041: `check-007 --only us1,apps,live`
+30/0: o `rien-test.desktop` em ≈0,3 s, fixado e usado continua depois do `pkill -x qs`, `apps.json`
+em `~/.local/state/rien-os/`, `~/.config/rien-os/` intacto; `qmllint` limpo).
 
 ---
 
