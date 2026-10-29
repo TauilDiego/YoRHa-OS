@@ -23,8 +23,11 @@ da camada visual (futuro) chama este módulo.
 
 ## O que ele cria
 
-- `/usr/share/yorha-os/login/` e `/usr/share/yorha-os/boot/`, com os links nas pastas de tema do
-  SDDM e do Plymouth;
+- `/usr/share/yorha-os/login/` e `/usr/share/yorha-os/boot/`. O SDDM chega no login por um link
+  (`/usr/share/sddm/themes/yorha-os`). O Plymouth recebe uma **cópia** gerenciada em
+  `/usr/share/plymouth/themes/yorha-os`, porque o hook do mkinitcpio 42 não segue link de pasta (a
+  frente C viu o tema sumir do initramfs com o link). O `.plymouth` aponta `ImageDir` e `ScriptFile`
+  pra essa cópia. A pasta `watch/` fica fora dela (e do initramfs);
 - `/usr/share/fonts/yorha-os/` (M PLUS 1, OFL);
 - `/etc/sddm.conf.d/yorha-os.conf`: `Current=yorha-os` (o SDDM já passa `-background none` pro X);
 - `/etc/systemd/system/sddm.service.d/yorha-os.conf`: a passagem do Plymouth (research R8);
@@ -37,7 +40,12 @@ da camada visual (futuro) chama este módulo.
 
 - as entradas do systemd-boot (`/boot/loader/entries/*.conf`, linha `options`), ou o
   `/etc/kernel/cmdline` numa máquina com UKI (research R13);
+- o `/etc/plymouth/plymouthd.conf`, que o `plymouth-set-default-theme` muda;
 - o `/etc/mkinitcpio.conf`, só no fallback de um mkinitcpio sem drop-ins.
+
+Se um arquivo editado mudou depois da instalação, o `uninstall` desfaz o resto, deixa esse arquivo
+como está, mostra a diferença e sai com 4; o manifesto fica só com ele. Os backups em
+`/var/lib/yorha-os/backup/` ficam depois do `uninstall` (são pequenos e são a última rede).
 
 O `uninstall` não apaga o `/etc/yorha-os/login.conf`, porque é do usuário. Ele avisa que o arquivo
 ficou.
