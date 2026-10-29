@@ -399,9 +399,11 @@ Cada critério diz a evidência que o comprova (constituição, princípio IV).
 - **SC-001**: Do ligar ao login pronto, nenhuma das capturas da VM (uma a cada 0,25 s) mostra texto
   de console, quadro branco ou outro tema. *Evidência:* a sequência de capturas de um reboot,
   numa folha de contato.
-- **SC-002**: O tema de boot não deixa o boot mais lento: o tempo do ligar ao login pronto fica no
-  máximo 0,5 s acima do mesmo boot sem o tema. *Evidência:* dois relatórios do `lab/perf`, com e
-  sem o tema, na mesma VM.
+- **SC-002**: O tema quase não deixa o boot mais lento: o login aceita teclas no máximo **1 s** depois
+  do que aceitaria no mesmo boot sem o tema. *Evidência:* `lab/011/boot-timing` (o relógio do kernel
+  da VM, três boots com e três sem o tema). O limite era 0,5 s; medido em 29.10, deu +0,80 s
+  (+0,41 s do Plymouth no initramfs, +0,53 s da passagem com a saída de 0,4 s), e o dono aceitou
+  subir pra 1 s ("esse a mais aí não dá bucho").
 - **SC-003**: Quem digita a senha certa e aperta Enter durante a entrada entra na sessão sem esperar
   a animação: a entrada some em até 1 quadro depois da primeira tecla. *Evidência:* teclas
   enviadas pela VM e as capturas antes e depois.
