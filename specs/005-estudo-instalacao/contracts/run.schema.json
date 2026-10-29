@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "rien-os/specs/005/run.schema.json",
+  "$id": "yorha-os/specs/005/run.schema.json",
   "title": "U2 study run record",
   "description": "One pass of one scenario on one install method (spec 005, data-model 'Execução'). Written by the lab harness to ~/.local/share/nier-lab/out/u2/<method>/<scenario>-<n>.json and attached to the lab/perf report.",
   "type": "object",
@@ -231,7 +231,7 @@
     },
     "perf_run_id": {
       "type": "string",
-      "description": "lab/perf run id (rien-OS-relatorios/runs/<id>)"
+      "description": "lab/perf run id (YoRHa-OS-relatorios/runs/<id>)"
     },
     "redone": {
       "type": [

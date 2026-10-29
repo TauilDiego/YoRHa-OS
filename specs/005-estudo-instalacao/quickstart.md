@@ -1,7 +1,7 @@
 # Quickstart: rodar o estudo de instalação no laboratório
 
 Roteiro de como os experimentos do [experimentos.md](experimentos.md) rodam no ambiente privado
-(`rien-OS-private/lab`). **Nada disso roda na máquina do dono** além das ferramentas do lab (QEMU,
+(`YoRHa-OS-private/lab`). **Nada disso roda na máquina do dono** além das ferramentas do lab (QEMU,
 Docker, `ssh`, `rsync`, o leitor do `lab/perf`). Toda linha que liga uma VM ou um container fica dentro
 de uma sessão `lab/perf`.
 
@@ -24,7 +24,7 @@ repositório privado (R15). Aqui fica o que cada um precisa fazer e o que se esp
 ## Preparação (uma vez)
 
 ```sh
-cd ~/projects/rien-OS-private
+cd ~/projects/YoRHa-OS-private
 lab/perf begin "005: preparação do estudo" --kind estudo --task 005
 lab/u2/base                      # u2-base congelada; confere: findmnt -no FSTYPE / (R9), sem quickshell
 lab/u2/servidor up
@@ -48,7 +48,7 @@ for m in A B C D; do
 done
 ```
 
-**Esperado:** pros quatro, `rien version` = `rien-os 0.1 (<m>)`, screenshot com o HUD, `wallpaper dump`
+**Esperado:** pros quatro, `yorha version` = `yorha-os 0.1 (<m>)`, screenshot com o HUD, `wallpaper dump`
 responde, 0 erros de QML, `user_config_unchanged: true`. Só então o método passa a `prototipado`.
 
 ## Execuções de tempo (uma VM por vez)
@@ -75,11 +75,11 @@ Cada agente com sua worktree e `NIER_LAB_VM=u2-<m>-<n>` (porta própria):
 
 | Cenário | Comando | Esperado / o que olhar |
 |---|---|---|
-| S5 | `lab/u2/rodar <m> S5` | 0.3 sem UI (log com o erro de QML de propósito); depois da volta, `rien version` = 0.2, screenshot, `state_format` registrado |
+| S5 | `lab/u2/rodar <m> S5` | 0.3 sem UI (log com o erro de QML de propósito); depois da volta, `yorha version` = 0.2, screenshot, `state_format` registrado |
 | S6a/b/c | `lab/u2/rodar <m> S6a` (b, c) | registro com `live_version`, `state_format`, `recovery.steps` e `recovery.automatic`; recuperação seguida até a UI responder, ≤ 5 min |
 | S7a/b | `lab/u2/rodar <m> S7a` (b) | `result: refused` ou `failed` com `message`; em b, `live_version` = 0.1 |
 | S8a/b | `lab/u2/adulterar <m> carga` + `rodar <m> S8a`; `tudo` + `S8b` | quem recusa, com qual mensagem |
-| S9 | `lab/u2/rodar <m> S9` | marcadores de migration de `beta` criados na entrada; nada fora de `~beta/.local/state/rien-os` mudou |
+| S9 | `lab/u2/rodar <m> S9` | marcadores de migration de `beta` criados na entrada; nada fora de `~beta/.local/state/yorha-os` mudou |
 | S10 | `lab/u2/rodar <m> S10` | conflito / sobrescrita / backup; a UI 0.2 abre ou não |
 | S11 | `lab/u2/rodar <m> S11` | `leftovers` |
 | S12 | o agente segue o `PUBLICAR.md` do protótipo (no lab), cronometrando | passos, tempo, segredos, infraestrutura |

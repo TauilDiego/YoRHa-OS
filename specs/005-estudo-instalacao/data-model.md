@@ -11,8 +11,8 @@ oferecer está em [contracts/contrato-de-entrega.md](contracts/contrato-de-entre
 | `id` | `A`, `B`, `C` ou `D` |
 | `nome` | script + git · AUR · repositório pacman · versões lado a lado |
 | `servidor` | o que o servidor do lab publica pra ele (ver [experimentos.md](experimentos.md) §2) |
-| `instala_em` | onde a carga fica no cliente (`~/.local/share/rien-os/…` ou `/usr/share/rien-os/…`) |
-| `migrations_em` | onde as migrations por usuário rodam (no `rien update` ou no começo da sessão) |
+| `instala_em` | onde a carga fica no cliente (`~/.local/share/yorha-os/…` ou `/usr/share/yorha-os/…`) |
+| `migrations_em` | onde as migrations por usuário rodam (no `yorha update` ou no começo da sessão) |
 | `prototipo` | pasta do protótipo no lab privado (`lab/u2/metodo-<id>/`) |
 
 ## Versão da carga

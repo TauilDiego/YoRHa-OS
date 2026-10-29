@@ -138,7 +138,7 @@ shell/
     ├── settings-long.json       # novo: caso de borda (aponta pro catálogo longo)
     └── settings-catalog-long.json # novo: 14 opções com textos longos + uma categoria vazia
 
-rien-OS-private/lab/             # (privado)
+YoRHa-OS-private/lab/             # (privado)
 ├── guest/hyprland.lua           # + ALT + I → settings toggle
 ├── click                        # novo: clique via QMP (extraído do check-u1)
 ├── burst                        # novo: n quadros de uma região, com grim na VM (+ times.txt)

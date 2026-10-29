@@ -27,7 +27,7 @@ em paralelo, rodam em sequência, todas pelo mesmo agente.
 A fase compara quatro jeitos de entregar e atualizar a camada (A script + git, B AUR, C repositório
 pacman próprio, D versões lado a lado), usando a UI de verdade (`shell/`) como carga. Pra cada método
 existe um **protótipo descartável** que cumpre o mesmo [contrato de entrega](contracts/contrato-de-entrega.md)
-(`rien-shell`, `rien version`, `rien update [--check]`, `rien rollback`, `rien migrate`, `rien uninstall`).
+(`yorha-shell`, `yorha version`, `yorha update [--check]`, `yorha rollback`, `yorha migrate`, `yorha uninstall`).
 
 Os protótipos rodam em VMs novas, criadas de uma camada própria (`u2-base`, um Arch com Hyprland mas
 sem as dependências da UI). Eles buscam a carga num **servidor de distribuição** num container do lab,
@@ -67,8 +67,8 @@ A carga é QML (Qt 6) sobre Quickshell 0.3.x, sem mudança no `shell/`.
 - no servidor (container): um servidor HTTP estático que registra bytes por pedido;
 - no lab: `lab/new`, `lab/up`, `lab/ssh`, `lab/shot`, `lab/perf`, QMP (desligamento forçado).
 
-**Storage**: arquivos. Na VM, os caminhos do contrato (`~/.local/share/rien-os/`, `/usr/share/rien-os/`,
-`~/.local/state/rien-os/`). No lab, `~/.local/share/nier-lab/u2/` (chave descartável, artefatos,
+**Storage**: arquivos. Na VM, os caminhos do contrato (`~/.local/share/yorha-os/`, `/usr/share/yorha-os/`,
+`~/.local/state/yorha-os/`). No lab, `~/.local/share/nier-lab/u2/` (chave descartável, artefatos,
 registros). No público, só `docs/estudo-instalacao.md`.
 
 **Testing**: o estudo **é** o teste. Cada cenário gera um registro com evidência (screenshot com sha256,
@@ -145,7 +145,7 @@ docs/
 └── estudo-instalacao.md     # o resultado (FR-015)
 ```
 
-No repositório privado (`rien-OS-private`), ao lado do lab que já existe:
+No repositório privado (`YoRHa-OS-private`), ao lado do lab que já existe:
 
 ```text
 lab/u2/
@@ -157,11 +157,11 @@ lab/u2/
 ├── fabrica              # container: tarball, receita, makepkg --sign, repo-add --sign
 ├── servidor             # container: HTTP estático com log de bytes
 ├── publicar · adulterar · rodar · tabelas
-├── guest/u2-ui-run      # abre rien-shell quando ele existir
-├── metodo-a/            # boot.sh, install.sh, bin/rien, PUBLICAR.md
-├── metodo-b/            # PKGBUILD, rien-os.install, bin/rien, PUBLICAR.md
-├── metodo-c/            # PKGBUILD (o mesmo de B), pacman.conf.d/rien-os.conf, bin/rien, PUBLICAR.md
-└── metodo-d/            # install-d.sh, bin/rien, PUBLICAR.md
+├── guest/u2-ui-run      # abre yorha-shell quando ele existir
+├── metodo-a/            # boot.sh, install.sh, bin/yorha, PUBLICAR.md
+├── metodo-b/            # PKGBUILD, yorha-os.install, bin/yorha, PUBLICAR.md
+├── metodo-c/            # PKGBUILD (o mesmo de B), pacman.conf.d/yorha-os.conf, bin/yorha, PUBLICAR.md
+└── metodo-d/            # install-d.sh, bin/yorha, PUBLICAR.md
 ```
 
 **Structure Decision**: protótipos, roteiros e chave no privado (R15, FR-017); conclusões no público.

@@ -15,7 +15,7 @@ como instalar e atualizar a UI" do manual do laboratório privado (antes, §8.4 
 - **D. versões lado a lado, com troca e volta (rollback).**
 
 A carga é a UI de verdade (`shell/`, com o HUD, o popup de configurações e o papel de parede). O
-resultado alimenta a S3 (instalador v0) e a S4 (`rien update` e migrations).
+resultado alimenta a S3 (instalador v0) e a S4 (`yorha update` e migrations).
 
 ## Contexto
 
@@ -211,7 +211,7 @@ commit, sem automação nova além do protótipo.
   O `shell/` do repositório não muda nesta fase.
 - **FR-003**: Todos os métodos MUST cumprir o mesmo contrato de entrega: um comando que abre a UI, um
   comando que informa a versão, padrões gerenciados separados dos arquivos do usuário, estado do
-  usuário em `~/.local/state/rien-os/`, migrations que rodam uma vez por usuário.
+  usuário em `~/.local/state/yorha-os/`, migrations que rodam uma vez por usuário.
 
 **Ambiente e medição**
 

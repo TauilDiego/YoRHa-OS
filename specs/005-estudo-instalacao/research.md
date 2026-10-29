@@ -104,7 +104,7 @@ casos a fonte é um espelho Kiwix do wiki de abril de 2026 (`wikipedia.jakami.de
 - **Disponibilidade:** o Omarchy criou o repositório próprio "as replacement for AUR … to avoid AUR
   DDoS fallout" (https://github.com/omacom/omarchy/releases/tag/v2.0.0), e quedas do Chaotic-AUR
   quebraram instalações (https://github.com/omacom/omarchy/issues/727).
-- **Decisão:** o protótipo B é um pacote **de versão** (`rien-os`, fonte = tarball da tag com
+- **Decisão:** o protótipo B é um pacote **de versão** (`yorha-os`, fonte = tarball da tag com
   `sha256sums`), não `-git`, pra o usuário poder ficar numa versão e voltar. O AUR é simulado por um
   repositório git com o PKGBUILD e o `.SRCINFO` no servidor do lab; o cliente faz o que um helper faz
   (`git clone`/`pull` + `makepkg -si`). O custo de instalar um helper entra numa execução de
@@ -122,7 +122,7 @@ casos a fonte é um espelho Kiwix do wiki de abril de 2026 (`wikipedia.jakami.de
     `--sign` assina o banco e `--verify` confere a assinatura antes de mexer
     (https://man.archlinux.org/man/repo-add.8;
     https://wikipedia.jakami.de/content/archlinux_en_all_maxi_2026-04/Pacman/Tips_and_tricks);
-  - o cliente adiciona `[rien-os]` com `Server = …/$arch` no `pacman.conf`; `SigLevel` padrão é
+  - o cliente adiciona `[yorha-os]` com `Server = …/$arch` no `pacman.conf`; `SigLevel` padrão é
     `Required TrustedOnly` (https://man.archlinux.org/man/pacman.conf.5);
   - assinatura dos pacotes com `makepkg --sign` (https://man.archlinux.org/man/makepkg.8); o usuário
     confia na chave com `pacman-key --recv-keys`, `--finger` e `--lsign-key`
@@ -142,7 +142,7 @@ casos a fonte é um espelho Kiwix do wiki de abril de 2026 (`wikipedia.jakami.de
   usuário (R8). Volta: `pacman -U` do pacote anterior no cache.
 - **Motivo:** é o caminho do Omarchy v4, do Chaotic-AUR e do CachyOS; o estudo mede o custo real pro
   dono (chave, hospedagem, CI) contra o ganho (assinatura, dependências, desinstalação limpa).
-- **Descartado:** um pacote keyring próprio (`rien-os-keyring`): só faz sentido em público (S6); no
+- **Descartado:** um pacote keyring próprio (`yorha-os-keyring`): só faz sentido em público (S6); no
   estudo a chave é importada à mão e isso é contado como passo do usuário.
 
 ## R5. Método D: versões lado a lado, com troca atômica
@@ -160,10 +160,10 @@ casos a fonte é um espelho Kiwix do wiki de abril de 2026 (`wikipedia.jakami.de
   sistemas de arquivos) (https://man7.org/linux/man-pages/man2/rename.2.html). `ln -sfn` não é atômico
   (apaga e cria); o certo é `ln -s novo tmp && mv -Tf tmp current`
   (https://deployer.org/blog/atomic-symlinks, fonte secundária).
-- **Decisão:** o protótipo D guarda `~/.local/share/rien-os/versions/<versão>/` e troca
-  `~/.local/share/rien-os/current` com link temporário + `mv -T` no mesmo sistema de arquivos. Antes de
-  cada migration, copia `~/.local/state/rien-os/` pra `~/.local/state/rien-os/backups/<versão-de-origem>/`;
-  `rien rollback` troca o link de volta **e** restaura essa cópia. Guarda as 3 últimas versões. A carga
+- **Decisão:** o protótipo D guarda `~/.local/share/yorha-os/versions/<versão>/` e troca
+  `~/.local/share/yorha-os/current` com link temporário + `mv -T` no mesmo sistema de arquivos. Antes de
+  cada migration, copia `~/.local/state/yorha-os/` pra `~/.local/state/yorha-os/backups/<versão-de-origem>/`;
+  `yorha rollback` troca o link de volta **e** restaura essa cópia. Guarda as 3 últimas versões. A carga
   chega como tarball da tag com `sha256` e assinatura destacada.
 - **Motivo:** é a única forma das quatro em que a volta é desenho, não improviso; o estudo precisa
   saber se ela compensa o espaço e o código a mais.
@@ -209,10 +209,10 @@ casos a fonte é um espelho Kiwix do wiki de abril de 2026 (`wikipedia.jakami.de
   (https://man.archlinux.org/man/alpm-hooks.5); a página não diz com qual usuário, e o natural é root
   (**inferência, a verificar no lab**). A v4 do Omarchy resolve com um aviso no login que roda as
   migrations pendentes do usuário (R2).
-- **Decisão:** nos métodos B e C, o pacote instala o ponto de entrada `rien-shell`, que, antes de abrir a
+- **Decisão:** nos métodos B e C, o pacote instala o ponto de entrada `yorha-shell`, que, antes de abrir a
   UI, roda as migrations pendentes **do usuário que está entrando** (marcadores em
-  `~/.local/state/rien-os/migrations/`, como no Omarchy). Nos métodos A e D o `rien update` roda as
-  migrations, e o `rien-shell` roda também as pendentes (pra cobrir o segundo usuário, cenário S9). O
+  `~/.local/state/yorha-os/migrations/`, como no Omarchy). Nos métodos A e D o `yorha update` roda as
+  migrations, e o `yorha-shell` roda também as pendentes (pra cobrir o segundo usuário, cenário S9). O
   contrato está em [contracts/contrato-de-entrega.md](contracts/contrato-de-entrega.md).
 - **Motivo:** constituição III (migrations idempotentes, update não toca no arquivo do usuário) e o caso
   de dois usuários, que só existe quando a carga é do sistema.
@@ -226,7 +226,7 @@ casos a fonte é um espelho Kiwix do wiki de abril de 2026 (`wikipedia.jakami.de
   mas **restaura a raiz e não o `/home`** (https://github.com/omacom/omarchy/blob/v4.0.0/manual/47-system-snapshots.md,
   https://raw.githubusercontent.com/basecamp/omarchy/master/bin/omarchy-snapshot).
 - **Decisão:** fora da medição (premissa da spec). O documento registra que o snapshot de sistema **não
-  substitui** a volta da camada: o estado do usuário (`~/.local/state/rien-os`) e a cópia em
+  substitui** a volta da camada: o estado do usuário (`~/.local/state/yorha-os`) e a cópia em
   `~/.local/share` (A, D) ficam no `/home`. Se a imagem do lab usa btrfs é **a verificar no lab**
   (`findmnt -no FSTYPE /` na `u2-base`); fica como nota pra S4.
 
@@ -236,7 +236,7 @@ casos a fonte é um espelho Kiwix do wiki de abril de 2026 (`wikipedia.jakami.de
   `checkupdates` (pacote `pacman-contrib`) usa um banco à parte em `/tmp/checkup-db-<uid>`, sem tocar no
   banco do sistema e sem root (https://man.archlinux.org/man/checkupdates.8). AUR: o helper compara com o
   AUR (`yay -Qua`) e, pra `-git`, só com `--devel` (R3).
-- **Decisão:** cada protótipo implementa `rien update --check` (contrato) com o mecanismo natural do
+- **Decisão:** cada protótipo implementa `yorha update --check` (contrato) com o mecanismo natural do
   método: tags remotas (A), `.SRCINFO` remoto (B), `checkupdates` filtrado pelo repositório (C), arquivo
   `latest` no servidor (D). O estudo mede: precisa de root, quanto baixa, quanto demora (cenário S4). O
   indicador na barra fica pra S4.
@@ -249,7 +249,7 @@ casos a fonte é um espelho Kiwix do wiki de abril de 2026 (`wikipedia.jakami.de
   - **A:** um repositório git nu servido por HTTP simples (`git update-server-info`), com as tags
     `v0.1`, `v0.2`, `v0.3`, e o `boot.sh`;
   - **B:** um repositório git com o `PKGBUILD` e o `.SRCINFO`, e os tarballs das tags;
-  - **C:** o repositório pacman (`rien-os.db`, pacotes e assinaturas);
+  - **C:** o repositório pacman (`yorha-os.db`, pacotes e assinaturas);
   - **D:** os tarballs, as somas, as assinaturas e o arquivo `latest`.
   As montagens (`makepkg`, `repo-add`, assinatura) rodam num container de Arch separado, como usuário sem
   privilégios. A chave é descartável e fica em `~/.local/share/nier-lab/u2/`, fora de qualquer git.
@@ -261,7 +261,7 @@ casos a fonte é um espelho Kiwix do wiki de abril de 2026 (`wikipedia.jakami.de
 ## R12. Interromper no ponto certo
 
 - **Decisão:** os protótipos escrevem a fase em que estão (`download`, `apply`, `migrate`) em
-  `~/.local/state/rien-os/u2-phase` e, com `U2_PAUSE_AT=<fase>`, esperam 20 s nela. O roteiro do lab
+  `~/.local/state/yorha-os/u2-phase` e, com `U2_PAUSE_AT=<fase>`, esperam 20 s nela. O roteiro do lab
   espera a fase aparecer (pelo `lab/ssh`) e desliga a VM à força pelo QMP (`quit`, equivalente a puxar o
   cabo). Nos métodos B e C a fase `apply` é o próprio pacman extraindo: o roteiro espera a trava
   `/var/lib/pacman/db.lck` aparecer e desliga; se o momento escapar, repete até 3 vezes com outro atraso
@@ -291,7 +291,7 @@ casos a fonte é um espelho Kiwix do wiki de abril de 2026 (`wikipedia.jakami.de
 - **Fatos:** o Quickshell procura a subpasta `quickshell` em "every XDG standard config path"
   (normalmente `~/.config/quickshell`), `-c <nome>` escolhe uma config e `-p <caminho>` roda uma config
   de qualquer lugar (https://quickshell.org/docs/guide/introduction/).
-- **Decisão:** todos os métodos abrem a UI pelo ponto de entrada `rien-shell`, que chama `qs -p` com o
+- **Decisão:** todos os métodos abrem a UI pelo ponto de entrada `yorha-shell`, que chama `qs -p` com o
   caminho da carga instalada. Assim nenhum método escreve em `~/.config/quickshell` (constituição III).
   Se `/etc/xdg/quickshell/<nome>` também funciona (útil pros pacotes) é **a verificar no lab**, só como
   nota.
@@ -299,7 +299,7 @@ casos a fonte é um espelho Kiwix do wiki de abril de 2026 (`wikipedia.jakami.de
 ## R15. Onde ficam os protótipos e o que é publicado
 
 - **Decisão:** os protótipos (scripts dos quatro métodos, receitas, roteiros, remendos das versões)
-  ficam no repositório privado, em `rien-OS-private/lab/u2/`. O repositório público recebe o
+  ficam no repositório privado, em `YoRHa-OS-private/lab/u2/`. O repositório público recebe o
   `docs/estudo-instalacao.md` e, nesta branch, os artefatos da spec. Quando a S3 começar, o que o método
   escolhido precisar é reescrito no público, já no desenho final.
 - **Motivo:** FR-017; os protótipos citam o servidor do lab, portas e a chave descartável. Ideias do

@@ -1,4 +1,4 @@
-// rien-OS shell: YoRHa design system + HUD (spec 001).
+// YoRHa-OS shell: YoRHa design system + HUD (spec 001).
 pragma ComponentBehavior: Bound
 
 import QtQuick

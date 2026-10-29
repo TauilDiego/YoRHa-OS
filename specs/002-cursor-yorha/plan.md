@@ -10,10 +10,10 @@ num plano formal.
 
 ## Summary
 
-Um tema de cursor próprio, o **rien-OS Cursors** (`rien_cursors`), com os 39 formatos do NieR
+Um tema de cursor próprio, o **YoRHa-OS Cursors** (`yorha_cursors`), com os 39 formatos do NieR
 Cursors de Beinsezii (MIT): os mesmos nomes, aliases e hotspots, mas desenho vetorial próprio, no
 estilo da "nave" do minigame de hacking aprovado pelo dono. Os dois formatos de carregamento usam
-os quadros do NieR Cursors 1:1, recoloridos pra paleta do rien-OS (FR-007). O tema sai como
+os quadros do NieR Cursors 1:1, recoloridos pra paleta do YoRHa-OS (FR-007). O tema sai como
 hyprcursor (SVG, desenhado no tamanho exato pelo Hyprland) com um XCursor de reserva gerado dos
 mesmos SVGs.
 
@@ -24,11 +24,11 @@ mesmos SVGs.
 **Primary Dependencies** (só dentro do container de build): Pillow, numpy, `hyprcursor-util`,
 `rsvg-convert` (librsvg), `xcursorgen`, `curl`
 
-**Storage**: fontes no repositório (`system/cursors/rien-cursors/gen/*.py`, `manifest.hl`,
+**Storage**: fontes no repositório (`system/cursors/yorha-cursors/gen/*.py`, `manifest.hl`,
 `NOTICE`, `upstream.lock`); o tema montado fica fora do repositório (cache do laboratório)
 
 **Testing**: evidência na VM: `lab/cursor` aplica o tema; `lab/check-u1` confere o cursor do
-rien-OS sobre o papel; a folha de contato (`gen/preview.py`) mostra os 39 formatos
+YoRHa-OS sobre o papel; a folha de contato (`gen/preview.py`) mostra os 39 formatos
 
 **Target Platform**: Hyprland 0.56+ (hyprcursor) com XCursor de reserva; só na VM até o
 instalador (S3) ou a troca (U7)
@@ -54,8 +54,8 @@ instalador (S3) ou a troca (U7)
 ```text
 system/cursors/
 ├── build.sh                    # monta hyprcursor + XCursor num container; baixa e confere o upstream
-├── defaults.conf               # name=rien_cursors, size=48
-└── rien-cursors/
+├── defaults.conf               # name=yorha_cursors, size=48
+└── yorha-cursors/
     ├── manifest.hl             # manifesto do hyprcursor
     ├── NOTICE                  # crédito ao Beinsezii (MIT), instalado junto do tema
     ├── upstream.lock           # url + sha256 do release do NieR Cursors (FR-007)

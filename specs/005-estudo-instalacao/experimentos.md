@@ -10,7 +10,7 @@ laboratório está no [quickstart.md](quickstart.md); as decisões que sustentam
 usuário e o mais barato de manter pro dono, sem violar a constituição III?
 
 **Hipótese de partida (a testar, não uma conclusão):** a combinação **A+D** (tags do git como fonte,
-versões lado a lado com troca atômica e `rien rollback`) ganha, porque fica com o custo de
+versões lado a lado com troca atômica e `yorha rollback`) ganha, porque fica com o custo de
 infraestrutura do A (só git) e a volta do D. **C** deve ganhar em confiança, dependências e desinstalação,
 mas custa uma chave, hospedagem e CI. **B** deve perder em manutenção e disponibilidade. O desenho abaixo
 foi feito pra poder **derrubar** essa hipótese: os pesos vêm antes das medidas (R16) e a conta é mostrada
@@ -20,27 +20,27 @@ também com pesos iguais.
 
 | Peça | Como | Por quê |
 |---|---|---|
-| **Camada `u2-base`** (congelada) | `arch-limpo` + Hyprland, uwsm, kitty, login automático e um `u2-ui-run` que abre `rien-shell` quando ele existir. **Sem** `quickshell`, Qt 6 extra, `qt6-shadertools` nem fontes da UI | Pra instalação ter que resolver as dependências da carga (FR-009). A `hypr-base` já traz tudo e esconderia isso |
+| **Camada `u2-base`** (congelada) | `arch-limpo` + Hyprland, uwsm, kitty, login automático e um `u2-ui-run` que abre `yorha-shell` quando ele existir. **Sem** `quickshell`, Qt 6 extra, `qt6-shadertools` nem fontes da UI | Pra instalação ter que resolver as dependências da carga (FR-009). A `hypr-base` já traz tudo e esconderia isso |
 | **Mirror fixo** | O pacman da `u2-base` aponta pro Arch Linux Archive numa data fixa (R13) | Mesmas versões de pacote em todas as execuções |
 | **VMs de execução** | `lab/new u2-<método>-<n> --from u2-base`, apagadas no fim; `NIER_LAB_CPUS=2 NIER_LAB_MEM=4G` (limite do dono), perfil `1080`, uma por vez | Mesmo ponto de partida e mesmos recursos pros quatro. Não usa `teste-a/b/c`, que são de outros agentes |
 | **Servidor de distribuição** | Container `nier-lab` com HTTP estático e log de bytes, porta só em `localhost`; a VM chega por `10.0.2.2` (R11) | Simula GitHub, AUR, repositório pacman e pacotes de versão sem publicar nada |
 | **Fábrica** | Container de Arch (`nier-lab`), usuário sem privilégio: `makepkg`, `repo-add`, `gpg` com chave descartável do lab | Constituição I: build nunca no host |
 | **Carga** | `shell/` do commit fixado + remendos 0.2 e 0.3 do lab ([data-model.md](data-model.md)) | Mesma carga pros quatro (FR-001, FR-002) |
-| **Usuário de teste** | `arch` (sudo sem senha no lab) com `~/.config/rien-os/shell.json` e `~/.config/hypr/` de exemplo; `beta`, criado só no S9 | Prova da constituição III e caso de dois usuários |
+| **Usuário de teste** | `arch` (sudo sem senha no lab) com `~/.config/yorha-os/shell.json` e `~/.config/hypr/` de exemplo; `beta`, criado só no S9 | Prova da constituição III e caso de dois usuários |
 
 ## 3. Os quatro protótipos
 
-Todos cumprem o [contrato de entrega](contracts/contrato-de-entrega.md): `rien-shell`, `rien version`,
-`rien update [--check]`, `rien rollback`, `rien migrate`, `rien uninstall`, os mesmos caminhos de estado e
+Todos cumprem o [contrato de entrega](contracts/contrato-de-entrega.md): `yorha-shell`, `yorha version`,
+`yorha update [--check]`, `yorha rollback`, `yorha migrate`, `yorha uninstall`, os mesmos caminhos de estado e
 o mesmo formato de migration. A tabela mostra só o que muda.
 
 | | **A. script + git** | **B. AUR (simulado)** | **C. repositório pacman** | **D. versões lado a lado** |
 |---|---|---|---|---|
-| **Instalar** | `curl …/boot.sh \| bash`: `pacman -S git`, `git clone --branch v0.1` em `~/.local/share/rien-os`, `install.sh` (dependências da lista com `pacman -S --needed`, shaders, `rien-shell` em `~/.local/bin`, migrations marcadas) | `pacman -S --needed base-devel git`, `git clone` da receita, `makepkg -si` (dependências pelo `depends=`, shaders no `build()`), carga em `/usr/share/rien-os` | importar a chave do lab (`pacman-key --add`, `--lsign-key`), bloco `[rien-os]` no `pacman.conf`, `pacman -Syu rien-os` | `curl …/install-d.sh \| bash`: baixa o tarball de 0.1 + soma + assinatura, confere, extrai em `versions/0.1`, dependências com `pacman -S --needed`, liga `current` |
-| **Atualizar** | `rien update`: `fetch --tags`, backup dos arquivos gerenciados editados, `checkout` da maior tag, pacotes novos, shaders, migrations, reinicia a UI | `git pull` da receita + `makepkg -si`; migrations no próximo `rien-shell` (R8) | `rien update` = `sudo pacman -Syu` + migrations; ou só `pacman -Syu`, e as migrations rodam no próximo `rien-shell` | baixa e confere 0.2 em `versions/0.2`, pacotes novos, backup do estado, migrations, troca atômica de `current` (R5) |
+| **Instalar** | `curl …/boot.sh \| bash`: `pacman -S git`, `git clone --branch v0.1` em `~/.local/share/yorha-os`, `install.sh` (dependências da lista com `pacman -S --needed`, shaders, `yorha-shell` em `~/.local/bin`, migrations marcadas) | `pacman -S --needed base-devel git`, `git clone` da receita, `makepkg -si` (dependências pelo `depends=`, shaders no `build()`), carga em `/usr/share/yorha-os` | importar a chave do lab (`pacman-key --add`, `--lsign-key`), bloco `[yorha-os]` no `pacman.conf`, `pacman -Syu yorha-os` | `curl …/install-d.sh \| bash`: baixa o tarball de 0.1 + soma + assinatura, confere, extrai em `versions/0.1`, dependências com `pacman -S --needed`, liga `current` |
+| **Atualizar** | `yorha update`: `fetch --tags`, backup dos arquivos gerenciados editados, `checkout` da maior tag, pacotes novos, shaders, migrations, reinicia a UI | `git pull` da receita + `makepkg -si`; migrations no próximo `yorha-shell` (R8) | `yorha update` = `sudo pacman -Syu` + migrations; ou só `pacman -Syu`, e as migrations rodam no próximo `yorha-shell` | baixa e confere 0.2 em `versions/0.2`, pacotes novos, backup do estado, migrations, troca atômica de `current` (R5) |
 | **Aviso** | `git ls-remote --tags` | `.SRCINFO` remoto | `checkupdates` | arquivo `latest` |
-| **Voltar** | `git checkout` da tag anterior (o que acontece com o estado migrado é medido) | `makepkg` da receita anterior ou `pacman -U` do pacote montado antes | `sudo pacman -U` do pacote anterior no cache | `rien rollback`: troca `current` e restaura o backup do estado |
-| **Desinstalar** | apaga a pasta e o `rien-shell`; dependências ficam | `pacman -Rns rien-os` | `pacman -Rns rien-os` + tirar o repositório e a chave | apaga `versions/`, `current`, `rien-shell`; dependências ficam |
+| **Voltar** | `git checkout` da tag anterior (o que acontece com o estado migrado é medido) | `makepkg` da receita anterior ou `pacman -U` do pacote montado antes | `sudo pacman -U` do pacote anterior no cache | `yorha rollback`: troca `current` e restaura o backup do estado |
+| **Desinstalar** | apaga a pasta e o `yorha-shell`; dependências ficam | `pacman -Rns yorha-os` | `pacman -Rns yorha-os` + tirar o repositório e a chave | apaga `versions/`, `current`, `yorha-shell`; dependências ficam |
 | **Confiança** | HTTPS + tag assinada (`git verify-tag`), se ligado | `sha256sums` na receita | assinatura GPG do pacote e do banco (`SigLevel Required`) | `sha256` + assinatura destacada |
 
 O protótipo mais simples que cumpre o contrato ganha (constituição VII): nada de menu `gum`, canais ou
@@ -54,17 +54,17 @@ Cada cenário roda numa VM nova, dentro de uma sessão `lab/perf` própria, e gr
 | Cenário | Como | O que é medido |
 |---|---|---|
 | **S1** instalar 0.1 (×3) | comando de instalação do método numa `u2-base` nova; espera a UI | `dur_s`, `ui_s`, bytes de carga e de dependências, pedidos de `sudo`, passos manuais (comandos que o usuário digita), espaço em disco, screenshot, log de QML |
-| **S2** atualizar 0.1 → 0.2 (×3) | publica 0.2 no servidor; `rien update` (ou o comando nativo, em B/C) | o mesmo de S1, mais: dependência nova instalada sozinha, migration aplicada (formato 2), `~/.config` igual |
-| **S3** update de novo | `rien update` com 0.2 instalada | nada muda: nenhuma migration, nenhum arquivo reescrito (mtime e soma da carga), `dur_s` |
-| **S4** aviso | 0.1 instalada, 0.2 publicada; `rien update --check` | detecta, precisa de root, bytes, tempo |
+| **S2** atualizar 0.1 → 0.2 (×3) | publica 0.2 no servidor; `yorha update` (ou o comando nativo, em B/C) | o mesmo de S1, mais: dependência nova instalada sozinha, migration aplicada (formato 2), `~/.config` igual |
+| **S3** update de novo | `yorha update` com 0.2 instalada | nada muda: nenhuma migration, nenhum arquivo reescrito (mtime e soma da carga), `dur_s` |
+| **S4** aviso | 0.1 instalada, 0.2 publicada; `yorha update --check` | detecta, precisa de root, bytes, tempo |
 | **S5** versão quebrada e volta | 0.2 → 0.3 (UI não abre) → volta pra 0.2 pelo jeito do método | a UI 0.3 falha como esperado; a volta existe; passos, `sudo`, tempo até a UI 0.2 responder; estado legível pela 0.2 (formato 2 de volta, ou não) |
-| **S6a/b/c** interrupção | `U2_PAUSE_AT=download\|apply\|migrate`, QMP `quit` na fase (R12); religa | a UI abre? qual versão? o estado (formato) é coerente? `rien update` seguinte conserta sozinho? passos e tempo de recuperação |
+| **S6a/b/c** interrupção | `U2_PAUSE_AT=download\|apply\|migrate`, QMP `quit` na fase (R12); religa | a UI abre? qual versão? o estado (formato) é coerente? `yorha update` seguinte conserta sozinho? passos e tempo de recuperação |
 | **S7a/b** sem rede | servidor parado antes da instalação (a) e no meio do download do update (b) | mensagem de erro clara; nada pela metade no disco; a 0.1 continua no ar (b) |
 | **S8a** carga adulterada | um QML trocado no artefato do servidor depois de publicar (metadados intactos) | o método recusa? com qual mensagem? |
 | **S8b** carga e metadados adulterados | o mesmo, regerando soma/receita/banco **sem** a chave do dono (outra chave ou nenhuma) | recusa só quem tem assinatura; registra o que cada método confia |
-| **S9** segundo usuário | depois do S2, cria `beta`, entra na sessão como `beta` | as migrations rodam pra `beta` na entrada; a casa de `beta` só muda dentro de `~/.local/state/rien-os` |
+| **S9** segundo usuário | depois do S2, cria `beta`, entra na sessão como `beta` | as migrations rodam pra `beta` na entrada; a casa de `beta` só muda dentro de `~/.local/state/yorha-os` |
 | **S10** arquivo gerenciado editado | antes do S2, edita um arquivo da carga instalada | conflito, sobrescrita silenciosa ou backup; a UI 0.2 abre? |
-| **S11** desinstalar | `rien uninstall` (ou o nativo) com 0.2 instalada | arquivos que sobram (lista de `find` antes da S1 × depois), pacotes órfãos, repositório e chave que ficam |
+| **S11** desinstalar | `yorha uninstall` (ou o nativo) com 0.2 instalada | arquivos que sobram (lista de `find` antes da S1 × depois), pacotes órfãos, repositório e chave que ficam |
 | **S12** publicar 0.2 (dono) | um agente segue o passo a passo de publicar do protótipo, do commit pronto até a 0.2 disponível | passos manuais, tempo, segredos tocados, infraestrutura que precisa existir, o que obriga a republicar sem mudança no projeto |
 | **S13** cursor (opcional) | instalar o tema de cursor como segunda carga: montado no destino (A, D) × pronto no pacote (B, C) | tempo, bytes, pacotes de build que ficam na máquina do usuário |
 

@@ -12,9 +12,9 @@ quickstart.md)
 rajada de quadros e log de QML sem erro, sempre dentro de `lab/perf begin/end`.
 
 **Caminhos**:
-- `shell/…` = repositório público `nier-os`;
-- `lab/…` = repositório privado `rien-OS-private`, irmão do público
-  (`~/projects/rien-OS-private/lab/`).
+- `shell/…` = repositório público `YoRHa-OS`;
+- `lab/…` = repositório privado `YoRHa-OS-private`, irmão do público
+  (`~/projects/YoRHa-OS-private/lab/`).
 
 **Dependência de outra spec**: o seletor (US2) usa os componentes da **003** (moldura de popup,
 linha de opção, seletor de valor, rodapé de teclas, foco em duas colunas). As fases US3, US4 e US5
@@ -149,9 +149,9 @@ de arquivo.
 **Independent Test**: `set scene:dark <monitor>`, reiniciar o `qs`, conferir; `next`/`prev` pelo
 `dump`.
 
-- [x] T038 [US5] `shell/services/WallpaperStore.qml`: persistência em `$XDG_STATE_HOME/rien-os/wallpaper.json` (research R8): leitura por `FileView`, escrita com `setText` + `atomicWrites`, agrupada em 250 ms, criação da pasta por `Process` em argv só se preciso; nada escrito com a fixture `wallpaper` ativa; prioridade estado > `shell.json` > `defaults.json`; estado ilegível começa vazio com linha no log — **feito.** O `FileView.setText` cria a pasta sozinho (conferido na VM), então o `Process` de `mkdir` saiu (como o R8 previa). O estado é lido bloqueando no início, então o primeiro quadro já mostra a escolha salva, sem transição
+- [x] T038 [US5] `shell/services/WallpaperStore.qml`: persistência em `$XDG_STATE_HOME/yorha-os/wallpaper.json` (research R8): leitura por `FileView`, escrita com `setText` + `atomicWrites`, agrupada em 250 ms, criação da pasta por `Process` em argv só se preciso; nada escrito com a fixture `wallpaper` ativa; prioridade estado > `shell.json` > `defaults.json`; estado ilegível começa vazio com linha no log — **feito.** O `FileView.setText` cria a pasta sozinho (conferido na VM), então o `Process` de `mkdir` saiu (como o R8 previa). O estado é lido bloqueando no início, então o primeiro quadro já mostra a escolha salva, sem transição
 - [x] T039 [US5] `next`/`prev` no `Compositor.focusedMonitor` quando o monitor vem vazio; fallback de monitor sem escolha e de imagem apagada (`resolve`, com linha no log) (FR-019, FR-020) — **feito** (o `step`, o `resolve` e o fallback já vinham do T014; a imagem salva só é resolvida depois de o catálogo ler a pasta, pra não trocar pra cena padrão e voltar no início)
-- [x] T040 [US5] Validar (`lab/perf begin "004: estado"`): cenário 6 do quickstart (reinício do `qs`, arquivo de estado conferido, `~/.config/rien-os/` intocado), `next`/`prev` pelo `dump`, imagem apagada → cena padrão — **feito** (`lab/perf` 2026-10-27T160430, `out/004-T040-estado`): estado gravado e de volta depois do `pkill qs`, sem transição; `next`/`prev` no monitor em foco; imagem apagada = cena padrão + linha no log; prioridade estado > `shell.json` > padrão; nada escrito com a fixture `wallpaper` (md5 igual); estado ilegível = começa vazio com uma linha `INFO`; `~/.config/rien-os/` nunca criado
+- [x] T040 [US5] Validar (`lab/perf begin "004: estado"`): cenário 6 do quickstart (reinício do `qs`, arquivo de estado conferido, `~/.config/yorha-os/` intocado), `next`/`prev` pelo `dump`, imagem apagada → cena padrão — **feito** (`lab/perf` 2026-10-27T160430, `out/004-T040-estado`): estado gravado e de volta depois do `pkill qs`, sem transição; `next`/`prev` no monitor em foco; imagem apagada = cena padrão + linha no log; prioridade estado > `shell.json` > padrão; nada escrito com a fixture `wallpaper` (md5 igual); estado ilegível = começa vazio com uma linha `INFO`; `~/.config/yorha-os/` nunca criado
 
 **Checkpoint**: as cinco histórias funcionam.
 
@@ -242,5 +242,5 @@ Polimento:
    desktop fica igual ao jogo e troca de cena por comando.
 2. **Depois:** US3, US4 e US5 em paralelo, todas testáveis pelo IPC, sem esperar a 003.
 3. **US2:** o seletor, assim que a 003 estiver pronta. É P1 pra o dono, mas depende de outra spec.
-4. Cada fase termina com evidência no lab e relatório no `rien-OS-relatorios`. Nenhuma tarefa é
+4. Cada fase termina com evidência no lab e relatório no `YoRHa-OS-relatorios`. Nenhuma tarefa é
    marcada `[x]` sem prova.

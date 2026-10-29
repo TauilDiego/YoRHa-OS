@@ -8,13 +8,13 @@ description: "Tarefas da 005: estudo de instalação (U2)"
 contracts/, quickstart.md)
 
 **Tests**: a fase **é** um teste. Não há testes automatizados; a prova de cada tarefa é a evidência da VM
-(princípio IV): registro da execução (`contracts/run.schema.json`), screenshot, resposta de `rien version`
+(princípio IV): registro da execução (`contracts/run.schema.json`), screenshot, resposta de `yorha version`
 e do IPC da UI, log de QML, sempre dentro de `lab/perf begin "…" --kind 005-u2 --task 005/<T>` …
 `lab/perf end`, com `NIER_LAB_VM` exportado.
 
 **Caminhos**:
-- `specs/…`, `docs/…` = repositório público (worktree `nier-os-wt/spec005`, branch `005-estudo-instalacao`);
-- `lab/u2/…` = repositório privado (worktree `rien-OS-private-wt/lab-u2`, branch `lab-u2`).
+- `specs/…`, `docs/…` = repositório público (worktree `YoRHa-OS-wt/spec005`, branch `005-estudo-instalacao`);
+- `lab/u2/…` = repositório privado (worktree `YoRHa-OS-private-wt/lab-u2`, branch `lab-u2`).
 
 **Limite do dono (2026-10-27):** uma VM por vez, `NIER_LAB_CPUS=2 NIER_LAB_MEM=4G`. Os protótipos são
 independentes (`[P]`), mas todas as execuções na VM são sequenciais.
@@ -59,13 +59,13 @@ independentes (`[P]`), mas todas as execuções na VM são sequenciais.
 
 **Goal**: os quatro protótipos cumprem o contrato e passam por S1–S4 três vezes.
 
-**Independent Test**: `lab/u2/rodar <m> S1 S4 S2 S3` numa VM nova: screenshot da 0.1 e da 0.2, `rien version`,
+**Independent Test**: `lab/u2/rodar <m> S1 S4 S2 S3` numa VM nova: screenshot da 0.1 e da 0.2, `yorha version`,
 `wallpaper.json` com `format: 2`, `~/.config` igual, registro e relatório `lab/perf`.
 
-- [ ] T011 [P] [US1] Protótipo A em `lab/u2/metodo-a/` (`boot.sh`, `install.sh`, `bin/rien`, `PUBLICAR.md`): clone por tag, `install.sh` com `pacman -S --needed`, `git verify-tag`, backup de arquivo gerenciado editado, sem `pull`/`reset --merge` (R1)
-- [ ] T012 [P] [US1] Protótipo B em `lab/u2/metodo-b/` (`PKGBUILD`, `rien-os.install`, `bin/rien`, `PUBLICAR.md`): pacote de versão, shaders no `build()`, update = `git pull` + `makepkg -si`, migrations no `rien-shell` (R3, R8)
-- [ ] T013 [P] [US1] Protótipo C em `lab/u2/metodo-c/` (`PKGBUILD`, `rien-os.conf`, `bin/rien`, `PUBLICAR.md`): chave + bloco `[rien-os]`, update = `pacman -Syu` + migrations, aviso por `checkupdates` (R4, R10)
-- [ ] T014 [P] [US1] Protótipo D em `lab/u2/metodo-d/` (`install-d.sh`, `bin/rien`, `PUBLICAR.md`): `versions/<v>`, troca atômica de `current` (`mv -T`), backup do estado antes da migration, `rien rollback` (R5)
+- [ ] T011 [P] [US1] Protótipo A em `lab/u2/metodo-a/` (`boot.sh`, `install.sh`, `bin/yorha`, `PUBLICAR.md`): clone por tag, `install.sh` com `pacman -S --needed`, `git verify-tag`, backup de arquivo gerenciado editado, sem `pull`/`reset --merge` (R1)
+- [ ] T012 [P] [US1] Protótipo B em `lab/u2/metodo-b/` (`PKGBUILD`, `yorha-os.install`, `bin/yorha`, `PUBLICAR.md`): pacote de versão, shaders no `build()`, update = `git pull` + `makepkg -si`, migrations no `yorha-shell` (R3, R8)
+- [ ] T013 [P] [US1] Protótipo C em `lab/u2/metodo-c/` (`PKGBUILD`, `yorha-os.conf`, `bin/yorha`, `PUBLICAR.md`): chave + bloco `[yorha-os]`, update = `pacman -Syu` + migrations, aviso por `checkupdates` (R4, R10)
+- [ ] T014 [P] [US1] Protótipo D em `lab/u2/metodo-d/` (`install-d.sh`, `bin/yorha`, `PUBLICAR.md`): `versions/<v>`, troca atômica de `current` (`mv -T`), backup do estado antes da migration, `yorha rollback` (R5)
 - [ ] T015 [US1] Validação (repetição 0, não conta): `lab/u2/rodar <m> S1 --n 0` pros quatro; o que passar vira `prototipado` e gera a camada `u2-<m>-v01` (0.1 instalada), congelada, base das execuções de função
 - [ ] T016 [US1] Execuções de tempo: S1 → S4 → S2 → S3 encadeados numa VM nova por método e rodada, nas ordens A B C D, D C B A, A B C D (experimentos §6.4)
 

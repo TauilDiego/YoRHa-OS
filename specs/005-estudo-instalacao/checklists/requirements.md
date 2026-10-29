@@ -35,7 +35,7 @@
   - os quatro métodos pelo nome (AUR, repositório pacman, git): eles **são** o objeto do estudo, definido no
     `PLAN.md`, e não uma escolha de implementação;
   - o `lab/perf`, os screenshots e o log de QML, porque são a evidência definida pela constituição (IV);
-  - `~/.config` e `~/.local/state/rien-os/`, porque são a fronteira da constituição III e o caminho que a
+  - `~/.config` e `~/.local/state/yorha-os/`, porque são a fronteira da constituição III e o caminho que a
     004 já usa pro estado.
 - **Escolhas feitas sem o dono** (ele não pôde ser consultado; entram como suposições, revisáveis na
   aprovação, e não como [NEEDS CLARIFICATION]):
@@ -44,7 +44,7 @@
   - a escolha vale pra camada inteira, com combinações permitidas;
   - pesos de partida no plano;
   - protótipos no repositório privado.
-- **Escopo:** é um estudo. O produto (instalador, `rien update`) é a S3 e a S4.
+- **Escopo:** é um estudo. O produto (instalador, `yorha update`) é a S3 e a S4.
 - **Pronta para** `/speckit-plan` (já escrito junto, a pedido do dono).
 - **Aprovada em 2026-10-27:** o dono respondeu às cinco escolhas acima (spec, "Decisões do dono"): as
   cinco ficam como estavam, com o cursor depois do `shell/` e a checagem do AUR real só de leitura.

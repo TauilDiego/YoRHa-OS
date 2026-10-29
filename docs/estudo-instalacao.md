@@ -7,9 +7,9 @@ privado; nada foi publicado (decisão 1 do dono).
 ## 1. Resumo
 
 **Escolha: método D (versões lado a lado), com a tag do git como origem de cada versão e um tarball
-assinado como transporte.** Cada versão da camada fica em `~/.local/share/rien-os/versions/<v>/`, um
+assinado como transporte.** Cada versão da camada fica em `~/.local/share/yorha-os/versions/<v>/`, um
 link `current` troca de forma atômica, o estado do usuário é copiado antes de cada migration, e
-`rien rollback` volta a versão **e** o estado num comando. D venceu com os pesos do dono (83,3) e com
+`yorha rollback` volta a versão **e** o estado num comando. D venceu com os pesos do dono (83,3) e com
 pesos iguais (83,3); nenhum método foi eliminado pelos critérios obrigatórios.
 
 | | A. script + git | B. AUR | C. repositório pacman | **D. versões lado a lado** | A+D (composição) |
@@ -32,9 +32,9 @@ pesos iguais (83,3); nenhum método foi eliminado pelos critérios obrigatórios
 - liga `current` e os pontos de entrada em `~/.local/bin`.
 
 **O que muda na S4:**
-- **ordem do `rien update`:** buscar e conferir → desempacotar → dependências → shaders → copiar o
+- **ordem do `yorha update`:** buscar e conferir → desempacotar → dependências → shaders → copiar o
   estado → trocar `current` → migrations → reiniciar a UI;
-- **migrations:** rodam também no começo da sessão (`rien-shell`);
+- **migrations:** rodam também no começo da sessão (`yorha-shell`);
 - **aviso:** um arquivo `latest` de poucos bytes, sem root.
 
 **Hipótese de partida** (experimentos §1, "A+D vence"): **confirmada em parte**.
@@ -53,20 +53,20 @@ pesos iguais (83,3); nenhum método foi eliminado pelos critérios obrigatórios
 |---|---|
 | Base | `u2-base`: Arch limpo (imagem oficial arch-boxes, raiz em btrfs) + Hyprland 0.56, uwsm e login automático, **sem** Quickshell, Qt 6 extra, `qt6-shadertools`, `jq` nem `git` |
 | Pacotes | Arch Linux Archive fixo em **2026-10-26**, servido por um cache no lab: as mesmas versões em todas as execuções |
-| Carga | `shell/` do commit `422cca7` (4,7 MB). **0.1** = a UI como está. **0.2** = "RIEN 0.2" + um selo webp na barra, dependência nova `qt6-imageformats`, e o estado do papel de parede no formato 2 (migration `monitors` → `outputs`). **0.3** = erro de QML de propósito + migration pro formato 3 |
+| Carga | `shell/` do commit `422cca7` (4,7 MB). **0.1** = a UI como está. **0.2** = "YORHA 0.2" + um selo webp na barra, dependência nova `qt6-imageformats`, e o estado do papel de parede no formato 2 (migration `monitors` → `outputs`). **0.3** = erro de QML de propósito + migration pro formato 3 |
 | Servidor | container do lab fazendo o papel de GitHub, AUR e repositório pacman; registra os bytes de cada pedido (separa carga e dependências) |
 | Fábrica | container de Arch sem privilégio: `makepkg`, `repo-add`, assinaturas, com uma chave descartável do lab e uma chave de "atacante" pro S8b |
 | VM | uma por vez, 2 núcleos e 4 GB (limite do dono), 1920×1080 |
 | Registro | um JSON por execução ([`run.schema.json`](../specs/005-estudo-instalacao/contracts/run.schema.json)), com screenshot e sha256, log de QML, `sudo` do journal, soma de `~/.config` antes e depois, e o id da sessão `lab/perf` |
 
 **Os quatro protótipos** cumprem o mesmo [contrato](../specs/005-estudo-instalacao/contracts/contrato-de-entrega.md)
-(`rien-shell`, `rien version`, `rien update [--check]`, `rien rollback`, `rien migrate`, `rien uninstall`):
+(`yorha-shell`, `yorha version`, `yorha update [--check]`, `yorha rollback`, `yorha migrate`, `yorha uninstall`):
 
 | | Instala | Atualiza | Volta | Confere |
 |---|---|---|---|---|
 | **A** | `curl …/boot.sh \| bash`: `pacman -Syu git`, clone, checkout da maior tag assinada | `git fetch --tags`, backup do que o usuário editou, checkout, migrations | checkout da tag anterior | hash do git + `git verify-tag` com a chave fixada no `boot.sh` |
 | **B** | `pacman -S base-devel git`, `git clone` da receita, `makepkg -si` | `git pull` + `makepkg -si` (o que um helper faz) | `pacman -U` do pacote montado antes | `sha256sums` da receita |
-| **C** | chave (`pacman-key --add` e `--lsign-key`), bloco `[rien-os]` no `pacman.conf`, `pacman -Syu rien-os` | `pacman -Syu` + migrations | `pacman -U` do cache | assinatura GPG do pacote e do banco |
+| **C** | chave (`pacman-key --add` e `--lsign-key`), bloco `[yorha-os]` no `pacman.conf`, `pacman -Syu yorha-os` | `pacman -Syu` + migrations | `pacman -U` do cache | assinatura GPG do pacote e do banco |
 | **D** | `curl …/install-d.sh \| bash`: tarball + sha256 + assinatura, `versions/<v>`, `current` | o mesmo pra versão nova, cópia do estado, troca atômica, migrations | troca `current` de volta e restaura a cópia do estado | sha256 + assinatura com a chave fixada no `install-d.sh` |
 
 **Execuções:**
@@ -83,7 +83,7 @@ pesos iguais (83,3); nenhum método foi eliminado pelos critérios obrigatórios
   máximo 4 VMs; esta fase, uma). Numa passagem, um defeito do roteiro deixou 4 VMs do estudo ligadas
   ao mesmo tempo. O lote foi parado e o roteiro passou a desligar a VM em qualquer saída e a recusar
   subir uma segunda.
-- **S9:** a "entrada do segundo usuário" foi simulada rodando o `rien-shell` como `beta`, sem sessão
+- **S9:** a "entrada do segundo usuário" foi simulada rodando o `yorha-shell` como `beta`, sem sessão
   gráfica. As migrations rodam antes da UI, então o resultado é o mesmo.
 - **S6b:** o corte é um `sysrq b` dentro da VM, que reinicia sem gravar o cache de disco, no instante
   em que o primeiro arquivo da carga muda. O desligamento pelo QMP, a partir do host, chegaria tarde
@@ -97,15 +97,15 @@ repetição k; `S12/x` = publicação; R-n = [research.md](../specs/005-estudo-i
 
 | Critério (peso) | A | B | C | D |
 |---|---|---|---|---|
-| **K1** update correto (15) | **3**: S2, S3 3/3 ok (`A/S2-1..3`, `A/S3-1..3`) | **2**: `rien update` ok, mas o comando nativo (`B/S2n-1`) deixa a 0.2 no ar com o estado velho até o próximo login | **2**: idem (`C/S2n-1`) | **3**: `D/S2-1..3`, `D/S3-1..3` |
+| **K1** update correto (15) | **3**: S2, S3 3/3 ok (`A/S2-1..3`, `A/S3-1..3`) | **2**: `yorha update` ok, mas o comando nativo (`B/S2n-1`) deixa a 0.2 no ar com o estado velho até o próximo login | **2**: idem (`C/S2n-1`) | **3**: `D/S2-1..3`, `D/S3-1..3` |
 | **K2** volta (15) | **2**: 1 comando, 1,2 s, estado no formato 3: a 0.2 perde a escolha do usuário (`A/S5-1`) | **2**: 1 comando, 0,8 s, estado não restaurado (`B/S5-1`) | **2**: 1 comando, 0,7 s, estado não restaurado; o próximo `-Syu` volta pra 0.3 (`C/S5-1`) | **3**: 1 comando, 0,8 s, estado restaurado (`D/S5-1`) |
-| **K3** interrupção (10) | **2**: UI no ar nos 3 pontos; download e troca terminam com 1 `rien update`, migration sozinha no login (`A/S6a..c-1`) | **2**: idem (`B/S6a..c-1`) | **2**: idem (`C/S6a..c-1`) | **2**: idem; na troca, a versão em uso não foi tocada (`D/S6a..c-1`) |
+| **K3** interrupção (10) | **2**: UI no ar nos 3 pontos; download e troca terminam com 1 `yorha update`, migration sozinha no login (`A/S6a..c-1`) | **2**: idem (`B/S6a..c-1`) | **2**: idem (`C/S6a..c-1`) | **2**: idem; na troca, a versão em uso não foi tocada (`D/S6a..c-1`) |
 | **K4** sem rede (5) | **2**: mensagem do curl, nada instalado, mas `curl \| bash` sai com 0 (`A/S7a-1`); update recusa limpo (`A/S7b-1`) | **1**: `base-devel` e `git` ficam; no update, `qt6-imageformats` entra antes do download falhar (`B/S7a-1`, `B/S7b-1`) | **3**: nada feito; transação abortada inteira (`C/S7a-1`, `C/S7b-1`) | **2**: como A; fica só uma pasta `downloads/` vazia (`D/S7a-1`, `D/S7b-1`) |
 | **K5** confiança (10) | **3**: S8a recusado (hash do git), S8b recusado (tag sem a assinatura fixada) (`A/S8a-1`, `A/S8b-1`) | **2**: S8a recusado; **S8b aceito, HUD com "PWNED 0.2"** (`B/S8b-1`) | **3**: S8a e S8b recusados (`C/S8a-1`, `C/S8b-1`) | **3**: S8a (sha256) e S8b (assinatura) recusados (`D/S8a-1`, `D/S8b-1`) |
 | **K6** manutenção (20) | **2**: 2 passos, 0,1 s; segredo: chave GPG das tags (`S12/a`) | **0**: 8 passos, 6,6 s; toda versão passa pelo AUR, terceiro com regras e disponibilidade próprias (`S12/b`, R3) | **1**: 7 passos, 4,7 s; chave + hospedagem do repositório, CI na prática (`S12/c`, R2, R4) | **2**: 7 passos (6 com GitHub Releases), 0,3 s; chave GPG + Releases (`S12/d`) |
 | **K7** primeira instalação (5) | **2**: 1 comando, 2 `sudo` (`A/S1-1..3`) | **2**: 3 comandos, 4 `sudo` (`B/S1-1..3`) | **1**: 5 comandos, edita `/etc/pacman.conf` (`C/S1-1..3`) | **3**: 1 comando, 1 `sudo` (`D/S1-1..3`) |
 | **K8** aviso (5) | **3**: sem root, 0,1 s, 308 B (`A/S4-1..3`) | **3**: sem root, <0,1 s, 578 B (`B/S4-1..3`) | **2**: sem root, 0,8 s, 9,0 MB (`checkupdates` sincroniza cópias dos bancos) (`C/S4-1..3`) | **3**: sem root, <0,1 s, 4 B (`D/S4-1..3`) |
-| **K9** desinstalação (5) | **2**: sobram `git` e as dependências (`A/S11-1`) | **1**: sobram a receita em `~/.cache`, `base-devel`, `git`, `qt6-shadertools` órfão (`B/S11-1`) | **1**: as dependências saem, o bloco `[rien-os]` e a chave ficam; o `rien` avisa, o `pacman -Rns` sozinho não (`C/S11-1`) | **2**: sobram as dependências (`D/S11-1`) |
+| **K9** desinstalação (5) | **2**: sobram `git` e as dependências (`A/S11-1`) | **1**: sobram a receita em `~/.cache`, `base-devel`, `git`, `qt6-shadertools` órfão (`B/S11-1`) | **1**: as dependências saem, o bloco `[yorha-os]` e a chave ficam; o `yorha` avisa, o `pacman -Rns` sozinho não (`C/S11-1`) | **2**: sobram as dependências (`D/S11-1`) |
 | **K10** encaixe (10) | **2**: camada por usuário (o segundo usuário instala de novo, `A/S9-1`); camada pessoal = clone privado | **1**: o AUR não serve pra camada pessoal; `/usr/share` só editável como root e sobrescrito sem aviso (`B/S10-1`) | **2**: módulos e hardware viram pacotes, vários usuários ok (`C/S9-1`); camada pessoal exige repositório privado com autenticação | **2**: camada por usuário (`D/S9-1`); camada pessoal = tarballs privados, o mesmo código |
 
 ## 4. Conta
@@ -142,7 +142,7 @@ empatam em K6 e K2, e o desempate cai na conta: **D**.
 
 Nenhum.
 - **G1:** em 103 execuções contadas, a soma de todos os arquivos de `~/.config` foi igual antes e depois.
-- **G2:** os quatro rodam migrations por usuário, com marcadores em `~/.local/state/rien-os/migrations/`.
+- **G2:** os quatro rodam migrations por usuário, com marcadores em `~/.local/state/yorha-os/migrations/`.
   - **B e C:** as do segundo usuário rodam na entrada dele (`B/S9-1`, `C/S9-1`).
   - **A e D:** a camada é por usuário; o segundo usuário não tem UI até instalar a dele (`A/S9-1`,
     `D/S9-1`). Isso pesa em K10, não elimina.
@@ -199,16 +199,16 @@ cada versão. Nesse tamanho isso não muda a escolha.
 ## 7. O que deu errado, por método
 
 **Versão quebrada (S5):** nos quatro, a 0.3 não abre (`Syntax error @shell.qml`), e o `u2-ui-run` do
-lab tenta de novo a cada segundo. O `rien rollback` volta pra 0.2 em menos de 1,5 s.
+lab tenta de novo a cada segundo. O `yorha rollback` volta pra 0.2 em menos de 1,5 s.
 - **D:** devolve também o estado (formato 2, a escolha do usuário de volta).
 - **A, B e C:** a 0.2 fica lendo um estado no formato 3, que ela não entende: o papel de parede do
   monitor volta ao padrão. Pra recuperar, o usuário copia à mão o arquivo de `backups/`.
 
 **Interrupção (S6):** em todos os cortes, ao religar, a UI abriu em menos de 90 s.
-- **Download (a) e troca dos arquivos (b):** a máquina voltou na 0.1, e um `rien update` terminou o
+- **Download (a) e troca dos arquivos (b):** a máquina voltou na 0.1, e um `yorha update` terminou o
   serviço (2–4 s).
 - **Migration (c):** a máquina voltou já na 0.2. A migration pendente rodou sozinha quando o
-  `rien-shell` abriu no login.
+  `yorha-shell` abriu no login.
 
 Detalhes por método:
 - **A (b):** o corte no meio do `git checkout` deixou a árvore em parte 0.1, em parte 0.2, e a UI abriu
@@ -237,10 +237,10 @@ Detalhes por método:
   - **C:** `failed to retrieve some files`, porque o tamanho difere do banco;
   - **D:** `checksum mismatch`.
 - **S8b** (o atacante refaz soma, receita, banco ou tag sem a chave do dono):
-  - **A** recusa: `tag v0.2 is not signed by the rien-OS key`;
+  - **A** recusa: `tag v0.2 is not signed by the YoRHa-OS key`;
   - **C** recusa: chave desconhecida. O `pacman` tenta importar a chave e falha; mesmo importada, ela
     não teria a assinatura local do usuário;
-  - **D** recusa: `not signed by the rien-OS key`;
+  - **D** recusa: `not signed by the YoRHa-OS key`;
   - **B instala a carga do atacante.**
 
 **Arquivo gerenciado editado (S10):**
@@ -249,23 +249,23 @@ Detalhes por método:
 - **D:** não toca a versão editada; a edição fica em `versions/0.1` até ela ser descartada.
 - Nos quatro, a UI 0.2 abriu.
 
-**Comando nativo em B e C (S2n):** o `makepkg -si` ou `pacman -Syu`, sem o `rien`, troca os arquivos
+**Comando nativo em B e C (S2n):** o `makepkg -si` ou `pacman -Syu`, sem o `yorha`, troca os arquivos
 debaixo do Quickshell em execução.
 - O Quickshell recarrega a 0.2 na hora, no mesmo processo, com o estado ainda no formato 1.
-- A escolha do usuário some da tela até o próximo login, quando o `rien-shell` roda a migration.
+- A escolha do usuário some da tela até o próximo login, quando o `yorha-shell` roda a migration.
 - **Vale pra qualquer método que troque arquivos no lugar:** em A acontece por um instante, entre o
   `checkout` e o reinício.
 
 ## 8. Entradas pra S3 (instalador)
 
 - **Estrutura** (`PLAN.md` §5, ajustada ao método D):
-  - `~/.local/share/rien-os/versions/<v>/` (imutável, uma por versão; guarda 3);
-  - `~/.local/share/rien-os/current` → `versions/<v>` (link relativo, trocado com `ln -s` + `mv -T`);
-  - `~/.local/share/rien-os/trust/` (a chave pública, num `GNUPGHOME` próprio, nunca o `~/.gnupg`
+  - `~/.local/share/yorha-os/versions/<v>/` (imutável, uma por versão; guarda 3);
+  - `~/.local/share/yorha-os/current` → `versions/<v>` (link relativo, trocado com `ln -s` + `mv -T`);
+  - `~/.local/share/yorha-os/trust/` (a chave pública, num `GNUPGHOME` próprio, nunca o `~/.gnupg`
     do usuário);
-  - `~/.local/bin/{rien,rien-shell}` → `current/bin/…`;
-  - `~/.local/state/rien-os/` (estado, marcadores de migration, `backups/`).
-  - O `~/.config/rien-os/` é só do usuário (nenhuma execução o alterou).
+  - `~/.local/bin/{yorha,yorha-shell}` → `current/bin/…`;
+  - `~/.local/state/yorha-os/` (estado, marcadores de migration, `backups/`).
+  - O `~/.config/yorha-os/` é só do usuário (nenhuma execução o alterou).
 - **Ponto de entrada:**
   - um `install.sh` público baixado e conferido **antes** de rodar: `bash <(curl -fsSL …)`, ou baixar
     e rodar, em vez de `curl … | bash`, que sai com 0 quando o download falha (S7a);
@@ -284,10 +284,10 @@ debaixo do Quickshell em execução.
 - **Shaders:** compilados no destino pelo `shell/shaders/build.sh` (`qsb` do `qt6-shadertools`).
   Funcionou nos quatro; o método C mostrou que os `.qsb` prontos também servem.
 - **Instalação nova:** marca como feitas as migrations que já vêm na versão (como o Omarchy).
-- **`~/.local/bin` no PATH:** o Arch não põe sozinho. Hoje o `rien-shell` é chamado pelo caminho; a S3
+- **`~/.local/bin` no PATH:** o Arch não põe sozinho. Hoje o `yorha-shell` é chamado pelo caminho; a S3
   precisa resolver o PATH do usuário.
 
-## 9. Entradas pra S4 (`rien update` e migrations)
+## 9. Entradas pra S4 (`yorha update` e migrations)
 
 - **Passos do update** (o protótipo D, testado em S2, S6 e S8):
   1. lê `latest`;
@@ -303,13 +303,13 @@ debaixo do Quickshell em execução.
   11. apaga versões além das 3 últimas e sobras `.part`;
   12. reinicia a UI.
 - **Onde rodam as migrations:**
-  - no `rien update` e no começo de toda sessão (`rien-shell`), por usuário;
+  - no `yorha update` e no começo de toda sessão (`yorha-shell`), por usuário;
   - a primeira que falhar para a fila (sem "pular e seguir"); a próxima tentativa recomeça dela;
   - toda migration é idempotente e copia o arquivo antes de escrever.
   - O S6c mostrou o valor disso: com o corte no meio da migration, o login seguinte terminou o serviço.
-- **Volta:** `rien rollback` troca `current` pra versão anterior e restaura `backups/<anterior>/`. O que
+- **Volta:** `yorha rollback` troca `current` pra versão anterior e restaura `backups/<anterior>/`. O que
   o usuário mudou depois do update se perde na volta; isso precisa ser dito na mensagem.
-- **Aviso:** `rien update --check` lê `latest` (4 B, sem root). O indicador na barra pode rodar isso de
+- **Aviso:** `yorha update --check` lê `latest` (4 B, sem root). O indicador na barra pode rodar isso de
   hora em hora, como o Omarchy v3.
 - **Nunca trocar arquivos debaixo da UI em execução** (S2n): com versões em pastas separadas isso não
   acontece; vale como regra pra qualquer parte da camada que fique fora de `versions/`.
@@ -335,7 +335,7 @@ renderizada bloqueia leitura automática).
 | Omarchy v3 (git) → v4 (pacotes, migrations avisadas no login); problemas do modelo git (#240, #1298, #12436, #7078) | research R1, R2 (GitHub do Omarchy) | não reconferido nesta fase |
 | `/etc/xdg/quickshell/<nome>` como caminho de config de pacote | research R14 | **não verificado** |
 | Um update do Qt invalida `.qsb` gerados antes? | research R7 | **não verificado** (o mirror fixo não muda o Qt); o `build.sh` recompila quando falta o `.qsb` |
-| Snapshot do sistema (btrfs) restaura a raiz, não o `/home` | research R9 | pesquisa; a raiz do lab é btrfs (conferido), mas a camada escolhida mora no `/home`, então o snapshot não substitui o `rien rollback` |
+| Snapshot do sistema (btrfs) restaura a raiz, não o `/home` | research R9 | pesquisa; a raiz do lab é btrfs (conferido), mas a camada escolhida mora no `/home`, então o snapshot não substitui o `yorha rollback` |
 
 **B-ref** (o AUR de verdade, só leitura): ver §12.
 
