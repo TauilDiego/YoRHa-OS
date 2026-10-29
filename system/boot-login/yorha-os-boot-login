@@ -1,0 +1,979 @@
+#!/usr/bin/env bash
+# yorha-os-boot-login: install, check and undo the YoRHa-OS boot and login themes (spec 011,
+# specs/011-boot-e-login/contracts/install-cli.md). Runs as root, on the target system.
+#
+# Usage: yorha-os-boot-login install [--dry-run] [--src <root>]
+#        yorha-os-boot-login uninstall [--dry-run]
+#        yorha-os-boot-login status
+#   --dry-run     only list what would be done; nothing changes
+#   --src <root>  where the themes, the font and the drop-ins come from: a tree laid out like the
+#                 YoRHa-OS repository (default: YORHA_OS_SRC, else the repository holding this file)
+#
+# Exit codes (status uses the same meanings):
+#   0  done, or nothing to do
+#   1  precondition: not root; SDDM, Plymouth or mkinitcpio missing; a theme missing in the source.
+#      Also an unexpected error: the manifest keeps what was done, and uninstall undoes it
+#   2  the initramfs failed to build, or lacks the theme (still has it, after uninstall). The
+#      backups stay; uninstall undoes the install
+#   3  unsupported bootloader: the rest is installed, and the manual step is printed
+#   4  uninstall without a manifest, or an edited file changed after the install: that file is
+#      left alone and the difference is shown
+#
+# Managed (replaced on every install, removed by uninstall): /usr/share/yorha-os/{login,boot},
+# /usr/share/fonts/yorha-os, the yorha-os link in the SDDM theme folder and the yorha-os copy in
+# the Plymouth one, the drop-ins named yorha-os.conf, the sddm.service drop-ins and the boot watch
+# unit (system/boot/plymouth/yorha-os/watch/*.service; its script stays in /usr/share/yorha-os/boot/watch).
+# Edited, with a backup and both hashes in the manifest: the systemd-boot entries (or
+# /etc/kernel/cmdline with UKI), /etc/plymouth/plymouthd.conf (the theme) and, only with a
+# mkinitcpio that reads no drop-ins, /etc/mkinitcpio.conf. Anything already sitting on a managed
+# path is moved into the backup, and uninstall puts it back. /etc/yorha-os/login.conf belongs to
+# the user: written once when missing, never overwritten nor removed.
+#
+# Lab overrides: YORHA_OS_BOOTLOADER=systemd-boot|uki|other forces the bootloader detection;
+# YORHA_OS_MKINITCPIO_DROPINS=0 forces the fallback that edits /etc/mkinitcpio.conf.
+set -euo pipefail
+shopt -s nullglob
+
+VERSION=0.1.0
+NAME=yorha-os
+STATE_DIR=/var/lib/yorha-os
+MANIFEST=$STATE_DIR/boot-login.json
+SHARE=/usr/share/yorha-os
+LOGIN_DIR=$SHARE/login
+BOOT_DIR=$SHARE/boot
+FONT_DIR=/usr/share/fonts/yorha-os
+SDDM_LINK=/usr/share/sddm/themes/$NAME
+# The Plymouth theme folder is a managed copy of $BOOT_DIR, not a link: the plymouth hook of
+# mkinitcpio 42 adds the theme with add_full_dir, and add_file moves every file whose parent is a
+# link to the real path, so the image would lack themes/yorha-os/yorha-os.plymouth (seen in the lab)
+PLY_DIR=/usr/share/plymouth/themes/$NAME
+PLY_CONF=/etc/plymouth/plymouthd.conf
+SDDM_DROPIN=/etc/sddm.conf.d/$NAME.conf
+UNIT_DIR=/etc/systemd/system
+SDDM_UNIT_D=$UNIT_DIR/sddm.service.d
+MKINIT_CONF=/etc/mkinitcpio.conf
+MKINIT_DROPIN=/etc/mkinitcpio.conf.d/$NAME.conf
+PRESET_DIR=/etc/mkinitcpio.d
+KERNEL_CMDLINE=/etc/kernel/cmdline
+USER_CONF=/etc/yorha-os/login.conf
+CMDLINE_WORDS=(quiet splash)
+US=$'\x1f'  # field separator of the in-memory records (keeps empty fields, unlike a tab)
+
+here=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+
+DRY=0 RC_INITRAMFS=0 RC_CHANGED=0 RC_BOOT=0 RELOAD=0 FINISHED=0
+declare -A TOUCHED=() MADE=()
+LEFTOVER=()
+
+say() { printf '%s\n' "$*"; }
+item() { printf '  %-9s %s\n' "$1" "$2"; }
+warn() { printf 'warning: %s\n' "$*" >&2; }
+die() { FINISHED=1; printf 'error: %s\n' "$2" >&2; exit "$1"; }
+usage() { sed -n '2,/^$/{/^#/!q;s/^# \{0,1\}//p}' "${BASH_SOURCE[0]}"; exit "$1"; }
+# shellcheck disable=SC2329  # the EXIT trap
+on_exit() {
+    local rc=$?
+    if ((!FINISHED && rc != 0)); then
+        printf 'error: unexpected failure (exit %s). The manifest %s keeps what was done; uninstall undoes it\n' "$rc" "$MANIFEST" >&2
+        exit 1
+    fi
+}
+trap on_exit EXIT
+
+finish() {
+    FINISHED=1
+    if ((RC_INITRAMFS)); then exit 2; fi
+    if ((RC_CHANGED)); then exit 4; fi
+    if ((RC_BOOT)); then exit 3; fi
+    exit 0
+}
+
+sha_of() { if [[ -f $1 ]]; then sha256sum "$1" | cut -d' ' -f1; else echo absent; fi; }
+
+# show_diff <old> <new> <old label> <new label>
+show_diff() {
+    if command -v diff >/dev/null; then
+        diff -u --label "$3" --label "$4" "$1" "$2" || true
+    else
+        printf -- '--- %s\n' "$3"; sed 's/^/-/' "$1"; printf -- '+++ %s\n' "$4"; sed 's/^/+/' "$2"
+    fi
+}
+
+# --- Manifest (/var/lib/yorha-os/boot-login.json, data-model.md "Instalação"). Written by this
+# file only, one item per line, so plain bash reads it back without jq.
+M_VERSION="" M_INSTALLED_AT="" M_UPDATED_AT="" M_SRC="" M_BACKUP="" M_BOOTLOADER=""
+M_IR_REBUILT=false M_IR_VERIFIED=false
+M_IR_IMAGES=()
+M_CREATED=()    # "type US path US extra": dir | mkdir | link (extra: target) | file, unit (sha256) | user
+M_EDITED=()     # "path US sha256 before US sha256 after"; copies in $M_BACKUP/before and /after
+M_DISPLACED=()  # "path US backup": what sat on a managed path before the install
+
+jstr() {
+    local s=$1
+    s=${s//\\/\\\\}; s=${s//\"/\\\"}; s=${s//$'\t'/\\t}; s=${s//$'\n'/\\n}
+    printf '"%s"' "$s"
+}
+# jget <line> <key>: the string value of <key> in one manifest line, unescaped
+jget() {
+    local re='"'"$2"'": "(([^"\\]|\\.)*)"' v
+    [[ $1 =~ $re ]] || return 1
+    v=${BASH_REMATCH[1]}
+    v=${v//\\\\/$'\x01'}; v=${v//\\\"/\"}; v=${v//\\t/$'\t'}; v=${v//\\n/$'\n'}; v=${v//$'\x01'/\\}
+    printf '%s' "$v"
+}
+jbool() {
+    local re='"'"$2"'": (true|false)'
+    if [[ $1 =~ $re ]]; then printf '%s' "${BASH_REMATCH[1]}"; else printf false; fi
+}
+
+manifest_write() {
+    ((DRY)) && return 0
+    local tmp i n t p x b a imgs="" sep=""
+    install -d -m 755 "$STATE_DIR"
+    tmp=$(mktemp "$MANIFEST.XXXXXX")
+    for i in "${M_IR_IMAGES[@]}"; do imgs+="$sep$(jstr "$i")"; sep=", "; done
+    {
+        printf '{\n'
+        printf '  "version": %s,\n' "$(jstr "$M_VERSION")"
+        printf '  "installed_at": %s,\n' "$(jstr "$M_INSTALLED_AT")"
+        printf '  "updated_at": %s,\n' "$(jstr "$M_UPDATED_AT")"
+        printf '  "src": %s,\n' "$(jstr "$M_SRC")"
+        printf '  "backup_dir": %s,\n' "$(jstr "$M_BACKUP")"
+        printf '  "bootloader": %s,\n' "$(jstr "$M_BOOTLOADER")"
+        printf '  "initramfs": {"rebuilt": %s, "verified": %s, "images": [%s]},\n' \
+            "$M_IR_REBUILT" "$M_IR_VERIFIED" "$imgs"
+        printf '  "created": [\n'
+        n=${#M_CREATED[@]}
+        for ((i = 0; i < n; i++)); do
+            IFS=$US read -r t p x <<<"${M_CREATED[i]}"
+            printf '    {"type": %s, "path": %s' "$(jstr "$t")" "$(jstr "$p")"
+            case $t in
+                link) printf ', "target": %s' "$(jstr "$x")" ;;
+                file | unit) printf ', "sha256": %s' "$(jstr "$x")" ;;
+            esac
+            printf '}%s\n' "$( ((i < n - 1)) && echo , )"
+        done
+        printf '  ],\n'
+        printf '  "edited": [\n'
+        n=${#M_EDITED[@]}
+        for ((i = 0; i < n; i++)); do
+            IFS=$US read -r p b a <<<"${M_EDITED[i]}"
+            printf '    {"path": %s, "backup": %s, "after_copy": %s, "sha256_before": %s, "sha256_after": %s}%s\n' \
+                "$(jstr "$p")" "$(jstr "$M_BACKUP/before$p")" "$(jstr "$M_BACKUP/after$p")" \
+                "$(jstr "$b")" "$(jstr "$a")" "$( ((i < n - 1)) && echo , )"
+        done
+        printf '  ],\n'
+        printf '  "displaced": [\n'
+        n=${#M_DISPLACED[@]}
+        for ((i = 0; i < n; i++)); do
+            IFS=$US read -r p b <<<"${M_DISPLACED[i]}"
+            printf '    {"path": %s, "backup": %s}%s\n' "$(jstr "$p")" "$(jstr "$b")" "$( ((i < n - 1)) && echo , )"
+        done
+        printf '  ]\n'
+        printf '}\n'
+    } >"$tmp"
+    chmod 644 "$tmp"
+    mv -f "$tmp" "$MANIFEST"
+}
+
+manifest_read() {
+    [[ -f $MANIFEST ]] || return 1
+    local line section="" t p x rest re='"(([^"\\]|\\.)*)"'
+    M_CREATED=() M_EDITED=() M_DISPLACED=() M_IR_IMAGES=()
+    while IFS= read -r line; do
+        case $line in
+            *'"created": ['*) section=created; continue ;;
+            *'"edited": ['*) section=edited; continue ;;
+            *'"displaced": ['*) section=displaced; continue ;;
+            '  ]'*) section=""; continue ;;
+        esac
+        case $section in
+            created)
+                t=$(jget "$line" type) || continue
+                p=$(jget "$line" path) || continue
+                x=$(jget "$line" target || jget "$line" sha256 || true)
+                M_CREATED+=("$t$US$p$US$x") ;;
+            edited)
+                p=$(jget "$line" path) || continue
+                M_EDITED+=("$p$US$(jget "$line" sha256_before || true)$US$(jget "$line" sha256_after || true)") ;;
+            displaced)
+                p=$(jget "$line" path) || continue
+                M_DISPLACED+=("$p$US$(jget "$line" backup || true)") ;;
+            *)
+                case $line in
+                    *'"version":'*) M_VERSION=$(jget "$line" version || true) ;;
+                    *'"installed_at":'*) M_INSTALLED_AT=$(jget "$line" installed_at || true) ;;
+                    *'"updated_at":'*) M_UPDATED_AT=$(jget "$line" updated_at || true) ;;
+                    *'"src":'*) M_SRC=$(jget "$line" src || true) ;;
+                    *'"backup_dir":'*) M_BACKUP=$(jget "$line" backup_dir || true) ;;
+                    *'"bootloader":'*) M_BOOTLOADER=$(jget "$line" bootloader || true) ;;
+                    *'"initramfs":'*)
+                        M_IR_REBUILT=$(jbool "$line" rebuilt)
+                        M_IR_VERIFIED=$(jbool "$line" verified)
+                        rest=${line#*'"images": ['}
+                        rest=${rest%%]*}
+                        while [[ $rest =~ $re ]]; do
+                            M_IR_IMAGES+=("${BASH_REMATCH[1]}")
+                            rest=${rest#*"${BASH_REMATCH[0]}"}
+                        done ;;
+                esac ;;
+        esac
+    done <"$MANIFEST"
+    return 0
+}
+
+# created_find <path>: print its record; status 1 when the module did not create it
+created_find() {
+    local r
+    for r in "${M_CREATED[@]}"; do
+        if [[ ${r#*"$US"} == "$1$US"* ]]; then printf '%s' "$r"; return 0; fi
+    done
+    return 1
+}
+created_set() {
+    local i rec="$1$US$2$US${3:-}"
+    TOUCHED[$2]=1
+    for i in "${!M_CREATED[@]}"; do
+        if [[ ${M_CREATED[i]#*"$US"} == "$2$US"* ]]; then M_CREATED[i]=$rec; return 0; fi
+    done
+    M_CREATED+=("$rec")
+}
+edited_find() {
+    local r
+    for r in "${M_EDITED[@]}"; do
+        if [[ $r == "$1$US"* ]]; then printf '%s' "$r"; return 0; fi
+    done
+    return 1
+}
+edited_set() {
+    local i rec="$1$US$2$US$3"
+    for i in "${!M_EDITED[@]}"; do
+        if [[ ${M_EDITED[i]} == "$1$US"* ]]; then M_EDITED[i]=$rec; return 0; fi
+    done
+    M_EDITED+=("$rec")
+}
+
+ensure_backup() {
+    [[ -n $M_BACKUP ]] || M_BACKUP=$STATE_DIR/backup/$(date +%Y%m%d-%H%M%S)
+    if ((!DRY)); then install -d -m 700 "$STATE_DIR/backup" "$M_BACKUP"; fi
+}
+
+# keep_copy <path> <subdir>: a copy of <path> in the backup, under <subdir>, never over another one
+keep_copy() {
+    local dst=$M_BACKUP/$2$1
+    [[ -e $dst ]] && dst+=.$(date +%s)
+    install -d -m 700 "$(dirname "$dst")"
+    cp -a "$1" "$dst"
+    printf '%s' "$dst"
+}
+
+# replace_with <path> <content file> [<preserve timestamps of content>]: atomic replace that keeps
+# the owner and mode of <path> (the ESP is FAT: chmod and chown may fail there, which is fine)
+replace_with() {
+    local new=$1.yorha-new
+    if [[ ${3:-} == keep-time ]]; then cp --preserve=timestamps "$2" "$new"; else cp "$2" "$new"; fi
+    chown --reference="$1" "$new" 2>/dev/null || true
+    chmod --reference="$1" "$new" 2>/dev/null || true
+    mv -f "$new" "$1"
+}
+
+# --- Placing what the module owns
+
+# make_dir <dir>: create it and its missing parents, each one recorded (uninstall removes it if
+# empty)
+make_dir() {
+    local d=$1 missing=()
+    while [[ ! -d $d ]]; do missing=("$d" "${missing[@]}"); d=$(dirname "$d"); done
+    for d in "${missing[@]}"; do
+        if [[ -n ${MADE[$d]:-} ]]; then continue; fi
+        MADE[$d]=1
+        item mkdir "$d"
+        if ((!DRY)); then install -d -m 755 "$d"; created_set mkdir "$d"; fi
+    done
+    return 0
+}
+
+# displace <path>: move what sits on a managed path, and is not ours, into the backup
+displace() {
+    local dst
+    if ((DRY)); then item move "$1 -> the backup (it was not installed by this module)"; return 0; fi
+    dst=$M_BACKUP/displaced$1
+    [[ -e $dst || -L $dst ]] && dst+=.$(date +%s)
+    install -d -m 700 "$(dirname "$dst")"
+    mv -T "$1" "$dst"
+    M_DISPLACED+=("$1$US$dst")
+    item move "$1 -> $dst"
+    manifest_write
+}
+
+# place_tree <src dir> <dest> [exclude...]: a theme (or the font) into its managed folder
+place_tree() {
+    local src=$1 dst=$2 stage x
+    shift 2
+    TOUCHED[$dst]=1
+    if [[ -e $dst || -L $dst ]] && ! created_find "$dst" >/dev/null; then displace "$dst"; fi
+    make_dir "$(dirname "$dst")"
+    item copy "$src -> $dst"
+    MADE[$dst]=1
+    ((DRY)) && return 0
+    stage=$dst.yorha-new
+    rm -rf "$stage"
+    mkdir -m 755 "$stage"
+    cp -R --preserve=mode,timestamps "$src/." "$stage/"
+    for x in "$@"; do rm -rf "${stage:?}/$x"; done
+    chown -R root:root "$stage"
+    chmod -R u+rwX,go+rX,go-w "$stage"
+    rm -rf "$dst"
+    mv -T "$stage" "$dst"
+    created_set dir "$dst"
+    manifest_write
+}
+
+# place_link <link> <target>
+place_link() {
+    local l=$1 tg=$2
+    TOUCHED[$l]=1
+    if [[ -L $l && $(readlink "$l") == "$tg" ]]; then
+        item same "$l -> $tg"
+        if ((!DRY)); then created_set link "$l" "$tg"; fi
+        return 0
+    fi
+    if [[ -e $l || -L $l ]]; then
+        if [[ -L $l ]] && created_find "$l" >/dev/null; then
+            : # our own link to an older target: replaced below
+        else
+            displace "$l"
+        fi
+    fi
+    make_dir "$(dirname "$l")"
+    item link "$l -> $tg"
+    ((DRY)) && return 0
+    ln -sfnT "$tg" "$l"
+    created_set link "$l" "$tg"
+    manifest_write
+}
+
+# place_file <src> <dest> [type]: a file the module owns (a drop-in, a unit). A hand edit of our
+# own file goes to the backup before it is replaced; someone else's file is moved aside.
+place_file() {
+    local src=$1 dst=$2 type=${3:-file} rec t p x cur gone=0
+    TOUCHED[$dst]=1
+    cur=$(sha_of "$dst")
+    if rec=$(created_find "$dst"); then
+        IFS=$US read -r t p x <<<"$rec"
+        if [[ -f $dst && $cur != "$x" && $cur != "$(sha_of "$src")" ]]; then
+            if ((DRY)); then item keep "$dst was changed by hand: a copy would go to the backup"
+            else item keep "$dst was changed by hand: copy in $(keep_copy "$dst" changed)"; fi
+        fi
+    elif [[ -e $dst || -L $dst ]]; then
+        displace "$dst"; gone=1
+    fi
+    make_dir "$(dirname "$dst")"
+    if ((!gone)) && [[ -f $dst && $cur == "$(sha_of "$src")" ]]; then
+        item same "$dst"
+        if ((!DRY)); then created_set "$type" "$dst" "$cur"; fi
+        return 0
+    fi
+    item write "$dst"
+    ((DRY)) && return 0
+    install -m 644 "$src" "$dst.yorha-new"
+    mv -f "$dst.yorha-new" "$dst"
+    created_set "$type" "$dst" "$(sha_of "$dst")"
+    if [[ $dst == "$UNIT_DIR"/* ]]; then RELOAD=1; fi
+    manifest_write
+}
+
+# changed_since <path>: an edited file changed after the install. It is left as it is.
+changed_since() {
+    local p=$1
+    RC_CHANGED=1
+    LEFTOVER+=("$p")
+    warn "$p changed after the install; it is left as it is"
+    if [[ ! -e $p ]]; then
+        say "    (the file is gone)"
+    elif [[ -f $M_BACKUP/after$p ]]; then
+        show_diff "$M_BACKUP/after$p" "$p" "as installed" "now" | sed 's/^/    /'
+    fi
+    say "    the original is in $M_BACKUP/before$p"
+}
+
+# edit_file <path> <fn>: <fn> rewrites the temporary copy it gets; the result replaces <path>
+# after a backup. Only the first backup counts; both hashes go to the manifest.
+edit_file() {
+    local path=$1 fn=$2 rec p before="" after cur new tmp
+    cur=$(sha_of "$path")
+    if rec=$(edited_find "$path"); then
+        IFS=$US read -r p before after <<<"$rec"
+        if [[ $cur == "$after" ]]; then item same "$path"; return 0; fi
+        if [[ $cur != "$before" ]]; then changed_since "$path"; return 0; fi
+    fi
+    tmp=$(mktemp)
+    cat "$path" >"$tmp"
+    "$fn" "$tmp"
+    new=$(sha_of "$tmp")
+    if [[ $new == "$cur" ]]; then
+        item same "$path (nothing to change)"
+        rm -f "$tmp"
+        return 0
+    fi
+    if ((DRY)); then
+        item edit "$path"
+        show_diff "$path" "$tmp" "now" "after" | sed 's/^/            /'
+        rm -f "$tmp"
+        return 0
+    fi
+    if [[ -z $rec ]]; then
+        install -d -m 700 "$(dirname "$M_BACKUP/before$path")"
+        cp --preserve=mode,timestamps "$path" "$M_BACKUP/before$path"
+        before=$cur
+    fi
+    replace_with "$path" "$tmp"
+    rm -f "$tmp"
+    after=$(sha_of "$path")
+    install -d -m 700 "$(dirname "$M_BACKUP/after$path")"
+    cp "$path" "$M_BACKUP/after$path"
+    edited_set "$path" "$before" "$after"
+    item edit "$path (backup in $M_BACKUP/before$path)"
+    manifest_write
+}
+
+# --- What the edits do
+
+# words_missing <file> options|all: the CMDLINE_WORDS absent from the options lines of a
+# systemd-boot entry (options) or from a whole kernel command line file (all)
+words_missing() {
+    awk -v want="${CMDLINE_WORDS[*]}" -v mode="$2" '
+        /^[ \t]*#/ { next }
+        mode == "options" && !/^options[ \t]/ { next }
+        { n = split($0, a, /[ \t]+/); for (i = 1; i <= n; i++) { w = a[i]; sub(/=.*/, "", w); have[w] = 1 } }
+        END {
+            m = split(want, ws, " "); out = ""
+            for (i = 1; i <= m; i++) if (!(ws[i] in have)) out = out (out == "" ? "" : " ") ws[i]
+            print out
+        }' "$1"
+}
+# shellcheck disable=SC2329  # fix_* run through edit_file
+fix_entry() {
+    local add
+    add=$(words_missing "$1" options)
+    [[ -n $add ]] || return 0
+    awk -v add="$add" '
+        !done && /^options[ \t]/ { sub(/[ \t]+$/, ""); print $0 " " add; done = 1; next }
+        { print }
+        END { if (!done) print "options " add }' "$1" >"$1.new"
+    mv -f "$1.new" "$1"
+}
+fix_cmdline_file() {
+    local add
+    add=$(words_missing "$1" all)
+    [[ -n $add ]] || return 0
+    awk -v add="$add" '
+        !done && !/^[ \t]*#/ && NF { sub(/[ \t]+$/, ""); print $0 " " add; done = 1; next }
+        { print }
+        END { if (!done) print add }' "$1" >"$1.new"
+    mv -f "$1.new" "$1"
+}
+# The boot theme in plymouthd.conf, by plymouth-set-default-theme itself, run on a copy (with a
+# copy of the theme file): its in-place sed would leave a stray "plymouthd.confe" in /etc, and it
+# removes a default.plymouth link it finds
+fix_plymouthd() {
+    local d
+    d=$(mktemp -d)
+    install -d "$d/conf" "$d/data/plymouth/themes/$NAME"
+    cp "$1" "$d/conf/plymouthd.conf"
+    cp "$BOOT_SRC/$NAME.plymouth" "$d/data/plymouth/themes/$NAME/"
+    PLYMOUTH_CONFDIR=$d/conf PLYMOUTH_DATADIR=$d/data plymouth-set-default-theme "$NAME" >/dev/null
+    cat "$d/conf/plymouthd.conf" >"$1"
+    rm -rf "$d"
+}
+# Fallback for a mkinitcpio without drop-ins: the HOOKS line, as the drop-in would leave it
+# shellcheck disable=SC2329
+fix_mkinitcpio_conf() {
+    local hooks
+    if [[ $(grep -c '^HOOKS=(.*)[[:space:]]*$' "$1" || true) != 1 ]]; then
+        warn "$MKINIT_CONF has no single-line HOOKS=(...); add the plymouth hook after kms by hand"
+        return 0
+    fi
+    # shellcheck disable=SC2016
+    hooks=$(bash -c 'source "$1"; source "$2"; printf "%s " "${HOOKS[@]}"' _ "$1" "$FILES/mkinitcpio.conf.d/$NAME.conf")
+    hooks=${hooks% }
+    sed -i "s|^HOOKS=(.*|HOOKS=($hooks)|" "$1"
+}
+
+# --- The system around
+
+# preset_values <image|uki>: the <preset>_<key> values of every mkinitcpio preset
+preset_values() {
+    local p
+    for p in "$PRESET_DIR"/*.preset; do
+        (
+            set +eu
+            # shellcheck disable=SC1090
+            source "$p" >/dev/null 2>&1
+            for x in "${PRESETS[@]}"; do
+                v=${x}_$1
+                if [[ -n ${!v:-} ]]; then printf '%s\n' "${!v}"; fi
+            done
+            true
+        )
+    done
+    return 0
+}
+initramfs_images() {
+    local i
+    while IFS= read -r i; do
+        if [[ -f $i ]]; then printf '%s\n' "$i"; fi
+    done < <(preset_values image; preset_values uki)
+    return 0
+}
+# The type #1 entries of systemd-boot that start Linux
+linux_entries() {
+    local d f
+    while IFS= read -r d; do
+        [[ -n $d && -d $d/loader/entries ]] || continue
+        for f in "$d"/loader/entries/*.conf; do
+            if grep -q '^linux[[:space:]]' "$f"; then printf '%s\n' "$f"; fi
+        done
+    done < <({ bootctl --print-esp-path 2>/dev/null || true; bootctl --print-boot-path 2>/dev/null || true; } | sort -u)
+    return 0
+}
+detect_bootloader() {
+    if [[ -n ${YORHA_OS_BOOTLOADER:-} ]]; then echo "$YORHA_OS_BOOTLOADER"
+    elif [[ -n $(preset_values uki) ]]; then echo uki
+    elif bootctl is-installed >/dev/null 2>&1 && [[ -n $(linux_entries) ]]; then echo systemd-boot
+    else echo other; fi
+}
+mkinitcpio_reads_dropins() {
+    case ${YORHA_OS_MKINITCPIO_DROPINS:-} in 0) return 1 ;; 1) return 0 ;; esac
+    grep -Eq 'mkinitcpio\.conf\.d|_f_config\}\.d' "$(command -v mkinitcpio)"
+}
+# The [Theme] Current= SDDM ends up with, and the file it comes from (later files win)
+sddm_current() {
+    local files=(/usr/lib/sddm/sddm.conf.d/*.conf /etc/sddm.conf.d/*.conf)
+    if [[ -f /etc/sddm.conf ]]; then files+=(/etc/sddm.conf); fi
+    if ((${#files[@]} == 0)); then echo "(default)"; return 0; fi
+    awk '/^\[/ { sec = $0 } sec == "[Theme]" && /^Current=/ { v = substr($0, 9); f = FILENAME }
+        END { print (v == "" ? "(default)" : v) (f == "" ? "" : " (" f ")") }' "${files[@]}"
+}
+# check_image <image> present|absent: what the image holds; status 0 when it is as expected
+check_image() {
+    local list theme=no hook=no font=no
+    if ! list=$(lsinitcpio -l "$1" 2>/dev/null); then item check "$1: unreadable"; return 1; fi
+    if grep -qx "usr/share/plymouth/themes/$NAME/$NAME.plymouth" <<<"$list"; then theme=yes; fi
+    if grep -qx 'usr/bin/plymouthd' <<<"$list"; then hook=yes; fi
+    if grep -qx 'usr/share/fonts/Plymouth.ttf' <<<"$list"; then font=yes; fi
+    item check "$1: theme $theme, plymouth $hook, font $font"
+    case $2 in
+        present) [[ $theme == yes && $hook == yes && $font == yes ]] ;;
+        absent) [[ $theme == no ]] ;;
+    esac
+}
+# rebuild_initramfs present|absent: mkinitcpio -P, then every image is checked
+rebuild_initramfs() {
+    local log img ok=1
+    if ((DRY)); then item initramfs "mkinitcpio -P, then the theme $1 in every image"; return 0; fi
+    log=$M_BACKUP/mkinitcpio.log
+    item initramfs "mkinitcpio -P (log: $log)"
+    M_IR_REBUILT=false M_IR_VERIFIED=false
+    if ! mkinitcpio -P >"$log" 2>&1; then
+        tail -n 15 "$log" | sed 's/^/    /' >&2
+        RC_INITRAMFS=1
+        manifest_write
+        return 0
+    fi
+    M_IR_REBUILT=true
+    mapfile -t M_IR_IMAGES < <(initramfs_images)
+    if ((${#M_IR_IMAGES[@]} == 0)); then item check "no image found in the presets of $PRESET_DIR"; ok=0; fi
+    for img in "${M_IR_IMAGES[@]}"; do check_image "$img" "$1" || ok=0; done
+    if ((ok)); then M_IR_VERIFIED=true; else RC_INITRAMFS=1; fi
+    manifest_write
+}
+
+# --- Preconditions
+
+need_root() { ((EUID == 0)) || die 1 "run it as root: sudo $0 $CMD"; }
+need_tools() {
+    command -v sddm >/dev/null || die 1 "SDDM is not installed (pacman -S sddm)"
+    { command -v plymouthd && command -v plymouth-set-default-theme; } >/dev/null \
+        || die 1 "Plymouth is not installed (pacman -S plymouth)"
+    { command -v mkinitcpio && command -v lsinitcpio; } >/dev/null \
+        || die 1 "mkinitcpio is missing: the boot theme goes into the initramfs through it"
+}
+need_src() {
+    local f fonts
+    [[ -f $LOGIN_SRC/Main.qml && -f $LOGIN_SRC/metadata.desktop ]] \
+        || die 1 "no login theme in $LOGIN_SRC (Main.qml and metadata.desktop)"
+    [[ -f $BOOT_SRC/$NAME.plymouth ]] || die 1 "no boot theme in $BOOT_SRC ($NAME.plymouth)"
+    fonts=("$FONT_SRC"/*.ttf)
+    ((${#fonts[@]})) || die 1 "no font (*.ttf) in $FONT_SRC"
+    for f in "sddm.conf.d/$NAME.conf" "mkinitcpio.conf.d/$NAME.conf" login.conf; do
+        [[ -f $FILES/$f ]] || die 1 "missing $FILES/$f"
+    done
+}
+
+header() {
+    local what=$1
+    ((DRY)) && what+=" --dry-run (nothing changes)"
+    say "yorha-os-boot-login $VERSION: $what"
+}
+
+# --- install
+
+set_plymouth_theme() {
+    local tmp
+    if [[ -f $PLY_CONF ]] && ! created_find "$PLY_CONF" >/dev/null; then
+        edit_file "$PLY_CONF" fix_plymouthd
+    else
+        tmp=$(mktemp)
+        fix_plymouthd "$tmp"
+        place_file "$tmp" "$PLY_CONF"
+        rm -f "$tmp"
+    fi
+}
+set_hook() {
+    if mkinitcpio_reads_dropins; then
+        place_file "$FILES/mkinitcpio.conf.d/$NAME.conf" "$MKINIT_DROPIN"
+    else
+        warn "this mkinitcpio reads no drop-ins: the plymouth hook goes into $MKINIT_CONF (with a backup)"
+        edit_file "$MKINIT_CONF" fix_mkinitcpio_conf
+    fi
+}
+user_conf() {
+    TOUCHED[$USER_CONF]=1
+    if [[ -e $USER_CONF ]]; then item keep "$USER_CONF (yours)"; return 0; fi
+    make_dir "$(dirname "$USER_CONF")"
+    item write "$USER_CONF (your login options, from the example)"
+    ((DRY)) && return 0
+    install -m 644 "$FILES/login.conf" "$USER_CONF"
+    created_set user "$USER_CONF"
+    manifest_write
+}
+place_units() {
+    local f u
+    for f in "$FILES"/sddm.service.d/*.conf; do place_file "$f" "$SDDM_UNIT_D/$(basename "$f")"; done
+    for f in "$BOOT_SRC"/watch/*.service; do
+        u=$(basename "$f")
+        place_file "$f" "$UNIT_DIR/$u" unit
+        if ((DRY)); then item enable "$u"; continue; fi
+        if ((RELOAD)); then systemctl daemon-reload; RELOAD=0; fi
+        if ! systemctl is-enabled --quiet "$u" 2>/dev/null; then
+            systemctl enable --quiet "$u"
+            item enable "$u"
+        fi
+    done
+    if ((RELOAD && !DRY)); then systemctl daemon-reload; RELOAD=0; fi
+    return 0
+}
+set_cmdline() {
+    local e tmp entries
+    case $BOOTLOADER in
+        systemd-boot)
+            mapfile -t entries < <(linux_entries)
+            for e in "${entries[@]}"; do edit_file "$e" fix_entry; done ;;
+        uki)
+            if [[ -f $KERNEL_CMDLINE ]] && ! created_find "$KERNEL_CMDLINE" >/dev/null; then
+                edit_file "$KERNEL_CMDLINE" fix_cmdline_file
+            else
+                tmp=$(mktemp)
+                tr ' ' '\n' </proc/cmdline | grep -Ev '^(initrd|BOOT_IMAGE)=|^$' | tr '\n' ' ' >"$tmp" || true
+                printf '\n' >>"$tmp"
+                fix_cmdline_file "$tmp"
+                place_file "$tmp" "$KERNEL_CMDLINE"
+                rm -f "$tmp"
+            fi ;;
+        *)
+            RC_BOOT=1
+            item skip "kernel command line: the bootloader is not systemd-boot (manual step below)" ;;
+    esac
+}
+# prune: files, links and units an older install placed that this one no longer does
+prune() {
+    local r t p x keep=()
+    ((DRY)) && return 0
+    for r in "${M_CREATED[@]}"; do
+        IFS=$US read -r t p x <<<"$r"
+        if [[ $t == file || $t == link || $t == unit ]] && [[ -z ${TOUCHED[$p]:-} ]]; then
+            remove_created "$t" "$p" "$x"
+        else
+            keep+=("$r")
+        fi
+    done
+    M_CREATED=("${keep[@]}")
+    if ((RELOAD)); then systemctl daemon-reload; RELOAD=0; fi
+    manifest_write
+}
+font_check() {
+    local font path
+    font=$(sed -n '/^ *Font *=/{s/^ *Font *= *//p;q}' "$BOOT_SRC/$NAME.plymouth")
+    [[ -n $font ]] || return 0
+    if ((DRY)); then item font "Font=$font must resolve into $FONT_DIR"; return 0; fi
+    path=$(/usr/lib/plymouth/plymouth-font-file "$font" 2>/dev/null || true)
+    if [[ $path == "$FONT_DIR"/* ]]; then item font "Font=$font -> $path"
+    else warn "the boot theme's Font=$font resolves to '${path:-nothing}', not into $FONT_DIR"; fi
+}
+manual_step() {
+    cat <<EOF
+manual step: this bootloader is not systemd-boot, so the kernel command line was not changed.
+  Add "${CMDLINE_WORDS[*]}" to it by hand, for example:
+  - GRUB: append them to GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/grub, then run
+    grub-mkconfig -o /boot/grub/grub.cfg
+  - Limine, rEFInd and others: append them to the kernel's cmdline or options line
+  Without "splash", Plymouth stays off and the boot shows text; the login theme works anyway.
+EOF
+}
+
+cmd_install() {
+    local f
+    need_root
+    need_tools
+    need_src
+    manifest_read || true
+    BOOTLOADER=$(detect_bootloader)
+    header "install from $SRC"
+    ensure_backup
+    if ((!DRY)); then
+        [[ -n $M_INSTALLED_AT ]] || M_INSTALLED_AT=$(date -Iseconds)
+        M_UPDATED_AT=$(date -Iseconds) M_VERSION=$VERSION M_SRC=$SRC M_BOOTLOADER=$BOOTLOADER
+        manifest_write
+    fi
+    say "login:"
+    place_tree "$LOGIN_SRC" "$LOGIN_DIR" README.md theme.conf.user
+    place_link "$SDDM_LINK" "$LOGIN_DIR"
+    user_conf
+    place_link "$LOGIN_DIR/theme.conf.user" "$USER_CONF"
+    place_file "$FILES/sddm.conf.d/$NAME.conf" "$SDDM_DROPIN"
+    say "boot:"
+    place_tree "$BOOT_SRC" "$BOOT_DIR" README.md gen
+    if ((!DRY)); then for f in "$BOOT_DIR"/watch/*; do [[ $f == *.service ]] || chmod 755 "$f"; done; fi
+    place_tree "$BOOT_SRC" "$PLY_DIR" README.md gen watch
+    place_tree "$FONT_SRC" "$FONT_DIR"
+    if ((!DRY)); then fc-cache -f "$FONT_DIR" >/dev/null 2>&1 || warn "fc-cache failed"; fi
+    font_check
+    set_plymouth_theme
+    set_hook
+    place_units
+    say "kernel command line ($BOOTLOADER):"
+    set_cmdline
+    prune
+    say "initramfs:"
+    rebuild_initramfs present
+    if ((RC_BOOT)); then manual_step; fi
+    if ((RC_INITRAMFS)); then
+        say "failed: the initramfs did not come out right. The backups are in $M_BACKUP;"
+        say "  'yorha-os-boot-login uninstall' undoes the install."
+    elif ((DRY)); then
+        say "dry run: nothing was changed"
+    elif ((RC_BOOT)); then
+        say "installed, except the kernel command line: see the manual step above (manifest: $MANIFEST)."
+    else
+        say "installed (manifest: $MANIFEST). Reboot to see the boot and the login."
+    fi
+    finish
+}
+
+# --- uninstall
+
+remove_created() {
+    local t=$1 p=$2 x=${3:-}
+    case $t in
+        user) item keep "$p (yours: it stays)"; return 0 ;;
+        mkdir)
+            if ((DRY)); then
+                if [[ -d $p ]]; then item rmdir "$p (if empty)"; fi
+                return 0
+            fi
+            if rmdir "$p" 2>/dev/null; then item rmdir "$p"; fi
+            return 0 ;;
+    esac
+    if [[ ! -e $p && ! -L $p ]]; then item gone "$p"; return 0; fi
+    if ((DRY)); then item remove "$p"; return 0; fi
+    case $t in
+        unit)
+            systemctl disable --quiet "$(basename "$p")" 2>/dev/null || true
+            item disable "$(basename "$p")" ;;
+    esac
+    if [[ $t == file || $t == unit ]] && [[ $(sha_of "$p") != "$x" ]]; then
+        item keep "$p was changed by hand: copy in $(keep_copy "$p" changed)"
+    fi
+    rm -rf "$p"
+    item remove "$p"
+    if [[ $p == "$UNIT_DIR"/* ]]; then RELOAD=1; fi
+    return 0
+}
+restore_edited() {
+    local p=$1 before=$2 after=$3 cur
+    cur=$(sha_of "$p")
+    if [[ $cur == "$before" ]]; then item same "$p (already as before)"; return 0; fi
+    if [[ $cur != "$after" ]]; then changed_since "$p"; return 0; fi
+    if ((DRY)); then item restore "$p (from $M_BACKUP/before$p)"; return 0; fi
+    replace_with "$p" "$M_BACKUP/before$p" keep-time
+    if [[ $(sha_of "$p") == "$before" ]]; then
+        item restore "$p (sha256 matches the original)"
+    else
+        warn "$p: restored, but its sha256 does not match the original"
+        RC_CHANGED=1
+        LEFTOVER+=("$p")
+    fi
+}
+cmd_uninstall() {
+    local i r t p x b a keep_edited=()
+    need_root
+    manifest_read || die 4 "no manifest ($MANIFEST): this module installed nothing here, nothing to undo"
+    header uninstall
+    say "edited files:"
+    for r in "${M_EDITED[@]}"; do
+        IFS=$US read -r p b a <<<"$r"
+        restore_edited "$p" "$b" "$a"
+    done
+    ((${#M_EDITED[@]})) || item none "-"
+    say "installed files:"
+    for ((i = ${#M_CREATED[@]} - 1; i >= 0; i--)); do
+        IFS=$US read -r t p x <<<"${M_CREATED[i]}"
+        remove_created "$t" "$p" "$x"
+    done
+    if ((${#M_DISPLACED[@]})); then
+        say "moved aside at install:"
+        for r in "${M_DISPLACED[@]}"; do
+            IFS=$US read -r p b <<<"$r"
+            if ((DRY)); then item restore "$p (from $b)"; continue; fi
+            if [[ -e $p || -L $p ]]; then warn "$p is taken again; what was there is still in $b"; continue; fi
+            install -d -m 755 "$(dirname "$p")"
+            mv -T "$b" "$p"
+            item restore "$p"
+            if [[ $p == "$UNIT_DIR"/* ]]; then RELOAD=1; fi
+        done
+    fi
+    if ((!DRY)); then
+        if ((RELOAD)); then systemctl daemon-reload; RELOAD=0; fi
+        fc-cache -f >/dev/null 2>&1 || warn "fc-cache failed"
+    fi
+    say "initramfs:"
+    rebuild_initramfs absent
+    if [[ -e $USER_CONF ]]; then
+        say "note: $USER_CONF stays: it is yours (your login options). Remove it by hand if you want."
+    fi
+    if ((DRY)); then say "dry run: nothing was changed"; finish; fi
+    if ((${#LEFTOVER[@]})); then
+        # Keep only what is still to undo, so a later uninstall can finish the job
+        for r in "${M_EDITED[@]}"; do
+            for p in "${LEFTOVER[@]}"; do
+                if [[ $r == "$p$US"* ]]; then keep_edited+=("$r"); fi
+            done
+        done
+        M_EDITED=("${keep_edited[@]}") M_CREATED=() M_DISPLACED=()
+        manifest_write
+        say "not finished: ${#LEFTOVER[@]} edited file(s) changed after the install and were left alone."
+        say "  Fix them (or put back the copy from $M_BACKUP/before), then run uninstall again."
+    elif ((RC_INITRAMFS)); then
+        manifest_write
+        say "failed: the initramfs did not come out right; run uninstall again once mkinitcpio works."
+    else
+        mv -f "$MANIFEST" "$M_BACKUP/manifest.json"
+        say "uninstalled. The backups and the old manifest stay in $M_BACKUP."
+    fi
+    finish
+}
+
+# --- status
+
+cmd_status() {
+    local installed=0 partial=0 bl r t p x b a cur nmiss=0 n=0 img e entries miss rc_ir=0 rc_ed=0
+    need_root
+    manifest_read && installed=1
+    # A manifest with edited files only is an uninstall that stopped on a changed file
+    if ((installed && ${#M_CREATED[@]} == 0)); then partial=1; fi
+    header status
+    if ((partial)); then
+        item installed "partly: an uninstall stopped on ${#M_EDITED[@]} changed file(s); the rest is undone"
+        item backups "$M_BACKUP"
+    elif ((installed)); then
+        item installed "yes: $M_VERSION, $M_INSTALLED_AT (updated $M_UPDATED_AT), from $M_SRC"
+        item backups "$M_BACKUP"
+    else
+        item installed "no ($MANIFEST is missing)"
+    fi
+    bl=$(detect_bootloader)
+    if ((installed)); then item bootloader "$bl (at install: $M_BOOTLOADER)"; else item bootloader "$bl"; fi
+    if [[ -L $SDDM_LINK ]]; then item login "$SDDM_LINK -> $(readlink "$SDDM_LINK")"
+    elif [[ -e $SDDM_LINK ]]; then item login "$SDDM_LINK (not a link: not from this module)"
+    else item login "no $SDDM_LINK"; fi
+    item sddm "Current=$(sddm_current)"
+    if [[ -d $PLY_DIR && -f $BOOT_DIR/$NAME.plymouth ]]; then item boot "$PLY_DIR (copy of $BOOT_DIR)"
+    elif [[ -e $PLY_DIR ]]; then item boot "$PLY_DIR (without $BOOT_DIR: not from this module)"
+    else item boot "no $PLY_DIR"; fi
+    item plymouth "theme $(plymouth-set-default-theme 2>/dev/null || echo '?')"
+    if [[ -f $MKINIT_DROPIN ]]; then item hook "$MKINIT_DROPIN"
+    elif grep -Eq '^HOOKS=.*[( ]plymouth[ )]' "$MKINIT_CONF" 2>/dev/null; then item hook "plymouth in $MKINIT_CONF"
+    else item hook "no plymouth hook"; fi
+    case $bl in
+        systemd-boot)
+            mapfile -t entries < <(linux_entries)
+            for e in "${entries[@]}"; do
+                miss=$(words_missing "$e" options)
+                if [[ -n $miss ]]; then item cmdline "$e: lacks $miss"; else item cmdline "$e: has ${CMDLINE_WORDS[*]}"; fi
+            done ;;
+        uki)
+            if [[ -f $KERNEL_CMDLINE ]]; then
+                miss=$(words_missing "$KERNEL_CMDLINE" all)
+                if [[ -n $miss ]]; then item cmdline "$KERNEL_CMDLINE: lacks $miss"
+                else item cmdline "$KERNEL_CMDLINE: has ${CMDLINE_WORDS[*]}"; fi
+            else item cmdline "no $KERNEL_CMDLINE"; fi ;;
+    esac
+    miss=$(words_missing /proc/cmdline all)
+    if [[ -n $miss ]]; then item "this boot" "/proc/cmdline lacks $miss"
+    else item "this boot" "/proc/cmdline has ${CMDLINE_WORDS[*]}"; fi
+    while IFS= read -r img; do
+        if ((installed && !partial)); then check_image "$img" present || rc_ir=1; else check_image "$img" absent || true; fi
+    done < <(initramfs_images)
+    if ((installed)); then
+        for r in "${M_CREATED[@]}"; do
+            IFS=$US read -r t p x <<<"$r"
+            n=$((n + 1))
+            if [[ $t == mkdir ]]; then continue; fi
+            if [[ ! -e $p && ! -L $p ]]; then item missing "$p"; nmiss=$((nmiss + 1)); fi
+        done
+        item created "$n paths in the manifest, $nmiss missing"
+        for r in "${M_EDITED[@]}"; do
+            IFS=$US read -r p b a <<<"$r"
+            cur=$(sha_of "$p")
+            if [[ $cur == "$a" ]]; then item edited "$p: as installed"
+            elif [[ $cur == "$b" ]]; then item edited "$p: back to the original"
+            else item edited "$p: CHANGED after the install"; rc_ed=1; fi
+        done
+        for r in "${M_DISPLACED[@]}"; do
+            IFS=$US read -r p b <<<"$r"
+            item "moved" "$p -> $b"
+        done
+    fi
+    if [[ -e $USER_CONF ]]; then item options "$USER_CONF (yours)"; else item options "no $USER_CONF"; fi
+    RC_INITRAMFS=$rc_ir RC_CHANGED=$rc_ed
+    finish
+}
+
+# --- main
+
+CMD=${1:-}
+[[ -n $CMD ]] && shift
+SRC=${YORHA_OS_SRC:-$(cd "$here/../.." && pwd)}
+while (($#)); do
+    case $1 in
+        --dry-run) DRY=1 ;;
+        --src) SRC=${2:?--src needs a folder}; shift ;;
+        -h | --help) usage 0 ;;
+        *) printf 'unknown option: %s\n' "$1" >&2; FINISHED=1; usage 1 ;;
+    esac
+    shift
+done
+SRC=$(cd "$SRC" 2>/dev/null && pwd) || die 1 "no source folder: $SRC"
+LOGIN_SRC=$SRC/system/login/sddm/$NAME
+BOOT_SRC=$SRC/system/boot/plymouth/$NAME
+FONT_SRC=$SRC/shell/assets/fonts
+FILES=$SRC/system/boot-login/files
+
+case $CMD in
+    install) cmd_install ;;
+    uninstall) cmd_uninstall ;;
+    status) ((DRY)) && die 1 "status has no --dry-run"; cmd_status ;;
+    -h | --help) usage 0 ;;
+    *) FINISHED=1; usage 1 ;;
+esac
