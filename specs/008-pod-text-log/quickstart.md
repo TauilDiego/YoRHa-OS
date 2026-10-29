@@ -7,10 +7,10 @@ vira o `lab/check-008` (`--only <bloco>`, `--profile 1080|hidpi`), no padrão do
 ## Preparação
 
 ```
-export NIER_LAB_VM=teste-a NIER_LAB_CPUS=2 NIER_LAB_MEM=4G
+export NIER_LAB_VM=teste-b NIER_LAB_CPUS=4 NIER_LAB_MEM=4G YORHA_OS_REPO=<worktree>
 lab/perf begin "008: check"
-lab/up teste-a                       # 1080; o hidpi é NIER_LAB_PROFILE=hidpi + lab/profile hidpi
-lab/provision notify                 # libnotify, pipewire, wireplumber, brightnessctl; sink e source nulos
+lab/up teste-b                       # o check-008 liga sozinho, no perfil hidpi (os dois modos existem)
+lab/provision-step notify            # libnotify, pipewire, wireplumber, brightnessctl; sink e source nulos
 lab/sync --src <worktree>/shell
 lab/check-008 [--only <bloco>] [--profile 1080|hidpi]
 lab/down; lab/perf end
@@ -47,7 +47,7 @@ lab/down; lab/perf end
 | `shots` | fixtures: pilha (normal, ações, imagem, progresso), crítica, OSD, log aberto, as 3 posições; cada um duas vezes | `lab/diffshot` = 0 px, em 1080 e hidpi | SC-002 |
 | `gallery` | galeria, página da 008 | screenshots; a `LogPage` nos dois tamanhos sem corte | SC-016 |
 | `edge` | sem nome de app; só título; marcação (`<b>`, `<a>`, `<img>`, `<script>`); imagem quebrada; passageira (`-e`); substituição (`notify-client replace`); progresso 0→100; volume 120%; outro servidor (`notify-client hold-name` antes de subir o `qs`) | `dump` e screenshots; no último, `server: false` e a única linha de log esperada | casos de borda |
-| `lint` | `qmllint` dentro da VM; log de QML do roteiro inteiro | 0 erros, 0 avisos (fora o aviso esperado do bloco `edge`/outro servidor, filtrado pelo texto) | SC-012 |
+| `lint` | `qmllint` dentro da VM; log de QML do roteiro inteiro | 0 erros, 0 avisos (fora as duas linhas esperadas do bloco `edge`/outro servidor, categoria `quickshell.service.notifications`, filtradas) | SC-012 |
 
 Os screenshots pra aprovação do dono (SC-013) saem dos blocos `shots`, `prefs` e `gallery`, montados
 lado a lado com o mockup numa imagem só (`out/008-revisao.png`).

@@ -32,7 +32,7 @@ O que entra em `shell/`:
 - **o alvo IPC `notify`**, com o injetor de exemplos que manda pelo caminho real (`notify-send`/`gdbus`).
 
 A verificação acontece no laboratório privado, dentro de `lab/perf`:
-- `lab/provision notify` (libnotify, PipeWire com sink e source nulos, brightnessctl), sem tocar as
+- `lab/provision-step notify` (libnotify, PipeWire com sink e source nulos, brightnessctl), sem tocar as
   camadas congeladas;
 - `lab/notify-client` (gdbus: resposta, substituição, progresso, enxurrada, dono falso do nome);
 - os atalhos provisórios `ALT + N` e `ALT + CTRL + N` e as teclas de volume;

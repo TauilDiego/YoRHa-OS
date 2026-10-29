@@ -223,7 +223,7 @@ fica marcado **(spike T004)** e é a primeira coisa a rodar.
   pede colunas proporcionais ao corpo (FR-008 dela). A 008 acrescenta ao `PickerLayout`, sem mudar o
   padrão: `fluid: bool` (as três colunas e o topo calculados a partir de `width`/`height`, mantendo as
   proporções do quadro) e opções do tipo `action` (`{ id, label, type: "action", text }`, Enter ou
-  clique → `invoked(option)`). É o mesmo acréscimo que a 007 vai precisar: **contrato comum**,
+  clique → `invoked(option)`; **emenda de 2026-10-29:** `triggered(option)`, toggle 0/1, como na branch da 007, ver contracts/components.md). É o mesmo acréscimo que a 007 vai precisar: **contrato comum**,
   combinado no plano da 007 (pergunta ao dono).
 - **Linhas do log:** a `GroupedList` ganha, nos itens, `lead` (texto em peso forte antes do rótulo:
   quem fala + `×N`), `tag` (a caixinha `NEW`) e `markColor` (o quadradinho em `alert` nas críticas); o

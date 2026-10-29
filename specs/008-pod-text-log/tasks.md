@@ -7,7 +7,13 @@ description: "Tarefas da 008: Pod e text log (notificações e OSD)"
 **Input**: `specs/008-pod-text-log/` (plan.md, spec.md, research.md, data-model.md, contracts/,
 quickstart.md)
 
-**Status**: plano aprovado pelo dono. MVP (T001–T027) pronto em 2026-10-28; US2 (T028–T031) pronta em 2026-10-29.
+**Status**: plano aprovado pelo dono. MVP (T001–T027) pronto em 2026-10-28; US2–US7 e o acabamento (T028–T057) prontos em 2026-10-29. Falta a aprovação visual do dono (SC-013, `out/008-revisao.png`).
+
+**Decisões pendentes do dono (2026-10-29), com a recomendação aplicada:**
+- "Do not dist…" sai cortado no quadro de opções do log (a coluna de valor é a `stepperValueW` da 003/004). Recomendação: uma coluna de valor mais estreita só pro toggle no modo `fluid`; não aplicada (mexe numa peça da 003).
+- O `PickerLayout` da 008 e o da `007-menu-de-pausa` têm a mesma interface (a 008 adotou os nomes da 007) e textos diferentes. Recomendação: no merge, ficar com o da 007 e somar `fluid`, `lazyList` e a lista mais larga do modo `fluid`.
+- O Qt 6.12 às vezes avisa, depois de um reboot da VM, que não registrou o app ID no portal (`qt.qpa.services`). Recomendação aplicada: silenciado no `guest/nier-ui-run` do lab, como o `qt.qpa.wayland.textinput`.
+- Atalhos `SUPER + N` / `SUPER + CTRL + N` continuam provisórios (já pendente).
 
 **Tests**: a spec não pede testes automatizados. A prova de cada tarefa é a evidência da VM
 (princípio IV): `qs ipc call notify dump` (e `hud dump`, `settings dump`), screenshot, `lab/diffshot`,
@@ -21,7 +27,8 @@ sem aviso, sempre dentro de `lab/perf begin/end`.
 
 **Laboratório**: no máximo **4 VMs ao mesmo tempo, 2 núcleos e 4 GB cada**
 (`NIER_LAB_CPUS=2 NIER_LAB_MEM=4G`). Cada frente paralela usa a própria `teste-*` e a própria porta
-SSH (`NIER_LAB_VM=<vm>`).
+SSH (`NIER_LAB_VM=<vm>`). **Retomada de 2026-10-29 (US2 em diante):** uma frente só, na `teste-b`
+(recriada depois do renome pra YoRHa-OS), com 4 núcleos e 4 GB, por instrução do dono.
 
 **Atalhos**: `ALT + N` e `ALT + CTRL + N` são **provisórios** (proposta pendente do dono); trocar é
 mudar o `lab/guest/hyprland.lua` e `contracts/ipc.md`.
@@ -148,7 +155,7 @@ congelado.**
   - `Band` + quem fala (quadradinho, nome com reticências, `×N`, hora; × no lugar da hora com o mouse);
   - título numa linha, `TypedText`;
   - imagem de 72 (`PreserveAspectCrop`, moldura de 2 px, `file://` só depois do filtro da R6; senão ignorada com `console.info`);
-  - progresso (`Meter` invertido + número);
+  - progresso (`Meter` invertido + número; **emenda de 2026-10-29:** a trilha translúcida do mockup, decisão do dono);
   - linha de tempo (`remainingFrac`, parada com `instant`);
   - `More in log` quando corta.
 
@@ -254,7 +261,7 @@ congelado.**
 
 **Independent Test**: `lab/check-008 --only osd,osd-quiet` (SC-008).
 
-- [x] T041 [P] [US5] `shell/ds/composites/OsdView.qml`: `Band` 600×72, quadradinho, rótulo (168), `Meter` invertido de 300 (35% no mudo; cheio acima de 100), número tabular à direita; `MIC ON/OFF` sem medidor. Na galeria: volume, mudo, microfone, brilho — **Frente C** — **feito** (`lab/perf` 2026-10-29T113600, `teste-b`): a faixa de 600 × 72 com o medidor na trilha translúcida (emenda do contrato, decisão do dono), MUTE com o medidor a 35% (`out/check-008-1080-20261029-113819/osd-mudo.png`), 120 com o medidor cheio (`osd-120.png`); na galeria, os quatro tipos
+- [x] T041 [P] [US5] `shell/ds/composites/OsdView.qml`: `Band` 600×72, quadradinho, rótulo (168), `Meter` invertido de 300 (**emenda de 2026-10-29:** a trilha translúcida do mockup) (35% no mudo; cheio acima de 100), número tabular à direita; `MIC ON/OFF` sem medidor. Na galeria: volume, mudo, microfone, brilho — **Frente C** — **feito** (`lab/perf` 2026-10-29T113600, `teste-b`): a faixa de 600 × 72 com o medidor na trilha translúcida (emenda do contrato, decisão do dono), MUTE com o medidor a 35% (`out/check-008-1080-20261029-113819/osd-mudo.png`), 120 com o medidor cheio (`osd-120.png`); na galeria, os quatro tipos
 - [x] T042 [P] [US5] `Osd` real (research R12), em `shell/services/Osd.qml`:
   - **volume e mudo:** `Pipewire.defaultAudioSink.audio`, valor real `round(volume × 100)`;
   - **microfone:** `defaultAudioSource.audio.muted`;
@@ -326,16 +333,16 @@ congelado.**
 
 ## Phase 10: Polish & Cross-Cutting Concerns
 
-- [ ] T052 [P] `docs/design-system.md` §9 (bloco marcado):
+- [x] T052 [P] `docs/design-system.md` §9 (bloco marcado):
   - a faixa e a faixa crítica, a transmissão, o texto digitado, o botão de ação, o OSD, o contador;
   - as três posições e as duas do OSD;
   - a `LogPage` e como a 007 a usa;
-  - os tokens, as opções e os comandos.
-- [ ] T053 [P] Galeria completa (`shell/gallery/Gallery.qml`): tudo da contracts/components.md "Galeria", incluindo a `LogPage` em dois tamanhos (corpo do popup e corpo do menu de pausa, SC-016) e o contador nos dois tons
-- [ ] T054 `lab/check-008` inteiro em 1080 e em hidpi (2560x1600 @1,25), dentro de `lab/perf`, incluindo `shots` (cada cena duas vezes, `lab/diffshot` = 0, SC-002), `monitors` (segundo monitor headless, SC-010), `reduced` (SC-011), o resto do `edge` (outro servidor com `lab/notify-client hold-name`) e `lint` (`qmllint` + log de QML; só a linha esperada do bloco `edge`, SC-012)
-- [ ] T055 Imagem de revisão pro dono (`~/.local/share/nier-lab/out/008-revisao.png`): os screenshots de `shots`, `prefs` e `gallery` ao lado do mockup (SC-013)
-- [ ] T056 `specs/008-pod-text-log/relatorio.md`: o que foi feito, as evidências (`lab/perf` de cada bloco), os desvios, o custo da enxurrada, as pendências pro dono (atalhos, homologação do brilho na U7)
-- [ ] T057 `/speckit-analyze` e as correções que ele apontar
+  - os tokens, as opções e os comandos. — **feito**: §9 entre os marcadores `spec 008 (008-pod-text-log)`, com a emenda da trilha translúcida e a `LogPage` nos dois corpos
+- [x] T053 [P] Galeria completa (`shell/gallery/Gallery.qml`): tudo da contracts/components.md "Galeria", incluindo a `LogPage` em dois tamanhos (corpo do popup e corpo do menu de pausa, SC-016) e o contador nos dois tons — **feito** (`lab/perf` 2026-10-29T113600): página 4 (a faixa e as peças) e página 5 nova (a `LogPage` no corpo do popup e no do menu de pausa, SC-016); as duas escalam por `min(altura/1080, largura/1920)` e não passam da borda em 1080 nem em 2560×1600 (decisão do dono), bloco `gallery` (`gallery-p4.png`, `gallery-p5.png`)
+- [x] T054 `lab/check-008` inteiro em 1080 e em hidpi (2560x1600 @1,25), dentro de `lab/perf`, incluindo `shots` (cada cena duas vezes, `lab/diffshot` = 0, SC-002), `monitors` (segundo monitor headless, SC-010), `reduced` (SC-011), o resto do `edge` (outro servidor com `lab/notify-client hold-name`) e `lint` (`qmllint` + log de QML; só a linha esperada do bloco `edge`, SC-012) — **feito** (`lab/perf` 2026-10-29T123957, `teste-b`): `lab/check-008` inteiro **110/0 em 1080** (`out/check-008-1080-20261029-125428`) e **110/0 em hidpi** (`out/check-008-hidpi-20261029-131938`), com `shots` (7 cenas, 0 px), `monitors` (headless), `reduced`, o outro servidor (`server: false`, as duas linhas `WARN quickshell.service.notifications` esperadas, filtradas) e `lint`. Ajustes do roteiro no caminho: o servidor falso morto pelo código (`exec python3`), o OSD do `monitors` dentro do 1,2 s, `-t 15000` no `first` e no `reduced` (a rajada em hidpi passa dos 6 s) e o CPU do `flood` comparado com o de uma transmissão sozinha na tela (a última da enxurrada ainda anima a linha de tempo aos 5 s: 3% contra 11% de uma sozinha; tela vazia 2%)
+- [x] T055 Imagem de revisão pro dono (`~/.local/share/nier-lab/out/008-revisao.png`): os screenshots de `shots`, `prefs` e `gallery` ao lado do mockup (SC-013) — **feito** (`lab/perf` 2026-10-29T123957, `teste-b`): `out/008-revisao.png`: por linha, o mockup (renderizado no container `nier-lab-chromium`, o palco a 1:1 com o movimento reduzido do próprio mockup) × VM 1080 × VM hidpi, em pilha, faixa crítica, OSD, text log, Top band e Subtitle, mais as páginas 4 e 5 da galeria e o System voice; as peças em `out/008-revisao/`. **Aguarda a aprovação do dono**
+- [x] T056 `specs/008-pod-text-log/relatorio.md`: o que foi feito, as evidências (`lab/perf` de cada bloco), os desvios, o custo da enxurrada, as pendências pro dono (atalhos, homologação do brilho na U7) — **feito**: `specs/008-pod-text-log/relatorio.md`
+- [x] T057 `/speckit-analyze` e as correções que ele apontar — **feito**: a passada de consistência (seção "Análise" do relatório): a spec emendada pela trilha translúcida (FR-028, US5, "Progresso"), o `invoked` → `triggered` anotado no research e na T036, o quickstart e o plano com `provision-step` e a `teste-b`, o filtro do `lint` explicado; nenhum conflito com a constituição
 
 ---
 

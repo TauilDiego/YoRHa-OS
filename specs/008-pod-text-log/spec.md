@@ -197,8 +197,8 @@ e por screenshots.
 ### User Story 5 - OSD de volume, microfone e brilho (Priority: P2)
 
 Ao mudar o volume (pelas teclas, por outro app ou por comando), aparece na parte de baixo do monitor
-em foco, centralizado (de fábrica; `OSD position` muda pro topo, US7), um aviso curto na faixa: quadradinho, o nome (VOLUME), o medidor do design
-system em versão invertida e o número. Mudo mostra MUTE e o medidor apagado. O mesmo vale pro brilho
+em foco, centralizado (de fábrica; `OSD position` muda pro topo, US7), um aviso curto na faixa: quadradinho, o nome (VOLUME), o medidor (na trilha
+translúcida da faixa; emenda de 2026-10-29) e o número. Mudo mostra MUTE e o medidor apagado. O mesmo vale pro brilho
 da tela (BRIGHTNESS) e pro microfone (MIC ON / MIC OFF, sem medidor). Apertar várias vezes atualiza o
 mesmo aviso, que some ≈1,2 s depois da última mudança.
 
@@ -301,7 +301,7 @@ o log; tudo por screenshots e pelo estado exportado.
 - **Marcação no texto:** negrito, itálico e sublinhado aparecem; links viram texto comum; o resto da
   marcação é tirado, nunca interpretado.
 - **Progresso** (a dica de valor 0–100, usada por downloads e scripts): a transmissão mostra o medidor
-  invertido embaixo do texto e atualiza no lugar quando o app manda o valor novo.
+  (na trilha translúcida da faixa) embaixo do texto e atualiza no lugar quando o app manda o valor novo.
 - **Crítica durante o não perturbe:** aparece (US6). Crítica em tela cheia: aparece também.
 - **Duas críticas:** a segunda entra na mesma faixa, que mostra a mais nova e `1/2` com setas ◂ ▸ pra
   ver a outra.
@@ -465,7 +465,8 @@ o log; tudo por screenshots e pelo estado exportado.
 - **FR-028**: Mudar o volume, o mudo, o mudo do microfone ou o brilho da tela, por qualquer caminho, MUST
   mostrar o OSD no monitor em foco, centralizado, na posição da opção `OSD position` (de fábrica,
   `Bottom`, a 110 da borda de baixo; `Top`, logo abaixo da barra ou da faixa crítica): faixa, quadradinho, nome, medidor
-  invertido (largura 300, os 11 px do `hp-bar`) e número com algarismos tabulares; MUTE com o medidor
+  na trilha translúcida do mockup (largura 300, os 11 px do `hp-bar`; emenda de 2026-10-29, decisão do
+  dono: não o `Meter` invertido da 003) e número com algarismos tabulares; MUTE com o medidor
   apagado; MIC ON / MIC OFF sem medidor.
 - **FR-029**: Um OSD MUST ficar ≈1,2 s depois da última mudança e atualizar no lugar; nunca há dois. O
   OSD não aparece quando a mudança vem de um menu do YoRHa-OS que já mostra o valor, e não entra no log.
