@@ -21,7 +21,7 @@ import "../base"
 // spec 007 (T043): the view's top always stops at an entry's top (less the rails' room, inside the
 // wider gap above it), so the first visible entry is never cut, whether the cursor or the wheel
 // scrolled it. The bottom too (T043, second part): while the list overflows, the window ends under
-// the last entry that fits whole (with its rails' room), so the last visible line is never cut
+// the last entry that fits whole, so the last visible line is never cut
 // either; the paper under it stays empty. The wheel scrolls one
 // entry per notch, only when the content is taller than the list (otherwise it does nothing, as
 // before); a cursor scrolled out of view comes back to the nearest whole item in view (moved here
@@ -231,7 +231,8 @@ Item {
     }
 
     // The window's height: the whole list's while nothing scrolls; when it overflows, down to the
-    // bottom (plus the rails' room) of the last entry that fits whole from `scrollY`.
+    // bottom of the last entry that fits whole from `scrollY`, plus the rails' room (up to the
+    // list's own height: an entry whose rails don't fit is still whole, as before).
     function visibleHeight(): real {
         if (!overflows)
             return height;
@@ -240,11 +241,11 @@ Item {
             const r = rows.itemAt(i);
             if (!r)
                 continue;
-            const end = topRoom + r.y + r.height + railRoom - scrollY;
+            const end = topRoom + r.y + r.height - scrollY;
             if (end > height + 0.5)
                 break;
             if (end > 0)
-                h = end;
+                h = Math.min(height, end + railRoom);
         }
         return h > 0 ? h : height;
     }
