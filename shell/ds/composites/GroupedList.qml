@@ -20,7 +20,9 @@ import "../base"
 // with its rails (and its group's title, when it is the group's first) is always in view.
 // spec 007 (T043): the view's top always stops at an entry's top (less the rails' room, inside the
 // wider gap above it), so the first visible entry is never cut, whether the cursor or the wheel
-// scrolled it; at the end, the room left under the last entry stays empty. The wheel scrolls one
+// scrolled it. The bottom too (T043, second part): while the list overflows, the window ends under
+// the last entry that fits whole (with its rails' room), so the last visible line is never cut
+// either; the paper under it stays empty. The wheel scrolls one
 // entry per notch, only when the content is taller than the list (otherwise it does nothing, as
 // before); a cursor scrolled out of view comes back to the nearest whole item in view (moved here
 // with `keysEnabled`, asked for by `cursorRequested(index)` otherwise). `scrollState()` tells it.
@@ -228,21 +230,54 @@ Item {
             cursorRequested(pick);
     }
 
-    // For a dump: the scroll, the first entry in view and whether it is cut at the top.
-    function scrollState(): var {
-        let first = -1;
+    // The window's height: the whole list's while nothing scrolls; when it overflows, down to the
+    // bottom (plus the rails' room) of the last entry that fits whole from `scrollY`.
+    function visibleHeight(): real {
+        if (!overflows)
+            return height;
+        let h = 0;
         for (let i = 0; i < entries.length; i++) {
             const r = rows.itemAt(i);
-            if (r && topRoom + r.y + r.height > scrollY + 0.5) {
-                first = i;
+            if (!r)
+                continue;
+            const end = topRoom + r.y + r.height + railRoom - scrollY;
+            if (end > height + 0.5)
                 break;
-            }
+            if (end > 0)
+                h = end;
         }
+        return h > 0 ? h : height;
+    }
+    readonly property real viewHeight: {
+        scrollY;
+        height;
+        contentHeight;
+        entries;
+        return visibleHeight();
+    }
+
+    // For a dump: the scroll, the first and last entries in view and whether either is cut.
+    function scrollState(): var {
+        const h = visibleHeight();
+        let first = -1, last = -1;
+        for (let i = 0; i < entries.length; i++) {
+            const r = rows.itemAt(i);
+            if (!r)
+                continue;
+            const top = topRoom + r.y, bottom = top + r.height;
+            if (first < 0 && bottom > scrollY + 0.5)
+                first = i;
+            if (top < scrollY + h - 0.5)
+                last = i;
+        }
+        const lr = rows.itemAt(last);
         return {
             y: Math.round(scrollY),
             overflows: overflows,
             first: first,
-            cut: first >= 0 && entryTop(first) < scrollY - 0.5
+            cut: first >= 0 && entryTop(first) < scrollY - 0.5,
+            last: last,
+            cutBottom: !!lr && topRoom + lr.y + lr.height > scrollY + h + 0.5
         };
     }
 
@@ -267,7 +302,7 @@ Item {
     Item {
         x: strips.implicitWidth + root.stripGap
         width: root.width - x
-        height: root.height
+        height: root.viewHeight
         clip: true
 
         Column {
