@@ -207,7 +207,36 @@ em `~/.local/state/rien-os/`, `~/.config/rien-os/` intacto; `qmllint` limpo).
 
 **Purpose**: juntar as frentes, documentar e provar tudo junto.
 
-- [ ] T043 Mesclar `007-apps`, `007-janelas` e `007-energia` na `007-menu-de-pausa` (e os blocos do `lab/check-007` na `lab-007`), nessa ordem; carregar na `teste-a` e conferir 0 erros e 0 avisos de QML
+- [x] T043 Mesclar `007-apps`, `007-janelas` e `007-energia` na `007-menu-de-pausa` (e os blocos do `lab/check-007` na `lab-007`), nessa ordem; carregar na `teste-a` e conferir 0 erros e 0 avisos de QML
+
+**Acréscimo da T043 (decidido pelo dono em 28.10, "Juntar e corrigir tudo"):** (1) a `GroupedList`
+rola em linhas inteiras: a rolagem para sempre no alto de uma linha, então a primeira linha à vista
+nunca fica cortada, pelo teclado ou pela roda; a roda rola uma linha por passo só quando a lista
+transborda (sem rolagem, nada muda na 003/004) e a pipa que sai da vista volta pro item inteiro mais
+perto; o `pause dump` ganhou `apps.scroll`/`windows.scroll`; (2) `PickerLayout.optionsVisible`
+(padrão `true`), usada na APPS pra esconder o card Options na busca sem resultado (`apps.optionsShown`);
+a POWER continua com as colunas próprias (o card da direita é o `StatusCard`, a lista fica
+`selected` e ignora o ponteiro com o diálogo aberto, e o Enter do rodapé tem o nome da ação: seriam
+três ajustes a mais na `PickerLayout` pra uma página só); (3) o `lab/README.md` documenta os
+ajudantes do `check-007` e a lição do `pkill -f` dentro do `lab/ssh`; o `lab/click` ganhou a roda;
+(4) o lembrete da S3 (criar `~/.local/share/applications/` antes de subir o shell) está no `PLAN.md`
+e nas premissas da `spec.md`.
+
+**Evidência da T043 (28.10, `teste-a`/`teste-b`/`teste-c`, 2 núcleos, 4 GB):** `lab/perf`
+`2026-10-28T215058-vm-teste-a-007-t043-desenvolvimento-rolagem-e-optio` (desenvolvimento: `check-007
+--only apps,windows` 23/0 em 1080), `2026-10-28T215918-vm-teste-a-007-t043-juntar-e-corrigir`
+(`check-007 --profile both` 70/0, com a primeira linha inteira no fim de APPS e de WINDOWS com
+`pause-long` e depois da roda, e a busca `zzz` sem o card Options nos dois perfis; log com 0 erros e
+0 avisos, fora a linha `expected-warn` do app fantasma),
+`2026-10-28T215918-vm-teste-b-007-t043-juntar-e-corrigir` (`check-u1` 15/0, `check-004` 58/0) e
+`2026-10-28T215948-vm-teste-c-007-t043-juntar-e-corrigir` (`check-003` 25/0 em 1080 e em hidpi,
+`check-007 --only reboot` 3/0, `qmllint` na VM limpo, fora os falsos positivos conhecidos). Imagens
+de referência: `check-003` 1080 com 35 de 36 a 0 px (a `sc004-open` varia no máximo 1 nível,
+como já variava entre as referências antigas); em hidpi o painel é igual e só muda o kitty real atrás
+dele; `check-004`: a lista do seletor a 0 px em todos os shots sem rolagem, e os dois que rolam
+(`us2-filtro-off`, `us2-video`) passaram a mostrar a lista a partir de `Menu` inteiro, em vez do
+título `SCENES` cortado ao meio (é a correção); o resto da diferença está no fundo animado e no
+cursor, fora da lista.
 - [ ] T044 `shell/gallery/Gallery.qml`: a página 4 (Tab três vezes), carregada só enquanto aparece, com as peças da seção "Galeria" do contracts/components.md
 - [ ] T045 `docs/design-system.md`: seção "§9 Menu de pausa (spec 007)" com a moldura com abas e a geometria do R12, as quatro páginas, os componentes novos (com os estados), os acréscimos em `PopupFrame`, `PickerLayout`, `GroupedList` e `SettingsPage`, as opções de `Pause menu`, as teclas e os comandos `pause`
 - [ ] T046 Validar tudo (`lab/perf begin "007: validação"`, `teste-a`): o `lab/check-007` inteiro nos dois perfis (cenários ⚙ 1–7, 9–13, 15 e 16 do quickstart), com a rajada do SC-008, o log e o `qmllint` do SC-010, o shot da galeria do SC-011 e o SC-013 completo; o `lab/check-003` e o `lab/check-004` sem regressão
