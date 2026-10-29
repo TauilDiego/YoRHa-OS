@@ -45,6 +45,11 @@ conferindo a senha. Entregas:
   (pras telas e faixas escuras);
 - os quadros também em sequência de PNG, pro Plymouth.
 
+### E. Número do volume colado na barra (OSD da 008)
+
+No OSD de volume (spec 008), o número da porcentagem fica muito perto da barra de volume. O dono pediu
+(29.10) pra afastar os dois. Vale olhar junto o OSD de brilho e o de microfone, que usam a mesma peça.
+
 ## Como o dono revisa
 
 Cada item entrega **duas imagens, antes e depois**, das mesmas telas e no mesmo perfil (1080 e
