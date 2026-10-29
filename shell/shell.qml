@@ -15,7 +15,7 @@ import "gallery"
 import "hud"
 import "wallpaper"
 import "services"
-import "settings"
+import "pause"
 
 ShellRoot {
     id: shell
@@ -102,78 +102,140 @@ ShellRoot {
         }
     }
 
-    // --- spec 003: settings pop-up -------------------------------------------------------------
-    // Opens on the focused monitor and stays there until it closes; opening re-reads the
-    // focused monitor first (research R3). Closing is two-step, like the gallery (research R2):
-    // the pop-up hides and drops its keyboard focus at once, and is unloaded a moment later.
-    property bool settingsOpen: false
-    property bool settingsOpening: false
-    property bool settingsLoaded: false
-    property string settingsMonitor: ""
-    property int settingsCategory: 0             // where the pop-up reopens
-    property var settingsLast: ({})              // the closed pop-up's last state, for `dump`
-    readonly property var settingsScreen: {
+    // --- spec 007: the pause menu (U3), with the settings of spec 003 in its SYSTEM tab ----------
+    // Opens on the focused monitor (re-read first, research R3 of 003) and stays there until it
+    // closes; closing is two-step (it hides and drops the keyboard at once, and is unloaded a
+    // moment later). `pauseTab` is the open tab; `pauseLastTab` the one the general shortcut opens
+    // (APPS at first). Only one pop-up at a time: the pause menu and the wallpaper picker close
+    // each other.
+    property bool pauseOpen: false
+    property bool pauseOpening: false
+    property bool pauseLoaded: false
+    property string pauseMonitor: ""
+    property string pauseTab: "apps"
+    property string pauseLastTab: "apps"
+    property string pausePendingQuery: ""        // `pause search` before the menu is up
+    property int settingsCategory: 0             // where SYSTEM reopens
+    property var pauseLast: null                 // the closed menu's last `pause dump`
+    property var settingsLast: ({})              // the SYSTEM page's last state, for `settings dump`
+    property var pauseLastAction: null           // { kind, id, detail }
+    readonly property var pauseScreen: {
         for (const sc of Quickshell.screens)
-            if (sc.name === settingsMonitor)
+            if (sc.name === pauseMonitor)
                 return sc;
         return Quickshell.screens[0] ?? null;
     }
+    readonly property var pauseMenu: pauseOpen ? pauseLoader.item : null
 
-    function openSettings(): void {
-        if (settingsOpen || settingsOpening)
+    // Open the menu in tab `tab`, or switch an open one to it.
+    function openPause(tab: string): void {
+        if (pauseOpen) {
+            pauseLoader.item?.setTab(tab);
             return;
-        settingsOpening = true;
+        }
+        pauseTab = tab;
+        if (pauseOpening)
+            return;
+        closePicker();
+        pauseOpening = true;
         Compositor.refreshFocusedMonitor();
-        settingsFallback.restart();
+        pauseFallback.restart();
     }
     // Called when the monitor query is back (or after the fallback, if it never comes).
-    function showSettings(): void {
-        if (!settingsOpening)
+    function showPause(): void {
+        if (!pauseOpening)
             return;
-        settingsOpening = false;
-        settingsFallback.stop();
-        settingsMonitor = Compositor.focusedMonitor;
-        settingsOpen = true;
+        pauseOpening = false;
+        pauseFallback.stop();
+        pauseMonitor = Compositor.focusedMonitor;
+        pauseOpen = true;
     }
-    function closeSettings(): void {
-        settingsOpening = false;
-        settingsOpen = false;
+    function closePause(): void {
+        pauseOpening = false;
+        pauseOpen = false;
+    }
+    function togglePause(): void {
+        if (pauseOpen || pauseOpening)
+            closePause();
+        else
+            openPause(pauseLastTab);
     }
     Connections {
         target: Compositor
         function onMonitorScalesChanged(): void {
-            shell.showSettings();
+            shell.showPause();
         }
     }
     Timer {
-        id: settingsFallback
+        id: pauseFallback
         interval: 250
-        onTriggered: shell.showSettings()
+        onTriggered: shell.showPause()
     }
 
-    onSettingsOpenChanged: {
-        if (settingsOpen) {
-            settingsUnload.stop();
-            settingsLoaded = true;
+    onPauseOpenChanged: {
+        if (pauseOpen) {
+            pauseUnload.stop();
+            pauseLoaded = true;
+            pauseLoader.item?.setTab(pauseTab);
         } else {
-            settingsLast = settingsLoader.item?.dumpState() ?? settingsLast;
-            settingsUnload.restart();
+            const menu = pauseLoader.item;
+            if (menu) {
+                pauseLastTab = menu.tab;
+                pauseLast = menu.dumpState();
+                pauseLast.open = false;
+                pauseLast.geometry = null;
+                settingsLast = menu.systemDump();
+            }
+            pausePendingQuery = "";
+            pauseUnload.restart();
         }
     }
     Timer {
-        id: settingsUnload
+        id: pauseUnload
         interval: 150
-        onTriggered: if (!shell.settingsOpen) shell.settingsLoaded = false
+        onTriggered: if (!shell.pauseOpen) shell.pauseLoaded = false
     }
     LazyLoader {
-        id: settingsLoader
-        active: shell.settingsLoaded
-        SettingsPopup {
-            screen: shell.settingsScreen
-            keyboardActive: shell.settingsOpen
-            category: shell.settingsCategory
-            onCategoryChanged: shell.settingsCategory = category
-            onCloseRequested: shell.closeSettings()
+        id: pauseLoader
+        active: shell.pauseLoaded
+        PauseMenu {
+            screen: shell.pauseScreen
+            keyboardActive: shell.pauseOpen
+            tab: shell.pauseTab
+            systemCategory: shell.settingsCategory
+            onSystemCategoryChanged: shell.settingsCategory = systemCategory
+            onTabChanged: {
+                shell.pauseTab = tab;
+                shell.pauseLastTab = tab;
+            }
+            onCloseRequested: shell.closePause()
+            Component.onCompleted: if (shell.pausePendingQuery !== "") search(shell.pausePendingQuery)
+        }
+    }
+
+    // The last thing the menu did, from whichever service did it (for `pause dump`).
+    Connections {
+        target: Apps
+        function onLastLaunchChanged(): void {
+            const l = Apps.lastLaunch;
+            if (l)
+                shell.pauseLastAction = { kind: "app", id: l.id, detail: { action: l.action, workspace: l.workspace, ok: l.ok, reason: l.reason } };
+        }
+    }
+    Connections {
+        target: Compositor
+        function onLastWindowActionChanged(): void {
+            const w = Compositor.lastWindowAction;
+            if (w)
+                shell.pauseLastAction = { kind: "window", id: w.id, detail: { op: w.kind, workspace: w.workspace } };
+        }
+    }
+    Connections {
+        target: Session
+        function onLastActionChanged(): void {
+            const a = Session.lastAction;
+            if (a)
+                shell.pauseLastAction = { kind: "power", id: a.id, detail: { executed: a.executed, ok: a.ok } };
         }
     }
 
@@ -194,7 +256,7 @@ ShellRoot {
     function openPicker(): void {
         if (pickerOpen || pickerOpening)
             return;
-        closeSettings();
+        closePause();
         pickerOpening = true;
         Compositor.refreshFocusedMonitor();
         pickerFallback.restart();
@@ -215,13 +277,6 @@ ShellRoot {
         target: Compositor
         function onMonitorScalesChanged(): void {
             shell.showPicker();
-        }
-    }
-    Connections {
-        target: shell
-        function onSettingsOpenChanged(): void {
-            if (shell.settingsOpen)
-                shell.closePicker();
         }
     }
     Timer {
@@ -324,32 +379,106 @@ ShellRoot {
         // --- end spec 004 ------------------------------------------------------------------
     }
 
-    // spec 003 (specs/003-settings-popup/contracts/ipc.md)
+    // spec 007 (specs/007-menu-de-pausa/contracts/ipc.md): the pause menu.
+    IpcHandler {
+        target: "pause"
+        // Already open (or opening): nothing.
+        function open(): void {
+            if (!shell.pauseOpen && !shell.pauseOpening)
+                shell.openPause(shell.pauseLastTab);
+        }
+        function close(): void { shell.closePause(); }
+        function toggle(): void { shell.togglePause(); }
+        function tab(name: string): string {
+            if (!["apps", "windows", "system", "power"].includes(name))
+                return `error: unknown tab ${name} (apps, windows, system or power)`;
+            shell.openPause(name);
+            return "ok";
+        }
+        function isOpen(): string { return shell.pauseOpen ? "true" : "false"; }
+        // Tests only: APPS with `text` as its whole search (opened there if needed).
+        function search(text: string): string {
+            if (shell.pauseOpen && shell.pauseMonitor !== Compositor.focusedMonitor)
+                return `error: the menu is open on ${shell.pauseMonitor}`;
+            if (shell.pauseMenu) {
+                shell.pauseMenu.search(text);
+            } else {
+                shell.pausePendingQuery = text;
+                shell.openPause("apps");
+            }
+            return "ok";
+        }
+        // Back to the start, for tests: APPS as the last tab, the cursors and the search forgotten,
+        // the dialog closed, no last action, and the test data's windows, pins and uses as in its
+        // files. The values of SYSTEM stay (that is `settings reset`).
+        function reset(): void {
+            shell.pauseLastTab = "apps";
+            shell.settingsCategory = 0;
+            shell.pauseLast = null;
+            shell.pauseLastAction = null;
+            Apps.resetFixture();
+            Compositor.resetWindowsFixture();
+            Session.resetFixture();
+            if (shell.pauseMenu) {
+                shell.pauseMenu.systemCategory = 0;
+                shell.pauseMenu.restart();
+            }
+        }
+        function dump(): string {
+            const live = shell.pauseMenu;
+            const d = live ? live.dumpState() : (shell.pauseLast ?? {
+                open: false, monitor: "", tab: shell.pauseLastTab, geometry: null
+            });
+            return JSON.stringify(Object.assign({}, d, {
+                open: shell.pauseOpen,
+                lastTab: shell.pauseLastTab,
+                options: {
+                    "icons": SettingsModel.choiceId("menu", "icons"),
+                    "app-order": SettingsModel.choiceId("menu", "app-order"),
+                    "running-app": SettingsModel.choiceId("menu", "running-app"),
+                    "confirm": SettingsModel.choiceId("menu", "confirm"),
+                    "confirm-start": SettingsModel.choiceId("menu", "confirm-start")
+                },
+                lastAction: shell.pauseLastAction,
+                compositor: { backend: Compositor.backendName, capabilities: Compositor.capabilities }
+            }));
+        }
+    }
+
+    // spec 003 (specs/003-settings-popup/contracts/ipc.md), now an alias of the SYSTEM tab (spec
+    // 007 research R2). `open` is true only with the menu open on SYSTEM.
     IpcHandler {
         target: "settings"
-        function open(): void { shell.openSettings(); }
-        function close(): void { shell.closeSettings(); }
-        function toggle(): void {
-            if (shell.settingsOpen || shell.settingsOpening)
-                shell.closeSettings();
-            else
-                shell.openSettings();
+        function open(): void { shell.openPause("system"); }
+        function close(): void {
+            if (shell.pauseOpen && shell.pauseTab === "system")
+                shell.closePause();
         }
-        function isOpen(): string { return shell.settingsOpen ? "true" : "false"; }
-        // Values back to the catalog and the pop-up back to its first category, so a test
-        // always starts from the same place.
+        // Closed → opens on SYSTEM; open on another tab → switches to SYSTEM; on SYSTEM → closes.
+        function toggle(): void {
+            if ((shell.pauseOpen || shell.pauseOpening) && shell.pauseTab === "system")
+                shell.closePause();
+            else
+                shell.openPause("system");
+        }
+        function isOpen(): string { return shell.pauseOpen && shell.pauseTab === "system" ? "true" : "false"; }
+        // Values back to the catalog and SYSTEM back to its first category, so a test always
+        // starts from the same place.
         function reset(): void {
             SettingsModel.reset();
             shell.settingsCategory = 0;
             shell.settingsLast = {};
-            settingsLoader.item?.restart(0);
+            if (shell.pauseMenu) {
+                shell.pauseMenu.systemCategory = 0;
+                shell.pauseMenu.restartSystem(0);
+            }
         }
         function dump(): string {
-            const live = shell.settingsOpen ? settingsLoader.item : null;
-            const page = live ? live.dumpState() : shell.settingsLast;
+            const open = shell.pauseOpen && shell.pauseTab === "system";
+            const page = shell.pauseMenu ? shell.pauseMenu.systemDump() : shell.settingsLast;
             return JSON.stringify({
-                open: shell.settingsOpen,
-                monitor: shell.settingsMonitor,
+                open: open,
+                monitor: shell.pauseMonitor,
                 focus: page.focus ?? "categories",
                 category: page.category ?? (SettingsModel.categories[shell.settingsCategory]?.id ?? ""),
                 option: page.option ?? null,
@@ -359,7 +488,7 @@ ShellRoot {
                 card: page.card ?? { title: "", note: "" },
                 values: SettingsModel.dumpValues(),
                 dimmed: SettingsModel.dimmedIds(),
-                geometry: live ? page.geometry : null
+                geometry: open ? page.geometry : null
             });
         }
     }

@@ -1,0 +1,29 @@
+{
+ "user": "arch",
+ "host": "nier-lab",
+ "uptime": 8040,
+ "can": {
+  "suspend": "yes",
+  "hibernate": "na",
+  "reboot": "yes",
+  "poweroff": "yes"
+ },
+ "inhibitors": [
+  {
+   "what": "shutdown",
+   "who": "pacman",
+   "why": "System update in progress",
+   "mode": "block"
+  },
+  {
+   "what": "sleep",
+   "who": "NetworkManager",
+   "why": "Waiting for the network",
+   "mode": "delay"
+  }
+ ],
+ "refuse": [
+  "poweroff",
+  "suspend"
+ ]
+}

@@ -59,6 +59,17 @@
       ]
     },
     {
+      "id": "menu", "label": "Pause menu",
+      "about": "How the pause menu looks and what it asks before acting.",
+      "options": [
+        {"id": "icons", "label": "App icons", "type": "choice", "desc": "How APPS shows an app's icon. Ink redraws it in the paper's ink; Original color keeps its colors; Square only shows the game's square.", "values": ["Ink", "Original color", "Square only"], "ids": ["ink", "color", "square"], "value": 0, "default": 0},
+        {"id": "app-order", "label": "App order", "type": "choice", "desc": "Order of ALL APPS when you are not searching. Search results always put the most used first.", "values": ["A–Z", "Most used"], "ids": ["az", "used"], "value": 0, "default": 0},
+        {"id": "running-app", "label": "Running app", "type": "choice", "desc": "What Enter does on an app that already has a window: open another one, or go to its window.", "values": ["New window", "Go to window"], "ids": ["new", "focus"], "value": 0, "default": 0},
+        {"id": "confirm", "label": "Confirm", "type": "choice", "desc": "Which POWER actions ask first. Risky ones: log out, reboot and shut down. Every action: lock and suspend too.", "values": ["Risky ones", "Every action"], "ids": ["risky", "all"], "value": 0, "default": 0},
+        {"id": "confirm-start", "label": "Dialog starts on", "type": "choice", "desc": "Where the cursor starts in a confirmation. On Cancel, a second Enter never acts by accident.", "values": ["Cancel", "Action"], "ids": ["cancel", "action"], "value": 0, "default": 0}
+      ]
+    },
+    {
       "id": "keyboard", "label": "Keyboard",
       "about": "Layout, repeat and shortcuts.",
       "options": [

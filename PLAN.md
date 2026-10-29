@@ -167,6 +167,10 @@ Serpantinum.
 | S6 Público | Docs, nome público, licença, testes em EndeavourOS/CachyOS | Alguém de fora instala sem ajuda |
 | S7 (opcional) | Pacote de plugins pro Omarchy usando o mesmo código da UI | — |
 
+**Lembrete pra S3 (instalador):** criar `~/.local/share/applications/` antes de subir o shell. O
+Quickshell só observa essa pasta se ela existir quando ele sobe; sem isso, um app instalado depois
+não aparece no menu de pausa até o shell reiniciar (spec 007: spike T003, research R4, e T041).
+
 ## 10. Riscos
 
 | Risco | Mitigação |

@@ -18,6 +18,17 @@ import "../base"
 // (hoveredIndex, activated) without moving `currentIndex`.
 // The parent sets the size. Taller content scrolls at once, by whole entries, so the current item
 // with its rails (and its group's title, when it is the group's first) is always in view.
+// spec 007 (T043): the view's top always stops at an entry's top (less the rails' room, inside the
+// wider gap above it), so the first visible entry is never cut, whether the cursor or the wheel
+// scrolled it. The bottom too (T043, second part): while the list overflows, the window ends under
+// the last item that fits whole, so the last visible line is never cut either, and a group's title
+// whose item doesn't fit waits for it (T046); the paper under it stays empty. The wheel scrolls one
+// entry per notch, only when the content is taller than the list (otherwise it does nothing, as
+// before); a cursor scrolled out of view comes back to the nearest whole item in view (moved here
+// with `keysEnabled`, asked for by `cursorRequested(index)` otherwise). `scrollState()` tells it.
+// spec 007: `search` ({ query, count } or null) puts the SearchHeader on top, where the group
+// titles would be (the model then has no titles); `emptyText`, with no item, is a line in
+// medium-gray in place of the items; `trailingRole` is the role of the items' trailing text.
 Item {
     id: root
 
@@ -28,11 +39,18 @@ Item {
     property bool focused: true
     property bool wrap: true
     property bool keysEnabled: true
+    property var search: null                    // spec 007
+    property string emptyText: ""
+    property string trailingRole: "small"
 
     signal activated(int index)
     signal hoveredIndex(int index)
+    signal cursorRequested(int index)             // the wheel left the cursor out of view (spec 007)
 
-    readonly property var entries: Array.isArray(model) ? model : []
+    readonly property var modelEntries: Array.isArray(model) ? model : []
+    readonly property bool noItems: !modelEntries.some(e => isItem(e))
+    readonly property var entries: (search ? [{ searchLine: true }] : []).concat(modelEntries,
+        noItems && emptyText !== "" ? [{ emptyLine: emptyText }] : [])
     // For each entry, its item index (-1 for titles and notes); and each item's entry index.
     readonly property var itemOf: {
         const out = [];
@@ -66,7 +84,8 @@ Item {
     implicitHeight: contentHeight
 
     function isItem(e: var): bool {
-        return e !== null && typeof e === "object" && e.group === undefined && e.note === undefined;
+        return e !== null && typeof e === "object" && e.group === undefined && e.note === undefined
+            && e.searchLine === undefined && e.emptyLine === undefined;
     }
 
     // The entry object of item `index` (null when out of range).
@@ -101,27 +120,189 @@ Item {
 
     // --- scrolling -----------------------------------------------------------------------------------
     property real scrollY: 0
-    function follow(): void {
-        const e = entryOf[currentIndex];
+    readonly property bool overflows: contentHeight > height
+    property real wheelRest: 0                    // the wheel's turn not yet spent (touchpads)
+
+    // Entry `i`'s top, in content px.
+    function entryTop(i: int): real {
+        const r = rows.itemAt(i);
+        return r ? topRoom + r.y : 0;
+    }
+
+    // Where the view may stop, in content px and ascending: each entry's top less the rails' room
+    // (the gap between entries is wider, so nothing of the entry above shows), never under 0.
+    function stops(): var {
+        const out = [];
+        for (let i = 0; i < entries.length; i++)
+            out.push(Math.max(0, entryTop(i) - railRoom));
+        return out;
+    }
+
+    // The highest stop at or above `v`, and the lowest at or below it.
+    function stopAbove(v: real): real {
+        let best = 0;
+        for (const p of stops())
+            if (p <= v + 0.5)
+                best = Math.max(best, p);
+        return best;
+    }
+    function stopBelow(v: real): real {
+        const all = stops();
+        for (const p of all)
+            if (p >= v - 0.5)
+                return p;
+        return all.length > 0 ? all[all.length - 1] : 0;
+    }
+
+    // The last stop: the first one that shows the content's end.
+    function maxScroll(): real {
+        return overflows ? stopBelow(contentHeight - height) : 0;
+    }
+
+    // Item `index`'s span that must be in view, in content px: from its group's title (titles and
+    // notes right above the item) to its bottom rail; null when out of range.
+    function spanOf(index: int): var {
+        const e = entryOf[index];
         const row = rows.itemAt(e ?? -1);
-        if (!row || height <= 0) {
-            scrollY = 0;
-            return;
-        }
-        // From the group's title (titles and notes right above the item) to the bottom rail.
+        if (!row)
+            return null;
         let first = e;
         while (first > 0 && itemOf[first - 1] < 0)
             first--;
         const above = rows.itemAt(first);
-        const a = topRoom + (first < e && above ? above.y : row.y - railRoom);
-        const b = topRoom + row.y + row.height + railRoom;
-        let y = scrollY;
-        if (a < y)
-            y = a;
-        else if (b > y + height)
-            y = b - height;
-        scrollY = Math.max(0, Math.min(y, contentHeight - height));
+        return {
+            a: topRoom + (first < e && above ? above.y : row.y - railRoom),
+            b: topRoom + row.y + row.height + railRoom
+        };
     }
+
+    function follow(): void {
+        const span = spanOf(currentIndex);
+        if (!span || height <= 0) {
+            scrollY = 0;
+            return;
+        }
+        let y = stopAbove(scrollY);
+        if (span.a < y)
+            y = stopAbove(span.a);
+        else if (span.b > y + height)
+            y = stopBelow(span.b - height);
+        scrollY = Math.max(0, Math.min(y, maxScroll()));
+    }
+
+    // One wheel notch (120) scrolls one entry; the cursor, if left out, comes to the nearest whole
+    // item in view.
+    function wheelBy(delta: real): void {
+        if (!overflows)
+            return;
+        wheelRest += delta;
+        let y = scrollY;
+        const all = stops();
+        while (wheelRest >= 120) {
+            wheelRest -= 120;
+            y = all.filter(p => p < y - 0.5).reduce((m, p) => Math.max(m, p), 0);
+        }
+        while (wheelRest <= -120) {
+            wheelRest += 120;
+            y = Math.min(maxScroll(), all.find(p => p > y + 0.5) ?? maxScroll());
+        }
+        if (y === scrollY)
+            return;
+        scrollY = y;
+        const span = spanOf(currentIndex);
+        if (span && span.a >= y - 0.5 && span.b <= y + height + 0.5)
+            return;
+        const down = !span || span.a < y;
+        let pick = -1;
+        for (let i = 0; i < count; i++) {
+            const s2 = spanOf(i);
+            if (!s2 || s2.a < y - 0.5 || s2.b > y + height + 0.5)
+                continue;
+            pick = i;
+            if (down)
+                break;
+        }
+        if (pick < 0)
+            return;
+        if (keysEnabled)
+            currentIndex = pick;
+        else
+            cursorRequested(pick);
+    }
+
+    // The window's height: the whole list's while nothing scrolls; when it overflows, down to the
+    // bottom of the last entry that fits whole from `scrollY`, plus the rails' room (up to the
+    // list's own height: an entry whose rails don't fit is still whole, as before).
+    function visibleHeight(): real {
+        return bottomEdge().h;
+    }
+    // Where the window ends while the list overflows: under the last whole item, plus the rails'
+    // room (up to the list's own height). A group's title (or note) that fits but whose item doesn't
+    // goes with its item to the next step (`hidden`); one with no item after it (the list's end) counts.
+    function bottomEdge(): var {
+        if (!overflows)
+            return { h: height, hidden: false };
+        let last = 0, any = 0;
+        for (let i = 0; i < entries.length; i++) {
+            const r = rows.itemAt(i);
+            if (!r)
+                continue;
+            const end = topRoom + r.y + r.height - scrollY;
+            if (end > height + 0.5)
+                break;
+            if (end <= 0)
+                continue;
+            any = end;
+            if (itemOf[i] >= 0 || !entryOf.some(e => e > i))
+                last = end;
+        }
+        const base = last > 0 ? last : any;
+        return {
+            h: base > 0 ? Math.min(height, base + railRoom) : height,
+            hidden: last > 0 && any > last + 0.5
+        };
+    }
+    readonly property real viewHeight: {
+        scrollY;
+        height;
+        contentHeight;
+        entries;
+        return visibleHeight();
+    }
+
+    // For a dump: the scroll, the first and last entries in view and whether either is cut.
+    function scrollState(): var {
+        const h = visibleHeight();
+        let first = -1, last = -1;
+        for (let i = 0; i < entries.length; i++) {
+            const r = rows.itemAt(i);
+            if (!r)
+                continue;
+            const top = topRoom + r.y, bottom = top + r.height;
+            if (first < 0 && bottom > scrollY + 0.5)
+                first = i;
+            if (top < scrollY + h - 0.5)
+                last = i;
+        }
+        const lr = rows.itemAt(last);
+        return {
+            y: Math.round(scrollY),
+            overflows: overflows,
+            first: first,
+            cut: first >= 0 && entryTop(first) < scrollY - 0.5,
+            last: last,
+            cutBottom: !!lr && topRoom + lr.y + lr.height > scrollY + h + 0.5,
+            lastIsItem: last < 0 || itemOf[last] >= 0 || !entryOf.some(e => e > last),
+            titleHidden: bottomEdge().hidden
+        };
+    }
+
+    WheelHandler {
+        enabled: root.overflows
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: event => root.wheelBy(event.angleDelta.y)
+    }
+
     onCurrentIndexChanged: Qt.callLater(follow)
     onHeightChanged: Qt.callLater(follow)
     onModelChanged: Qt.callLater(follow)
@@ -130,14 +311,15 @@ Item {
         id: strips
         s: root.s
         kind: "vertical"
-        height: Math.min(root.height, root.contentHeight)
+        // No entries (e.g. APPS without data): no strips, not a 7 px stub of the rails' room.
+        height: root.entries.length > 0 ? Math.min(root.height, root.contentHeight) : 0
     }
 
     // A clipped window on the entries, with the kite's room on its left and the shadow's on its right.
     Item {
         x: strips.implicitWidth + root.stripGap
         width: root.width - x
-        height: root.height
+        height: root.viewHeight
         clip: true
 
         Column {
@@ -158,6 +340,8 @@ Item {
                     readonly property int item: root.itemOf[index] ?? -1
                     readonly property bool isItem: item >= 0
                     readonly property bool isGroup: !isItem && modelData?.group !== undefined
+                    readonly property bool isSearch: modelData?.searchLine === true
+                    readonly property bool isEmpty: modelData?.emptyLine !== undefined
                     readonly property bool dim: isItem && modelData?.dim === true
                     readonly property Item row: isItem ? listItem : null
 
@@ -166,13 +350,42 @@ Item {
                     readonly property int topPad: isGroup && index > 0 ? root.groupTop : 0
                     width: column.width
                     height: isItem ? listItem.height
+                          : isSearch ? searchHeader.height + root.groupBottom
+                          : isEmpty ? emptyLabel.height
                           : isGroup ? topPad + caption.size + root.groupBottom : caption.height
+
+                    SearchHeader {
+                        id: searchHeader
+                        width: parent.width
+                        height: entry.isSearch ? implicitHeight : 0
+                        visible: entry.isSearch
+                        s: root.s
+                        query: String(root.search?.query ?? "")
+                        count: Number(root.search?.count ?? 0)
+                    }
+
+                    // "No apps match.": the mockup's 23 px line, 8 px above and below, 16 px in.
+                    Label {
+                        id: emptyLabel
+                        x: Tokens.px(16, root.s)
+                        width: parent.width - x
+                        height: entry.isEmpty ? implicitHeight + Tokens.px(16, root.s) : 0
+                        topPadding: Tokens.px(8, root.s)
+                        visible: entry.isEmpty
+                        s: root.s
+                        role: "standard"
+                        font.weight: Font.Medium
+                        font.variableAxes: ({ "wght": Font.Medium })
+                        wrapMode: Text.Wrap
+                        text: String(entry.modelData?.emptyLine ?? "")
+                        color: Tokens.color.mediumGray
+                    }
 
                     Label {
                         id: caption
                         y: entry.topPad - (entry.isGroup ? Math.round((implicitHeight - size) / 2) : 0)
                         width: parent.width
-                        visible: !entry.isItem
+                        visible: !entry.isItem && !entry.isSearch && !entry.isEmpty
                         s: root.s
                         role: "small"
                         wrapMode: Text.Wrap
@@ -186,7 +399,7 @@ Item {
                         visible: entry.isItem
                         s: root.s
                         variant: root.variant
-                        trailingRole: "small"
+                        trailingRole: root.trailingRole
                         text: String(entry.modelData?.label ?? "")
                         trailing: String(entry.modelData?.trailing ?? "")
                         state: entry.item === root.currentIndex ? (root.focused ? "hovered" : "selected")

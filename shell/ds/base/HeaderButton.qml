@@ -46,12 +46,13 @@ Item {
     implicitWidth: fixedWidth > 0 ? Tokens.px(fixedWidth, s)
                                   : pad + Tokens.px(Tokens.space.square, s) + gap + Math.ceil(dark.labelWidth) + pad
 
-    // Ink sweep: 0 → 1 when entering an inked state, instant on the way out or when frozen.
+    // Ink sweep: 0 → 1 when entering an inked state, instant on the way out, when frozen or with
+    // reduced motion (Tokens.instant; spec 007 FR-030).
     property real sweep: 0
-    readonly property real fill: Tokens.frozen ? (inked ? 1 : 0) : sweep
+    readonly property real fill: Tokens.instant ? (inked ? 1 : 0) : sweep
     onInkedChanged: {
         sweepAnim.stop();
-        if (inked && !Tokens.frozen)
+        if (inked && !Tokens.instant)
             sweepAnim.start();
         else
             sweep = inked ? 1 : 0;
@@ -67,7 +68,7 @@ Item {
     onTouchingChanged: {
         touchAnim.stop();
         untouchAnim.stop();
-        if (Tokens.frozen)
+        if (Tokens.instant)
             reach = touching ? 1 : 0;
         else if (touching) {
             touchDelay.duration = Math.round(Tokens.motion.highlight * (1 - sweep));

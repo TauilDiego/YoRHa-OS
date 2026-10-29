@@ -13,6 +13,8 @@ Item {
     property string subtitle
 
     readonly property int shadowOffset: Math.round(heading.size * Tokens.shadow.textRatio)
+    // spec 007: the title's text, so a row can align other text to its baseline.
+    readonly property Item titleText: heading
 
     implicitWidth: sub.visible ? sub.x + sub.implicitWidth : heading.implicitWidth + shadowOffset
     implicitHeight: heading.implicitHeight + shadowOffset

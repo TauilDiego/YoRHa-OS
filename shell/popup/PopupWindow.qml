@@ -24,8 +24,15 @@ PanelWindow {
     default property alias content: frame.content
     readonly property real s: frame.s
     readonly property Item panel: frame.panel
+    // spec 007: the frame with tabs (the pause menu)
+    property var tabs: []
+    property int currentTab: 0
+    property bool clock: false
+    readonly property int bodyTop: frame.bodyTop
+    readonly property PopupFrame popupFrame: frame
 
     signal dismissed()
+    signal tabClicked(int index)
 
     anchors {
         top: true
@@ -53,7 +60,11 @@ PanelWindow {
         subtitle: root.subtitle
         footerLeft: root.footerLeft
         keys: root.keys
+        tabs: root.tabs
+        tab: root.currentTab
+        clock: root.clock
         onDismissed: root.dismissed()
+        onTabClicked: index => root.tabClicked(index)
     }
 
     NumberAnimation {
