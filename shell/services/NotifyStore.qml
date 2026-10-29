@@ -859,8 +859,12 @@ Singleton {
             loadFixture();
             return;
         }
-        if (!restoreSession() && !session.started && saving)
-            fileView.reload();                   // a new session: the saved log comes back (FR-019)
+        // A new session: the saved log comes back (FR-019). Read here, at once: a FileView without
+        // preload only loads when its text is asked for (reload() alone did nothing).
+        if (!restoreSession() && !session.started && saving) {
+            fileView.reload();
+            loadFile(fileView.text());
+        }
         session.started = true;
     }
     function restoreSession(): bool {
@@ -973,9 +977,8 @@ Singleton {
         path: root.statePath
         atomicWrites: true
         printErrors: false
-        blockLoading: false
+        blockLoading: true
         preload: false
-        onLoaded: root.loadFile(text())
     }
 
     // --- the injector (FR-032, R17): the mockup's samples through the real path of an app -------------

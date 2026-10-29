@@ -292,7 +292,7 @@ congelado.**
 
 **Independent Test**: `lab/check-008 --only prefs,saved` (SC-014, SC-015).
 
-- [ ] T048 [P] [US7] `NotifyPrefs` com o estado (research R14; **emenda da T013:** as escolhas já ficam no `SettingsState` da 004, chaves `notifications.<chave>`; aqui sobra conferir origem, reset, valor inválido e o "nunca no `~/.config`"):
+- [x] T048 [P] [US7] `NotifyPrefs` com o estado (research R14; **emenda da T013:** as escolhas já ficam no `SettingsState` da 004, chaves `notifications.<chave>`; aqui sobra conferir origem, reset, valor inválido e o "nunca no `~/.config`"):
   - **ordem de quem vale:** `$XDG_STATE_HOME/yorha-os/notifications.json` (`{ "version": 1, "dnd", "prefs" }`, só as chaves mudadas) acima de `shell.json` e dos padrões;
   - **`origin`;**
   - **`reset()`** apaga as escolhas;
@@ -300,8 +300,8 @@ congelado.**
   - **com fixtures**, nada escrito (FR-043);
   - **nunca escreve no `~/.config`.**
 
-  **Frente B**
-- [ ] T049 [P] [US7] Log salvo no `NotifyStore` (FR-019, research R14), formato `contracts/notifications.schema.json#/$defs/savedLog`:
+  **Frente B** — **feito** (`lab/perf` 2026-10-29T121451, `teste-b`): as escolhas ficam em `~/.local/state/yorha-os/settings.json` (`notifications.<chave>`) e valem depois de reiniciar o `qs`; uma escolha inválida no estado volta pro padrão (origem `default`) com uma linha INFO; `prefsReset` apaga; nada escrito no `~/.config` (`find -newer` vazio)
+- [x] T049 [P] [US7] Log salvo no `NotifyStore` (FR-019, research R14), formato `contracts/notifications.schema.json#/$defs/savedLog`:
   - **quando grava:** só com `log == "saved"` e sem fixtures;
   - **permissão:** `install -m 600 /dev/null` antes da primeira escrita, e `chmod 600` depois de cada escrita se o spike mostrou que precisa;
   - **escritas** juntas em 500 ms;
@@ -311,16 +311,16 @@ congelado.**
   - **arquivo ilegível** → `.bak-<data>` + log vazio + `console.info`;
   - **`logSize` menor** corta na hora.
 
-  **Frente B**
-- [ ] T050 [US7] Ligar as opções ao vivo:
+  **Frente B** — **feito** (`lab/perf` 2026-10-29T121451, `teste-b`): `text-log.json` com modo 600; as 5 voltam depois de reiniciar o `qs` e de reiniciar a VM, `earlier: true`, sem ações; Session only apaga o arquivo na hora e o log continua na memória; um arquivo ilegível vai pra `.bak-<data>` com uma linha INFO; `Log size 50` corta o log e o arquivo na hora. **Corrigido:** o log salvo não voltava num `qs` novo: a `FileView` sem `preload` não carrega no `reload()`, só quando o texto é pedido; agora a leitura é explícita e síncrona no começo da sessão
+- [x] T050 [US7] Ligar as opções ao vivo:
   - **`Position`** → `TransmissionStack.position`, mudando também o que está na tela, sem animação, mantendo o tempo (FR-041);
   - **`OSD position`** → `OsdWindow`: `Top` logo abaixo da barra ou da faixa crítica;
   - **`Monitor`, `On screen`** (o que passar sai pro log), **`Duration`, `Typing`** (`Off` = `instant` no `TypedText`);
   - **`System voice`** → `speaker` das entradas `system`, até as antigas;
   - **`In fullscreen`**.
 
-  Conferir as bordas da spec: `Top band` com a crítica, `Subtitle` com o OSD, OSD no topo com a crítica
-- [ ] T051 [US7] `lab/check-008` blocos `prefs` (configurações › Notifications com teclas reais: `Position` nas três, `OSD position` Top, `System voice` System + `notify sample system`) e `saved` (5 entradas; reiniciar o `qs` e a sessão da VM; `stat -c %a`; voltar pra Session only; `ls -la ~/.config` igual)
+  Conferir as bordas da spec: `Top band` com a crítica, `Subtitle` com o OSD, OSD no topo com a crítica — **feito** (`lab/perf` 2026-10-29T121451, `teste-b`): Position muda o que está na tela na hora e mantém o tempo (89042 → 84688 ms); Top band com a crítica (a crítica em cima, as faixas embaixo); Subtitle acima da área do OSD; OSD no topo abaixo da barra e abaixo da faixa crítica quando há uma; System voice → System só nas mensagens do YoRHa-OS; On screen 1 manda o excesso pro log na hora; Typing Off digita de uma vez
+- [x] T051 [US7] `lab/check-008` blocos `prefs` (configurações › Notifications com teclas reais: `Position` nas três, `OSD position` Top, `System voice` System + `notify sample system`) e `saved` (5 entradas; reiniciar o `qs` e a sessão da VM; `stat -c %a`; voltar pra Session only; `ls -la ~/.config` igual) — **feito** (`lab/perf` 2026-10-29T121451, `teste-b`): `lab/check-008 --only prefs,saved` **15/0 + 11/0** em 1080 (`out/check-008-1080-20261029-122229`, `-122044`, `-121851`) e **24/0** em hidpi (`out/check-008-hidpi-20261029-122333`). Screenshots `prefs-corner.png`, `prefs-top.png`, `prefs-subtitle.png`, `prefs-osd-top.png`, `prefs-voz.png`. **Lab:** depois do reboot da VM o Qt 6.12 às vezes avisa que não registrou o app ID no portal (`qt.qpa.services`); silenciado no `guest/nier-ui-run` (decisão pendente do dono)
 
 ---
 
