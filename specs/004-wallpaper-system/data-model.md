@@ -127,7 +127,7 @@ tela atual.
 | `camouflage` | `{ cell, trail, glitch }` | `{ 24, 2600, 2 }` | Como `Transition` |
 | `barContrast` (emenda (2)) | `"normal"` / `"high"` | `"normal"` | Fora da lista → padrão + aviso. O popup (Appearance › Bar contrast) troca e salva no estado (`shell.barContrast`), que vale mais |
 
-**Configurações salvas** (emenda (3)): `$XDG_STATE_HOME/rien-os/settings.json`,
+**Configurações salvas** (emenda (3)): `$XDG_STATE_HOME/yorha-os/settings.json`,
 `{ "version": 1, "values": { "<chave>": valor } }`; ver `contracts/settings-state.md`.
 
 ## Fixture (domínio novo `wallpaper`)

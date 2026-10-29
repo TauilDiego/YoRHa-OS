@@ -12,7 +12,7 @@ import math
 from fam_ring import disc
 from style import Canvas, circle_pts
 
-ATTRIBUTION = "rien-OS cursor ({}). Shapes after NieR Cursors by Beinsezii (MIT)."
+ATTRIBUTION = "YoRHa-OS cursor ({}). Shapes after NieR Cursors by Beinsezii (MIT)."
 
 TIP_Y = 12.8                       # fingertip line = the hotspots' y (0.1 × 128)
 FINGER_X = (48.0, 64.0, 80.0)      # finger centers

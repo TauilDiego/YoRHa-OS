@@ -12,9 +12,9 @@ quickstart.md)
 rajada de quadros e log de QML sem erro, sempre dentro de `lab/perf begin/end`.
 
 **Caminhos**:
-- `shell/…` = repositório público `nier-os`;
-- `lab/…` = repositório privado `rien-OS-private`, irmão do público
-  (`~/projects/rien-OS-private/lab/`).
+- `shell/…` = repositório público `YoRHa-OS`;
+- `lab/…` = repositório privado `YoRHa-OS-private`, irmão do público
+  (`~/projects/YoRHa-OS-private/lab/`).
 
 **Dependência de outra spec**: o seletor (US2) usa os componentes da **003** (moldura de popup,
 linha de opção, seletor de valor, rodapé de teclas, foco em duas colunas). As fases US3, US4 e US5
@@ -149,9 +149,9 @@ de arquivo.
 **Independent Test**: `set scene:dark <monitor>`, reiniciar o `qs`, conferir; `next`/`prev` pelo
 `dump`.
 
-- [x] T038 [US5] `shell/services/WallpaperStore.qml`: persistência em `$XDG_STATE_HOME/rien-os/wallpaper.json` (research R8): leitura por `FileView`, escrita com `setText` + `atomicWrites`, agrupada em 250 ms, criação da pasta por `Process` em argv só se preciso; nada escrito com a fixture `wallpaper` ativa; prioridade estado > `shell.json` > `defaults.json`; estado ilegível começa vazio com linha no log — **feito.** O `FileView.setText` cria a pasta sozinho (conferido na VM), então o `Process` de `mkdir` saiu (como o R8 previa). O estado é lido bloqueando no início, então o primeiro quadro já mostra a escolha salva, sem transição
+- [x] T038 [US5] `shell/services/WallpaperStore.qml`: persistência em `$XDG_STATE_HOME/yorha-os/wallpaper.json` (research R8): leitura por `FileView`, escrita com `setText` + `atomicWrites`, agrupada em 250 ms, criação da pasta por `Process` em argv só se preciso; nada escrito com a fixture `wallpaper` ativa; prioridade estado > `shell.json` > `defaults.json`; estado ilegível começa vazio com linha no log — **feito.** O `FileView.setText` cria a pasta sozinho (conferido na VM), então o `Process` de `mkdir` saiu (como o R8 previa). O estado é lido bloqueando no início, então o primeiro quadro já mostra a escolha salva, sem transição
 - [x] T039 [US5] `next`/`prev` no `Compositor.focusedMonitor` quando o monitor vem vazio; fallback de monitor sem escolha e de imagem apagada (`resolve`, com linha no log) (FR-019, FR-020) — **feito** (o `step`, o `resolve` e o fallback já vinham do T014; a imagem salva só é resolvida depois de o catálogo ler a pasta, pra não trocar pra cena padrão e voltar no início)
-- [x] T040 [US5] Validar (`lab/perf begin "004: estado"`): cenário 6 do quickstart (reinício do `qs`, arquivo de estado conferido, `~/.config/rien-os/` intocado), `next`/`prev` pelo `dump`, imagem apagada → cena padrão — **feito** (`lab/perf` 2026-10-27T160430, `out/004-T040-estado`): estado gravado e de volta depois do `pkill qs`, sem transição; `next`/`prev` no monitor em foco; imagem apagada = cena padrão + linha no log; prioridade estado > `shell.json` > padrão; nada escrito com a fixture `wallpaper` (md5 igual); estado ilegível = começa vazio com uma linha `INFO`; `~/.config/rien-os/` nunca criado
+- [x] T040 [US5] Validar (`lab/perf begin "004: estado"`): cenário 6 do quickstart (reinício do `qs`, arquivo de estado conferido, `~/.config/yorha-os/` intocado), `next`/`prev` pelo `dump`, imagem apagada → cena padrão — **feito** (`lab/perf` 2026-10-27T160430, `out/004-T040-estado`): estado gravado e de volta depois do `pkill qs`, sem transição; `next`/`prev` no monitor em foco; imagem apagada = cena padrão + linha no log; prioridade estado > `shell.json` > padrão; nada escrito com a fixture `wallpaper` (md5 igual); estado ilegível = começa vazio com uma linha `INFO`; `~/.config/yorha-os/` nunca criado
 
 **Checkpoint**: as cinco histórias funcionam.
 
@@ -217,8 +217,8 @@ medido e a área vazia contra a cena sem a barra; sem fixtures, rajadas da camuf
 - [x] T065 Validar na `teste-a` (`lab/perf` 2026-10-27T204902): `check-u1` 15/15, `check-003 --profile 1080` 25/25, `check-004` 53/2. Os 2 FAIL eram o SC-011 do High com a tinta principal (hora 2,57, abas 3,78, meio-tom 1,60), levados ao dono, que escolheu a P2 (T067)
 - [x] T066 `docs/design-system.md` (§8, "A barra sobre o fundo") e `PLAN.md` (fase U5a, boot e login; decisões de 2026-10-27)
 - [x] T067 High = P2 (emenda (3)): `Tokens.hudHighInk` `#2E2C27` em `ink`, `ink2` e `sel` do `hudPaperHigh`; `Tokens.hudHighPlate` (`#C9C5AB` a 55%) atrás do título, de cada leitura (até o fim dos dígitos), da data e da hora, com 3 × 2 px de folga, sumindo com o tom claro; `hud dump` com a placa de cada texto
-- [x] T068 "Salvar sempre" (emenda (3), FR-031): `services/SettingsState.qml` (`$XDG_STATE_HOME/rien-os/settings.json`, leitura no início, escrita atômica 250 ms depois, nada com fixtures); `Settings.setLevel` salva `shell.barContrast`; o `SettingsModel` salva `settings.<cat>.<opt>` (marca `persist` no catálogo) e o `reset()` limpa; contrato em `contracts/settings-state.md`; FR-018 da 003 revista
-- [x] T069 `lab/check-004`: bloco de configurações salvas (SC-014) sem fixtures: teclas reais, reinício, arquivo só em `~/.local/state/rien-os/`, reset também depois de reiniciar
+- [x] T068 "Salvar sempre" (emenda (3), FR-031): `services/SettingsState.qml` (`$XDG_STATE_HOME/yorha-os/settings.json`, leitura no início, escrita atômica 250 ms depois, nada com fixtures); `Settings.setLevel` salva `shell.barContrast`; o `SettingsModel` salva `settings.<cat>.<opt>` (marca `persist` no catálogo) e o `reset()` limpa; contrato em `contracts/settings-state.md`; FR-018 da 003 revista
+- [x] T069 `lab/check-004`: bloco de configurações salvas (SC-014) sem fixtures: teclas reais, reinício, arquivo só em `~/.local/state/yorha-os/`, reset também depois de reiniciar
 - [x] T070 Validar na `teste-a` (`lab/perf` 2026-10-27T215859, `--kind 004-acab`): `check-u1` **15/15** e `check-003 --profile 1080` **25/25** (`out/004-acab2-check-u1`, `out/004-acab2-check-003`); `check-004` **58 PASS / 0 FAIL** (`out/004-acab2-check-004-final`), log 0 erros e 0 avisos em 9 inícios do `qs`, `qmllint` limpo. SC-011 do High: pior p05 6,04 nas cenas de papel, 5,03 no meio-tom, 4,77 (1080) e 5,08 (hidpi) no tom claro; SC-012 0 níveis nos dois modos. A primeira rodada achou a placa das leituras passando do último dígito (SC-012 49 níveis): corrigido. Imagem `out/004-contraste-revisao.png`
 <!-- acabamento (004-acabamento): fim -->
 
@@ -278,5 +278,5 @@ Polimento:
    desktop fica igual ao jogo e troca de cena por comando.
 2. **Depois:** US3, US4 e US5 em paralelo, todas testáveis pelo IPC, sem esperar a 003.
 3. **US2:** o seletor, assim que a 003 estiver pronta. É P1 pra o dono, mas depende de outra spec.
-4. Cada fase termina com evidência no lab e relatório no `rien-OS-relatorios`. Nenhuma tarefa é
+4. Cada fase termina com evidência no lab e relatório no `YoRHa-OS-relatorios`. Nenhuma tarefa é
    marcada `[x]` sem prova.

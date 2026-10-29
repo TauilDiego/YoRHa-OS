@@ -11,7 +11,7 @@ adicionar um seletor [...] a minha ideia é fazer um sistema próprio pra contro
 [...] a ideia é que fique o mais fiel ao fundo do jogo. que não tem esse 'quadriculado' que a gente
 adicionou". Decisões tomadas no mockup aprovado
 (https://claude.ai/artifact/UW66HpHwKmEshV1CeJmWke; cópia em
-`rien-OS-private/lab/mockups/papel-de-parede/index.html`):
+`YoRHa-OS-private/lab/mockups/papel-de-parede/index.html`):
 - **fundo:** cena "Menu", sem grid e sem grão;
 - **transição:** uma opção do usuário; de fábrica, a camuflagem (célula 24 px, rastro longo, falhas visíveis);
 - **primeiro corte:** as quatro cenas e as imagens da pasta do usuário;
@@ -21,7 +21,7 @@ adicionou". Decisões tomadas no mockup aprovado
 pegasse a tela inteira: "o efeito não se propaga pro fundo como um todo, o fundo da topbar não é
 afetado". A barra do topo deixa de pintar o próprio papel e passa a mostrar o papel de parede por
 baixo, com um tom que acompanha o fundo. Aprovada pelo dono em 2026-10-27, pelo plano e pelo mockup
-(`rien-OS-private/lab/mockups/papel-de-parede/index.html`, seção "the bar over the desktop"). Ela
+(`YoRHa-OS-private/lab/mockups/papel-de-parede/index.html`, seção "the bar over the desktop"). Ela
 substitui a FR-004 desta spec e a FR-002a da 001 na parte da barra (o HUD pintava a faixa de cima da
 vinheta).
 
@@ -42,7 +42,7 @@ falhava nas paletas aprovadas. O dono decidiu:
   `#2E2C27` e uma placa de papel (`#C9C5AB` a 55%) atrás dos textos da barra, só no High (FR-028).
   O Normal não muda.
 - **Salvar sempre:** o que muda no popup de configurações continua depois de reiniciar o shell, num
-  arquivo de estado comum (`$XDG_STATE_HOME/rien-os/settings.json`), que as specs 007 e 008 vão
+  arquivo de estado comum (`$XDG_STATE_HOME/yorha-os/settings.json`), que as specs 007 e 008 vão
   reusar (FR-031, `contracts/settings-state.md`). Revê a FR-018 da 003.
 
 **Emenda de 2026-10-28 (4), "O seletor lembra o monitor" (decisão do dono):** o campo Monitor do
@@ -400,7 +400,7 @@ medido nos pixels). Sem dados de teste, gravar rajadas da camuflagem Menu → Da
   o `settings reset` volta ao valor configurado.
 - **FR-031** (emenda (3), decisão do dono de 2026-10-27, "salvar sempre"): Todo valor mudado no popup
   de configurações MUST continuar depois de reiniciar o shell. Um mecanismo comum guarda os valores
-  em `$XDG_STATE_HOME/rien-os/settings.json` (nunca no `~/.config`): lido no início, escrito 250 ms
+  em `$XDG_STATE_HOME/yorha-os/settings.json` (nunca no `~/.config`): lido no início, escrito 250 ms
   depois da última mudança, de forma atômica, por cima da base (`shell.json` e `defaults.json`). O
   `settings reset` limpa o estado. Com fixtures, o arquivo não é lido nem escrito. O contrato
   (chaves, API, a marca `persist` do catálogo) está em `contracts/settings-state.md`, pra ser
@@ -457,7 +457,7 @@ Cada critério diz qual evidência da VM o comprova (constituição IV).
   texto contra o fundo sem a barra, com a placa da aba por cima quando é uma aba), em 1080 e hidpi,
   nos dois modos.
 - **SC-014** (emenda (3)): Sem fixtures, uma opção mudada por teclas reais no popup continua depois de
-  reiniciar o `qs`; o único arquivo escrito fica em `~/.local/state/rien-os/`; o `settings reset`
+  reiniciar o `qs`; o único arquivo escrito fica em `~/.local/state/yorha-os/`; o `settings reset`
   volta ao catálogo e à config, também depois de outro reinício. Evidência: `settings dump` e
   `hud dump` antes e depois, o arquivo de estado e a lista de arquivos escritos (`lab/check-004`).
 - **SC-015** (emenda (4)): Sem fixtures, o campo Monitor trocado por teclas reais pra uma saída

@@ -1,4 +1,4 @@
-# rien-OS — plano
+# YoRHa-OS — plano
 
 > Codinome interno. Documento vivo, atualizado em 2026-10-27.
 
@@ -45,13 +45,13 @@ A classificação item a item fica no repositório privado da camada pessoal (`i
 ## 4. Princípios
 
 1. **Padrões gerenciados separados dos seus arquivos.**
-   - O que é do projeto fica em `~/.local/share/rien-os/default/` e é substituído a cada update.
+   - O que é do projeto fica em `~/.local/share/yorha-os/default/` e é substituído a cada update.
    - O seu `~/.config/hypr/hyprland.lua` só carrega os padrões e depois os seus arquivos, que
      sobrescrevem o que quiserem.
    - Update nunca mexe no que é seu. Acaba o "reaplicar patches".
 2. **Idempotente.** Rodar o instalador duas vezes dá o mesmo resultado.
 3. **Nunca sobrescrever sem backup.** Qualquer arquivo existente vai antes pra
-   `~/.local/state/rien-os/backups/<data>/`.
+   `~/.local/state/yorha-os/backups/<data>/`.
 4. **Módulos, não monolito.** Cada área (pacotes, áudio, rede, login, shell, compositor) é um
    script independente.
 5. **O shell é um encaixe.** Começa com o que funciona hoje e é trocado pela UI NieR quando
@@ -64,8 +64,8 @@ A classificação item a item fica no repositório privado da camada pessoal (`i
 ## 5. Estrutura do repositório
 
 ```
-rien-OS/
-├── boot.sh            one-liner: instala o git, clona a versão escolhida em ~/.local/share/rien-os e roda o install.sh
+YoRHa-OS/
+├── boot.sh            one-liner: instala o git, clona a versão escolhida em ~/.local/share/yorha-os e roda o install.sh
 ├── install.sh         preflight → pacotes → hardware → config → login → pós-instalação (com log)
 ├── install/
 │   ├── preflight/     é Arch? tem internet? não está rodando como root? tem espaço?
@@ -77,7 +77,7 @@ rien-OS/
 ├── default/           configs gerenciadas: hypr/, kitty/, zsh/, starship, btop, fastfetch, gtk…
 ├── config/            sementes: o que é copiado pro ~/.config do usuário uma única vez
 ├── shell/             a UI NieR (Quickshell)
-├── bin/               CLI `rien`: update · refresh <app> · module enable/disable · pkg add/remove · doctor
+├── bin/               CLI `yorha`: update · refresh <app> · module enable/disable · pkg add/remove · doctor
 ├── migrations/        scripts com timestamp, rodam uma vez por usuário
 └── docs/
 ```
@@ -93,14 +93,14 @@ que só você ativa.
 3. instala tudo;
 4. reinicia no SDDM, e o Hyprland abre já configurado.
 
-**Atualizar.** `rien update`:
+**Atualizar.** `yorha update`:
 1. pega a versão nova;
 2. roda as migrations pendentes;
 3. instala os pacotes que entraram nas listas;
 4. atualiza o sistema;
 5. reinicia o shell.
 
-**Voltar uma config pro padrão.** `rien refresh hyprland` restaura o padrão de uma config
+**Voltar uma config pro padrão.** `yorha refresh hyprland` restaura o padrão de uma config
 gerenciada, fazendo backup antes.
 
 **Desinstalar.** Fora do escopo inicial. O que existe são os backups de tudo que foi substituído.
@@ -162,7 +162,7 @@ Serpantinum.
 | S1 Inventário | Classificação em base/módulo/hardware/pessoal (o rascunho já está pronto) | Você revisou o inventário (repositório privado) |
 | S2 Arch completo na VM ✅ | ISO + archinstall desassistido (8.5) | Um comando entrega um `arch-limpo` instalado pela ISO |
 | S3 Instalador v0 | Arch limpo → o seu uso, com o Serpantinum no encaixe do shell | O checklist bate na VM |
-| S4 Updates | `rien update` e migrations, usando o que o U2 aprendeu | Atualizar de v0.1 pra v0.2 funciona na VM |
+| S4 Updates | `yorha update` e migrations, usando o que o U2 aprendeu | Atualizar de v0.1 pra v0.2 funciona na VM |
 | S5 Niri | Gerador de atalhos e regras de janela, adaptador de workspaces no shell | O mesmo checklist passa no Niri |
 | S6 Público | Docs, nome público, licença, testes em EndeavourOS/CachyOS | Alguém de fora instala sem ajuda |
 | S7 (opcional) | Pacote de plugins pro Omarchy usando o mesmo código da UI | — |
@@ -195,8 +195,8 @@ Serpantinum.
   vai pra sua máquina depois de homologada.
 - **2026-10-26, VM e não Docker:** o desenvolvimento da UI acontece numa VM, que também serve
   pra testar instalação e updates.
-- **2026-10-26, licença:** AGPL-3.0-or-later. Repositório público: `TauilDiego/rien-OS`.
-- **2026-10-26, nome:** rien-OS (provisório). Dados pessoais ficam fora do repositório público.
+- **2026-10-26, licença:** AGPL-3.0-or-later. Repositório público: `TauilDiego/YoRHa-OS`.
+- **2026-10-26, nome:** YoRHa-OS (provisório). Dados pessoais ficam fora do repositório público.
 - **2026-10-26, implementar antes de otimizar:** a otimização de desempenho fica pra U6.
 - **2026-10-26, testes:** o ambiente de testes (VM + containers) é privado e fica fora do
   repositório público.
