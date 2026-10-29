@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,9 +31,9 @@
 
 ## Notes
 
-- Uma marca `[NEEDS CLARIFICATION]` espera o dono: US5 (a tela de desligar e reiniciar entra nesta
-  spec). A da instalação foi respondida em 29.10: o instalador ativa o Plymouth, com backup e um
-  comando que desfaz (FR-041, FR-042, SC-011).
+- As duas perguntas foram respondidas pelo dono em 29.10: o instalador ativa o Plymouth, com backup
+  e um comando que desfaz (FR-041, FR-042, SC-011); o desligar e o reiniciar entram, só com a faixa
+  de passagem (US5, FR-030a). Todos os itens passam.
 - SDDM, Plymouth e systemd-boot aparecem por nome porque a fase U5a do `PLAN.md` define o escopo por
   eles (o que é tematizado), não como escolha de implementação. QML aparece só na evidência do
   SC-007, porque a constituição (princípio IV) pede "log sem erro de QML".

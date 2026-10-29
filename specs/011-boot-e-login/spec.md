@@ -4,8 +4,8 @@
 
 **Created**: 2026-10-29
 
-**Status**: Rascunho, com uma pergunta pro dono marcada `[NEEDS CLARIFICATION]` (US5). A da
-instalação (FR-041) foi respondida em 29.10.
+**Status**: As perguntas foram respondidas pelo dono em 29.10 (a instalação, FR-041, e o
+desligar, US5). Aguardando a aprovação da spec.
 
 **Input**: Fase U5a do `PLAN.md` (§9): "Splash de boot no Plymouth e tela de login com a UI NieR:
 tema QML do SDDM ou um greeter em Quickshell (a escolha sai da spec). O bootloader continua o
@@ -42,6 +42,8 @@ erro do tema".
   cena "Menu + rules". É o mesmo tamanho que a barra vai usar (spec 010, item A, decidido em 29.10).
 - **Regra geral:** toda alternativa de design vira uma opção, com a recomendação como padrão. Aqui
   as opções ficam na configuração do tema, porque o login roda antes de qualquer sessão.
+- **Desligar e reiniciar:** entram nesta spec, só com a faixa de passagem ("Shutting down…",
+  "Rebooting…"), sem a lista de checagens ao contrário (US5).
 - **Núcleo de sistema da experiência:** o projeto continua só visual, mas o que o sistema precisa
   pra experiência completa vai junto na distribuição. Aqui isso é o Plymouth no initramfs e o
   parâmetro `splash` do kernel, que o instalador ativa com backup e um comando que desfaz (FR-041,
@@ -205,12 +207,13 @@ screenshot, errar uma vez, acertar e conferir que o boot segue até o login.
 
 ### User Story 5 - Desligar e reiniciar com a mesma cara (Priority: P3)
 
-[NEEDS CLARIFICATION: a tela de desligar e reiniciar entra nesta spec? A proposta seria: ao
-desligar ou reiniciar (pelo login, pelo menu de pausa ou por comando), a tela escura do boot
-mostra a faixa "Shutting down…" ou "Rebooting…", como no protótipo do login, até a máquina apagar.
-O estudo do boot listou o desligar como etapa desejada, mas a forma não foi decidida.]
+Ao desligar ou reiniciar, por qualquer caminho (o login, o menu de pausa ou um comando), a tela
+escura do boot aparece com a faixa de passagem dizendo "Shutting down…" ou "Rebooting…", como no
+protótipo do login, até a máquina apagar. É só a faixa, sem lista de checagens (decisão do dono,
+29.10).
 
-**Why this priority**: Fecha o ciclo visual do boot, mas o sistema funciona sem ela.
+**Why this priority**: Fecha o ciclo visual (liga com a lista e a faixa, desliga com a faixa), mas
+o sistema funciona sem ela.
 
 **Independent Test**: Na VM, desligar e reiniciar pelos três caminhos, capturando a tela até a VM
 apagar, e conferir que nenhuma imagem mostra texto de console.
@@ -334,6 +337,9 @@ apagar, e conferir que nenhuma imagem mostra texto de console.
   anel girando.
 - **FR-030**: O pedido de senha do disco criptografado MUST continuar funcionando com o tema. O
   estilo do login nesse pedido (quadradinhos, "…", erro) é da US4.
+- **FR-030a**: Ao desligar ou reiniciar, por qualquer caminho, o tema de boot MUST mostrar a tela
+  escura com a faixa de passagem dizendo "Shutting down…" ou "Rebooting…" até a máquina apagar,
+  sem lista de checagens e sem texto de console.
 
 **Opções**
 
