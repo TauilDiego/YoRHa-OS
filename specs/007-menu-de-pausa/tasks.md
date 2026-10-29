@@ -156,7 +156,7 @@ cancelamento e o registro no `dump`; sem fixtures, um `Reboot` confirmado reinic
 `org.freedesktop.login1.Session.Lock` no `busctl monitor`; `check-007 --only us1` 15/0; `qmllint`
 limpo na VM; log da UI com 0 erros e 0 avisos) e `2026-10-28T212425-vm-teste-c-007-reboot-real`
 (cenário 8: o `Reboot` confirmado reiniciou a VM, `/proc/uptime` 872,43 s → 12,66 s; um aviso
-`qt.qpa.services` do portal num relançamento do `qs` logo depois do boot, fora do QML).
+`qt.qpa.services` do portal logo depois do boot, fora do QML). Rodada de novo em `2026-10-28T212731-vm-teste-c-007-reboot-real-portal`, com o roteiro esperando o `org.freedesktop.portal.Desktop` antes de relançar o `qs` (decisão do dono): reboot 16,42 s → 12,55 s e portal PASS, mas o aviso continua, vindo do `qs` iniciado sozinho no boot, antes da espera; o relançamento depois do portal sai limpo (pendência com o dono).
 
 **Checkpoint**: o menu cobre launcher, janelas e energia.
 
