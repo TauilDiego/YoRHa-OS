@@ -54,7 +54,7 @@ Singleton {
         readonly property string samplePageTitle: "Items"
         readonly property string samplePageSubtitle: "All Items"
         // spec 003: the settings pieces, on the gallery's second page (Tab)
-        readonly property string page2Subtitle: "-Design System 2/3"
+        readonly property string page2Subtitle: "-Design System 2/4"
         readonly property string valueStepper: "Value stepper"
         readonly property string stepperMiddle: "middle"
         readonly property string stepperStart: "start"
@@ -69,7 +69,7 @@ Singleton {
         readonly property string cursorListUnfocused: "Cursor list, unfocused"
         readonly property string popupFrame: "Pop-up frame"
         // spec 004: the wallpaper pieces, on the gallery's third page (Tab)
-        readonly property string page3Subtitle: "-Design System 3/3"
+        readonly property string page3Subtitle: "-Design System 3/4"
         readonly property string scenes: "Scenes"
         readonly property string paperFilter: "Paper filter"
         readonly property string filterOn: "on"
@@ -81,6 +81,21 @@ Singleton {
         readonly property string frameAt: "%1 · %2"           // a transition's still frame: kind · when
         readonly property string camouflageAt: "700 ms"
         readonly property string halfway: "50%"
+        // spec 007: the pause menu's pieces, on the gallery's fourth page (Tab)
+        readonly property string page4Subtitle: "-Design System 4/4"
+        readonly property string tabbedFrame: "Pop-up frame with tabs"
+        readonly property string tabHovered: "%1 hovered"
+        readonly property string searchHeader: "Search header"
+        readonly property string confirmDialog: "Confirm dialog"
+        readonly property string kiteOn: "kite on %1"
+        readonly property string appIcon: "App icon"
+        readonly property string genericIcon: "no icon"
+        readonly property string workspaceMap: "Workspace map"
+        readonly property string mapEmpty: "empty"
+        readonly property string mapWindows: "windows"
+        readonly property string mapChosen: "chosen"
+        readonly property string statusCard: "Status card"
+        readonly property string statusNote: "Battery not found."
     }
 
     // --- spec 003: settings pop-up ---------------------------------------------------------

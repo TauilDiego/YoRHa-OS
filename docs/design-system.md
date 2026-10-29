@@ -556,7 +556,8 @@ as informações. É o corpo do seletor de papel de parede e serve pros próximo
     a linha de opção apagada);
   - **sem foco:** o item atual fica `selected`, com a pipa clara e parada (§7);
   - **rolagem:** quando não cabe, rola na hora, por entradas inteiras, mostrando o item atual com os
-    trilhos e, se ele for o primeiro do grupo, o título.
+    trilhos e, se ele for o primeiro do grupo, o título; desde a 007 (T043), em linhas inteiras no
+    alto e embaixo, e também pela roda do mouse (ver §9, "Acréscimos em peças existentes").
 - **Prévia (`PreviewCard`, no seletor de papel de parede):** o card com o quadrado claro antes do
   título (`Card` com `mark`), a mídia de 512 × 288 numa moldura de 2 px `medium-gray`, 24 px das
   bordas, e a descrição embaixo (23 px, peso 500, linhas a 1,45 × o tamanho, no mínimo 100 px).
@@ -615,6 +616,103 @@ agrupada com e sem foco e o layout inteiro em miniatura.
 - **Comandos:** `qs ipc call wallpaper list | set <id> <monitor|all> | next | prev | transition
   <tipo> | camouflage <cell> <trail> <glitch> | filter <caminho> <true|false> | picker
   <open|close|toggle> | dump`.
+
+## 9. Menu de pausa (spec 007)
+
+O menu de pausa do jogo como o launcher, o gerenciador de janelas e o menu de energia do desktop
+(`specs/007-menu-de-pausa`): um popup só, com quatro abas. Medidas em px do jogo no quadro de
+1612 × 908 da moldura (§7), × `s`. A galeria mostra as peças novas na página 4 (Tab três vezes).
+
+### A moldura com abas (`PopupFrame` com `tabs`)
+
+| Peça | y | Notas |
+|---|---|---|
+| barra de abas | 26 | `TabBar` com abas de 214 × 47 (`space.tabW`), x 48, faixas verticais à esquerda |
+| régua pontilhada | 83 | `pauseRuleY`; a aba aberta (`selected`) desce até ela |
+| título + data e hora | 127 | `pauseTitleY`: `PageHeader` da aba à esquerda; `Clock.dateText` e a hora à direita, `small` |
+| régua lisa | 189 | `pauseHRuleY` |
+| corpo (`bodyTop`) | 221 | `pauseBodyY`; as colunas vão até 24 acima da régua do rodapé |
+| rodapé | 820 / 846 | igual à 003: o texto da aba à esquerda, as teclas da aba à direita, com `Tab Next tab` antes do `Esc` |
+
+- **Abas:** `APPS`, `WINDOWS`, `SYSTEM`, `POWER`, nessa ordem. A aberta fica `selected` (sem pipa);
+  as outras `normal` e, com o ponteiro em cima, `hovered`. Trocar de aba faz a haste da aba nova
+  descer até a régua (`motion.touch`; instantânea com movimento reduzido ou fixtures).
+- **Teclas da moldura:** Tab e Shift+Tab trocam de aba dando a volta; clicar numa aba abre ela;
+  clique fora fecha; texto digitado em qualquer aba vai pra busca de APPS (R13).
+- **Sem `tabs`:** nada muda (o seletor de papel de parede continua como na §8).
+- **Acréscimos:** `tabs` (`[{ label }]`), `tab`, `clock`, o sinal `tabClicked(int)`, `bodyTop`
+  (leitura) e, só pra galeria, `hoveredTab` (uma aba desenhada `hovered` sem o ponteiro; padrão
+  `-1`). O `PopupWindow` repassa tudo (com `currentTab` no lugar de `tab`).
+
+### As quatro páginas
+
+| Aba | Corpo | Rodapé à esquerda | Teclas (lista) |
+|---|---|---|---|
+| APPS `-Launcher` | `PickerLayout`: PINNED e ALL APPS (ou o cabeçalho de busca com os resultados); prévia com o ícone de 160 numa área `light-gray` de 512 × 288 e a descrição; opções `Open`, as ações do app, `Workspace ◂ Current ▸`, `Pinned ◂ ON ▸`; informações `CATEGORY`, `COMMAND`, `WINDOWS` | `N apps · type to search` | `↑↓ Select` `Enter Open` `→ Options` `Tab Next tab` `Esc Close` (com busca, `Esc Clear`) |
+| WINDOWS `-Open Windows` | `PickerLayout`: `WORKSPACE 01`… e `SPECIAL` no fim, `●` na janela em foco, o app à direita; prévia com o `WorkspaceMap` e o título inteiro; ações `Focus`, `Workspace ◂ 01 ▸`, `Floating ◂ OFF ▸`, `Close`; informações `APP`, `MONITOR`, `SIZE` | `N windows · M workspaces` | `↑↓ Select` `Enter Focus` `→ Actions` `Tab Next tab` `Esc Close` |
+| SYSTEM `-Settings` | a `SettingsPage` da 003 com `startY` 255 (as legendas no `bodyTop`) | a versão | as da 003, com `Tab Next tab` |
+| POWER `-Session` | `GroupedList` sem grupos com as 6 ações (as indisponíveis `dimmed`), o `DescriptionCard` em x 560 e o `StatusCard` em x 1160 (as colunas da `PickerLayout`) | `Up 2h 14m` | `↑↓ Select` `Enter <ação>` `Tab Next tab` `Esc Close` |
+
+- **Busca sem resultado (APPS):** a linha `No apps match.` em `medium-gray` no lugar dos itens, a
+  prévia `No match` com a lupa, e **sem o card Options** (como no mockup).
+- **Sem janelas (WINDOWS):** `No open windows.`, o mapa vazio da área atual e o rodapé só com `Tab`
+  e `Esc`.
+- **POWER:** Enter numa ação apagada não faz nada; numa que confirma, abre o `ConfirmDialog`; nas
+  outras, executa (lock, suspend e hibernate fecham o menu antes; log out, reboot e shut down fecham
+  quando o sistema aceita). Uma recusa deixa o menu aberto com o erro em `alert` no quadro.
+
+### Componentes novos
+
+| Componente | Onde | Desenho | Estados (galeria, página 4) |
+|---|---|---|---|
+| `SearchHeader` | `composites/` | `SEARCH` (`small`, tinta), a consulta numa caixa `light-yellow` com o cursor de texto piscando (parado com movimento reduzido ou fixtures) e `N RESULTS` à direita (`small`, `medium-gray`); linha de 30 px | com consulta; a busca vazia (`GroupedList` com `emptyText`) |
+| `AppIcon` | `base/` | `ink`: o ícone redesenhado na tinta sobre `light-yellow`, pela luminância (`shaders/duotone.frag`); sem o `.qsb`, `MultiEffect` colorizado, com um aviso só; `color`: a imagem; `square`: o quadrado do jogo no tamanho do ícone. Sem ícone, o genérico da categoria (`assets/icons/category-*.svg`) | `ink`, `color` e `square`, com um ícone da fixture e sem ícone |
+| `WorkspaceMap` | `composites/` | contorno de 2 px `medium-gray` na proporção do monitor, dentro de 512 × 288; a faixa da barra em `light-gray`; cada janela um retângulo `light-gray` com borda `dark-gray` de 1 px, na escala; a escolhida em tinta com o título em `light-yellow` (`small`, cortado) | vazio, com janelas, com a escolhida |
+| `StatusCard` | `composites/` | `Card` com `mark`; pares rótulo (tinta) / valor (à direita, tabular), com um `Meter` de 150 × 11 quando há medidor; régua `light-gray`; a fileira de quadrados vazios de 22 px; o rodapé `NO ERROR` centralizado, ou o aviso em `alert` | `NO ERROR`; com aviso |
+| `ConfirmDialog` | `composites/` | tinta `color.dim` sobre o painel inteiro (clicar nela cancela); no centro um `Card` de 760 com `mark`, o título (`Shut down?`), o texto em 23 px, os bloqueios em `alert` (`pacman: …`), duas `OptionRow` de ação (a ação e `Cancel`) a 420 de largura e o rodapé próprio (`↑↓ Select` `Enter Confirm` `Esc Cancel`) | a pipa em `Cancel`; a pipa na ação |
+
+### Acréscimos em peças existentes
+
+- **`PickerLayout` (004):** `startY` (padrão 150; 221 no menu), `searchHeader` e `emptyText` (vão
+  pra lista), `trailingRole`, opções com `type` (`choice` como antes, `toggle` `◂ ON ▸`, `action`
+  rótulo + seta: Enter ou clique emite `triggered(option)`, → não faz nada, ← volta pra lista) e
+  `optionsVisible` (padrão `true`; `false` esconde o card Options). Teclas que ela não usa (Tab,
+  letras, Backspace) ficam pra página.
+- **`GroupedList` (004):** `search` (o `SearchHeader` no alto, no lugar dos títulos), `emptyText`,
+  `trailingRole`, e a **rolagem em linhas inteiras** (T043, decisão do dono em 28.10):
+  - a rolagem sempre para no alto de uma linha (menos o espaço dos trilhos, dentro do vão maior
+    entre as linhas), então a primeira linha à vista nunca fica cortada;
+  - enquanto a lista não cabe, a janela termina embaixo da última linha que cabe inteira, então a
+    última também nunca fica cortada; o papel que sobra embaixo fica vazio;
+  - **roda do mouse:** uma linha por passo, só quando a lista não cabe na coluna (sem rolagem, a
+    roda não faz nada, como antes); se a pipa sai da vista, ela vai pro item inteiro mais perto
+    (`cursorRequested(index)` quando quem manda é o pai) e o foco vai pra lista;
+  - `scrollState()` = `{ y, overflows, first, cut, last, cutBottom }`, pro `pause dump`
+    (`apps.scroll`, `windows.scroll`).
+  Sem rolagem, nada muda: o seletor da 004 e a galeria ficam iguais.
+- **`SettingsPage` (003):** `startY` (padrão 170) e `extraKeys` (antes do `Esc`).
+
+### Opções (`SYSTEM › Pause menu`)
+
+| Opção | Valores (padrão primeiro) | O que muda, na hora |
+|---|---|---|
+| `App icons` | Ink, Original color, Square only | o estilo do `AppIcon` na prévia de APPS |
+| `App order` | A–Z, Most used | a ordem de ALL APPS (a busca sempre põe os mais usados primeiro) |
+| `Running app` | New window, Go to window | o Enter num app que já tem janela |
+| `Confirm` | Risky ones, Every action | quais ações de POWER pedem confirmação (log out, reboot e shut down; ou também lock e suspend) |
+| `Dialog starts on` | Cancel, Action | onde a pipa começa no `ConfirmDialog` |
+
+### Atalhos e comandos
+
+- **Atalhos (na VM, ALT no lugar de SUPER):** `ALT + Escape` abre e fecha o menu (na última aba);
+  `ALT + I` abre em SYSTEM (as configurações da 003) e fecha se já estiver nela.
+- **Comandos:** `qs ipc call pause open | close | toggle | tab <apps|windows|system|power> | isOpen
+  | search <texto> | reset | dump` (o formato do `dump` está em `specs/007-menu-de-pausa/contracts/ipc.md`);
+  `qs ipc call settings …` continua como alias da aba SYSTEM.
+- **Tokens** (`Tokens.space`): `pauseTabsY` 26, `pauseRuleY` 83, `pauseTitleY` 127, `pauseHRuleY`
+  189, `pauseBodyY` 221, `confirmW` 760, `confirmRowsW` 420, `appIconSize` 160, `mapW` × `mapH`
+  512 × 288, `statusMeterW` 150, `statusBox` 22.
+- **Configuração:** `terminal` (padrão `["kitty"]`), o terminal dos apps que rodam nele.
 
 ## Créditos
 

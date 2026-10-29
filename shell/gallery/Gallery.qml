@@ -116,7 +116,7 @@ PanelWindow {
         anchors.fill: parent
         focus: true
         Keys.onEscapePressed: root.closeRequested()
-        Keys.onTabPressed: root.page = (root.page + 1) % 3     // spec 003: page 2; spec 004: page 3
+        Keys.onTabPressed: root.page = (root.page + 1) % 4     // spec 003: page 2; 004: page 3; 007: page 4
 
         Rectangle {
             anchors.fill: parent
@@ -670,6 +670,13 @@ PanelWindow {
             active: root.page === 2
             sourceComponent: page3
         }
+
+        // --- spec 007: page 4 (Tab), the pause menu's pieces, loaded only while shown -------------
+        Loader {
+            anchors.fill: parent
+            active: root.page === 3
+            sourceComponent: page4
+        }
     }
 
     Component {
@@ -899,6 +906,258 @@ PanelWindow {
                                 s: miniFrame.s
                                 wallpaper: p3.scenes[2] ?? null
                                 dpr: p3.dpr
+                            }
+                        }
+                    }
+                }
+            }
+
+            Vignette {
+                anchors.fill: parent
+                s: root.s
+                enabled: Settings.vignette
+            }
+        }
+    }
+
+    // --- spec 007: page 4 (Tab), the pause menu's pieces (FR-033) ---------------------------------
+    // Loaded only while shown: the tabbed frame (each tab selected, one hovered), the search header
+    // and the empty search, the app icon in its three styles (a fixture icon and none: the generic
+    // one), the workspace map (empty, with windows, with the chosen one), the status card (NO ERROR
+    // and a note) and the confirm dialog (the kite on Cancel and on the action), in miniature.
+    Component {
+        id: page4
+
+        Rectangle {
+            id: p4
+            color: Tokens.color.darkYellow
+
+            readonly property var ps: Strings.pause
+            readonly property var tabs: ["apps", "windows", "system", "power"].map(t => ({ label: ps.tabs[t].label }))
+            readonly property string iconPath: Quickshell.shellPath("fixtures/pause/icons/terminal.svg")
+            readonly property string genericPath: Quickshell.shellPath("assets/icons/category-system.svg")
+            readonly property var monitor: ({ name: "Virtual-1", w: 1920, h: 1080 })
+            readonly property var mapWindows: [
+                { address: "0x1", x: 0, y: 40, w: 956, h: 1040, title: "kitty", focused: false },
+                { address: "0x2", x: 964, y: 40, w: 956, h: 516, title: "Firefox", focused: true },
+                { address: "0x3", x: 964, y: 564, w: 956, h: 516, title: "btop", focused: false }
+            ]
+            readonly property var statusRows: [
+                { label: ps.user, value: "arch", meter: null },
+                { label: ps.host, value: "nier-lab", meter: null },
+                { label: ps.uptime, value: ps.uptimeHM.arg(2).arg(14), meter: null },
+                { label: ps.battery, value: ps.percent.arg(87), meter: 0.87 },
+                { label: ps.windowsCount, value: "7", meter: null }
+            ]
+            // The page must fit 16:10 too (s = height / 1080 leaves 1728 game px of width there):
+            // a narrower dialog column, and the third one ends by 1666 (where the header's rule ends).
+            readonly property real dialogW: 430
+            readonly property real col2: Tokens.space.pageMarginH + root.colW + root.colGap
+            readonly property real col3: col2 + dialogW + 60
+
+            PageHeader {
+                x: root.u(Tokens.space.pageMarginH)
+                y: root.u(Tokens.space.pageMarginV)
+                s: root.s
+                title: Strings.gallery.title
+                subtitle: Strings.gallery.page4Subtitle
+            }
+
+            Rule {
+                x: root.u(Tokens.space.pageMarginH)
+                y: root.u(128)
+                width: parent.width - 2 * x
+                s: root.s
+            }
+
+            // --- column 1: the tabbed frame, then the search header and the empty search
+            Column {
+                x: root.u(Tokens.space.pageMarginH)
+                y: root.u(root.bodyY)
+                spacing: root.u(root.sectionGap)
+
+                Section {
+                    name: Strings.gallery.tabbedFrame
+                    Grid {
+                        columns: 2
+                        columnSpacing: root.u(20)
+                        rowSpacing: root.u(14)
+                        Repeater {
+                            model: 4
+                            Column {
+                                id: frameTile
+                                required property int index
+                                spacing: root.u(8)
+                                Tile {
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        color: Tokens.color.darkYellow
+                                    }
+                                    PopupFrame {
+                                        anchors.fill: parent
+                                        tabs: p4.tabs
+                                        tab: frameTile.index
+                                        hoveredTab: frameTile.index === 0 ? 1 : -1
+                                        clock: true
+                                        title: p4.ps.tabs[["apps", "windows", "system", "power"][frameTile.index]].title
+                                        subtitle: p4.ps.tabs[["apps", "windows", "system", "power"][frameTile.index]].subtitle
+                                    }
+                                }
+                                Caption {
+                                    text: frameTile.index === 0
+                                        ? Strings.gallery.frameAt.arg(p4.tabs[0].label).arg(Strings.gallery.tabHovered.arg(p4.tabs[1].label))
+                                        : p4.tabs[frameTile.index].label
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Section {
+                    name: Strings.gallery.searchHeader
+                    Column {
+                        spacing: root.u(14)
+                        SearchHeader {
+                            s: root.s
+                            query: "fir"
+                            count: 3
+                        }
+                        GroupedList {
+                            width: root.u(470)
+                            height: implicitHeight
+                            s: root.s
+                            keysEnabled: false
+                            search: ({ query: "zzz", count: 0 })
+                            emptyText: p4.ps.noMatch
+                            model: []
+                        }
+                    }
+                }
+            }
+
+            // --- column 2: the confirm dialog, the kite on Cancel and on the action
+            Section {
+                x: root.u(p4.col2)
+                y: root.u(root.bodyY)
+                name: Strings.gallery.confirmDialog
+
+                Column {
+                    spacing: root.u(14)
+                    Repeater {
+                        model: ["cancel", "action"]
+                        Column {
+                            id: dialogTile
+                            required property string modelData
+                            spacing: root.u(8)
+                            Item {
+                                width: root.u(p4.dialogW)
+                                height: root.u(240)
+                                clip: true
+                                Rectangle {
+                                    anchors.fill: parent
+                                    color: Tokens.color.lightYellow
+                                }
+                                ConfirmDialog {
+                                    anchors.fill: parent
+                                    enabled: false
+                                    s: root.s * 0.5
+                                    start: dialogTile.modelData
+                                    title: p4.ps.dialogTitle.arg(p4.ps.powerLabels.poweroff)
+                                    text: p4.ps.windowsWillClose.arg(7)
+                                    blockers: [{ who: "pacman", why: "System update in progress" }]
+                                    actionLabel: p4.ps.powerLabels.poweroff
+                                }
+                            }
+                            Caption {
+                                text: Strings.gallery.kiteOn.arg(dialogTile.modelData === "cancel" ? p4.ps.cancel : p4.ps.powerLabels.poweroff)
+                            }
+                        }
+                    }
+                }
+            }
+
+            // --- column 3: the app icon, the workspace map, the status card
+            Column {
+                x: root.u(p4.col3)
+                y: root.u(root.bodyY)
+                spacing: root.u(root.sectionGap)
+
+                Section {
+                    name: Strings.gallery.appIcon
+                    Grid {
+                        columns: 3
+                        columnSpacing: root.u(40)
+                        rowSpacing: root.u(10)
+                        flow: Grid.TopToBottom
+                        rows: 2
+                        Repeater {
+                            model: ["ink", "ink", "color", "color", "square", "square"]
+                            Column {
+                                id: iconCell
+                                required property string modelData
+                                required property int index
+                                readonly property bool generic: index % 2 === 1
+                                spacing: root.u(6)
+                                Rectangle {
+                                    width: root.u(84)
+                                    height: root.u(84)
+                                    color: Tokens.color.lightGray
+                                    AppIcon {
+                                        anchors.centerIn: parent
+                                        s: root.s
+                                        size: 64
+                                        style: iconCell.modelData
+                                        source: iconCell.generic ? "" : p4.iconPath
+                                        fallback: p4.genericPath
+                                    }
+                                }
+                                Caption {
+                                    text: iconCell.generic ? Strings.gallery.frameAt.arg(iconCell.modelData).arg(Strings.gallery.genericIcon) : iconCell.modelData
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Section {
+                    name: Strings.gallery.workspaceMap
+                    Row {
+                        spacing: root.u(14)
+                        Repeater {
+                            model: [Strings.gallery.mapEmpty, Strings.gallery.mapWindows, Strings.gallery.mapChosen]
+                            Column {
+                                id: mapCell
+                                required property string modelData
+                                required property int index
+                                spacing: root.u(6)
+                                WorkspaceMap {
+                                    width: implicitWidth
+                                    height: implicitHeight
+                                    s: root.s * 0.3
+                                    monitor: p4.monitor
+                                    bar: 40
+                                    windows: mapCell.index === 0 ? [] : p4.mapWindows
+                                    selected: mapCell.index === 2 ? "0x2" : ""
+                                }
+                                Caption { text: mapCell.modelData }
+                            }
+                        }
+                    }
+                }
+
+                Section {
+                    name: Strings.gallery.statusCard
+                    Row {
+                        spacing: root.u(20)
+                        Repeater {
+                            model: ["", Strings.gallery.statusNote]
+                            StatusCard {
+                                required property string modelData
+                                width: implicitWidth
+                                height: implicitHeight
+                                s: root.s * 0.58
+                                rows: p4.statusRows
+                                note: modelData
                             }
                         }
                     }

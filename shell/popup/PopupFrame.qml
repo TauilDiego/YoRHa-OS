@@ -34,6 +34,7 @@ Item {
     property var tabs: []                        // [{ label }]
     property int tab: 0
     property bool clock: false
+    property int hoveredTab: -1                  // the gallery: a tab drawn hovered without the pointer
     readonly property bool tabbed: tabs.length > 0
     readonly property int bodyTop: u(tabbed ? Tokens.space.pauseBodyY : 150)
 
@@ -131,7 +132,7 @@ Item {
             tabWidth: Tokens.space.tabW
             model: root.tabs.map((t, i) => ({
                 label: t.label,
-                state: i === root.tab ? "selected" : i === tabBar.hoveredIndex ? "hovered" : "normal"
+                state: i === root.tab ? "selected" : i === tabBar.hoveredIndex || i === root.hoveredTab ? "hovered" : "normal"
             }))
             onActivated: index => root.tabClicked(index)
         }
