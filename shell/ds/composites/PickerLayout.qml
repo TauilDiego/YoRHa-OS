@@ -254,7 +254,8 @@ FocusScope {
         id: list
         x: root.hx(48)
         y: root.topY
-        width: root.fluid ? Math.min(implicitWidth, root.hx(560 - 48) - root.u(24)) : implicitWidth
+        // fluid (the text log, as its mockup): the list reaches 24 px short of the preview
+        width: root.fluid ? root.hx(560 - 48) - root.u(24) : implicitWidth
         height: Math.min(implicitHeight, root.bottomY - y)
         s: root.s
         model: root.entries
