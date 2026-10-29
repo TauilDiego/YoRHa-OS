@@ -454,16 +454,19 @@ Rectangle {
     }
 
     // Reboot or Shut down confirmed: the screen goes dark, the band opens with "Rebooting…" or
-    // "Shutting down…" and the SDDM is asked to act at once (research R10), so the boot theme's band
-    // takes over; the band closes into a line after 1.5 s if the machine is still up.
+    // "Shutting down…" and, once it is on the screen, the SDDM is asked to act (research R10), so the
+    // boot theme's band takes over; the band closes into a line after 1.5 s if the machine is still
+    // up. Asking in the band's own frame would take the machine down before the band is drawn.
     SequentialAnimation {
         id: leaveSeq
         ParallelAnimation {
             NumberAnimation { target: root; property: "paperShown"; to: 0; duration: 900; easing.type: Easing.BezierSpline; easing.bezierCurve: root.ease }
             NumberAnimation { target: root; property: "uiShown"; to: 0; duration: 400; easing.type: Easing.BezierSpline; easing.bezierCurve: root.ease }
         }
-        ScriptAction { script: { root.bridgeMode = "band"; root.power(); } }
-        PauseAnimation { duration: 1500 }
+        ScriptAction { script: root.bridgeMode = "band" }
+        PauseAnimation { duration: 100 }
+        ScriptAction { script: root.power() }
+        PauseAnimation { duration: 1400 }
         ScriptAction { script: root.bridgeMode = "line" }
         PauseAnimation { duration: 17 }
         ScriptAction { script: root.bridgeMode = "off" }
