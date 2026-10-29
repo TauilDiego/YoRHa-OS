@@ -37,7 +37,7 @@ PanelWindow {
     }
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "rien-notify"
+    WlrLayershell.namespace: "yorha-notify"
     WlrLayershell.keyboardFocus: replyOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     color: "transparent"
 

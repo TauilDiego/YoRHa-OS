@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "rien-os/shell/notifications/1",
+  "$id": "yorha-os/shell/notifications/1",
   "title": "spec 008: the notifications fixture domain, the prefs state file and the saved text log",
   "$defs": {
     "urgency": { "enum": ["low", "normal", "critical"] },
@@ -10,7 +10,7 @@
       "properties": {
         "position": { "enum": ["corner", "top", "subtitle"] },
         "osdPosition": { "enum": ["bottom", "top"] },
-        "voice": { "enum": ["relay", "rienos", "system"] },
+        "voice": { "enum": ["relay", "yorhaos", "system"] },
         "log": { "enum": ["session", "saved"] },
         "logSize": { "enum": [50, 100, 200] },
         "monitor": { "type": "string", "description": "\"\" = the focused monitor; else an output name" },
@@ -81,7 +81,7 @@
     },
     "savedLog": {
       "type": "object",
-      "description": "$XDG_STATE_HOME/rien-os/text-log.json, mode 600, only with log = saved",
+      "description": "$XDG_STATE_HOME/yorha-os/text-log.json, mode 600, only with log = saved",
       "additionalProperties": false,
       "required": ["version", "entries"],
       "properties": {

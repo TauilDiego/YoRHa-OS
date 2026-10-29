@@ -6,7 +6,7 @@ Valem as regras da 001: `property real s: 1`; cores, fontes, medidas e tempos s�
 fixos só via `Strings`; cada camada importa só as de baixo.
 
 Medidas em px do jogo (1080p), vezes `s`, tiradas do mockup aprovado
-(`rien-OS-private/lab/mockups/transmissoes/index.html`).
+(`YoRHa-OS-private/lab/mockups/transmissoes/index.html`).
 
 ## Tokens novos (`Tokens.notify`)
 

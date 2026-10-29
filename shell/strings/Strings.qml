@@ -10,7 +10,7 @@ Singleton {
     readonly property string vol: "VOL"
     readonly property string bat: "BAT"
     readonly property string system: "SYSTEM"
-    readonly property string brand: "rien-OS"
+    readonly property string brand: "YoRHa-OS"
     readonly property string charging: "+"         // after the battery percent while charging
     readonly property string muted: "MUTE"         // in place of the volume percent
 
@@ -114,7 +114,7 @@ Singleton {
         readonly property string nowLabel: "NOW"
         readonly property string on: "ON"
         readonly property string off: "OFF"
-        readonly property string version: "rien-OS 0.1 · Hyprland"
+        readonly property string version: "YoRHa-OS 0.1 · Hyprland"
         readonly property string error: "Settings data unavailable."
         // key hints: the key, then what it does
         readonly property string keyUpDown: "↑↓"
@@ -182,7 +182,7 @@ Singleton {
         readonly property string mark: "●"
         readonly property string separator: " · "
         readonly property string listSeparator: ", "
-        readonly property string footer: "rien-OS 0.1 · %1"        // %1 = how many monitors
+        readonly property string footer: "YoRHa-OS 0.1 · %1"        // %1 = how many monitors
         readonly property string oneMonitor: "1 monitor"
         readonly property string manyMonitors: "%1 monitors"
     }
@@ -194,7 +194,7 @@ Singleton {
         // the text log
         readonly property string title: "LOG"
         readonly property string subtitle: "-Transmissions"
-        readonly property string footer: "rien-OS 0.1 · notification server"
+        readonly property string footer: "YoRHa-OS 0.1 · notification server"
         readonly property string now: "NOW"
         readonly property string earlier: "EARLIER"
         readonly property string newTag: "NEW"
@@ -262,7 +262,7 @@ Singleton {
         readonly property string counterLog: "LOG"
         readonly property string counterDnd: "DND"
         // the system's voice (FR-003)
-        readonly property var voices: ({ relay: "Relay 01", rienos: "rien-OS", system: "System" })
+        readonly property var voices: ({ relay: "Relay 01", yorhaos: "YoRHa-OS", system: "System" })
         readonly property string serverMissing: "Notification server unavailable"
         readonly property string serverMissingText: "Another program owns the notification name (%1). Transmissions stay off until it quits."
         // the Notifications category of the settings (FR-039, FR-042)
@@ -276,7 +276,7 @@ Singleton {
         readonly property var prefValues: ({
             position: ["Corner", "Top band", "Subtitle"],
             osdPosition: ["Bottom", "Top"],
-            voice: ["Relay 01", "rien-OS", "System"],
+            voice: ["Relay 01", "YoRHa-OS", "System"],
             log: ["Session only", "Saved"],
             logSize: ["100", "50", "200"],
             monitor: ["Focused"],
@@ -288,7 +288,7 @@ Singleton {
             dnd: "Keeps transmissions off the screen. Critical ones still show, and everything waits in the text log. The top bar shows DND and the unread count. Default: Off.",
             position: "Where transmissions appear. Corner: under the top bar, on the right. Top band: full-width bands under the bar. Subtitle: centered at the bottom, like the Pod's lines. Default: Corner.",
             osdPosition: "Where the volume, microphone and brightness display appears: centered at the bottom, or under the top bar. Default: Bottom.",
-            voice: "The name rien-OS speaks with in its own messages. Apps keep their own names. Default: Relay 01.",
+            voice: "The name YoRHa-OS speaks with in its own messages. Apps keep their own names. Default: Relay 01.",
             log: "Session only keeps the text log in memory until you log out. Saved also writes the last messages to disk, readable only by you; going back to Session only deletes that file. Default: Session only.",
             logSize: "How many transmissions the text log keeps. The oldest go first. Default: 100.",
             monitor: "Where transmissions appear: the focused monitor when they arrive, or always the same one. Default: Focused.",
@@ -304,7 +304,7 @@ Singleton {
             reply: { app: "Chat", title: "Mika", body: "Are you still coming tonight? I saved you a seat by the window." },
             critical: { app: "Battery", title: "Battery at 5%", body: "Plug in the charger. The system suspends at 3%." },
             flood: { app: "Mail", title: "New message", body: "Message %1 of 5." },
-            long: { app: "Build", title: "The nightly build finished with warnings in three packages and one test that took longer than usual", body: "Packages: quickshell, hyprland, rien-shell. The slow test was settings/persist, at 4.2 s against 1.1 s yesterday. Nothing failed, but the warnings repeat the same deprecation notice about the old layer-shell namespace, which the next release removes. The full log is in ~/builds/nightly.log, and a summary was mailed to you. Run rien build --verbose to see every step again." },
+            long: { app: "Build", title: "The nightly build finished with warnings in three packages and one test that took longer than usual", body: "Packages: quickshell, hyprland, yorha-shell. The slow test was settings/persist, at 4.2 s against 1.1 s yesterday. Nothing failed, but the warnings repeat the same deprecation notice about the old layer-shell namespace, which the next release removes. The full log is in ~/builds/nightly.log, and a summary was mailed to you. Run yorha build --verbose to see every step again." },
             progress: { app: "Downloads", title: "archlinux.iso", body: "Downloading…", value: 40 },
             low: { app: "Updates", title: "3 updates available", body: "They install the next time you restart." },
             script: { app: "script.sh", title: "Step %1 of 100", body: "Job %1 finished." },

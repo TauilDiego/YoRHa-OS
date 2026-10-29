@@ -21,7 +21,7 @@ principal; arquivo de trabalho `mock008/index.html` no scratchpad da sessão).
 - **Transmissão:** uma notificação na tela, no estilo das falas do Pod.
 - **Faixa:** o material das superfícies passageiras desta fase (transmissão, faixa crítica, OSD):
   tinta translúcida com retícula e arcos finos, texto claro, como a faixa de tutorial do jogo.
-- **Quem fala:** o rótulo da transmissão. É o nome do app; as mensagens do próprio rien-OS falam
+- **Quem fala:** o rótulo da transmissão. É o nome do app; as mensagens do próprio YoRHa-OS falam
   com a **voz do sistema**, `Relay 01` de fábrica (nome nosso, não o do jogo; trocável nas
   configurações).
 - **Text log:** o histórico das transmissões. É uma tela só, que aparece num popup próprio agora e
@@ -41,8 +41,8 @@ principal; arquivo de trabalho `mock008/index.html` no scratchpad da sessão).
 - Q: Onde fica o OSD? → A: opção `OSD position`: **Bottom** (de fábrica) ou **Top** (FR-028).
 - Q: O text log vai pro disco? → A: opção `Text log`: **Session only** (de fábrica) ou **Saved** (as
   últimas 100 no estado do usuário) (FR-019).
-- Q: Como o rien-OS se chama quando fala? → A: opção `System voice`: **Relay 01** (de fábrica),
-  **rien-OS** ou **System** (FR-003).
+- Q: Como o YoRHa-OS se chama quando fala? → A: opção `System voice`: **Relay 01** (de fábrica),
+  **YoRHa-OS** ou **System** (FR-003).
 - Q: O text log é popup ou aba do menu de pausa? → A: **os dois**: popup agora e aba do menu de pausa
   quando o U3 chegar, com a mesma tela (FR-020, FR-044).
 - Q: Atalhos? → A: **adiados pelo dono.** `SUPER + N` (log) e `SUPER + CTRL + N` (não perturbe), com
@@ -251,7 +251,7 @@ no log, cinco não lidas na barra.
 O usuário abre as configurações do sistema (popup da 003, ou a aba SYSTEM do menu de pausa quando o
 U3 chegar) e encontra a categoria **Notifications**, com as alternativas desta fase: não perturbe,
 posição das transmissões (Corner, Top band, Subtitle), posição do OSD (Bottom, Top), o log no disco
-(Session only, Saved), a voz do sistema (Relay 01, rien-OS, System) e as outras escolhas (monitor,
+(Session only, Saved), a voz do sistema (Relay 01, YoRHa-OS, System) e as outras escolhas (monitor,
 quantas na tela, duração, digitação, tamanho do log, tela cheia). Cada mudança vale na hora, sem
 reiniciar nada: a próxima transmissão (e as que estão na tela) já aparece do jeito novo. As escolhas
 ficam guardadas como estado do usuário e sobrevivem a reiniciar o shell.
@@ -261,7 +261,7 @@ valores de fábrica sem ela.
 
 **Independent Test**: Na VM, abrir as configurações, ir em Notifications, trocar `Position` pras três
 posições mandando um `notify-send` em cada, trocar `OSD position` mudando o volume, trocar `System
-voice` disparando uma mensagem do rien-OS, trocar `Text log` pra `Saved`, reiniciar o shell e conferir
+voice` disparando uma mensagem do YoRHa-OS, trocar `Text log` pra `Saved`, reiniciar o shell e conferir
 o log; tudo por screenshots e pelo estado exportado.
 
 **Acceptance Scenarios**:
@@ -275,7 +275,7 @@ o log; tudo por screenshots e pelo estado exportado.
    centro do monitor, como as falas do Pod, acima do OSD; as mais novas embaixo.
 4. **Given** `OSD position` em `Top`, **When** o volume muda, **Then** o OSD aparece no topo, logo abaixo
    da barra (ou da faixa crítica, se houver uma).
-5. **Given** `System voice` em `System`, **When** o rien-OS manda uma mensagem própria, **Then** quem fala
+5. **Given** `System voice` em `System`, **When** o YoRHa-OS manda uma mensagem própria, **Then** quem fala
    é `System`; as notificações dos apps não mudam.
 6. **Given** `Text log` em `Saved`, **When** o usuário troca pra `Session only`, **Then** o arquivo do log
    é apagado na hora e o log da sessão continua na memória.
@@ -352,7 +352,7 @@ o log; tudo por screenshots e pelo estado exportado.
   retícula, texto claro, cantos retos, sem desfoque), com:
   - um bloco de 14 px na esquerda, na cor da urgência (FR-010);
   - quem fala: quadradinho + nome do app (ou a voz do sistema, `Relay 01` de fábrica, pras mensagens
-    do rien-OS; FR-039), `small`, e a hora de chegada à direita;
+    do YoRHa-OS; FR-039), `small`, e a hora de chegada à direita;
   - o título, uma linha, peso forte;
   - o texto, até 4 linhas, digitando;
   - opcionalmente: imagem (à direita), medidor de progresso e botões de ação (embaixo);
@@ -421,7 +421,7 @@ o log; tudo por screenshots e pelo estado exportado.
   passageiras, conforme a opção `Text log`:
   - **Session only** (de fábrica): em memória; sobrevive a recarregar o shell, não a sair da sessão;
     nada vai pro disco;
-  - **Saved**: também num arquivo no estado do usuário (`$XDG_STATE_HOME/rien-os/`), legível só por
+  - **Saved**: também num arquivo no estado do usuário (`$XDG_STATE_HOME/yorha-os/`), legível só por
     ele, regravado a cada mudança; ao entrar na sessão, o log volta com as entradas salvas, marcadas
     como de uma sessão anterior e sem ações. Voltar pra `Session only` apaga o arquivo na hora.
 - **FR-020**: O log MUST abrir por um atalho da sessão (proposta: `SUPER + N`; na VM, `ALT + N`;
@@ -468,7 +468,7 @@ o log; tudo por screenshots e pelo estado exportado.
   invertido (largura 300, os 11 px do `hp-bar`) e número com algarismos tabulares; MUTE com o medidor
   apagado; MIC ON / MIC OFF sem medidor.
 - **FR-029**: Um OSD MUST ficar ≈1,2 s depois da última mudança e atualizar no lugar; nunca há dois. O
-  OSD não aparece quando a mudança vem de um menu do rien-OS que já mostra o valor, e não entra no log.
+  OSD não aparece quando a mudança vem de um menu do YoRHa-OS que já mostra o valor, e não entra no log.
 - **FR-030**: O OSD MUST aparecer com o não perturbe ligado e MUST NOT pegar o teclado nem o mouse.
 
 **Movimento, dados de teste e estado**
@@ -513,7 +513,7 @@ o log; tudo por screenshots e pelo estado exportado.
   - `Do not disturb`: Off / On (o mesmo estado da FR-026);
   - `Position`: Corner / Top band / Subtitle (FR-004);
   - `OSD position`: Bottom / Top (FR-028);
-  - `System voice`: Relay 01 / rien-OS / System (FR-003);
+  - `System voice`: Relay 01 / YoRHa-OS / System (FR-003);
   - `Text log`: Session only / Saved (FR-019);
   - `Log size`: 100 / 50 / 200 (FR-019);
   - `Monitor`: Focused / cada saída pelo nome (FR-004);
@@ -522,7 +522,7 @@ o log; tudo por screenshots e pelo estado exportado.
     app não muda);
   - `Typing`: On / Off (Off: o texto aparece inteiro, como com movimento reduzido, FR-006);
   - `In fullscreen`: Hold / Show (FR-027).
-- **FR-040**: As escolhas MUST ser guardadas como estado do usuário (`$XDG_STATE_HOME/rien-os/`),
+- **FR-040**: As escolhas MUST ser guardadas como estado do usuário (`$XDG_STATE_HOME/yorha-os/`),
   nunca na config dele. A ordem de quem vale: a escolha guardada, depois o `shell.json` do usuário,
   depois os padrões do projeto (como o papel de parede da 004).
 - **FR-041**: Uma troca de `Position`, `OSD position`, `Monitor` ou `On screen` MUST valer também pro
@@ -611,11 +611,11 @@ Cada critério diz qual evidência da VM o comprova (constituição IV). Os test
   teste com luz de fundo de verdade fica pra homologação na máquina do dono (U7).
 - **Quem muda o volume:** as teclas de volume continuam na config do compositor; o OSD só observa as
   mudanças (FR-028), não muda nada.
-- **Sem sons:** as transmissões não tocam som nesta fase (nada de sons do jogo, e o rien-OS ainda não
+- **Sem sons:** as transmissões não tocam som nesta fase (nada de sons do jogo, e o YoRHa-OS ainda não
   tem sons próprios).
 - **Histórico no disco:** de fábrica, o log vive só na sessão, por privacidade (mensagens de chat e
   e-mail); `Saved` é escolha do usuário (FR-019).
-- **Nome de quem fala:** o nome do app, como ele mesmo se apresenta; o rien-OS fala com a voz do sistema
+- **Nome de quem fala:** o nome do app, como ele mesmo se apresenta; o YoRHa-OS fala com a voz do sistema
   (`Relay 01` de fábrica). O formato "nome + número" lembra o do jogo sem copiar o texto dele.
 - **Medidas e cores:** a faixa (tinta ≈84%, retícula, arcos) e os tempos são estimativas, em tokens,
   calibráveis na VM. O material vem da faixa de tutorial medida no §6; nenhuma imagem do jogo entra no

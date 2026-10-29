@@ -40,7 +40,7 @@ PanelWindow {
     implicitHeight: view.implicitHeight + Tokens.px(nt.shadow, s)
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "rien-osd"
+    WlrLayershell.namespace: "yorha-osd"
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
     color: "transparent"
     mask: Region {}

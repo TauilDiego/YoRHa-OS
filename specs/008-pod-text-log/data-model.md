@@ -13,7 +13,7 @@ Criada pelo `NotifyStore` a cada notificação recebida (ou pela fixture, ou por
 | `app` | string | `appName`; vazio → o nome da entrada de desktop (`desktopEntry`), senão `Unknown` |
 | `appKey` | string | `desktopEntry` ou `app`: a chave do agrupamento (FR-017) |
 | `speaker` | string | Quem fala: `app`, ou a voz do sistema (`NotifyPrefs.voice`) quando `system: true`. Calculado na hora de desenhar, então trocar a voz muda até as antigas |
-| `system` | bool | Mensagem do próprio rien-OS |
+| `system` | bool | Mensagem do próprio YoRHa-OS |
 | `title` | string | `summary`, texto puro, uma linha |
 | `body` | string | `NotifyText.sanitize(body)` (só `<b>`, `<i>`, `<u>`) |
 | `urgency` | enum `low`, `normal`, `critical` | Do app; sem dica → `normal` |
@@ -101,7 +101,7 @@ Só existe um (FR-029). `suppressed` (por tipo) vem de `Osd.suppress(kind, on)`.
 | `dnd` | Do not disturb | `false`, `true` | toggle |
 | `position` | Position | `corner`, `top`, `subtitle` (rótulos Corner, Top band, Subtitle) | choice |
 | `osdPosition` | OSD position | `bottom`, `top` | choice |
-| `voice` | System voice | `relay`, `rienos`, `system` (Relay 01, rien-OS, System) | choice |
+| `voice` | System voice | `relay`, `yorhaos`, `system` (Relay 01, YoRHa-OS, System) | choice |
 | `log` | Text log | `session`, `saved` (Session only, Saved) | choice |
 | `logSize` | Log size | `100`, `50`, `200` | choice |
 | `monitor` | Monitor | `""` (Focused) ou o nome de uma saída | choice (valores vivos) |
@@ -115,7 +115,7 @@ Cada valor tem a origem (`state`, `user`, `default`) pro `notify dump`. Valor in
 estado é regravado.
 
 **Onde as escolhas ficam** (emenda da T013): no `SettingsState` da 004
-(`$XDG_STATE_HOME/rien-os/settings.json`, `{ "version": 1, "values": { … } }`), com as chaves
+(`$XDG_STATE_HOME/yorha-os/settings.json`, `{ "version": 1, "values": { … } }`), com as chaves
 `notifications.dnd`, `notifications.position`, … — só as que o usuário mudou. Não existe um
 `notifications.json` próprio.
 

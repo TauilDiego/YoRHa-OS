@@ -30,7 +30,7 @@
         {"id": "dnd", "label": "Do not disturb", "type": "toggle", "setting": "notify.dnd", "value": false, "default": false},
         {"id": "position", "label": "Position", "type": "choice", "setting": "notify.position", "values": ["Corner", "Top band", "Subtitle"], "value": 0, "default": 0},
         {"id": "osd-position", "label": "OSD position", "type": "choice", "setting": "notify.osdPosition", "values": ["Bottom", "Top"], "value": 0, "default": 0},
-        {"id": "voice", "label": "System voice", "type": "choice", "setting": "notify.voice", "values": ["Relay 01", "rien-OS", "System"], "value": 0, "default": 0},
+        {"id": "voice", "label": "System voice", "type": "choice", "setting": "notify.voice", "values": ["Relay 01", "YoRHa-OS", "System"], "value": 0, "default": 0},
         {"id": "log", "label": "Text log", "type": "choice", "setting": "notify.log", "values": ["Session only", "Saved"], "value": 0, "default": 0},
         {"id": "log-size", "label": "Log size", "type": "choice", "setting": "notify.logSize", "values": ["100", "50", "200"], "value": 0, "default": 0},
         {"id": "monitor", "label": "Monitor", "type": "choice", "setting": "notify.monitor", "values": ["Focused", "—"], "value": 0, "default": 0},
@@ -63,9 +63,9 @@
     },
     {
       "id": "appearance", "label": "Appearance",
-      "about": "How rien-OS looks and moves.",
+      "about": "How YoRHa-OS looks and moves.",
       "options": [
-        {"id": "ui-scale", "label": "Interface scale", "type": "choice", "desc": "Size of the rien-OS interface, on top of the screen scale.", "values": ["90%", "100%", "110%", "125%"], "value": 1, "default": 1},
+        {"id": "ui-scale", "label": "Interface scale", "type": "choice", "desc": "Size of the YoRHa-OS interface, on top of the screen scale.", "values": ["90%", "100%", "110%", "125%"], "value": 1, "default": 1},
         {"id": "bar-height", "label": "Top bar height", "type": "choice", "desc": "Height of the bar at the top of the screen. The tabs and the dotted rule follow it.", "values": ["40 px", "50 px", "68 px", "80 px"], "value": 2, "default": 2},
         {"id": "bar-contrast", "label": "Bar contrast", "type": "choice", "desc": "How the texts of the top bar stand out from the wallpaper. High draws the texts darker, on a light plate over paper, and the clock heavier.", "setting": "barContrast", "values": ["Normal", "High"], "value": 0, "default": 0},
         {"id": "vignette", "label": "Vignette", "type": "toggle", "desc": "Darkens the edges and corners of full-screen menus and the desktop, like the game.", "value": true, "default": true},

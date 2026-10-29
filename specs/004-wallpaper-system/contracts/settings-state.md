@@ -6,7 +6,7 @@ reiniciar o shell. Emenda (3) da spec 004; revê a FR-018 da 003. As specs 007 (
 
 ## Onde fica
 
-- **Arquivo:** `$XDG_STATE_HOME/rien-os/settings.json` (sem a variável, `~/.local/state/rien-os/`).
+- **Arquivo:** `$XDG_STATE_HOME/yorha-os/settings.json` (sem a variável, `~/.local/state/yorha-os/`).
   Nunca no `~/.config` (constituição III).
 - **Formato:** `{ "version": 1, "values": { "<chave>": <valor JSON> } }`.
 - **Leitura:** uma vez, quando o shell inicia, bloqueando (o primeiro quadro já sai com o valor salvo).
@@ -56,5 +56,5 @@ barra lê `barContrast`) vai pro `Settings`, com `levelsOf`/`levelOf`/`setLevel`
 ## Evidência
 
 `lab/check-004`, bloco "saved settings": sem fixtures, duas opções mudadas por teclas reais
-continuam depois de reiniciar o `qs`; o único arquivo escrito fica em `~/.local/state/rien-os/`;
+continuam depois de reiniciar o `qs`; o único arquivo escrito fica em `~/.local/state/yorha-os/`;
 o `settings reset` volta ao catálogo e esvazia o estado, também depois de outro reinício.

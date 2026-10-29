@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Io
 
 // User settings: managed defaults (config/defaults.json) overridden key by key by the user's
-// $XDG_CONFIG_HOME/rien-os/shell.json. Updates never touch the user file (constitution III).
+// $XDG_CONFIG_HOME/yorha-os/shell.json. Updates never touch the user file (constitution III).
 Singleton {
     id: root
 
@@ -22,7 +22,7 @@ Singleton {
 
     readonly property string userPath: {
         const xdg = Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config");
-        return xdg + "/rien-os/shell.json";
+        return xdg + "/yorha-os/shell.json";
     }
 
     function parse(text, name) {
@@ -130,7 +130,7 @@ Singleton {
     readonly property var notificationChoices: ({
         position: ["corner", "top", "subtitle"],
         osdPosition: ["bottom", "top"],
-        voice: ["relay", "rienos", "system"],
+        voice: ["relay", "yorhaos", "system"],
         log: ["session", "saved"],
         logSize: [100, 50, 200],
         onScreen: [3, 1, 5],

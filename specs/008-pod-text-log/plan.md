@@ -56,10 +56,10 @@ usuários já esperam; entra na lista base na S3). Na VM de teste: `libnotify`, 
 
 **Storage** (research R14):
 - `shell/config/defaults.json` → bloco `notifications` (gerenciado);
-- `$XDG_CONFIG_HOME/rien-os/shell.json` → bloco `notifications` (do usuário, só lido);
-- `$XDG_STATE_HOME/rien-os/settings.json` (o `SettingsState` da 004, chaves `notifications.<chave>`) → as
+- `$XDG_CONFIG_HOME/yorha-os/shell.json` → bloco `notifications` (do usuário, só lido);
+- `$XDG_STATE_HOME/yorha-os/settings.json` (o `SettingsState` da 004, chaves `notifications.<chave>`) → as
   escolhas e o não perturbe (emenda da T013);
-- `$XDG_STATE_HOME/rien-os/text-log.json` → o log salvo, modo 600, só com `Text log: Saved`.
+- `$XDG_STATE_HOME/yorha-os/text-log.json` → o log salvo, modo 600, só com `Text log: Saved`.
 
 **Testing**: evidência na VM:
 - `notify-send`, `lab/notify-client`, teclas e cliques reais (`lab/key`, `lab/click`);
@@ -194,10 +194,10 @@ shell/
     ├── notifications-dnd.json     # novo: DND 5 + crítica
     └── notify/avatar.png          # novo: imagem de teste gerada (container), < 20 KB
 
-rien-OS-private/lab/               # (privado, branch lab-008)
+YoRHa-OS-private/lab/               # (privado, branch lab-008)
 ├── provision/notify.sh            # pacotes de teste na VM descartável + sink/source nulos
 ├── notify-client                  # gdbus: reply, replace, progress, flood, hold-name
-├── guest/hyprland.lua             # + ALT+N, ALT+CTRL+N (provisórios), teclas de volume → wpctl, noanim nas namespaces rien-notify/rien-osd
+├── guest/hyprland.lua             # + ALT+N, ALT+CTRL+N (provisórios), teclas de volume → wpctl, noanim nas namespaces yorha-notify/yorha-osd
 └── check-008                      # o quickstart (--only, --profile)
 ```
 

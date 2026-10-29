@@ -1,4 +1,4 @@
-"""The 39 cursor shapes of the rien-OS theme: one row per shape, with the hotspot (fraction of
+"""The 39 cursor shapes of the YoRHa-OS theme: one row per shape, with the hotspot (fraction of
 the 128 grid) and the XCursor/CSS aliases. Shapes, hotspots and aliases follow NieR Cursors by
 Beinsezii (MIT), build.sh; the pointers' hotspots are their tips.
 

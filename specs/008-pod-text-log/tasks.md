@@ -15,8 +15,8 @@ quickstart.md)
 sem aviso, sempre dentro de `lab/perf begin/end`.
 
 **Caminhos**:
-- `shell/…` = repositório público `nier-os` (esta worktree);
-- `lab/…` = repositório privado `rien-OS-private` (`~/projects/rien-OS-private/lab/`), branch
+- `shell/…` = repositório público `YoRHa-OS` (esta worktree);
+- `lab/…` = repositório privado `YoRHa-OS-private` (`~/projects/YoRHa-OS-private/lab/`), branch
   `lab-008`.
 
 **Laboratório**: no máximo **4 VMs ao mesmo tempo, 2 núcleos e 4 GB cada**
@@ -54,7 +54,7 @@ o servidor do Quickshell provado na VM antes de qualquer desenho.
     - `XF86AudioRaiseVolume`/`LowerVolume` → `wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 2%+/-`;
     - `XF86AudioMute` → `wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle`;
     - `XF86AudioMicMute` → o mesmo no source;
-  - regras de camada sem animação pras namespaces `rien-notify` e `rien-osd` (conferir como o `rien-popup` já está).
+  - regras de camada sem animação pras namespaces `yorha-notify` e `yorha-osd` (conferir como o `yorha-popup` já está).
 
   Conferir que o `lab/key` manda `volumeup`, `volumedown`, `audiomute` pelo QMP. Registrar no `lab/README.md` — **feito** (`2f33636`): ALT+N, ALT+CTRL+N, as quatro teclas de volume e as `layer_rule` `no_anim`; o `lab/key` manda qcodes do QMP (`volumeup`, `volumedown`, `audiomute`)
 - [x] T004 **Spike na VM** (`lab/perf begin "008: spike do servidor"`): uma UI mínima em `lab/mockups/notify-spike/shell.qml` com um `NotificationServer` (todas as flags de research R1). Ela loga cada notificação (campos, `actions`, `hints`, `image`) e confirma:
@@ -92,7 +92,7 @@ congelado.**
   - o OSD: `VOLUME`, `MUTE`, `MIC ON`, `MIC OFF`, `BRIGHTNESS`;
   - as teclas;
   - os rótulos e descrições das 11 opções da FR-039, com a descrição do `Text log` da FR-042;
-  - as vozes (`Relay 01`, `rien-OS`, `System`);
+  - as vozes (`Relay 01`, `YoRHa-OS`, `System`);
   - os textos fixos dos exemplos do injetor (mockup) — **feito**
 - [x] T008 [P] Gerar `shell/fixtures/notify/avatar.png` (96×96, desenhado do zero, < 20 KB) e `shell/fixtures/notify/broken.png` (bytes aleatórios) num container `nier-lab` com ImageMagick (`lab/make-test-notify-images`) — **feito**: `avatar.png` 96×96, 1004 B; `broken.png` 3000 B aleatórios (`lab/make-test-notify-images`, `lab-008` `882ca2d`)
 - [x] T009 Fixtures (domínio `notifications`, válidas contra `contracts/notifications.schema.json#/$defs/fixture`; conferir num container com python-jsonschema). Todas com `clock` fixo e os domínios da `hud-default.json`:
@@ -172,7 +172,7 @@ congelado.**
   Provado por `notify-send` + `dump`, sem desenho — **Frente B** — **feito**: agrupamento (`×5`, as anteriores não lidas se não terminaram de digitar), pilha cheia (`+1 in log`, a que saiu digitando fica não lida), substituição, lote, `logSize`, pausa com o mouse, recarga (log mantido, a viva religada e a ação chegando no `notify-send -w`), injetor em ordem (laço de `sh` com argv). **Corrigido:** o prazo da digitação era agendado antes de a transmissão entrar na pilha; `appeared`/`typed` aplicados depois da atualização da vista (laço de binding). Evidência `out/008-t026-163250`
 - [x] T026 [US1] `shell/notify/NotifyLayer.qml` + `shell/shell.qml`. Antes, mesclar a `004-wallpaper-system` de novo (pega a "Bar contrast"), em commit próprio:
   - **janelas:** um `Variants` sobre as telas, com um `LazyLoader` ativo só com conteúdo naquele monitor;
-  - **`PanelWindow`:** `Overlay`, `exclusionMode: Ignore`, namespace `rien-notify`, `mask` = união das caixas, teclado `None`;
+  - **`PanelWindow`:** `Overlay`, `exclusionMode: Ignore`, namespace `yorha-notify`, `mask` = união das caixas, teclado `None`;
   - **dentro:** `TransmissionStack` com `topInset` abaixo da barra (`Settings.barHeight` × escala);
   - **cliques** (FR-009): esquerdo dispara a ação padrão ou `hide`; direito `hide`; × `hide`;
   - **mouse por cima:** `pause` + `complete()`;
@@ -264,7 +264,7 @@ congelado.**
   - **`suppress(kind, on)`.**
 
   **Frente C**
-- [ ] T043 [P] [US5] `shell/notify/OsdWindow.qml` + `shell/shell.qml`: `PanelWindow` `Overlay` do tamanho do OSD, `mask` vazia, teclado `None`, namespace `rien-osd`, só enquanto há OSD. Embaixo a `osdBottom` do monitor em foco (a posição `Top` vem na US7); aparece com DND; `osd.box` no `dump` — **Frente C**
+- [ ] T043 [P] [US5] `shell/notify/OsdWindow.qml` + `shell/shell.qml`: `PanelWindow` `Overlay` do tamanho do OSD, `mask` vazia, teclado `None`, namespace `yorha-osd`, só enquanto há OSD. Embaixo a `osdBottom` do monitor em foco (a posição `Top` vem na US7); aparece com DND; `osd.box` no `dump` — **Frente C**
 - [ ] T044 [P] [US5] `shell/settings/SettingsPage.qml`: `Osd.suppress("volume", …)` com o foco em `sound.volume`/`sound.mute`, `"brightness"` em `display.brightness` (FR-029) — **Frente C**
 - [ ] T045 [US5] `lab/check-008` blocos `osd` (`lab/key volumeup` ×3, `wpctl get-volume`, `lab/burst`, mudo, `notify osd brightness 40`, volume 120%) e `osd-quiet`
 
@@ -293,7 +293,7 @@ congelado.**
 **Independent Test**: `lab/check-008 --only prefs,saved` (SC-014, SC-015).
 
 - [ ] T048 [P] [US7] `NotifyPrefs` com o estado (research R14; **emenda da T013:** as escolhas já ficam no `SettingsState` da 004, chaves `notifications.<chave>`; aqui sobra conferir origem, reset, valor inválido e o "nunca no `~/.config`"):
-  - **ordem de quem vale:** `$XDG_STATE_HOME/rien-os/notifications.json` (`{ "version": 1, "dnd", "prefs" }`, só as chaves mudadas) acima de `shell.json` e dos padrões;
+  - **ordem de quem vale:** `$XDG_STATE_HOME/yorha-os/notifications.json` (`{ "version": 1, "dnd", "prefs" }`, só as chaves mudadas) acima de `shell.json` e dos padrões;
   - **`origin`;**
   - **`reset()`** apaga as escolhas;
   - **estado inválido** → padrão e regravar;

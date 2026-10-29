@@ -1,4 +1,4 @@
-// rien-OS shell: YoRHa design system + HUD (spec 001).
+// YoRHa-OS shell: YoRHa design system + HUD (spec 001).
 // Launch it with QT_LOGGING_RULES=qt.qpa.wayland.textinput.warning=false. That silences one Qt
 // 6.12.0 warning and nothing else: every newly focused pop-up logs "qt.qpa.wayland.textinput: …
 // disableSurface … but 0x0 is focused" (QWaylandInputContext disables text input on a surface

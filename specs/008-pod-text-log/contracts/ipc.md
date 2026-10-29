@@ -1,7 +1,7 @@
 # Contrato: comandos IPC (alvo `notify`)
 
 Chamada: `qs -p <pasta da UI> ipc call notify <função> [args]`; no laboratório,
-`lab/ipc 'qs -p ~/nier/ui ipc call notify …'`. Um `IpcHandler` novo no `shell.qml`. Um `rien notify …`
+`lab/ipc 'qs -p ~/nier/ui ipc call notify …'`. Um `IpcHandler` novo no `shell.qml`. Um `yorha notify …`
 (S4) vai ser um invólucro destes comandos.
 
 | Função | Retorno | Uso |

@@ -10,7 +10,7 @@ UI; só o `Compositor` fala com o Hyprland. Entidades em [../data-model.md](../d
 | Membro | Tipo | Notas |
 |---|---|---|
 | `dnd`, `position`, `osdPosition`, `voice`, `log`, `logSize`, `monitor`, `onScreen`, `duration`, `typing`, `fullscreen` | valores do data-model | Só leitura; sempre válidos |
-| `voiceName` | string | `Relay 01`, `rien-OS` ou `System` (do `Strings`) |
+| `voiceName` | string | `Relay 01`, `YoRHa-OS` ou `System` (do `Strings`) |
 | `durationFactor` | real | 0,66 / 1 / 1,5 |
 | `origin(key)` | `"state"`, `"user"`, `"default"` | Pro `dump` |
 | `set(key, value)` | `"ok"` / `"error: …"` | Valida, aplica na hora, grava o estado (não com fixtures) |
@@ -19,9 +19,9 @@ UI; só o `Compositor` fala com o Hyprland. Entidades em [../data-model.md](../d
 | **opção viva** (research R13, emenda da T013) | `levelsOf(key)`, `levelOf(key)`, `setLevel(key, v)`, `labelsOf(key)` | A mesma API de opção viva do `Settings` da 004 (`specs/004-wallpaper-system/contracts/settings-state.md`). `levelsOf` são os valores na ordem do catálogo (toggle: `[false, true]`; `monitor`: `""` + as saídas); `labelsOf`, os rótulos do `Strings` |
 | `dump()` | objeto | Os valores + `origin` (pro `notify dump`) |
 
-Fontes: `config/defaults.json` (bloco `notifications`) → `$XDG_CONFIG_HOME/rien-os/shell.json` (bloco
+Fontes: `config/defaults.json` (bloco `notifications`) → `$XDG_CONFIG_HOME/yorha-os/shell.json` (bloco
 `notifications`, só lido) → as escolhas salvas no `SettingsState` da 004 (chaves `notifications.<chave>`,
-em `$XDG_STATE_HOME/rien-os/settings.json`, lido e escrito pelo `SettingsState`). Fixture:
+em `$XDG_STATE_HOME/yorha-os/settings.json`, lido e escrito pelo `SettingsState`). Fixture:
 `notifications.prefs` e `notifications.dnd`; com fixtures o `SettingsState` vive só na memória (FR-043).
 
 ### `NotifyStore` — o servidor, o log e a tela (US1–US4, US6)
@@ -45,12 +45,12 @@ em `$XDG_STATE_HOME/rien-os/settings.json`, lido e escrito pelo `SettingsState`)
 | `clear()` | void | Dispensa todas as vivas e esvazia o log (e o arquivo, com `Saved`) |
 | `markAllRead()` | void | Abrir o log (FR-024) |
 | `pause(id, on)`, `typed(id)`, `remainingOf(id)` | — | Ganchos da transmissão (mouse, fim da digitação) |
-| `system(title, body, urgency)` | int (id) | Mensagem do rien-OS, com a voz do sistema |
+| `system(title, body, urgency)` | int (id) | Mensagem do YoRHa-OS, com a voz do sistema |
 | `sample(name)` | `"ok"` / `"error: …"` | O injetor (research R17) |
 | `dumpState()` | objeto | Pro `notify dump` |
 
 Fonte: `NotificationServer` (research R1). Fixture: domínio `notifications` (o log, a pilha, as
-críticas; ver o schema). Log salvo: `$XDG_STATE_HOME/rien-os/text-log.json`, só com `log == "saved"` e
+críticas; ver o schema). Log salvo: `$XDG_STATE_HOME/yorha-os/text-log.json`, só com `log == "saved"` e
 sem fixtures (research R14). Estado de sessão: `PersistentProperties` (research R15).
 
 ### `NotifyText` — funções puras de texto (FR-036)
@@ -87,7 +87,7 @@ Fontes: `Pipewire.defaultAudioSink`/`defaultAudioSource` (`Quickshell.Services.P
 
 **Domínio `notifications` das fixtures:** como o `settings` da 003, é novo e o `fixtures.schema.json`
 da 001 (com `additionalProperties: false`) não o lista. No merge na principal, ele ganha
-`"notifications": { "$ref": "rien-os/shell/notifications/1#/$defs/fixture" }`.
+`"notifications": { "$ref": "yorha-os/shell/notifications/1#/$defs/fixture" }`.
 
 ## Regras
 

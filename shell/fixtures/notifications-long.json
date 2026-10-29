@@ -37,7 +37,7 @@
         "id": -100,
         "app": "A build server with a remarkably long application name",
         "title": "The nightly build finished with warnings in three packages and one slow test",
-        "body": "Packages: quickshell, hyprland, rien-shell. The slow test was settings/persist, at 4.2 s against 1.1 s yesterday. Nothing failed, but the warnings repeat the same deprecation notice about the old layer-shell namespace, which the next release removes. The full log is in ~/builds/nightly.log, and a summary was mailed to you. Run the build again with every step shown to see where the time goes; the cache was cold this morning, so part of the slowness is expected. Tomorrow's run starts at 03:00 and should be back to its usual eleven minutes. If it is not, the report from that run will say which st",
+        "body": "Packages: quickshell, hyprland, yorha-shell. The slow test was settings/persist, at 4.2 s against 1.1 s yesterday. Nothing failed, but the warnings repeat the same deprecation notice about the old layer-shell namespace, which the next release removes. The full log is in ~/builds/nightly.log, and a summary was mailed to you. Run the build again with every step shown to see where the time goes; the cache was cold this morning, so part of the slowness is expected. Tomorrow's run starts at 03:00 and should be back to its usual eleven minutes. If it is not, the report from that run will say which st",
         "at": "2026-10-26T13:36:00"
       },
       {

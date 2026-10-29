@@ -115,17 +115,17 @@ fica marcado **(spike T004)** e é a primeira coisa a rodar.
 - **Transmissões:** um `Variants` sobre `Quickshell.screens` com um `LazyLoader` por monitor, ativo só
   enquanto aquele monitor tem algo pra mostrar. Dentro, `NotifyLayer`: `PanelWindow` transparente na
   tela inteira (como a `PopupWindow` da 003), camada `Overlay` (a crítica aparece até sobre tela cheia),
-  `exclusionMode: Ignore`, namespace `rien-notify`, `mask` = a união das caixas visíveis (o resto da
+  `exclusionMode: Ignore`, namespace `yorha-notify`, `mask` = a união das caixas visíveis (o resto da
   tela continua clicável), teclado `None` (ou `OnDemand` com a resposta aberta). A posição da pilha
   (Corner, Top band, Subtitle) e a da faixa crítica são calculadas dentro dela, então trocar a opção
   não recria janela (FR-041).
 - **OSD:** `OsdWindow`, outra `PanelWindow` `Overlay`, do tamanho do OSD, ancorada embaixo ou em cima
-  com margem, `mask` vazia (não pega clique, FR-030), teclado `None`, namespace `rien-osd`, criada só
+  com margem, `mask` vazia (não pega clique, FR-030), teclado `None`, namespace `yorha-osd`, criada só
   enquanto o OSD está visível.
 - **Log:** `LogPopup` = `PopupWindow` da 003 com a `LogPage` dentro. Abre e fecha como os outros
   popups do `shell.qml` (monitor em foco relido, fechamento em duas fases). Abrir o log fecha o
   configurações e o seletor, e vice-versa.
-- **Animações do compositor:** as três namespaces ganham `noanim` na config da VM (como o `rien-popup`
+- **Animações do compositor:** as três namespaces ganham `noanim` na config da VM (como o `yorha-popup`
   precisa pra screenshots iguais), pra o fade e a varredura serem só os nossos.
 - **Alternativas:** uma janela por transmissão (layer surfaces demais numa enxurrada); janela fixa por
   monitor sempre criada (superfície transparente parada a toa).
@@ -191,11 +191,11 @@ fica marcado **(spike T004)** e é a primeira coisa a rodar.
 - **Decisão:**
   - padrões do projeto em `shell/config/defaults.json`, bloco `notifications` (gerenciado);
   - o `shell.json` do usuário pode sobrescrever cada chave (só lido, como na 004);
-  - as escolhas e o não perturbe no `SettingsState` da 004 (`$XDG_STATE_HOME/rien-os/settings.json`,
+  - as escolhas e o não perturbe no `SettingsState` da 004 (`$XDG_STATE_HOME/yorha-os/settings.json`,
     chaves `notifications.<chave>`; vale mais que os dois de cima). **Emenda da T013:** era um
     `notifications.json` próprio, escrito pelo `NotifyPrefs`; o `SettingsState` já faz isso (leitura
     no início, escrita atômica juntada, nada com fixtures);
-  - o log salvo em `$XDG_STATE_HOME/rien-os/text-log.json`, só com `Saved`.
+  - o log salvo em `$XDG_STATE_HOME/yorha-os/text-log.json`, só com `Saved`.
 - **Permissão do log salvo (SC-015):** antes da primeira escrita, `install -m 600 /dev/null <arquivo>`
   (argv). O `FileView` escreve atômico (arquivo temporário + rename); se o rename não mantiver o 600
   **(spike T004)**, o `NotifyStore` roda `chmod 600 -- <arquivo>` depois de cada escrita. Escritas se
@@ -240,7 +240,7 @@ fica marcado **(spike T004)** e é a primeira coisa a rodar.
     variações): o log, a pilha, as críticas, o OSD, o não perturbe, a tela cheia e as opções, com horas
     fixas. Com fixtures, as transmissões da fixture não expiram nem digitam, e as que chegarem por D-Bus
     aparecem inteiras, sem tempo (screenshots iguais, SC-002).
-- **Mensagens do próprio rien-OS:** um `NotifyStore.system(title, body, urgency)` cria uma entrada com
+- **Mensagens do próprio YoRHa-OS:** um `NotifyStore.system(title, body, urgency)` cria uma entrada com
   a voz do sistema, sem passar pelo D-Bus (não há app pra avisar). Nesta fase, só o injetor e o aviso
   "notification server unavailable" usam.
 

@@ -52,7 +52,7 @@ PanelWindow {
     }
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "rien-gallery"
+    WlrLayershell.namespace: "yorha-gallery"
     // false while closing: drop the exclusive focus before the window goes away (shell.qml).
     property bool keyboardActive: true
     WlrLayershell.keyboardFocus: keyboardActive ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None

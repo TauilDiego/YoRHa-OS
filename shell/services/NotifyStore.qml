@@ -23,7 +23,7 @@ import "../strings"
 // stack and the critical band come from the file, frozen: nothing types, nothing expires, nothing is
 // written. Notifications that still arrive over D-Bus show whole, without a time.
 //   The session's log survives a reload of the shell (PersistentProperties, R15); with Text log:
-// Saved it is also written to $XDG_STATE_HOME/rien-os/text-log.json, mode 600 (R14).
+// Saved it is also written to $XDG_STATE_HOME/yorha-os/text-log.json, mode 600 (R14).
 Singleton {
     id: root
 
@@ -53,7 +53,7 @@ Singleton {
 
     readonly property string statePath: {
         const xdg = Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state");
-        return xdg + "/rien-os/text-log.json";
+        return xdg + "/yorha-os/text-log.json";
     }
     readonly property bool saving: NotifyPrefs.log === "saved" && !fixed
 
@@ -233,7 +233,7 @@ Singleton {
         commit(true);
     }
 
-    // A rien-OS message, spoken with the system's voice (R17): no app to tell.
+    // A YoRHa-OS message, spoken with the system's voice (R17): no app to tell.
     function system(title: string, body: string, urgency: string, quiet: bool): int {
         const id = -1000 - (++systemSeq);
         const e = makeEntry(id, {
