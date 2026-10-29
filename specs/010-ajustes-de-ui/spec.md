@@ -32,6 +32,19 @@ System Settings (`ALT + I` no lab, `SUPER + I` em instalação real), uma opçã
 o cursor YoRHa (padrão) e o cursor normal do sistema, sem a personalização. Segue a regra do dono
 de implementar alternativas como opções trocáveis no System Settings.
 
+### D. Uma animação de carregamento só, a do cursor
+
+O dono definiu (29.10): o anel de carregamento do tema de cursor (`Loading_Circle`, em
+`system/cursors/yorha-cursors/gen/fam_loading.py`, quadros do NieR Cursors da Beinsezii, MIT,
+recoloridos) é **a** animação de carregamento de quase tudo no sistema. Isso vale pro Plymouth, pro
+SDDM enquanto entra, pro shell (abrindo app, aplicando configuração ou papel de parede) e pro bloqueio
+conferindo a senha. Entregas:
+
+- um componente único no design system, que todo lugar de espera usa;
+- duas variantes de cor, geradas pelo mesmo build do cursor: tinta sobre papel e clara sobre escuro
+  (pras telas e faixas escuras);
+- os quadros também em sequência de PNG, pro Plymouth.
+
 ## Como o dono revisa
 
 Cada item entrega **duas imagens, antes e depois**, das mesmas telas e no mesmo perfil (1080 e
