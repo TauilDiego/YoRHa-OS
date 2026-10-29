@@ -72,6 +72,7 @@ Formato do `pause dump`:
 
 - Uma aba ainda não visitada nesta abertura aparece com o estado de abertura dela (FR-006).
 - `apps.results` são os ids na ordem da busca (vazio sem busca); `apps.entries` é a lista como aparece.
+- **T043:** `apps.scroll` e `windows.scroll` (`{ y, overflows, first, cut }`: a rolagem da lista em px, se ela rola, a primeira entrada à vista e se ela está cortada no alto) e `apps.optionsShown` (o card Options à vista; `false` na busca sem resultado).
 - `power.dialog`, com o diálogo aberto: `{ "action": "poweroff", "row": "cancel", "blockers": ["pacman: System update in progress"], "keys": ["↑↓ Select", "Enter Confirm", "Esc Cancel"], "geometry": { … } }`.
 - `compositor` (T012a): `{ "backend": "hyprland", "capabilities": { … } }`, o `backendName` e as `capabilities` da fachada do compositor (contracts/compositor.md).
 - `lastAction.kind`: `app`, `window` (`detail`: `{ "op": "focus|move|float|close", "workspace": 2 }`)

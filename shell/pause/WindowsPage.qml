@@ -251,6 +251,7 @@ FocusScope {
             option: layout.column === "options" ? (options[layout.option]?.id ?? null) : null,
             preview: { title: cardTitle, text: cardText, foot: cardFoot },
             info: info.map(i => `${i.label}: ${i.value}`),
+            scroll: layout.groupedList.scrollState(),
             error: error
         };
     }

@@ -31,6 +31,9 @@ import "../../strings"
 //   action  label + arrow (`text`): Enter or a click emits triggered(option); → does nothing and ←
 //           goes back to the list.
 // Keys it doesn't use (Tab, letters, Backspace) stay unaccepted, for the page around it.
+// `optionsVisible` (default true; T043) hides the Options card, e.g. APPS with a search that found
+// nothing. The wheel over a list taller than its column scrolls it by whole entries; a cursor left
+// out of view comes back into it, and the focus goes to the list (as with the pointer).
 FocusScope {
     id: root
 
@@ -50,6 +53,7 @@ FocusScope {
     property var searchHeader: null
     property string emptyText: ""
     property string trailingRole: "small"
+    property bool optionsVisible: true
     readonly property GroupedList groupedList: list
 
     signal applied(int index)
@@ -237,7 +241,7 @@ FocusScope {
             item: row ? rectOf(row, 0, 0, row.width, row.height) : null,
             value: value ? rectOf(value, 0, 0, value.width, value.height) : null,
             preview: rectOf(previewSlot, 0, 0, previewSlot.width, previewSlot.childrenRect.height),
-            options: rectOf(optionsBox, 0, 0, optionsBox.width, optionsBox.height)
+            options: optionsVisible ? rectOf(optionsBox, 0, 0, optionsBox.width, optionsBox.height) : null
         };
     }
 
@@ -261,6 +265,10 @@ FocusScope {
         emptyText: root.emptyText
         trailingRole: root.trailingRole
         onHoveredIndex: i => root.noteHover("list", i)
+        onCursorRequested: i => {
+            root.column = "list";
+            root.index = i;
+        }
         onActivated: i => {
             root.column = "list";
             root.index = i;
@@ -283,6 +291,7 @@ FocusScope {
         y: root.topY
         width: root.u(Tokens.space.pickerOptionsW)
         height: infoColumn.y + infoColumn.height + root.u(22)
+        visible: root.optionsVisible
 
         readonly property int railRoom: Tokens.px(Tokens.space.railGap, root.s) + Tokens.line(Tokens.space.rail, root.s)
 

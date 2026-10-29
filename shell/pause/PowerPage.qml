@@ -22,6 +22,9 @@ import "../strings"
 // open with the error on the card. The dialog is cancelled whenever the menu loses the keyboard
 // (closed, or another tab). Entering the tab re-reads the machine (Session.refresh()); the uptime
 // is read again every minute while the tab is shown.
+// Not a PickerLayout (looked at in T043): its right column is the StatusCard, not the Options card;
+// with the dialog open the list must stay drawn "selected" and ignore the pointer; and the footer's
+// Enter names the action. That would take three more knobs on the PickerLayout for one page.
 FocusScope {
     id: root
 
@@ -280,6 +283,10 @@ FocusScope {
                 root.index = i;
         }
         onActivated: i => root.trigger(i)
+        onCursorRequested: i => {
+            if (root.dialogAction === "")
+                root.index = i;
+        }
     }
 
     DescriptionCard {

@@ -18,6 +18,12 @@ import "../base"
 // (hoveredIndex, activated) without moving `currentIndex`.
 // The parent sets the size. Taller content scrolls at once, by whole entries, so the current item
 // with its rails (and its group's title, when it is the group's first) is always in view.
+// spec 007 (T043): the view's top always stops at an entry's top (less the rails' room, inside the
+// wider gap above it), so the first visible entry is never cut, whether the cursor or the wheel
+// scrolled it; at the end, the room left under the last entry stays empty. The wheel scrolls one
+// entry per notch, only when the content is taller than the list (otherwise it does nothing, as
+// before); a cursor scrolled out of view comes back to the nearest whole item in view (moved here
+// with `keysEnabled`, asked for by `cursorRequested(index)` otherwise). `scrollState()` tells it.
 // spec 007: `search` ({ query, count } or null) puts the SearchHeader on top, where the group
 // titles would be (the model then has no titles); `emptyText`, with no item, is a line in
 // medium-gray in place of the items; `trailingRole` is the role of the items' trailing text.
@@ -37,6 +43,7 @@ Item {
 
     signal activated(int index)
     signal hoveredIndex(int index)
+    signal cursorRequested(int index)             // the wheel left the cursor out of view (spec 007)
 
     readonly property var modelEntries: Array.isArray(model) ? model : []
     readonly property bool noItems: !modelEntries.some(e => isItem(e))
@@ -111,27 +118,140 @@ Item {
 
     // --- scrolling -----------------------------------------------------------------------------------
     property real scrollY: 0
-    function follow(): void {
-        const e = entryOf[currentIndex];
+    readonly property bool overflows: contentHeight > height
+    property real wheelRest: 0                    // the wheel's turn not yet spent (touchpads)
+
+    // Entry `i`'s top, in content px.
+    function entryTop(i: int): real {
+        const r = rows.itemAt(i);
+        return r ? topRoom + r.y : 0;
+    }
+
+    // Where the view may stop, in content px and ascending: each entry's top less the rails' room
+    // (the gap between entries is wider, so nothing of the entry above shows), never under 0.
+    function stops(): var {
+        const out = [];
+        for (let i = 0; i < entries.length; i++)
+            out.push(Math.max(0, entryTop(i) - railRoom));
+        return out;
+    }
+
+    // The highest stop at or above `v`, and the lowest at or below it.
+    function stopAbove(v: real): real {
+        let best = 0;
+        for (const p of stops())
+            if (p <= v + 0.5)
+                best = Math.max(best, p);
+        return best;
+    }
+    function stopBelow(v: real): real {
+        const all = stops();
+        for (const p of all)
+            if (p >= v - 0.5)
+                return p;
+        return all.length > 0 ? all[all.length - 1] : 0;
+    }
+
+    // The last stop: the first one that shows the content's end.
+    function maxScroll(): real {
+        return overflows ? stopBelow(contentHeight - height) : 0;
+    }
+
+    // Item `index`'s span that must be in view, in content px: from its group's title (titles and
+    // notes right above the item) to its bottom rail; null when out of range.
+    function spanOf(index: int): var {
+        const e = entryOf[index];
         const row = rows.itemAt(e ?? -1);
-        if (!row || height <= 0) {
-            scrollY = 0;
-            return;
-        }
-        // From the group's title (titles and notes right above the item) to the bottom rail.
+        if (!row)
+            return null;
         let first = e;
         while (first > 0 && itemOf[first - 1] < 0)
             first--;
         const above = rows.itemAt(first);
-        const a = topRoom + (first < e && above ? above.y : row.y - railRoom);
-        const b = topRoom + row.y + row.height + railRoom;
-        let y = scrollY;
-        if (a < y)
-            y = a;
-        else if (b > y + height)
-            y = b - height;
-        scrollY = Math.max(0, Math.min(y, contentHeight - height));
+        return {
+            a: topRoom + (first < e && above ? above.y : row.y - railRoom),
+            b: topRoom + row.y + row.height + railRoom
+        };
     }
+
+    function follow(): void {
+        const span = spanOf(currentIndex);
+        if (!span || height <= 0) {
+            scrollY = 0;
+            return;
+        }
+        let y = stopAbove(scrollY);
+        if (span.a < y)
+            y = stopAbove(span.a);
+        else if (span.b > y + height)
+            y = stopBelow(span.b - height);
+        scrollY = Math.max(0, Math.min(y, maxScroll()));
+    }
+
+    // One wheel notch (120) scrolls one entry; the cursor, if left out, comes to the nearest whole
+    // item in view.
+    function wheelBy(delta: real): void {
+        if (!overflows)
+            return;
+        wheelRest += delta;
+        let y = scrollY;
+        const all = stops();
+        while (wheelRest >= 120) {
+            wheelRest -= 120;
+            y = all.filter(p => p < y - 0.5).reduce((m, p) => Math.max(m, p), 0);
+        }
+        while (wheelRest <= -120) {
+            wheelRest += 120;
+            y = Math.min(maxScroll(), all.find(p => p > y + 0.5) ?? maxScroll());
+        }
+        if (y === scrollY)
+            return;
+        scrollY = y;
+        const span = spanOf(currentIndex);
+        if (span && span.a >= y - 0.5 && span.b <= y + height + 0.5)
+            return;
+        const down = !span || span.a < y;
+        let pick = -1;
+        for (let i = 0; i < count; i++) {
+            const s2 = spanOf(i);
+            if (!s2 || s2.a < y - 0.5 || s2.b > y + height + 0.5)
+                continue;
+            pick = i;
+            if (down)
+                break;
+        }
+        if (pick < 0)
+            return;
+        if (keysEnabled)
+            currentIndex = pick;
+        else
+            cursorRequested(pick);
+    }
+
+    // For a dump: the scroll, the first entry in view and whether it is cut at the top.
+    function scrollState(): var {
+        let first = -1;
+        for (let i = 0; i < entries.length; i++) {
+            const r = rows.itemAt(i);
+            if (r && topRoom + r.y + r.height > scrollY + 0.5) {
+                first = i;
+                break;
+            }
+        }
+        return {
+            y: Math.round(scrollY),
+            overflows: overflows,
+            first: first,
+            cut: first >= 0 && entryTop(first) < scrollY - 0.5
+        };
+    }
+
+    WheelHandler {
+        enabled: root.overflows
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: event => root.wheelBy(event.angleDelta.y)
+    }
+
     onCurrentIndexChanged: Qt.callLater(follow)
     onHeightChanged: Qt.callLater(follow)
     onModelChanged: Qt.callLater(follow)

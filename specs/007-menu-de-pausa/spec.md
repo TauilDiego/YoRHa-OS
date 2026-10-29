@@ -534,6 +534,9 @@ Cada critério diz qual evidência da VM o comprova (constituição IV).
   opções, `GroupedList`, que nasce no seletor da 004, US2); a 001 (tokens, `TabBar`, `HeaderButton`,
   `PageHeader`, `Card`, `Rule`, fixtures, adaptador do compositor). Se a `GroupedList` da 004 ainda
   não existir quando o plano desta spec for feito, ela entra aqui, no contrato da 004.
+- **Instalador (S3):** o instalador tem que criar `~/.local/share/applications/` antes de subir o
+  shell. O Quickshell só observa essa pasta se ela já existir quando ele sobe; criada depois, um app
+  instalado não aparece em APPS até o shell reiniciar (achado do spike T003, research R4, e da T041).
 - **Movimento reduzido:** respeita o `reduceMotion` que já existe (003/004).
 - **Laboratório:** no máximo 4 VMs ao mesmo tempo, cada uma com 2 núcleos e 4 GB (limite do dono
   pra rodada de 2026-10-27); as frentes paralelas do plano cabem nisso.

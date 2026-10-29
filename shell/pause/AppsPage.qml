@@ -225,6 +225,8 @@ FocusScope {
             info: info.map(r => `${r.label}: ${r.value}`),
             order: order,
             runningApp: runningApp,
+            optionsShown: layout.optionsVisible,
+            scroll: layout.groupedList.scrollState(),
             error: Apps.error
         };
     }
@@ -250,6 +252,7 @@ FocusScope {
         applyLabel: root.ps.open
         searchHeader: root.searching ? { query: root.query, count: root.itemIds.length } : null
         emptyText: root.searching ? root.ps.noMatch : ""
+        optionsVisible: !(root.searching && root.itemIds.length === 0)      // the mockup: no card
         onIndexChanged: {
             const id = root.itemIds[index];
             if (id !== undefined)
