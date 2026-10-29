@@ -85,8 +85,8 @@ todo dia. Sozinha, sem o boot novo, ela já entrega a cara do sistema antes do d
    que entra com animação. Passando da largura do campo, os mais antigos saem pela esquerda sob um
    "…", e o cursor fica sempre visível. Backspace encolhe o último quadradinho; Esc limpa o campo.
 3. **Given** a senha certa, **When** o usuário aperta Enter, **Then** o anel de carregamento aparece
-   enquanto a senha é conferida. Em seguida a tela mostra "Welcome, <usuário>" com a sessão
-   escolhida, e a sessão abre pro usuário certo.
+   enquanto a senha é conferida, e a sessão escolhida abre pro usuário certo. (Sem "Welcome": o
+   SDDM fecha o login 32 ms depois de aceitar a senha; decisão do dono, 29.10.)
 4. **Given** a senha errada, **When** o usuário aperta Enter, **Then** aparece "Authentication
    failed." na cor de alerta, o painel de autenticação rasga 7 px (em 4K) como as faixas de
    interferência do boot, e o campo se limpa pra nova tentativa.
@@ -299,8 +299,9 @@ apagar, e conferir que nenhuma imagem mostra texto de console.
   última usada MUST vir escolhida.
 - **FR-015**: Com mais de 10 usuários, a lista MUST rolar em linhas inteiras, com a barra de rolagem
   e o contador "n / total".
-- **FR-016**: Depois da senha certa, a tela MUST mostrar "Welcome, <usuário>" e a sessão antes de
-  passar pra ela.
+- **FR-016**: Depois da senha certa, o login MUST passar direto pra sessão. Não há tela de
+  boas-vindas: o SDDM fecha o greeter 32 ms depois de aceitar a senha (visto no lab), e o dono
+  decidiu tirar o "Welcome" em 29.10.
 
 **Entrada do login e animações**
 
