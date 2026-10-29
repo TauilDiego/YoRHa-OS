@@ -7,7 +7,7 @@ description: "Tarefas da 011: boot e login (U5a)"
 **Input**: `specs/011-boot-e-login/` (plan.md, spec.md, research.md, data-model.md, contracts/,
 quickstart.md)
 
-**Status**: aprovadas em 29.10 ("sim"). Setup feito (T001–T006; a sondagem está em `sondagem.md`).
+**Status**: aprovadas em 29.10 ("sim"). Setup e fundação feitos (T001–T010; a sondagem está em `sondagem.md`).
 
 **Tests**: a spec não pede testes automatizados de código. A prova de cada tarefa é a evidência da VM
 (princípio IV): screenshot ou captura do boot, um comando que responde (`loginctl`, `pgrep`, o estado
@@ -46,7 +46,7 @@ A fundação usa a `teste-011`. As frentes usam `t011-boot`, `t011-login` e `t01
 - [X] T004 [P] Escrever `lab/bootcap <vm> --until login|password|off [--every 0.25]`: liga a VM em `--soft`, tira `screendump` pelo QMP no intervalo, grava `times.txt` (hora de cada quadro desde o ligar), para na condição e monta a folha de contato com o ImageMagick em `out/bootcap-<data>/`; documentar em `lab/README.md`
 - [X] T005 Escrever `lab/011/install-dev <vm>`: instalação só de laboratório, até a frente C entregar o módulo. Liga as pastas do repositório sincronizado (`system/login/sddm/yorha-os`, `system/boot/plymouth/yorha-os`) nas pastas de tema, copia a fonte de `shell/assets/fonts/` pra `/usr/share/fonts/yorha-os/`, escolhe o tema no SDDM e no Plymouth, põe o hook `plymouth` e o `splash` e refaz o initramfs
 - [X] T006 Sondagem R0 na `teste-011` (de `boot-iso`), com um tema `script` mínimo em `lab/011/sondagem/`. Confirmar os seis itens da research R0: (1) nomes das unidades no `SetUpdateStatusFunction`, (2) `Image.Crop`, (3) ~100 sprites a ≥25 quadros/s, (4) M PLUS 1 no initramfs com `Image.Text`, (5) `GetMode()` = `shutdown`/`reboot`, (6) a passagem pro SDDM sem console com o drop-in da R8. Registrar em `specs/011-boot-e-login/sondagem.md` (com os relatórios do `lab/perf` e as capturas) e ajustar `research.md` (R6–R8) no que mudar
-- [ ] T007 Criar o esqueleto do plano: `system/boot/plymouth/yorha-os/`, `system/login/sddm/yorha-os/` e `system/boot-login/`, cada um com um `README.md` curto (o que é, como gerar, como testar no lab), e as entradas novas em `CREDITS.md`: Qylock (Darkkal44, GPL-3.0, pro que espelhar a conversa com o SDDM) e o uso da M PLUS 1 e do anel do NieR Cursors (MIT) nos temas
+- [X] T007 Criar o esqueleto do plano: `system/boot/plymouth/yorha-os/`, `system/login/sddm/yorha-os/` e `system/boot-login/`, cada um com um `README.md` curto (o que é, como gerar, como testar no lab), e as entradas novas em `CREDITS.md`: Qylock (Darkkal44, GPL-3.0, pro que espelhar a conversa com o SDDM) e o uso da M PLUS 1 e do anel do NieR Cursors (MIT) nos temas
 
 ---
 
@@ -56,9 +56,9 @@ A fundação usa a `teste-011`. As frentes usam `t011-boot`, `t011-login` e `t01
 
 **⚠️ CRITICAL**: nenhuma frente começa antes desta fase.
 
-- [ ] T008 Acrescentar a saída de quadros em `system/cursors/yorha-cursors/gen/fam_loading.py` (`--frames <pasta> --palette light|ink --size <px>`): os mesmos 90 quadros a 60 quadros/s, recoloridos pela rampa existente. Gerar no lab `system/boot/plymouth/yorha-os/assets/ring/` (claro sobre escuro, 128 px) e `system/login/sddm/yorha-os/assets/ring/` (tinta sobre papel, 64 px) e commitar os PNG. Avisar no `README.md` do cursor que a 010 (item D) reaproveita esta saída
-- [ ] T009 Escrever `system/login/sddm/yorha-os/ds/Tokens.qml`: o pedaço dos `Tokens` do shell que o login usa (cores, `space` das listas e da pipa, `motion.highlight` 150 e `motion.blink` 240, `vignette`, `wallpaper.ruleAlpha`), com o cabeçalho "port of shell/ds/Tokens.qml; keep the numbers in sync"
-- [ ] T010 Escrever o modo `ds-sync` de `lab/check-011`: compara os números que precisam bater entre `system/login/sddm/yorha-os/ds/` e `shell/ds/` (cores, período 77 e marcas da régua, arcos e feixes do `PaperDecor`, tamanhos da pipa, 150/240 ms, vinheta) e falha na primeira diferença
+- [X] T008 Acrescentar a saída de quadros em `system/cursors/yorha-cursors/gen/fam_loading.py` (`--frames <pasta> --palette light|ink --size <px>`): os mesmos 90 quadros a 60 quadros/s, recoloridos pela rampa existente. Gerar no lab `system/boot/plymouth/yorha-os/assets/ring/` (claro sobre escuro, 128 px) e `system/login/sddm/yorha-os/assets/ring/` (tinta sobre papel, 64 px) e commitar os PNG. Avisar no `README.md` do cursor que a 010 (item D) reaproveita esta saída
+- [X] T009 Escrever `system/login/sddm/yorha-os/ds/Tokens.qml`: o pedaço dos `Tokens` do shell que o login usa (cores, `space` das listas e da pipa, `motion.highlight` 150 e `motion.blink` 240, `vignette`, `wallpaper.ruleAlpha`), com o cabeçalho "port of shell/ds/Tokens.qml; keep the numbers in sync"
+- [X] T010 Escrever o modo `ds-sync` de `lab/check-011`: compara os números que precisam bater entre `system/login/sddm/yorha-os/ds/` e `shell/ds/` (cores, período 77 e marcas da régua, arcos e feixes do `PaperDecor`, tamanhos da pipa, 150/240 ms, vinheta) e falha na primeira diferença
 
 **Checkpoint**: fundação pronta. As frentes A, B e C podem começar, cada uma na sua worktree e VM.
 
