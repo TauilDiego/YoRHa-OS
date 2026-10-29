@@ -275,6 +275,20 @@ cursor, fora da lista.
   caso de borda da rolagem, o `plan.md` (páginas criadas com o menu), o caminho e o status do
   `tasks.md`, os cenários manuais do quickstart e o uso do `check-007`. Achados e perguntas no
   `relatorio.md`.
+- **Acabamento da T046 (dono, 29.10, "os 5 como recomendado"):** APPS sem app (busca sem resultado
+  ou sem dados) sem o card Options; a lista vazia sem o traço de 7 px das faixas; rolando, a lista
+  termina no último item inteiro e um título cujo item não cabe vai pro próximo passo
+  (`scroll.lastIsItem`, `titleHidden`); o SC-008 passa a "até 0,21 s"; o `check-007` ganhou os blocos
+  `burst` (SC-008) e `broken` (`pause-broken`, avisos da fixture como `expected-warn`) e a varredura
+  de 14 passos da roda em WINDOWS. `lab/perf` `2026-10-29T002736-vm-teste-a-007-t046-acabamento-desenvolvimento`
+  (desenvolvimento, 16/0), `2026-10-29T003229-vm-teste-a-007-validacao-acabamento` (`check-007
+  --profile both` 76/0: a pipa volta inteira 71 ms depois de sumir, abas sem pipa, `pause-broken` com
+  7 avisos esperados; log sem outro WARN/ERROR), `2026-10-29T003123-vm-teste-b-007-validacao-acabamento`
+  (`check-004` 58/0: a lista do seletor igual, fora a `sc007-seletor-nova`, onde o título `VIDEO`
+  sozinho embaixo agora espera o `Videos`) e `2026-10-29T003203-vm-teste-c-007-validacao-acabamento`
+  (`check-003` 25/0 em 1080, 0 px nas 36 imagens; `qmllint` limpo). A sessão
+  `2026-10-29T003123-vm-teste-a-007-validacao-acabamento` fechou como `fail` sem rodar nada: a
+  `teste-a` e a `teste-b` ligaram juntas e disputaram a porta 2222. O SC-012 continua esperando o dono.
 
 ---
 

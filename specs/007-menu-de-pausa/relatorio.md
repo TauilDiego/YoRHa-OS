@@ -44,14 +44,14 @@ revisão abaixo.
 
 | Critério | Resultado | `lab/perf` |
 |---|---|---|
-| SC-001 | As 7 telas do cenário 1 (4 abas, diálogo de Shut down, busca `fir` e `zzz`) com o `dump` que bate, em 1080 e hidpi (14 shots) | `2026-10-28T235337-vm-teste-a-007-validacao` (`out/007-t046-007-both`) |
+| SC-001 | As 7 telas do cenário 1 (4 abas, diálogo de Shut down, busca `fir` e `zzz`) com o `dump` que bate, em 1080 e hidpi (14 shots) | `2026-10-28T235337-vm-teste-a-007-validacao` (`out/007-t046-007-both`); de novo em `2026-10-29T003229-vm-teste-a-007-validacao-acabamento` (`out/007-t046c-007-both`, 76/0) |
 | SC-002 | Dois shots seguidos de cada aba: 0 px, nos dois perfis | idem |
 | SC-003 | `ALT+Escape`, `k`, `i`, `t`, Enter (5 teclas reais) abrem um kitty real ≈0,35 s depois do Enter | idem |
 | SC-004 | As 10 consultas do roteiro trazem o esperado em primeiro; `zzz` com `No apps match.` | idem |
 | SC-005 | Abre em ≤ 0,3 s; a sequência de teclas e os três fechamentos com o kitty voltando ao foco | idem |
 | SC-006 | 3 kitty reais em 2 áreas: Enter em C, B movida pra 02, A fechada em ≈0,3 s, `hyprctl` a cada passo | idem |
 | SC-007 | Com fixtures: Lock/Suspend sem diálogo, os outros com diálogo (Cancel por Esc, clique fora e `Cancel`), Hibernate apagado, o `pacman` no diálogo; sem fixtures, o `Lock` pelo sinal do logind; o reboot real zera o `/proc/uptime` | idem e `2026-10-28T235417-vm-teste-c-007-validacao` (`out/007-t046-007-reboot`, 3/0) |
-| SC-008 | Rajada sem fixtures: no ↓ a pipa some e volta inteira em ≤ 0,21 s; trocando de aba, nenhum quadro com pipa nas abas (manual, o `check-007` não tem a rajada) | `2026-10-29T000458-vm-teste-a-007-validacao-galeria-sc-008-pause-broke` (`out/burst-teste-a-20261029-000618-sc008-down`, `…-000640-sc008-tabs`) |
+| SC-008 | Bloco `burst` do `check-007` (sem fixtures): no ↓ em APPS a pipa volta inteira 71 ms depois de sumir (critério: até 0,21 s, decisão do dono em 29.10); trocando de aba, os vãos entre as abas sem tinta em todos os quadros | `2026-10-29T003229-vm-teste-a-007-validacao-acabamento` (`out/007-t046c-007-both/sc008-down.txt`, `sc008-gone.png`, `sc008-back.png`) |
 | SC-009 | `rien-test.desktop` em ≈0,3 s com o menu aberto; fixado e usado continua depois do `pkill -x qs`; `~/.config/rien-os/` intacto | `2026-10-28T235337-vm-teste-a-007-validacao` |
 | SC-010 | Log do roteiro inteiro com 0 erros e 0 avisos de QML (a única linha é a `expected-warn` do app de comando inexistente); `qmllint` dentro da VM limpo (os 12 falsos positivos conhecidos) | idem e `…-teste-c-007-validacao` (`out/007-t046-qmllint.txt`) |
 | SC-011 | Galeria, página 4, nos dois perfis (dois shots iguais, o Tab seguinte volta à 1) | `2026-10-29T000458-…` (`out/007-t046-007-gallery`) |
@@ -73,10 +73,16 @@ revisão abaixo.
   aparecia cortado no alto); a `galeria-p3` muda pelo contador (3/3 → 3/4); o resto é o fundo
   animado e diferenças de 1 nível na barra entre VMs.
 
-**Bordas (cenário 15):** `pause-empty`, `pause-long` (rolagem, reticências, dois monitores,
-SPECIAL), a recusa (`pause-refuse`), o comando inexistente e o seletor fechando o menu, no
-`check-007`; `pause-broken` à mão na T046 (erro curto em APPS, WINDOWS e POWER, SYSTEM anda; o log
-tem os 3 avisos da fixture quebrada, como a spec pede: `out/007-t046-extra`).
+**Bordas (cenário 15), todas no `check-007`:** `pause-empty`, `pause-long` (rolagem em linhas
+inteiras, a roda em 14 passos sem corte e com o título esperando o item, reticências, dois monitores,
+SPECIAL), a recusa (`pause-refuse`), o comando inexistente, o seletor fechando o menu e
+`pause-broken` (bloco `broken`: erro curto em APPS, WINDOWS e POWER, APPS sem o card Options e sem
+o traço da lista vazia, SYSTEM anda; os avisos da fixture quebrada marcados `expected-warn`).
+
+**Acabamento da T046 (dono, 29.10):** `check-007` 76/0 nos dois perfis, `check-004` 58/0 e
+`check-003` 25/0 em 1080 (0 px contra `out/007-t046-003-1080`). No `check-004`, a lista do seletor
+fica igual, fora a `sc007-seletor-nova`: com a imagem nova, o título `VIDEO` ficava sozinho embaixo
+(o `Videos` não cabia) e agora espera o item, que é a regra nova.
 
 ## Decisões e desvios
 
@@ -95,6 +101,8 @@ tem os 3 avisos da fixture quebrada, como a spec pede: `out/007-t046-extra`).
   cabe (sem rolagem, nada muda na 003/004), e a pipa que sai da vista vai pro item inteiro mais perto.
 - **`PopupFrame.hoveredTab`** (T044): só pra galeria mostrar uma aba `hovered` sem o ponteiro.
 - **Contador da galeria:** as páginas passaram a 2/4, 3/4 e 4/4.
+- **SC-008 "até 0,21 s"** no lugar de "≈240 ms" (decisão do dono, 29.10; o blink de 240 ms da
+  pipa continua como o desenho da animação).
 - **T022 rodou com a VM de 4 núcleos** (registrado na evidência da fase 3), acima do limite de 2 do
   dono; as validações seguintes usaram 2.
 
@@ -121,7 +129,8 @@ Corrigidos nos artefatos:
 - **I4** (LOW): o `plan.md` ainda dizia "Loaders por aba" → as 4 páginas criadas com o menu (R1).
 - **I5** (LOW): o caminho da worktree privada e o status no topo do `tasks.md` estavam velhos.
 - **C1** (cobertura, MEDIUM): o quickstart marcava o cenário 9 (SC-008) e o `pause-broken` como
-  automáticos (⚙), mas o `check-007` não os tem → marcados como manuais (feitos na T046).
+  automáticos (⚙), mas o `check-007` não os tinha → marcados como manuais na T048 e, depois, a
+  pedido do dono, automatizados (blocos `burst` e `broken`) e desmarcados.
 - **L1** (LOW, lab): o uso do `check-007` listava blocos `options` e `edges` que não existem.
 
 Sem violação da constituição; todas as FR e SC têm tarefa.
@@ -141,14 +150,8 @@ memória 0,1 s).
 
 1. **SC-012:** aprovar `~/.local/share/nier-lab/out/007-revisao-sc012.png` (o mockup foi renderizado
    no container `nier-lab-chromium`; as peças estão em `out/007-revisao/`).
-2. **Perguntas:**
-   - Na APPS com erro de dados (sem nenhum app), o card Options aparece vazio. Esconder também
-     (`optionsVisible` quando não há app)?
-   - Com a lista vazia e sem `emptyText` (o mesmo caso), as faixas da `GroupedList` aparecem como
-     um traço de 7 px no alto. Corrigir (sem efeito na 003/004)?
-   - Quando a última linha que cabe é um título de grupo, ele fica sozinho embaixo (o item dele não
-     cabe). Esconder o título junto?
-   - SC-008: a pipa volta em ≤ 0,21 s (o quickstart diz ≈240 ms). Aceitar?
-3. **Automatizar no `check-007`:** a rajada do SC-008 e o `pause-broken`.
-4. **S3:** o instalador tem que criar `~/.local/share/applications/` antes de subir o shell (no
+2. **Respondidas pelo dono (29.10, "os 5 como recomendado") e feitas:** card Options escondido na
+   APPS sem dados; sem o traço de 7 px da lista vazia; título de grupo sozinho embaixo escondido
+   (vai com o item); SC-008 "até 0,21 s"; a rajada e o `pause-broken` no `check-007`.
+3. **S3:** o instalador tem que criar `~/.local/share/applications/` antes de subir o shell (no
    `PLAN.md` e nas premissas da spec).
