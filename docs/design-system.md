@@ -1,4 +1,4 @@
-# Design system do rien-OS
+# Design system do YoRHa-OS
 
 > Rascunho pra discussão. Baseado na biblioteca **"NieR: Automata - UI"**, de
 > [tyleo](https://tyleo.com) ([Figma Community](https://www.figma.com/community/file/1598348131070316402/nier-automata-ui),
@@ -120,7 +120,7 @@ Cantos sempre retos (raio 0).
 ### Botão-aba (`header-button`)
 
 Tem ícone (quadrado) + texto e mede 214×47. São 7px entre o quadrado e o texto. No Figma, a
-borda esquerda reserva espaço pro cursor; no rien-OS, as abas não têm seletor (ver §5).
+borda esquerda reserva espaço pro cursor; no YoRHa-OS, as abas não têm seletor (ver §5).
 
 | Estado | Fundo | Quadrado e texto | Cursor |
 |---|---|---|---|
@@ -174,7 +174,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 
 - **Barra de abas:**
   - uma faixa vertical à esquerda;
-  - as abas (o Figma põe o seletor na aba em foco; no rien-OS, não, ver §5);
+  - as abas (o Figma põe o seletor na aba em foco; no YoRHa-OS, não, ver §5);
   - a régua pontilhada embaixo.
 - **Lista com cursor:** faixas verticais + itens + barra de rolagem + seletor.
 - **Card de status:** pares rótulo/valor alinhados, medidor, fileira de quadrados vazios e um
@@ -184,7 +184,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 
 ## 5. Desvios pro desktop (decididos em 2026-10-27)
 
-| Ponto | No jogo (1080p) | No rien-OS |
+| Ponto | No jogo (1080p) | No YoRHa-OS |
 |---|---|---|
 | Altura da barra do topo | Aba de 47px, texto 27px | **Revisado (2026-10-27):** barra de 68px, configurável de 28 a 96. De cima pra baixo: 3px de folga, a aba (33px, `s ≈ 0,70`), um vão de 17px de jogo (12px) e a régua pontilhada **na escala do jogo** (`s × 1,0`: pontos de 4px, padrão de 20px de altura), nítida em pixels físicos inteiros. A aba em foco desce até a régua por uma haste animada (`motion.touch`, 160 ms, logo depois da tinta; recolhe em `motion.untouch`, 120 ms). A versão cheia fica pros menus de tela inteira |
 | Escala | Fixa em 1080p | Tokens em medidas do jogo × fator da tela × `uiScale` (ver "Escala") |
@@ -193,7 +193,7 @@ retos. O corpo pode ter imagem, texto e um rodapé alinhado à direita.
 | Sombra do título | 8,8 fixo | Proporcional ao tamanho do texto (≈15%) |
 | Cursor (pipa) | Parado; pula de um item pro outro | **Decidido (2026-10-27):** parado, e pisca ao trocar de item (some e reaparece com ease in-out, `motion.blink` ≈240 ms) |
 | Abas da barra | Seletor (pipa) ao lado da aba em foco | **Decidido (2026-10-27):** as abas nunca têm seletor, nem no HUD nem nos menus: só as abas lado a lado. A pipa fica só nos itens de lista |
-| Fundo do desktop | Só nos menus | **Decidido (2026-10-27):** o fundo inteiro da área de trabalho é o papel do menu (vinheta, arcos e feixes, sem grid, com movimento sutil que pode ser desligado). Desde a spec 004 ele é um papel de parede do próprio rien-OS, trocável (§8) |
+| Fundo do desktop | Só nos menus | **Decidido (2026-10-27):** o fundo inteiro da área de trabalho é o papel do menu (vinheta, arcos e feixes, sem grid, com movimento sutil que pode ser desligado). Desde a spec 004 ele é um papel de parede do próprio YoRHa-OS, trocável (§8) |
 | Vinheta | Em todos os menus | Como no jogo (bordas `#A6A18D`, cantos `#8B8877`), desligável. Nos menus de tela cheia e na tela inteira do desktop, sem emenda (2026-10-27). As janelas, as abas, a régua e os textos ficam por cima, sem vinheta. Desde a spec 004 (US6) a barra do topo não pinta mais a faixa dela: a vinheta que aparece embaixo da barra é a do próprio papel de parede (§8, "A barra sobre o fundo") |
 | Fundo da barra do topo | O HUD do jogo flutua sobre a cena | **Decidido (2026-10-27, spec 004 US6):** a barra não tem fundo próprio. O papel de parede e as transições passam por baixo dela, e as cores dela seguem o fundo do monitor: tom papel ou tom claro (§8, "A barra sobre o fundo") |
 
@@ -235,7 +235,7 @@ convertidas pra 1080p (×1,2). As imagens ficam só no repositório privado, pra
 | Papel | `#C9C5AB` | **M** `#C7C2AA`–`#C8C3AC` | Seguir o Figma |
 | Vinheta | — | **M** bordas `#A6A18D`, cantos `#8C8978`, em todas as telas de menu; perfil num círculo de meia diagonal (o centro de cima e de baixo fica papel) | **Decidido:** como no jogo, na tela inteira do desktop e nos menus de tela cheia, desligável |
 | Grid | 6% | **Revisto (2026-10-27):** não existe no fundo do jogo; a leitura anterior era a compressão das capturas | Tirar do fundo (feito na 004 US1) |
-| Fundo (medido) | — | **M** centro `#C8C3AC`, bordas `#A6A18D`, cantos `#8C8978` (vinheta radial); grão fino, desvio ≈2 níveis em 255 (o rien-OS fica sem, escolha do dono); diagonais ≈20 níveis mais escuras que o papel (≈17% de tinta), em feixes de 2–3 linhas que começam e terminam na tela; arcos duplos (dois círculos a ≈6 px), centro fora da tela | Seguir (spec 004) |
+| Fundo (medido) | — | **M** centro `#C8C3AC`, bordas `#A6A18D`, cantos `#8C8978` (vinheta radial); grão fino, desvio ≈2 níveis em 255 (o YoRHa-OS fica sem, escolha do dono); diagonais ≈20 níveis mais escuras que o papel (≈17% de tinta), em feixes de 2–3 linhas que começam e terminam na tela; arcos duplos (dois círculos a ≈6 px), centro fora da tela | Seguir (spec 004) |
 | Fundo escuro | — | **M** atrás de popups e legendas: `#141414`, arcos e diagonais cinza até ≈`#454545` | Variante pra testar |
 | `light-yellow` | `#D7D1B3` | **M** `#D2CDB4`–`#D4CEB5` | Seguir o Figma |
 | `light-gray` | `#B1AB93` | **M** `#B0AB97` | Seguir o Figma |
@@ -252,7 +252,7 @@ convertidas pra 1080p (×1,2). As imagens ficam só no repositório privado, pra
   de fechar.
 - **Realce de item:** a faixa varre da esquerda pra direita junto com os trilhos, em ≈100–150 ms
   com desaceleração. A spec usa 0,15 s (token `motion.highlight`).
-- **Cursor:** parado. O rien-OS acrescenta um blink suave quando ele troca de item (ver §5).
+- **Cursor:** parado. O YoRHa-OS acrescenta um blink suave quando ele troca de item (ver §5).
 - **Fechar o menu:** a tela se desfaz em estilhaços triangulares, em ≈300–500 ms.
 - **Estado danificado:** aberração cromática e glitch no texto.
 - Os tempos ficam em tokens, pra calibrar depois com gravação a 60 fps no laboratório.
@@ -378,10 +378,10 @@ atual:
 
 ## 8. Papel de parede (spec 004)
 
-O rien-OS desenha o próprio papel de parede, sem ferramenta de fora (`swww`, `hyprpaper`…): um
+O YoRHa-OS desenha o próprio papel de parede, sem ferramenta de fora (`swww`, `hyprpaper`…): um
 fundo por monitor na camada de fundo do Wayland. Cada monitor mostra a escolha dele, ou a de
 "todos os monitores", ou a cena `menu`. A escolha é estado do usuário
-(`$XDG_STATE_HOME/rien-os/wallpaper.json`), nunca a config dele. Há três tipos: **cenas**,
+(`$XDG_STATE_HOME/yorha-os/wallpaper.json`), nunca a config dele. Há três tipos: **cenas**,
 **imagens** da pasta do usuário e **vídeo** (depois, no U6).
 
 ### Cenas
@@ -506,7 +506,7 @@ canal a canal, com alfa. `Label`, `Rule`, `HeaderButton`, `Meter` e `TabBar` rec
 - O popup troca na hora e salva a escolha (ver "Configurações salvas" abaixo).
 
 **Configurações salvas** ("salvar sempre", decisão do dono de 2026-10-27): o que muda no popup de
-configurações fica em `$XDG_STATE_HOME/rien-os/settings.json` (`SettingsState`), por cima do
+configurações fica em `$XDG_STATE_HOME/yorha-os/settings.json` (`SettingsState`), por cima do
 `shell.json` e do `defaults.json`, e continua depois de reiniciar. O `settings reset` limpa. Com
 fixtures o arquivo não é lido nem escrito. Os próximos menus (007, 008) usam o mesmo mecanismo; o
 contrato está em `specs/004-wallpaper-system/contracts/settings-state.md`.
@@ -577,7 +577,7 @@ as informações. É o corpo do seletor de papel de parede e serve pros próximo
 
 **No seletor de papel de parede** (`WallpaperPicker`, `ALT + W` na VM, `qs ipc call wallpaper picker
 open|close|toggle`):
-- **título:** `WALLPAPER -Select`; rodapé à esquerda: `rien-OS 0.1 · N monitors`;
+- **título:** `WALLPAPER -Select`; rodapé à esquerda: `YoRHa-OS 0.1 · N monitors`;
 - **lista:** SCENES, IMAGES e VIDEO, com `● ALL` (ou as saídas) no que está aplicado; abre com o
   cursor no papel de parede do monitor em que abriu;
 - **opções:** `Monitor` (All monitors, depois cada saída), `Transition` (as quatro) e, só nas
@@ -616,5 +616,5 @@ agrupada com e sem foco e o layout inteiro em miniatura.
 
 Componentes, tokens e anatomia baseados em **"NieR: Automata - UI"**, de **tyleo**,
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). As páginas de screenshots do jogo
-desse arquivo não foram usadas. NieR:Automata é marca da Square Enix; o rien-OS é um projeto de
+desse arquivo não foram usadas. NieR:Automata é marca da Square Enix; o YoRHa-OS é um projeto de
 fã, sem relação com ela.

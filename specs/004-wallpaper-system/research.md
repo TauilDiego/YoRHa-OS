@@ -4,7 +4,7 @@ Cada item segue o formato: decisão, motivo e o que foi descartado. As APIs fora
 `qmltypes` do Quickshell 0.3.1 e do Qt 6.11 (`/usr/lib/qt6/qml/…`), a mesma versão da VM. O que
 precisa de prova na VM está marcado **a verificar no lab**.
 
-A referência visual é o mockup aprovado (`rien-OS-private/lab/mockups/papel-de-parede/index.html`);
+A referência visual é o mockup aprovado (`YoRHa-OS-private/lab/mockups/papel-de-parede/index.html`);
 os algoritmos abaixo são a tradução do JavaScript dele pro shell.
 
 ## R1. Cena procedural: o fundo fiel vira um JSON de parâmetros
@@ -209,8 +209,8 @@ Duração: 900 ms com ease in-out (FR-015).
 ## R8. Estado: escolha por monitor, transição e filtros
 
 - **Decisão:**
-  - **o arquivo:** `$XDG_STATE_HOME/rien-os/wallpaper.json` (padrão
-    `~/.local/state/rien-os/wallpaper.json`), no formato de
+  - **o arquivo:** `$XDG_STATE_HOME/yorha-os/wallpaper.json` (padrão
+    `~/.local/state/yorha-os/wallpaper.json`), no formato de
     [contracts/state.schema.json](contracts/state.schema.json):
     - `all`;
     - `monitors { nome: id }`;
@@ -219,7 +219,7 @@ Duração: 900 ms com ease in-out (FR-015).
   - **a leitura:** um `FileView` lê;
   - **a escrita:** `setText(JSON)`, com `atomicWrites: true`, depois de cada mudança, agrupada em
     250 ms;
-  - **a pasta `rien-os`:** se não existir, é criada por `Process { command: ["mkdir", "-p", dir] }`,
+  - **a pasta `yorha-os`:** se não existir, é criada por `Process { command: ["mkdir", "-p", dir] }`,
     em forma de argv, sem shell. **A verificar no lab:** se o `FileView` cria a pasta sozinho. Se
     criar, o `Process` sai;
   - **com fixtures:** o estado vem da fixture e **nada é escrito** (os screenshots não sujam o estado
@@ -233,7 +233,7 @@ Duração: 900 ms com ease in-out (FR-015).
 - **Descartado:**
   - **gravar no `shell.json`:** viola a III;
   - **`Quickshell.statePath()`:** a pasta é por shell, e o caminho deixaria de ser previsível pro
-    `rien` (S4).
+    `yorha` (S4).
 
 ## R9. Monitores
 

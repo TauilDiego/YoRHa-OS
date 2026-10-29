@@ -6,7 +6,7 @@ import math
 
 from style import Canvas, OUTLINE, DETAIL_W, DEPTH, SIDE_RIGHT, SIDE_BOTTOM, fmt, circle_pts
 
-ATTRIBUTION = "rien-OS cursor ({}). Shapes after NieR Cursors by Beinsezii (MIT)."
+ATTRIBUTION = "YoRHa-OS cursor ({}). Shapes after NieR Cursors by Beinsezii (MIT)."
 
 CENTER = (64.0, 64.0)
 
