@@ -126,11 +126,17 @@ flutuar, fechar), ao vivo.
 **Independent Test**: com três janelas reais em duas áreas (`pause-live.json`), conferir a lista e
 o mapa, ir pra uma janela da outra área, mover outra e fechar uma terceira, pelo compositor (SC-006).
 
-- [ ] T029 [P] [US3] `shell/ds/composites/WorkspaceMap.qml`: o contorno na proporção do monitor dentro de 512 × 288, a faixa da barra, os retângulos na escala, a escolhida em tinta com o título, linhas na grade física (como a 001); vazio = só o contorno e a faixa
-- [ ] T030 [P] [US3] `shell/services/compositor/HyprlandBackend.qml` (contracts/compositor.md §5), fonte real das janelas (research R7): `hyprctl clients -j`, `workspaces -j` e o `monitors -j` que já existe, relidos nos eventos crus listados no R7 por um `Timer` de 50 ms; `monitorList` com o tamanho lógico; a janela em foco pelo `focusHistoryID`; a área especial; `windowsRevision`. Leitura que falha mantém a última lista e registra no log
-- [ ] T031 [P] [US3] `shell/services/compositor/HyprlandBackend.qml` (contracts/compositor.md §5), ações reais (research R8, com os nomes confirmados na T003): `focusWindow`, `moveWindow` (sem seguir), `toggleFloating`, `closeWindow` por `Hyprland.dispatch`, com o endereço validado por `^0x[0-9a-f]+$` e a área por inteiro 1–10 (senão, nada é enviado e o log registra), e a forma da config antiga quando `!Hyprland.usingLua`
-- [ ] T032 [P] [US3] `shell/pause/WindowsPage.qml`: a `PickerLayout` com os grupos (`WORKSPACE 01`…, `SPECIAL` no fim; dentro do grupo por `y` e `x`), a marca `●` na janela em foco, o nome do app pelo `Apps` (ou o `class`), a prévia (`Card` com o `WorkspaceMap` e o título inteiro), as opções (`Focus`, `Workspace ◂ 01 ▸`, `Floating ◂ OFF ▸`, `Close`) e as informações (`APP`, `MONITOR`, `SIZE`); a pipa abre na janela em foco e segue o `address` quando a lista muda (vizinha quando ela some; foco volta pra lista se as opções estavam abertas); `No open windows.` com o rodapé só com `Tab` e `Esc`; rodapé e teclas da FR-018; `dumpState()`
-- [ ] T033 [P] [US3] Validar (`lab/perf begin "007: WINDOWS"`, `teste-b`): bloco `windows` do `lab/check-007` com o cenário 6 (SC-006: as 3 janelas, Enter em C, mover B, fechar A em ≤ 1 s, `hyprctl clients -j` e `activewindow -j` a cada passo, shot do mapa), a tela de WINDOWS do cenário 1 nos dois perfis e as bordas de WINDOWS do cenário 15 (`pause-empty.json`, `pause-long.json` com dois monitores e SPECIAL, título vazio e enorme)
+- [x] T029 [P] [US3] `shell/ds/composites/WorkspaceMap.qml`: o contorno na proporção do monitor dentro de 512 × 288, a faixa da barra, os retângulos na escala, a escolhida em tinta com o título, linhas na grade física (como a 001); vazio = só o contorno e a faixa
+- [x] T030 [P] [US3] `shell/services/compositor/HyprlandBackend.qml` (contracts/compositor.md §5), fonte real das janelas (research R7): `hyprctl clients -j`, `workspaces -j` e o `monitors -j` que já existe, relidos nos eventos crus listados no R7 por um `Timer` de 50 ms; `monitorList` com o tamanho lógico; a janela em foco pelo `focusHistoryID`; a área especial; `windowsRevision`. Leitura que falha mantém a última lista e registra no log
+- [x] T031 [P] [US3] `shell/services/compositor/HyprlandBackend.qml` (contracts/compositor.md §5), ações reais (research R8, com os nomes confirmados na T003): `focusWindow`, `moveWindow` (sem seguir), `toggleFloating`, `closeWindow` por `Hyprland.dispatch`, com o endereço validado por `^0x[0-9a-f]+$` e a área por inteiro 1–10 (senão, nada é enviado e o log registra), e a forma da config antiga quando `!Hyprland.usingLua`
+- [x] T032 [P] [US3] `shell/pause/WindowsPage.qml`: a `PickerLayout` com os grupos (`WORKSPACE 01`…, `SPECIAL` no fim; dentro do grupo por `y` e `x`), a marca `●` na janela em foco, o nome do app pelo `Apps` (ou o `class`), a prévia (`Card` com o `WorkspaceMap` e o título inteiro), as opções (`Focus`, `Workspace ◂ 01 ▸`, `Floating ◂ OFF ▸`, `Close`) e as informações (`APP`, `MONITOR`, `SIZE`); a pipa abre na janela em foco e segue o `address` quando a lista muda (vizinha quando ela some; foco volta pra lista se as opções estavam abertas); `No open windows.` com o rodapé só com `Tab` e `Esc`; rodapé e teclas da FR-018; `dumpState()`
+- [x] T033 [P] [US3] Validar (`lab/perf begin "007: WINDOWS"`, `teste-b`): bloco `windows` do `lab/check-007` com o cenário 6 (SC-006: as 3 janelas, Enter em C, mover B, fechar A em ≤ 1 s, `hyprctl clients -j` e `activewindow -j` a cada passo, shot do mapa), a tela de WINDOWS do cenário 1 nos dois perfis e as bordas de WINDOWS do cenário 15 (`pause-empty.json`, `pause-long.json` com dois monitores e SPECIAL, título vazio e enorme)
+
+**Evidência da fase 5 (28.10, `teste-b`, frente B):** `lab/perf` `2026-10-28T211028-vm-teste-b-007-windows`
+(T029–T033: `check-007 --only windows,live` 17/0 e `--only windows,us1,compositor` 28/0; SC-006 com 3
+kitty reais: Enter em C ativa C na área 2, B movida pra 02 com a lista reagrupada em 284 ms, A fechada e
+fora da lista em 276 ms; `qmllint` limpo nos arquivos da frente; sonda da T031 na VM: id ou área
+inválidos não mandam nada e o log registra).
 
 **Checkpoint**: WINDOWS substitui o alt-tab e a visão das áreas de trabalho.
 
@@ -165,7 +171,13 @@ fixado depois de reiniciar o shell; janelas abrindo e fechando com o menu aberto
 - [ ] T039 [P] [US5] Frente A, `shell/services/Apps.qml`, fonte real (research R4): `DesktopEntries.applications` (ids repetidos descartados), a categoria mapeada pras 8 do projeto, `Quickshell.iconPath(icon, true)` com o genérico da categoria quando falta, `runInTerminal`, `startupClass`, as ações, e a lista refeita no `applicationsChanged`
 - [ ] T040 [P] [US5] Frente A, estado dos apps (research R11): `$XDG_STATE_HOME/rien-os/apps.json` lido no início e gravado com `FileView` (`atomicWrites`) a cada fixar e a cada uso; arquivo ilegível começa vazio com uma linha no log; nada é gravado com a fixture `apps`; `~/.config` nunca é tocado
 - [ ] T041 [P] [US5] Frente A, validar (`lab/perf begin "007: APPS reais"`, `teste-a`): bloco `live` do `lab/check-007`, metade dos apps (cenário 10, SC-009: o `rien-test.desktop` em ≤ 2 s, o fixado depois de `pkill -x qs`, o `apps.json` na VM, `~/.config/rien-os/` intacto) e um shot de APPS com os apps reais da VM
-- [ ] T042 [P] [US5] Frente B, validar (`lab/perf begin "007: WINDOWS ao vivo"`, `teste-b`): bloco `live`, metade das janelas (US5, cenário 2: com WINDOWS aberto, abrir e fechar janelas por `lab/ipc`, o `dump` acompanha em ≤ 1 s e a pipa fica no mesmo item ou vai pro vizinho; uma janela que muda de título)
+- [x] T042 [P] [US5] Frente B, validar (`lab/perf begin "007: WINDOWS ao vivo"`, `teste-b`): bloco `live`, metade das janelas (US5, cenário 2: com WINDOWS aberto, abrir e fechar janelas por `lab/ipc`, o `dump` acompanha em ≤ 1 s e a pipa fica no mesmo item ou vai pro vizinho; uma janela que muda de título)
+
+**Evidência da T042 (28.10, `teste-b`):** `lab/perf` `2026-10-28T212708-vm-teste-b-007-windows-ao-vivo`
+(`check-007 --only live` 5/0 e `--only us1,compositor,windows,live` 32/0: janela nova no `dump` em
+≈270 ms com a pipa parada, a da pipa fechada por fora leva a pipa pra vizinha de baixo e o foco pra
+lista, outra fechada mantém a pipa, título novo no quadro ≈290 ms depois do compositor; log sem
+WARN/ERROR).
 
 **Checkpoint**: o menu está pronto pra substituir o launcher do Serpantinum na U7.
 
