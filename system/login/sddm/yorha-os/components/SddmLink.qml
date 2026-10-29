@@ -24,6 +24,7 @@ Item {
         && sessionModel.lastIndex < sessions.length ? sessionModel.lastIndex : 0
 
     signal failed()
+    signal info(string message)
     signal succeeded()
 
     function read(model: var, row: int, role: int): string {
@@ -67,6 +68,8 @@ Item {
     Connections {
         target: root.present ? sddm : null
         function onLoginFailed(): void { root.failed(); }
+        // PAM's own words, e.g. pam_faillock's "The account is locked…": shown instead of the plain failure
+        function onInformationMessage(message: string): void { root.info(message); }
         function onLoginSucceeded(): void { root.succeeded(); }
     }
     Connections {

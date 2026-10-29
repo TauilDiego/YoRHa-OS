@@ -472,6 +472,8 @@ Plymouth.SetRootMountedFunction(root_cb);
 # or a line of its own comes first.
 # During the exit there is no time to type: the failure's line shows at once.
 fun fail_unit (name) {
+    # a failure gets the game's longer exit, so it can be read (the handoff waits as long)
+    global.EXIT_DUR = 0.9;
     k = global.line_of[name];
     if (k) {
         k = k - 1;

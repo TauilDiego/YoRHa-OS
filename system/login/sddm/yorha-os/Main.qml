@@ -49,11 +49,13 @@ Rectangle {
         id: link
         onFailed: root.failed()
         onSucceeded: root.succeeded()
+        onInfo: message => root.pamInfo = message.split("\n")[0].trim()
     }
 
     // --- selection ----------------------------------------------------------------------------------
     property int sel: 0                          // users.length = "Other user…"
     property int sessionIndex: 0
+    property string pamInfo: ""                  // the last message PAM sent while checking (FR-011)
     property bool picked: false                  // the user moved the selection: a late model reload keeps it
     readonly property bool otherUser: sel >= link.users.length
     // The users load after the screen: until then the selection sits on "Other user…" and the name
@@ -302,6 +304,7 @@ Rectangle {
             auth.focusName();
             return;
         }
+        pamInfo = "";
         greeter.enter("checking");
         link.login(name, auth.password, sessionIndex);
     }
@@ -309,7 +312,7 @@ Rectangle {
         if (greeter.current !== "checking")
             return;
         greeter.enter("ready");
-        setMessage("Authentication failed.", true);
+        setMessage(pamInfo !== "" ? pamInfo : "Authentication failed.", true);
         auth.clearPassword(true);
         tear.start();
         auth.focusPassword();

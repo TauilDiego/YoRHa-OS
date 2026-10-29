@@ -723,7 +723,7 @@ EOF
 }
 
 cmd_install() {
-    local f
+    local f fonts
     need_root
     need_tools
     need_src
@@ -745,8 +745,14 @@ cmd_install() {
     say "boot:"
     place_tree "$BOOT_SRC" "$BOOT_DIR" README.md gen
     if ((!DRY)); then for f in "$BOOT_DIR"/watch/*; do [[ $f == *.service ]] || chmod 755 "$f"; done; fi
-    place_tree "$BOOT_SRC" "$PLY_DIR" README.md gen watch
-    place_tree "$FONT_SRC" "$FONT_DIR"
+    place_tree "$BOOT_SRC" "$PLY_DIR" README.md gen watch assets/font
+    # the UI font and the boot screen's own static instance (assets/font) share the font folder; the
+    # boot one must be there before the initramfs is rebuilt (the plymouth hook copies Font=)
+    fonts=$(mktemp -d)
+    cp -R "$FONT_SRC/." "$fonts/"
+    if [[ -d $BOOT_SRC/assets/font ]]; then cp -R "$BOOT_SRC/assets/font/." "$fonts/"; fi
+    place_tree "$fonts" "$FONT_DIR"
+    rm -rf "$fonts"
     if ((!DRY)); then fc-cache -f "$FONT_DIR" >/dev/null 2>&1 || warn "fc-cache failed"; fi
     font_check
     set_plymouth_theme

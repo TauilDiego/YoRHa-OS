@@ -34,7 +34,7 @@ CELL = (27, 24, 20)            # the film's cell, also the screen background
 GAP = (12, 7, 4)               # the film's gap
 BAND = (15, 15, 15)            # the passage band
 RING_RGB = (230, 225, 204)     # the rings, as in the reproduction
-FONT_WEIGHT = 600              # SemiBold: between the header (500) and the lines (700) of the reproduction
+FONT_WEIGHT = 700              # Bold (29.10): 600 read thinner and dimmer than the game next to it
 FONT_FAMILY = "YoRHa-OS Boot"
 FONT_FILE = "YoRHaOSBoot.ttf"
 # What the boot and the shutdown band draw: ASCII (the initramfs draws nothing else), Latin-1 and
