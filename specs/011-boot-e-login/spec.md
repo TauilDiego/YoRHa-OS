@@ -4,8 +4,8 @@
 
 **Created**: 2026-10-29
 
-**Status**: As perguntas foram respondidas pelo dono em 29.10 (a instalação, FR-041, e o
-desligar, US5). Aguardando a aprovação da spec.
+**Status**: Aprovada pelo dono em 29.10.2026 ("aprovado cuida"), depois das respostas sobre a
+instalação (FR-041) e o desligar (US5). Próximo passo: o plano.
 
 **Input**: Fase U5a do `PLAN.md` (§9): "Splash de boot no Plymouth e tela de login com a UI NieR:
 tema QML do SDDM ou um greeter em Quickshell (a escolha sai da spec). O bootloader continua o
