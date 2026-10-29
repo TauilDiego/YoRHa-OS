@@ -49,7 +49,12 @@ Rectangle {
         id: link
         onFailed: root.failed()
         onSucceeded: root.succeeded()
-        onInfo: message => root.pamInfo = message.split("\n")[0].trim()
+        // only what says more than a plain failure (e.g. a locked account); the generic one keeps our text
+        onInfo: message => {
+            const line = message.split("\n")[0].trim();
+            if (!/^authentication fail/i.test(line))
+                root.pamInfo = line;
+        }
     }
 
     // --- selection ----------------------------------------------------------------------------------
@@ -57,10 +62,28 @@ Rectangle {
     property int sessionIndex: 0
     property string pamInfo: ""                  // the last message PAM sent while checking (FR-011)
     property bool picked: false                  // the user moved the selection: a late model reload keeps it
-    readonly property bool otherUser: sel >= link.users.length
-    // The users load after the screen: until then the selection sits on "Other user…" and the name
-    // field has the focus; once it moves, the keys must go to the field that is shown.
+    // The users may load after the screen. Until they do, the keys go to the password field (the last
+    // user is about to be selected) and an Enter waits for them: typing during the entry never lands
+    // in the name field of "Other user…" by accident.
+    property bool usersReady: false
+    property bool pendingSubmit: false
+    readonly property bool otherUser: usersReady && sel >= link.users.length
     onOtherUserChanged: focusField()
+    function markUsersReady(): void {
+        if (usersReady)
+            return;
+        usersReady = true;
+        if (pendingSubmit) {
+            pendingSubmit = false;
+            Qt.callLater(submit);
+        }
+    }
+    // A machine with no listable user never sends a change: after a second, "Other user…" it is.
+    Timer {
+        interval: 1000
+        running: !root.usersReady
+        onTriggered: root.markUsersReady()
+    }
     readonly property bool showUsers: userListOption === "always" || link.users.length !== 1
     readonly property string sessionName: link.sessions.length > 0 ? link.sessions[sessionIndex] ?? "" : ""
     readonly property string selectedLabel: otherUser ? auth.userName.trim() : (link.users[sel]?.label ?? "")
@@ -71,6 +94,7 @@ Rectangle {
             if (!root.picked)
                 root.sel = link.lastUser;
             root.sel = Math.min(root.sel, link.users.length);
+            root.markUsersReady();
         }
         function onSessionsChanged(): void {
             root.sessionIndex = Math.min(link.lastSession, Math.max(0, link.sessions.length - 1));
@@ -287,6 +311,7 @@ Rectangle {
     Component.onCompleted: {
         Tokens.reduced = reduceMotion;
         sel = link.users.length > 0 ? link.lastUser : 0;
+        usersReady = link.users.length > 0;
         sessionIndex = link.lastSession;
         if (introOption === "none")
             greeter.enter("ready");
@@ -298,6 +323,10 @@ Rectangle {
     function submit(): void {
         if (greeter.current !== "ready")
             return;
+        if (!usersReady) {
+            pendingSubmit = true;
+            return;
+        }
         const name = otherUser ? auth.userName.trim() : (link.users[sel]?.name ?? "");
         if (name === "") {
             setMessage("Enter a user name.", true);

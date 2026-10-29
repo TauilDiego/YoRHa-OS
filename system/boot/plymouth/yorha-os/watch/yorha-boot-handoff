@@ -12,9 +12,11 @@
 # Bash and the system's own tools only. Every step may fail without stopping SDDM.
 set -u
 here=$(dirname "$(readlink -f "$0")")
+# Only a real handoff (Plymouth on screen) marks the boot: a restart of SDDM later must not replay the
+# login's full entry.
+command -v plymouth >/dev/null && plymouth --ping || exit 0
 mkdir -p /run/yorha-os
 cut -d' ' -f1 /proc/uptime > /run/yorha-os/handoff
-command -v plymouth >/dev/null && plymouth --ping || exit 0
 
 wait=0.4
 grep -qx 'exit=game' /usr/share/plymouth/themes/yorha-os/config 2>/dev/null && wait=0.9
