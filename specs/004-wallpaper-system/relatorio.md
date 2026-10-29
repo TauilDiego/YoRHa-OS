@@ -36,7 +36,7 @@ revisão abaixo.
 
 ## Evidência por critério
 
-Pastas em `~/.local/share/nier-lab/out/`; relatórios em `~/projects/rien-OS-relatorios/runs/<id>`.
+Pastas em `~/.local/share/nier-lab/out/`; relatórios em `~/projects/YoRHa-OS-relatorios/runs/<id>`.
 
 | Critério | Evidência | Sessão `lab/perf` |
 |---|---|---|
@@ -45,7 +45,7 @@ Pastas em `~/.local/share/nier-lab/out/`; relatórios em `~/projects/rien-OS-rel
 | SC-003 | As 4 cenas e as 3 imagens aplicadas, imagens com o corte esperado (diferença média ≤ 0,07) | `2026-10-27T195507` |
 | SC-004 | Teclas reais `ALT+W`, ↓ ↓ Enter → ↓ → Esc Esc: um `dump` por tecla bate com o passo; fim em `scene:dark`, `wipe`, `picker: null`. Em 1080 e hidpi (`sc004-*-passos.txt`) | `2026-10-27T195507` |
 | SC-005 | Rajadas das 4 transições (T032) | `2026-10-27T155020` (`004-T032-transicoes`) |
-| SC-006 | `scene:dark` no Virtual-1 volta depois de `pkill qs`; `~/.config/rien-os` intocado | `2026-10-27T195507` |
+| SC-006 | `scene:dark` no Virtual-1 volta depois de `pkill qs`; `~/.config/yorha-os` intocado | `2026-10-27T195507` |
 | SC-007 | `nova.jpg` no catálogo em 0,33 s e, com o seletor aberto, na lista dele em 0,30 s; o nome com espaços, aspas e `#` aplica | `2026-10-27T195507`, `2026-10-27T200317` |
 | SC-008 | Log do roteiro inteiro: 0 erros e 0 avisos de QML (fora o aviso conhecido do Qt 6.12.0 ao abrir um popup, contado à parte como na 003); `qmllint` limpo | `2026-10-27T195507` |
 | SC-009 | Camuflagem 0,63 s de CPU do `qs` por troca, a ≈60 fps; crossfade 0,18 s (T033) | `2026-10-27T155509`, `2026-10-27T155649` |

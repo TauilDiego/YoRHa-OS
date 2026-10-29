@@ -1,6 +1,6 @@
 # Contrato: `images.lock`
 
-Arquivo de fixação das imagens oficiais do laboratório (`rien-OS-private/lab/images.lock`). Hoje ele
+Arquivo de fixação das imagens oficiais do laboratório (`YoRHa-OS-private/lab/images.lock`). Hoje ele
 tem uma linha só, com o nome da imagem `basic`. Passa a ter **uma linha por imagem**:
 
 ```

@@ -1,7 +1,7 @@
 # Quickstart: validar o Arch instalado pela ISO no laboratório
 
 Este é o roteiro que prova cada critério de sucesso com evidência da VM (princípio IV). Tudo roda no
-ambiente privado (`rien-OS-private/lab`), **dentro de uma sessão de medição**. No sistema do dono só
+ambiente privado (`YoRHa-OS-private/lab`), **dentro de uma sessão de medição**. No sistema do dono só
 rodam o QEMU, o `curl`, o `gpg`, o `sha256sum`, o `xorriso` e o `ssh`, que já são do laboratório.
 
 Use uma VM só sua (`NIER_LAB_VM`) e recursos menores, pra não atrapalhar os agentes em paralelo.
@@ -9,7 +9,7 @@ Use uma VM só sua (`NIER_LAB_VM`) e recursos menores, pra não atrapalhar os ag
 ## Preparação
 
 ```sh
-cd ~/projects/rien-OS-private
+cd ~/projects/YoRHa-OS-private
 export NIER_LAB_CPUS=2 NIER_LAB_MEM=4G
 lab/ls > /tmp/camadas-antes.txt
 sha256sum ~/.local/share/nier-lab/vms/{basic,arch-limpo,hypr-base}.qcow2 > /tmp/discos-antes.txt   # SC-006: só as congeladas (dev e teste-* mudam com os outros agentes)
@@ -28,12 +28,12 @@ sha256sum ~/.local/share/nier-lab/vms/{basic,arch-limpo,hypr-base}.qcow2 > /tmp/
 | 7 | SC-005, US3 | Na `teste-iso` ligada: mandar `guest/` e `provision/` por tar e rodar `LAB_TZ=UTC bash ~/lab-guest/hypr-base.sh` (o mesmo que o `lab/bootstrap` faz); `lab/down`; `lab/up teste-iso` (com 3D); `lab/sync --src lab/smoke`; `lab/shot` | A preparação termina sem erro; o screenshot mostra o Hyprland com o smoke da UI. `lab/down`, `lab/rm teste-iso`, `lab/perf end --result pass` |
 | 8 | US1.4, FR-004 | `lab/install-iso` de novo; depois `lab/new x --from arch-iso` e `lab/install-iso --redo` | 1º: avisa que `arch-iso` existe, código 1, nada muda. 2º: recusa porque `x` depende dela. `lab/rm x` |
 | 9 | US4.3 | `lab/install-iso teste-int` e, durante o passo `install` (marcador no `steps.tsv`), Ctrl+C (num teste automatizado: SIGINT pro grupo do processo, com o SIGINT restaurado; um job em segundo plano herda o SIGINT ignorado) | Código 130; VM desligada (`lab/ls` sem `teste-int`); a pasta de saída tem `console.png` e o `install.live.log` parcial |
-| 10 | SC-009 | `pw=$(sed -n 's/^password=//p' ~/.local/share/nier-lab/vms/arch-iso.creds); grep -rF -- "$pw" ~/.local/share/nier-lab/out/ ~/projects/rien-OS-relatorios/ ~/projects/rien-OS-private/ ~/projects/nier-os*/ \| wc -l` | `0` |
+| 10 | SC-009 | `pw=$(sed -n 's/^password=//p' ~/.local/share/nier-lab/vms/arch-iso.creds); grep -rF -- "$pw" ~/.local/share/nier-lab/out/ ~/projects/YoRHa-OS-relatorios/ ~/projects/YoRHa-OS-private/ ~/projects/nier-os-project/YoRHa-OS*/ \| wc -l` | `0` |
 | 11 | SC-006 | `sha256sum -c /tmp/discos-antes.txt`; `diff <(lab/ls \| grep -v -E 'arch-iso\|teste-' ) <(grep -v -E 'arch-iso\|teste-' /tmp/camadas-antes.txt)` | Todos `OK`; nenhuma diferença nas camadas que já existiam |
 
 ## Evidência pra revisão
 
-- os relatórios do `lab/perf` dos cenários 1, 4 e 6–7 (em `~/projects/rien-OS-relatorios/runs/`);
+- os relatórios do `lab/perf` dos cenários 1, 4 e 6–7 (em `~/projects/YoRHa-OS-relatorios/runs/`);
 - a pasta `out/install-iso-*/` do cenário 4 (`checks.txt`, `install.log`, `console.png`,
   `manifest.json`);
 - o screenshot do Hyprland sobre a `arch-iso` (cenário 7);

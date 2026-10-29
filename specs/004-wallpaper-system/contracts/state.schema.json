@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/TauilDiego/rien-OS/specs/004-wallpaper-system/contracts/state.schema.json",
-  "title": "rien-OS wallpaper state ($XDG_STATE_HOME/rien-os/wallpaper.json)",
+  "$id": "https://github.com/TauilDiego/YoRHa-OS/specs/004-wallpaper-system/contracts/state.schema.json",
+  "title": "YoRHa-OS wallpaper state ($XDG_STATE_HOME/yorha-os/wallpaper.json)",
   "description": "Written by the shell (atomic writes), never by hand. Missing keys fall back to shell.json, then defaults.json. Not written while the `wallpaper` fixture domain is active.",
   "type": "object",
   "required": ["version"],

@@ -9,7 +9,7 @@
 
 **Input**: Pedido do dono, a partir do mockup aprovado da aba SYSTEM
 (https://claude.ai/artifact/Hi6evdHnH2tFQw9eyKv2H5; cópia em
-`rien-OS-private/lab/mockups/configuracoes/index.html`): "essa tela por enquanto vamos fazer o
+`YoRHa-OS-private/lab/mockups/configuracoes/index.html`): "essa tela por enquanto vamos fazer o
 fundo escurecer e essa janela abrir como um popup igual o super + K aqui do serpantinum. só que
 escurecendo o fundo do SO". Dados: "tudo fixture".
 
@@ -20,7 +20,7 @@ escurecendo o fundo do SO". Dados: "tudo fixture".
 Em qualquer momento da sessão, o usuário aperta um atalho e as configurações aparecem como um popup
 no centro do monitor em foco. O resto da tela (janelas, barra do topo, fundo) continua visível, mas
 escurecido, pra deixar claro que o popup tem o foco. O popup tem a cara dos menus do jogo: papel
-(sem grid, como todo o rien-OS desde 2026-10-27), vinheta, título `SYSTEM -Settings` com a sombra chapada e a régua embaixo. Ele fecha pelo mesmo
+(sem grid, como todo o YoRHa-OS desde 2026-10-27), vinheta, título `SYSTEM -Settings` com a sombra chapada e a régua embaixo. Ele fecha pelo mesmo
 atalho, pelo Esc ou com um clique fora dele.
 
 **Why this priority**: Sem abrir e fechar, nada do resto existe. É também o padrão de "janela por cima
@@ -53,7 +53,7 @@ que está em foco. Embaixo, um rodapé mostra as teclas que valem agora. O usuá
 ou com o mouse; a pipa marca onde ele está. Ela fica parada, como no jogo, e pisca ao trocar de
 item.
 
-**Why this priority**: É a interação que define o padrão dos menus do rien-OS. Junto com a US1, já
+**Why this priority**: É a interação que define o padrão dos menus do YoRHa-OS. Junto com a US1, já
 entrega uma tela navegável de ponta a ponta.
 
 **Independent Test**: Na VM, com dados de teste, mandar teclas reais (setas, Enter, Esc) e
@@ -122,7 +122,7 @@ dependentes.
   fora da área visível.
 - **Dados de teste ausentes ou inválidos:** o popup abre com uma mensagem de erro curta no quadro,
   em vez de quebrar; o log registra o motivo.
-- **Movimento reduzido:** com a opção de movimento reduzido do rien-OS ligada, nem o fade de
+- **Movimento reduzido:** com a opção de movimento reduzido do YoRHa-OS ligada, nem o fade de
   abertura nem o blink acontecem (a pipa só pula).
 - **Fixtures ativas (testes):** nada anima, pra dois screenshots saírem iguais.
 - **Teclas repetidas rápido:** um blink novo cancela o anterior; a pipa termina sempre no item em
@@ -151,14 +151,14 @@ dependentes.
 **Aparência**
 
 - **FR-007**: O popup MUST usar o design system da 001: papel (sem grid: o dono tirou o grid de
-  todo o rien-OS em 2026-10-27), vinheta (desligável pela
+  todo o YoRHa-OS em 2026-10-27), vinheta (desligável pela
   config `vignette` que já existe), sombra deslocada chapada, título `SYSTEM` com a sombra e o
   complemento `-Settings`, régua lisa embaixo do título e régua lisa acima do rodapé. Nada de
   cor, tamanho ou tempo fora dos tokens.
 - **FR-008**: O popup NÃO tem as abas do menu de pausa; elas ficam pro U3.
 - **FR-009**: O layout MUST seguir o mockup aprovado: categorias à esquerda com as faixas
   verticais, opções no meio com o nome da categoria e a contagem de opções em cima, quadro de
-  descrição à direita, rodapé de teclas embaixo à direita e a versão do rien-OS embaixo à
+  descrição à direita, rodapé de teclas embaixo à direita e a versão do YoRHa-OS embaixo à
   esquerda.
 
 **Navegação (US2)**

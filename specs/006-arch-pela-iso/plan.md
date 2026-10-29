@@ -35,7 +35,7 @@ instala e congela o resultado como uma camada nova, a `arch-iso`:
 A camada nova entra **ao lado** da cadeia atual (`basic → arch-limpo → hypr-base`), sem mudar nada
 dela. Tudo roda dentro do `lab/perf`, com um marcador por passo.
 
-A implementação fica toda no repositório privado (`rien-OS-private/lab/`). O repositório público
+A implementação fica toda no repositório privado (`YoRHa-OS-private/lab/`). O repositório público
 recebe só esta spec.
 
 ## Technical Context
@@ -125,7 +125,7 @@ specs/006-arch-pela-iso/
 ### Source Code (repositório privado)
 
 ```text
-rien-OS-private/lab/
+YoRHa-OS-private/lab/
 ├── install-iso              # NOVO: o comando (passos 0–10 do contrato)
 ├── fetch                    # + subcomando `iso`; lê o images.lock no formato novo (compatível com o antigo)
 ├── images.lock              # + linha iso=… sha256=…

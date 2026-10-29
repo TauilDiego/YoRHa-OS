@@ -13,8 +13,8 @@ quickstart.md), com as decisões do dono de 2026-10-27 (spec, "Decisões do dono
 com `NIER_LAB_VM` exportado.
 
 **Caminhos**:
-- `specs/006-arch-pela-iso/…` = repositório público `nier-os` (branch `006-arch-pela-iso`);
-- `lab/…` = repositório privado `rien-OS-private` (branch `lab-s2`). Todo o código desta fase fica lá.
+- `specs/006-arch-pela-iso/…` = repositório público `YoRHa-OS` (branch `006-arch-pela-iso`);
+- `lab/…` = repositório privado `YoRHa-OS-private` (branch `lab-s2`). Todo o código desta fase fica lá.
 
 **Recursos**: **uma VM por vez**, `NIER_LAB_CPUS=2 NIER_LAB_MEM=4G` (teto do dono). As VMs desta fase são
 a `arch-iso` (e camadas descartáveis sobre ela) e discos de spike, apagados no fim. Nenhuma camada
@@ -74,7 +74,7 @@ mais nova reescrevendo o lock.
 `arch-iso` responde no SSH com `yes`, `btrfs`, `0`.
 
 - [x] T008 [P] [US1] `lab/iso/archinstall.json`: a configuração padrão que passou no `--dry-run` do spike (systemd-boot sem UKI, btrfs `@`/`@home`/`@log`/`@pkg` com `compress=zstd`, zram, NetworkManager, perfil mínimo, `en_US`/`us`, UTC, mirror `geo.mirror.pkgbuild.com`), sem `disk_config` (gerado), com as adaptações do lab (openssh + sshd, chave do lab, `/etc/sudoers.d/90-nier-lab`, hostname `nier-lab`) num bloco identificado (FR-014); nada que impeça acrescentar o Plymouth depois (decisão 2) — **feito**
-- [x] T009 [P] [US1] `lab/iso/user-data` e `lab/iso/meta-data` (modelos do contrato archinstall-config.md, "Disco `cidata`"): só a chave do lab pro root e o marcador `RIEN-LAB-SEED-OK` na serial — **feito** (mais tarde ganhou a isenção do NAT do QEMU no sshd da ISO, ver T019)
+- [x] T009 [P] [US1] `lab/iso/user-data` e `lab/iso/meta-data` (modelos do contrato archinstall-config.md, "Disco `cidata`"): só a chave do lab pro root e o marcador `YORHA-LAB-SEED-OK` na serial — **feito** (mais tarde ganhou a isenção do NAT do QEMU no sshd da ISO, ver T019)
 - [x] T010 [P] [US1] `lab/iso/check-arch-iso`: roda no sistema instalado (como `arch`, sudo sem senha) e imprime as conferências do contrato (`hostname`, `bootloader`, `root_fs`, `root_subvol`, `subvols`, `swap`, `network`, `online`, `system`, `failed_units`, `user`, `sudo_nopasswd`, `root_locked`, `kernel`, `packages`, `archinstall_log`) em `chave=valor`; um modo `--expect` compara com o esperado e devolve ≠ 0 se algo decisivo não bater (as dependentes da configuração viram informativas com `--config` próprio) — **feito**
 - [x] T011 [P] [US1] `lab/ls` mostra `iso:<versão>` / `incompleta:<passo>` na coluna BASE (raiz sem link); `lab/rm` apaga também `<nome>.manifest.json` e `<nome>.creds`; `lab/new --from` recusa uma base `incompleta:*` e uma base que não está congelada só se for incompleta (o resto igual) — **feito**
 - [x] T012 [US1] `lab/install-iso [<nome>] [--config] [--disk] [--snapshot] [--redo] [--keep-on-fail] [--timeout]`: os passos 0–10 do contrato (`preflight`, `iso`, `seed`, `boot-iso`, `ssh-iso`, `dry-run`, `install`, `collect`, `reboot`, `checks`, `freeze`), cada um como `lab/perf mark`; `disk_config` gerado de `--disk`; senha gerada em `vms/<nome>.creds` (600) e hash feito dentro da ISO por stdin; credenciais apagadas da ISO antes de desligar; `steps.tsv`, `serial.log`, `install.live.log`, `install.log`, `user_configuration.json`, `checks.txt`, `console.png`, `manifest.json` na pasta `out/install-iso-<data>/`, registrados no `perf_artifact`; `trap` de falha/interrupção (screendump, `quit`, limpeza ou `incompleta:<passo>`, códigos 1–6 e 130); padrão `NIER_LAB_CPUS=2 NIER_LAB_MEM=4G` — **feito.** **Desvios:** (1) o archinstall roda num `systemd-run` na ISO e o host acompanha a unidade (uma queda do SSH não mata a instalação); (2) o ssh tenta de novo no código 255 e o `install-iso` usa uma porta própria (2240+); (3) o `--dry-run` lê o `install.log` (`- ERROR -`), porque o código 0 não basta. Causa no T013/T019

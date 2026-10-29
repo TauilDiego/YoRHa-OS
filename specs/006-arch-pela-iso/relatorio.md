@@ -18,7 +18,7 @@ lab/install-iso            # 335 s, código 0, camada arch-iso congelada (BASE i
 
 ## Evidência por critério de sucesso
 
-Todos os ids são de `~/projects/rien-OS-relatorios/runs/`.
+Todos os ids são de `~/projects/YoRHa-OS-relatorios/runs/`.
 
 | Critério | Resultado | Evidência |
 |---|---|---|

@@ -5,7 +5,7 @@ diamond, like the original (no center element: that one is all-scroll's dot)."""
 from style import Canvas
 from fam_resize import full_heads, head
 
-ATTRIBUTION = "rien-OS cursor ({}). Shapes after NieR Cursors by Beinsezii (MIT)."
+ATTRIBUTION = "YoRHa-OS cursor ({}). Shapes after NieR Cursors by Beinsezii (MIT)."
 
 
 def _shape(name, where):

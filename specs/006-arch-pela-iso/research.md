@@ -18,7 +18,7 @@ primeira tarefa (plano, "Ordem de execução") confirma ou corrige cada um.
 - **Consequência pra S2:** a `basic` é um Arch "já instalado por outra pessoa". Ela não passa pelas
   escolhas que um usuário faz no archinstall (carregador, sistema de arquivos, swap, rede, perfil), e
   é justamente isso que a S3 precisa encontrar.
-- **Fontes:** `rien-OS-private/lab/{fetch,bootstrap,images.lock,README.md}`;
+- **Fontes:** `YoRHa-OS-private/lab/{fetch,bootstrap,images.lock,README.md}`;
   https://gitlab.archlinux.org/archlinux/arch-boxes
 
 ## R2. Como dirigir a ISO sem ninguém olhando

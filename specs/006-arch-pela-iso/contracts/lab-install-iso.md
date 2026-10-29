@@ -1,6 +1,6 @@
 # Contrato: `lab/install-iso` (e `lab/fetch iso`)
 
-Comandos novos do laboratório privado (`rien-OS-private/lab/`). Este contrato fixa a interface, os
+Comandos novos do laboratório privado (`YoRHa-OS-private/lab/`). Este contrato fixa a interface, os
 passos, os arquivos e os códigos de saída; o script em si é da implementação.
 
 ## `lab/fetch iso [--latest]`
@@ -59,9 +59,9 @@ Cada passo vira um marcador do `lab/perf` (`lab/perf mark "<passo>"`) quando há
 | 2 | `seed` | Gera `run/<nome>-seed.iso` (rótulo `cidata`) com `meta-data` (`instance-id` novo) e `user-data` (chave do lab pro root + marcador na serial) | 1 |
 | 3 | `boot-iso` | Cria `vms/<nome>.qcow2` vazio e `vms/<nome>.vars.fd` (cópia do OVMF limpo); liga o QEMU `--soft` com o disco, a ISO e o `cidata` como CD-ROMs somente leitura, serial pra arquivo, QMP | 3 |
 | 4 | `ssh-iso` | Espera o marcador do cloud-init na serial e o SSH do root (limite 5 min); depois `systemctl is-system-running --wait` dentro da ISO | 3 |
-| 5 | `dry-run` | Gera a senha (só no host do lab, `vms/<nome>.creds`, modo 600), o hash dela **dentro da ISO** (`crypt_yescrypt`, senha por stdin) e as credenciais; manda config + credenciais pra `/root/rien-lab/` por tar no SSH; roda `archinstall --config … --creds … --silent --dry-run` | 4 |
+| 5 | `dry-run` | Gera a senha (só no host do lab, `vms/<nome>.creds`, modo 600), o hash dela **dentro da ISO** (`crypt_yescrypt`, senha por stdin) e as credenciais; manda config + credenciais pra `/root/yorha-lab/` por tar no SSH; roda `archinstall --config … --creds … --silent --dry-run` | 4 |
 | 6 | `install` | `archinstall --config … --creds … --silent --skip-version-check`, com o log ao vivo em `out/…/install.live.log`; limite `--timeout`. Sucesso = código 0 **e** linha de conclusão no `install.log` | 5 |
-| 7 | `collect` | Copia da ISO: `/var/log/archinstall/install.log`, o `user_configuration.json` salvo pelo archinstall; **apaga** `/root/rien-lab/` e o arquivo de credenciais salvo pelo archinstall antes de desligar | 5 |
+| 7 | `collect` | Copia da ISO: `/var/log/archinstall/install.log`, o `user_configuration.json` salvo pelo archinstall; **apaga** `/root/yorha-lab/` e o arquivo de credenciais salvo pelo archinstall antes de desligar | 5 |
 | 8 | `reboot` | `poweroff` na ISO; liga de novo **só com o disco** (sem CD-ROMs), com `discard=unmap` | 6 |
 | 9 | `checks` | SSH como `arch` com a chave do lab (limite 2 min); roda as conferências (abaixo) → `checks.txt`; `fstrim -av`; `screendump` → `console.png`; grava `manifest.json` | 6 |
 | 10 | `freeze` | `lab/down <nome>`; escreve `vms/<nome>.base` = `iso:<versão>`; `lab/freeze <nome>`; apaga o `seed` | 6 |
@@ -145,8 +145,8 @@ A interface, os passos, os arquivos e os códigos acima valem como estão. A imp
   255 (até ~1 min). Motivo: o sshd (OpenSSH ≥ 9.8) tem `PerSourcePenalties`, todo o lab chega pelo NAT
   do QEMU (10.0.2.2), e a sonda de boot do `lab/perf` deixa uma rajada de conexões sem autenticação
   quando o sshd sobe; o sshd então recusa o lab por 15 s ou mais. Na ISO, o `cidata` isenta o
-  10.0.2.2 (`/etc/ssh/sshd_config.d/90-rien-lab.conf`, só no sistema da ISO) e recarrega o sshd.
-- **Instalação num `systemd-run` na ISO** (`rien-archinstall`, `RemainAfterExit`, `RuntimeMaxSec` =
+  10.0.2.2 (`/etc/ssh/sshd_config.d/90-yorha-lab.conf`, só no sistema da ISO) e recarrega o sshd.
+- **Instalação num `systemd-run` na ISO** (`yorha-archinstall`, `RemainAfterExit`, `RuntimeMaxSec` =
   `--timeout`): uma queda do SSH não mata o archinstall; o host lê `SubState`, `Result` e
   `ExecMainStatus` da unidade e copia a saída pra `install.live.log`.
 - **Recusa no `--dry-run`:** código ≠ 0, **ou** `- ERROR -`/`Traceback` no log do archinstall, **ou**

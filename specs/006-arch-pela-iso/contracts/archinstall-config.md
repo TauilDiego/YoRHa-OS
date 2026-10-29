@@ -4,7 +4,7 @@ Formatos do **archinstall 4.5** (o da ISO 2026.10.01; research R3). Os arquivos 
 privado:
 
 ```
-rien-OS-private/lab/iso/
+YoRHa-OS-private/lab/iso/
 ├── archinstall.json     # configuração padrão (sem disk_config: o lab gera)
 ├── user-data            # modelo do cloud-init (a chave pública entra na hora)
 └── check-arch-iso       # as conferências do passo 9, rodadas no sistema instalado
@@ -113,7 +113,7 @@ Forma (abreviada; os campos seguem `examples/config-sample.json` do archinstall 
 - A senha em texto puro existe só em `$LAB_HOME/vms/<nome>.creds` (modo 600).
 - O hash é feito **dentro da ISO**: a senha entra por stdin num `python -c` que chama
   `archinstall.lib.crypt.crypt_yescrypt`. Ela nunca aparece numa linha de comando (nem no `ps` da VM).
-- O arquivo vai pra `/root/rien-lab/user_credentials.json` na ISO e é apagado no passo 7, junto com a
+- O arquivo vai pra `/root/yorha-lab/user_credentials.json` na ISO e é apagado no passo 7, junto com a
   cópia que o archinstall salva em `/var/log/archinstall/`. Nada disso vai pra pasta de saída.
 
 ## Disco `cidata` (cloud-init NoCloud)
@@ -124,7 +124,7 @@ Uma ISO 9660 com rótulo `cidata`, feita no host com
 `meta-data`:
 
 ```yaml
-instance-id: rien-lab-<nome>-<AAAAMMDDHHMMSS>
+instance-id: yorha-lab-<nome>-<AAAAMMDDHHMMSS>
 local-hostname: archiso
 ```
 
@@ -138,13 +138,13 @@ write_files:
     content: |
       @LAB_PUBKEY@
 runcmd:
-  - [sh, -c, 'echo RIEN-LAB-SEED-OK > /dev/ttyS0']
+  - [sh, -c, 'echo YORHA-LAB-SEED-OK > /dev/ttyS0']
 ```
 
 - **Só abre a porta.** O `cidata` não leva a configuração nem as credenciais: elas vão pelo SSH
   (research R2).
 - **Implementado com um item a mais** (2026-10-27): o `user-data` também grava
-  `/etc/ssh/sshd_config.d/90-rien-lab.conf` com `PerSourcePenaltyExemptList 10.0.2.2/32` e recarrega o
+  `/etc/ssh/sshd_config.d/90-yorha-lab.conf` com `PerSourcePenaltyExemptList 10.0.2.2/32` e recarrega o
   sshd antes do marcador. Vale só pro sistema da ISO (não vai pro instalado) e evita que o sshd recuse
   o lab depois da rajada de conexões da sonda de boot ([lab-install-iso.md](lab-install-iso.md),
   "Notas da implementação").

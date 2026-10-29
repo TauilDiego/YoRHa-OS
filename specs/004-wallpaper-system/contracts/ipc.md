@@ -2,7 +2,7 @@
 
 Os comandos são chamados com `qs -p <pasta da UI> ipc call wallpaper <função> [args]`. No laboratório,
 isso vira `lab/ipc qs -p ~/nier/ui ipc call wallpaper …`. O alvo já existe desde a 001 (`motion`,
-`isMoving`) e ganha as funções abaixo. Um `rien wallpaper …` (S4) vai ser um invólucro destes
+`isMoving`) e ganha as funções abaixo. Um `yorha wallpaper …` (S4) vai ser um invólucro destes
 comandos.
 
 | Função | Retorno | Uso |
