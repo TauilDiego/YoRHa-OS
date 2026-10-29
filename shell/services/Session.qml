@@ -117,23 +117,225 @@ Singleton {
         if (dryRun) {
             const no = refuse.includes(id);
             lastAction = { id: id, executed: false, ok: !no };
-            if (no) {
-                lastError = Strings.pause.refused.arg(Strings.pause.notAllowed);
-                refused(id, Strings.pause.notAllowed);
-            } else {
+            if (no)
+                refuse_(id, Strings.pause.notAllowed);
+            else
                 accepted(id);
-            }
             return;
         }
         runLive(id);
     }
 
-    // --- the real sources (frente C) -----------------------------------------------------------------
-    function refreshLive(): void {
+    // A refusal: the error stays on the card until the next action. An action that closed the menu
+    // first (lock, suspend, hibernate) says so on the next opening, and in the log.
+    function refuse_(id: string, reason: string): void {
+        if (closesSession(id)) {
+            lastError = Strings.pause.refused.arg(reason);
+        } else {
+            lastError = Strings.pause.lastRefused.arg(Strings.pause.powerLabels[id]).arg(reason);
+            console.info(`session: ${id} refused: ${reason}`);
+        }
+        refused(id, reason);
     }
 
-    function runLive(id: string): void {
+    // --- the real sources (research R9) --------------------------------------------------------------
+    // Every program is called by argv, never through a shell. Capabilities and inhibitors are read
+    // again on refresh() only (entering POWER, opening the dialog), never polled.
+    readonly property var capQueries: [
+        { id: "suspend", method: "CanSuspend" },
+        { id: "hibernate", method: "CanHibernate" },
+        { id: "reboot", method: "CanReboot" },
+        { id: "poweroff", method: "CanPowerOff" }
+    ]
+
+    function busctl(method: string): var {
+        return ["busctl", "--json=short", "call", "org.freedesktop.login1", "/org/freedesktop/login1",
+                "org.freedesktop.login1.Manager", method];
     }
+
+    function refreshLive(): void {
+        user = Quickshell.env("USER") ?? "";
+        refuse = [];
+        fixtureError = "";
+        readStatus();
+        for (let i = 0; i < capRepeater.count; i++) {
+            const p = capRepeater.objectAt(i);
+            if (p && !p.running)
+                p.running = true;
+        }
+        if (!inhibitorQuery.running)
+            inhibitorQuery.running = true;
+    }
+
+    // Host and uptime (the status card; uptime again every minute while POWER is shown).
+    function readStatus(): void {
+        if (fixed)
+            return;
+        if (!statusQuery.running)
+            statusQuery.running = true;
+    }
+
+    function parseStatus(text: string): void {
+        if (fixed)                               // a fixture came in meanwhile, and wins
+            return;
+        const lines = text.split("\n");
+        const up = parseFloat(lines[0]);
+        if (isFinite(up))
+            uptime = Math.floor(up);
+        if ((lines[1] ?? "").trim() !== "")
+            host = lines[1].trim();
+    }
+
+    function parseCan(id: string, text: string): void {
+        if (fixed)                               // a fixture came in meanwhile, and wins
+            return;
+        try {
+            const v = String(JSON.parse(text).data[0]);
+            const next = Object.assign({}, can);
+            next[id] = v;
+            can = next;
+        } catch (e) {
+            console.info(`session: Can ${id} unreadable, keeping "${can[id] ?? "na"}": ${e}`);
+        }
+    }
+
+    function parseInhibitors(text: string): void {
+        if (fixed)                               // a fixture came in meanwhile, and wins
+            return;
+        try {
+            inhibitors = JSON.parse(text).data[0].map(i => ({
+                what: String(i[0]), who: String(i[1]), why: String(i[2]), mode: String(i[3])
+            }));
+        } catch (e) {
+            console.info(`session: ListInhibitors unreadable, keeping the last list: ${e}`);
+        }
+    }
+
+    // The argv of an action; log out asks uwsm first (logout() below).
+    function commandOf(id: string): var {
+        switch (id) {
+        case "lock":
+            return ["loginctl", "lock-session"];
+        case "suspend":
+        case "hibernate":
+        case "reboot":
+        case "poweroff":
+            return ["systemctl", id];
+        }
+        return [];
+    }
+
+    // Lock, suspend and hibernate close the menu before they run: a short wait lets the compositor
+    // take the pop-up off the screen first (FR-023).
+    function runLive(id: string): void {
+        busy = id;
+        pendingId = id;
+        if (closesSession(id))
+            startLive();
+        else
+            clearScreen.restart();
+    }
+
+    property string pendingId: ""
+
+    function startLive(): void {
+        const id = pendingId;
+        if (id === "logout") {
+            uwsmCheck.running = true;
+            return;
+        }
+        launch(commandOf(id));
+    }
+
+    function launch(argv: var): void {
+        actionProc.exitCode = -1;
+        actionProc.errDone = false;
+        actionProc.exited_ = false;
+        actionProc.command = argv;
+        actionProc.running = true;
+    }
+
+    function finishLive(code: int, err: string): void {
+        const id = pendingId;
+        pendingId = "";
+        busy = "";
+        lastAction = { id: id, executed: true, ok: code === 0 };
+        if (code === 0) {
+            accepted(id);
+            return;
+        }
+        const reason = err.trim().split("\n")[0] || Strings.pause.notAllowed;
+        console.info(`session: ${actionProc.command.join(" ")} exited with ${code}: ${reason}`);
+        refuse_(id, reason);
+    }
+
+    Timer {
+        id: clearScreen
+        interval: 150
+        onTriggered: root.startLive()
+    }
+
+    Process {
+        id: statusQuery
+        command: ["cat", "/proc/uptime", "/proc/sys/kernel/hostname"]
+        stdout: StdioCollector {
+            onStreamFinished: root.parseStatus(text)
+        }
+    }
+
+    Instantiator {
+        id: capRepeater
+        model: root.capQueries
+        delegate: Process {
+            required property var modelData
+            command: root.busctl(modelData.method)
+            stdout: StdioCollector {
+                onStreamFinished: root.parseCan(modelData.id, text)
+            }
+        }
+    }
+
+    Process {
+        id: inhibitorQuery
+        command: root.busctl("ListInhibitors")
+        stdout: StdioCollector {
+            onStreamFinished: root.parseInhibitors(text)
+        }
+    }
+
+    // A uwsm session ends by `uwsm stop`; any other, by logind.
+    Process {
+        id: uwsmCheck
+        command: ["uwsm", "check", "is-active"]
+        onExited: code => root.launch(code === 0 ? ["uwsm", "stop"]
+            : ["loginctl", "terminate-session", Quickshell.env("XDG_SESSION_ID") || "self"])
+    }
+
+    // The action itself: done once it has exited and its stderr is read.
+    Process {
+        id: actionProc
+        property int exitCode: -1
+        property bool exited_: false
+        property bool errDone: false
+        function settle(): void {
+            if (exited_ && errDone)
+                root.finishLive(exitCode, actionErr.text);
+        }
+        stderr: StdioCollector {
+            id: actionErr
+            onStreamFinished: {
+                actionProc.errDone = true;
+                actionProc.settle();
+            }
+        }
+        onExited: code => {
+            exitCode = code;
+            exited_ = true;
+            settle();
+        }
+    }
+
+    Component.onCompleted: if (!fixed) refreshLive()
 
     // --- the fixture ---------------------------------------------------------------------------------
     function loadFixture(text: string): void {
@@ -171,6 +373,8 @@ Singleton {
         busy = "";
         if (fixed)
             fixtureFile.reload();
+        else
+            refreshLive();
     }
 
     FileView {
