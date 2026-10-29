@@ -491,7 +491,8 @@ Cada critério diz qual evidência da VM o comprova (constituição IV).
   segurando aparece no diálogo. Sem dados de teste, um `Reboot` confirmado reinicia a VM.
   Evidência: estado exportado por passo e o tempo ligado da VM antes e depois do reboot.
 - **SC-008**: numa sequência de quadros sem fixtures, trocar de item mostra a pipa sumindo e
-  reaparecendo em ≈240 ms, e nenhuma aba mostra a pipa em nenhum quadro. Evidência: os quadros.
+  reaparecendo inteira em até 0,21 s depois de sumir (medido na T046; decisão do dono, 29.10, no
+  lugar de "≈240 ms"), e nenhuma aba mostra a pipa em nenhum quadro. Evidência: os quadros.
 - **SC-009**: um app de teste instalado com o menu aberto aparece em APPS em até 2 s; um app fixado
   continua fixado depois de reiniciar o shell. Evidência: estado exportado e screenshot.
 - **SC-010**: o log fica sem erro e sem aviso de QML depois do roteiro inteiro. Evidência: o trecho

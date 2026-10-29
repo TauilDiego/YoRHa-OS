@@ -21,8 +21,8 @@ import "../base"
 // spec 007 (T043): the view's top always stops at an entry's top (less the rails' room, inside the
 // wider gap above it), so the first visible entry is never cut, whether the cursor or the wheel
 // scrolled it. The bottom too (T043, second part): while the list overflows, the window ends under
-// the last entry that fits whole, so the last visible line is never cut
-// either; the paper under it stays empty. The wheel scrolls one
+// the last item that fits whole, so the last visible line is never cut either, and a group's title
+// whose item doesn't fit waits for it (T046); the paper under it stays empty. The wheel scrolls one
 // entry per notch, only when the content is taller than the list (otherwise it does nothing, as
 // before); a cursor scrolled out of view comes back to the nearest whole item in view (moved here
 // with `keysEnabled`, asked for by `cursorRequested(index)` otherwise). `scrollState()` tells it.
@@ -234,9 +234,15 @@ Item {
     // bottom of the last entry that fits whole from `scrollY`, plus the rails' room (up to the
     // list's own height: an entry whose rails don't fit is still whole, as before).
     function visibleHeight(): real {
+        return bottomEdge().h;
+    }
+    // Where the window ends while the list overflows: under the last whole item, plus the rails'
+    // room (up to the list's own height). A group's title (or note) that fits but whose item doesn't
+    // goes with its item to the next step (`hidden`); one with no item after it (the list's end) counts.
+    function bottomEdge(): var {
         if (!overflows)
-            return height;
-        let h = 0;
+            return { h: height, hidden: false };
+        let last = 0, any = 0;
         for (let i = 0; i < entries.length; i++) {
             const r = rows.itemAt(i);
             if (!r)
@@ -244,10 +250,17 @@ Item {
             const end = topRoom + r.y + r.height - scrollY;
             if (end > height + 0.5)
                 break;
-            if (end > 0)
-                h = Math.min(height, end + railRoom);
+            if (end <= 0)
+                continue;
+            any = end;
+            if (itemOf[i] >= 0 || !entryOf.some(e => e > i))
+                last = end;
         }
-        return h > 0 ? h : height;
+        const base = last > 0 ? last : any;
+        return {
+            h: base > 0 ? Math.min(height, base + railRoom) : height,
+            hidden: last > 0 && any > last + 0.5
+        };
     }
     readonly property real viewHeight: {
         scrollY;
@@ -278,7 +291,9 @@ Item {
             first: first,
             cut: first >= 0 && entryTop(first) < scrollY - 0.5,
             last: last,
-            cutBottom: !!lr && topRoom + lr.y + lr.height > scrollY + h + 0.5
+            cutBottom: !!lr && topRoom + lr.y + lr.height > scrollY + h + 0.5,
+            lastIsItem: last < 0 || itemOf[last] >= 0 || !entryOf.some(e => e > last),
+            titleHidden: bottomEdge().hidden
         };
     }
 
@@ -296,7 +311,8 @@ Item {
         id: strips
         s: root.s
         kind: "vertical"
-        height: Math.min(root.height, root.contentHeight)
+        // No entries (e.g. APPS without data): no strips, not a 7 px stub of the rails' room.
+        height: root.entries.length > 0 ? Math.min(root.height, root.contentHeight) : 0
     }
 
     // A clipped window on the entries, with the kite's room on its left and the shadow's on its right.

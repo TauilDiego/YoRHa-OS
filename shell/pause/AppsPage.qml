@@ -252,7 +252,7 @@ FocusScope {
         applyLabel: root.ps.open
         searchHeader: root.searching ? { query: root.query, count: root.itemIds.length } : null
         emptyText: root.searching ? root.ps.noMatch : ""
-        optionsVisible: !(root.searching && root.itemIds.length === 0)      // the mockup: no card
+        optionsVisible: root.app !== null      // no app (a search with no match, no app data): no card
         onIndexChanged: {
             const id = root.itemIds[index];
             if (id !== undefined)
