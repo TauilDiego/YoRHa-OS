@@ -4,7 +4,8 @@
 
 **Created**: 2026-10-29
 
-**Status**: Rascunho, com duas perguntas pro dono marcadas `[NEEDS CLARIFICATION]` (FR-040 e US5)
+**Status**: Rascunho, com uma pergunta pro dono marcada `[NEEDS CLARIFICATION]` (US5). A da
+instalação (FR-041) foi respondida em 29.10.
 
 **Input**: Fase U5a do `PLAN.md` (§9): "Splash de boot no Plymouth e tela de login com a UI NieR:
 tema QML do SDDM ou um greeter em Quickshell (a escolha sai da spec). O bootloader continua o
@@ -41,6 +42,11 @@ erro do tema".
   cena "Menu + rules". É o mesmo tamanho que a barra vai usar (spec 010, item A, decidido em 29.10).
 - **Regra geral:** toda alternativa de design vira uma opção, com a recomendação como padrão. Aqui
   as opções ficam na configuração do tema, porque o login roda antes de qualquer sessão.
+- **Núcleo de sistema da experiência:** o projeto continua só visual, mas o que o sistema precisa
+  pra experiência completa vai junto na distribuição. Aqui isso é o Plymouth no initramfs e o
+  parâmetro `splash` do kernel, que o instalador ativa com backup e um comando que desfaz (FR-041,
+  FR-042). O dono: "se tiver um 'core' de sistema que precisa pra experiência completa da nossa
+  ideia, não faz mal a gente distribuir isso junto".
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -360,11 +366,12 @@ apagar, e conferir que nenhuma imagem mostra texto de console.
 **Instalação**
 
 - **FR-040**: A camada visual MUST trazer os dois temas na pasta gerenciada e escolher o tema do SDDM
-  por um arquivo de configuração próprio, sem editar o arquivo do usuário. [NEEDS CLARIFICATION: o
-  tema de boot precisa de duas mudanças no sistema, fora do tema em si: o Plymouth no initramfs
-  (com a imagem refeita) e o parâmetro `splash` na linha do kernel, que fica na entrada do
-  systemd-boot. Na direção "só visual", o instalador faz essas duas mudanças, com backup e um
-  jeito de desfazer, ou só instala o tema e documenta os passos?]
+  por um arquivo de configuração próprio, sem editar o arquivo do usuário.
+- **FR-041**: O instalador MUST ativar o tema de boot por inteiro: pôr o Plymouth no initramfs (e
+  refazer a imagem) e acrescentar o parâmetro `splash` na linha do kernel da entrada do
+  systemd-boot. Antes de mexer, MUST guardar backup de cada arquivo que muda.
+- **FR-042**: MUST existir um comando que desfaz as mudanças do FR-040 e do FR-041, volta os arquivos
+  do backup e deixa o boot e o login como estavam antes.
 
 ### Key Entities
 
@@ -408,6 +415,9 @@ Cada critério diz a evidência que o comprova (constituição, princípio IV).
 - **SC-010**: Os screenshots do login nos dois perfis de monitor batem com a proposta aprovada, e a
   sequência do boot bate com a análise 4K. *Evidência:* a página de revisão com as capturas lado a
   lado e a aprovação visual do dono.
+- **SC-011**: Depois do comando de desfazer, o reboot seguinte mostra o boot em texto e o login
+  padrão do SDDM, e os arquivos mudados ficam iguais aos de antes da instalação. *Evidência:* as
+  capturas do reboot e a comparação dos arquivos com o backup.
 
 ## Assumptions
 
