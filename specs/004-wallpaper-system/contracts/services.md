@@ -8,7 +8,7 @@ A UI lê o papel de parede **só** por estes serviços. As entidades estão em
 | Serviço | Expõe | Fonte real | Fixture |
 |---|---|---|---|
 | `WallpaperCatalog` | `items` (lista de `Wallpaper`), `byId(id)` → `Wallpaper` ou `null`, `folder` (caminho em uso), `folderMissing` (bool), `count` | `shell/wallpaper/scenes/*.json` + `FolderListModel` na `Settings.wallpaperFolder` (R6) | `wallpaper.folder` |
-| `WallpaperStore` | `all`, `monitors`, `transition`, `paperFilterOff`, `resolve(monitorName)` → id, `set(id, monitorName)` (`""` ou `"all"` = todos), `step(monitorName, delta)` (próximo/anterior), `setTransition(kind)`, `setCamouflage(cell, trail, glitch)`, `setPaperFilter(path, on)`, `instant` (bool) | `$XDG_STATE_HOME/rien-os/wallpaper.json` (R8) + `Settings` | `wallpaper.all`, `wallpaper.monitors`, `wallpaper.transition` |
+| `WallpaperStore` | `all`, `monitors`, `transition`, `paperFilterOff`, `resolve(monitorName)` → id, `set(id, monitorName)` (`""` ou `"all"` = todos), `step(monitorName, delta)` (próximo/anterior), `setTransition(kind)`, `setCamouflage(cell, trail, glitch)`, `setPaperFilter(path, on)`, `instant` (bool) | `$XDG_STATE_HOME/yorha-os/wallpaper.json` (R8) + `Settings` | `wallpaper.all`, `wallpaper.monitors`, `wallpaper.transition` |
 
 **Regras:**
 - **`set` e `step` não desenham nada.** Eles mudam a escolha. Cada `Wallpaper` (um por monitor) observa
@@ -33,7 +33,7 @@ A UI lê o papel de parede **só** por estes serviços. As entidades estão em
 | `Settings` | `reduceMotion`, `wallpaperFolder`, `wallpaperTransition`, `camouflage` | `defaults.json` + `shell.json` (data-model) |
 | `Settings` (emendas (2) e (3)) | `barContrast` (`"normal"` / `"high"`), `levelsOf(key)`, `levelOf(key)`, `setLevel(key, level)` (`""` volta pra config) | `SettingsState` (`shell.<key>`) > `shell.json` > `defaults.json` |
 | `SettingsModel` (emendas (2) e (3)) | uma opção com `"setting": key` é uma escolha ligada a uma configuração do shell; as outras são salvas em `settings.<cat>.<opt>` (a menos que `"persist": false`); `reset()` limpa o estado | `settings-default.json` + `SettingsState` |
-| `SettingsState` (novo, emenda (3)) | `values`, `persisted`, `has`, `get`, `set`, `remove`, `clear(prefix)` | `$XDG_STATE_HOME/rien-os/settings.json` (`contracts/settings-state.md`) |
+| `SettingsState` (novo, emenda (3)) | `values`, `persisted`, `has`, `get`, `set`, `remove`, `clear(prefix)` | `$XDG_STATE_HOME/yorha-os/settings.json` (`contracts/settings-state.md`) |
 | `Compositor` | `focusedMonitor` (nome da saída) | campo `focused` do `hyprctl monitors -j` que já é lido para as escalas; atualizado nos mesmos eventos |
 | `Fixtures` | domínio `wallpaper` | data-model, "Fixture" |
 

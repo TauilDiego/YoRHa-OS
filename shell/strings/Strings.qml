@@ -10,7 +10,7 @@ Singleton {
     readonly property string vol: "VOL"
     readonly property string bat: "BAT"
     readonly property string system: "SYSTEM"
-    readonly property string brand: "rien-OS"
+    readonly property string brand: "YoRHa-OS"
     readonly property string charging: "+"         // after the battery percent while charging
     readonly property string muted: "MUTE"         // in place of the volume percent
 
@@ -109,7 +109,7 @@ Singleton {
         readonly property string nowLabel: "NOW"
         readonly property string on: "ON"
         readonly property string off: "OFF"
-        readonly property string version: "rien-OS 0.1 · Hyprland"
+        readonly property string version: "YoRHa-OS 0.1 · Hyprland"
         readonly property string error: "Settings data unavailable."
         // key hints: the key, then what it does
         readonly property string keyUpDown: "↑↓"
@@ -177,7 +177,7 @@ Singleton {
         readonly property string mark: "●"
         readonly property string separator: " · "
         readonly property string listSeparator: ", "
-        readonly property string footer: "rien-OS 0.1 · %1"        // %1 = how many monitors
+        readonly property string footer: "YoRHa-OS 0.1 · %1"        // %1 = how many monitors
         readonly property string oneMonitor: "1 monitor"
         readonly property string manyMonitors: "%1 monitors"
     }

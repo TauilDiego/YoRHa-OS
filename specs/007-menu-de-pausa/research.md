@@ -104,11 +104,11 @@ dependência nova. `execDetached` não usa shell.
 **Spike (T003, 2026-10-27, `teste-c`, Quickshell 0.3.2, `lab/perf` `2026-10-27T215958-vm-teste-c-007-spike`):**
 - um `.desktop` copiado pra `~/.local/share/applications/` aparece em `DesktopEntries.applications`
   em ≈0,1 s (`applicationsChanged`), e some no mesmo tempo quando é apagado. O rascunho está em
-  `rien-OS-private/lab/mockups/desktop-spike/`;
+  `YoRHa-OS-private/lab/mockups/desktop-spike/`;
 - **mas** a pasta tem que existir quando o shell sobe: com `~/.local/share/applications/` criada
   depois, o Quickshell não a observa. O `check-007` cria a pasta antes de reiniciar o shell; o
   instalador (S3) deve criá-la também;
-- o `DesktopEntry.id` vem **sem** o `.desktop` (`kitty`, `rien-test`): o serviço `Apps` acrescenta
+- o `DesktopEntry.id` vem **sem** o `.desktop` (`kitty`, `yorha-test`): o serviço `Apps` acrescenta
   o sufixo, pra os ids reais e os da fixture terem a mesma forma (`kitty.desktop`).
 
 **Alternativas:**
@@ -230,7 +230,7 @@ fazem o esperado, sem ajuste na tabela:
 |---|---|
 | pode? (`Suspend`, `Hibernate`, `Reboot`, `PowerOff`) | `busctl --json=short call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager Can<Ação>` → `yes`/`challenge` = disponível; `no`/`na` = apagado, com o motivo ("Not supported on this machine.", "Not allowed.") |
 | quem está segurando | `busctl --json=short call … ListInhibitors` → `a(ssssuu)`: `what`, `who`, `why`, `mode`, uid, pid. Só os `mode = block` com `what` contendo `shutdown` (Reboot, Shut down, Log out) ou `sleep` (Suspend, Hibernate) |
-| Lock | `loginctl lock-session` (o sinal `Lock` do logind; quem desenha a tela é o locker da sessão, e o do rien-OS vem no U5) |
+| Lock | `loginctl lock-session` (o sinal `Lock` do logind; quem desenha a tela é o locker da sessão, e o do YoRHa-OS vem no U5) |
 | Log out | sessão do uwsm (`uwsm check is-active` responde 0): `uwsm stop`; senão `loginctl terminate-session <XDG_SESSION_ID>` |
 | Suspend, Hibernate, Reboot, Shut down | `systemctl suspend`, `hibernate`, `reboot`, `poweroff` |
 | status | `USER` = `$USER`; `HOST` = `/proc/sys/kernel/hostname`; `UPTIME` = `/proc/uptime` (relido a cada minuto com o menu aberto); `BATTERY` = o serviço `Battery` da 001; `WINDOWS` = `Compositor.windows.length` |
@@ -283,7 +283,7 @@ dispatch exit` pro Log out (a wiki do Hyprland desaconselha com uwsm).
   chave do `shell.json` espelhada no catálogo), a T009 se ajusta a ele. É a pergunta 1 do relatório.
 
 **Conferido na T009 (2026-10-28):** o `Bar contrast` (acabamento da 004, mesclado na 007) guarda os
-valores de **todo** o catálogo no `SettingsState` (`$XDG_STATE_HOME/rien-os/settings.json`, chave
+valores de **todo** o catálogo no `SettingsState` (`$XDG_STATE_HOME/yorha-os/settings.json`, chave
 `settings.<categoria>.<opção>`, contracts/settings-state.md da 004). A categoria `menu` usa esse
 mesmo mecanismo sem código a mais: as cinco opções ficam salvas entre sessões (o "salvar sempre" do
 dono), e o `settings reset` as volta ao padrão. Com fixtures, ficam só em memória.
@@ -297,7 +297,7 @@ fixo no código (quebra se a ordem dos valores mudar).
 
 ## R11. Fixados e usos: arquivo de estado
 
-**Decisão:** `$XDG_STATE_HOME/rien-os/apps.json` (`{ "version": 1, "pinned": [ids], "uses": { id: n } }`),
+**Decisão:** `$XDG_STATE_HOME/yorha-os/apps.json` (`{ "version": 1, "pinned": [ids], "uses": { id: n } }`),
 lido no início e gravado com `FileView` (`atomicWrites`) a cada mudança, no mesmo padrão do
 `wallpaper.json` da 004. Arquivo ilegível: começa vazio e registra no log. Com a fixture `apps`
 ativa, nada é gravado (os valores da fixture valem em memória). A última aba usada vale pela sessão
@@ -340,7 +340,7 @@ inteiras.
 ## R14. Laboratório e paralelismo
 
 **Decisão:**
-- **branch privada:** `lab-007` no `rien-OS-private`, saindo da `lab-004-acab` (a mais nova);
+- **branch privada:** `lab-007` no `YoRHa-OS-private`, saindo da `lab-004-acab` (a mais nova);
 - **roteiro:** `lab/check-007`, no padrão do `check-004` (`ok`/`ko`, pasta de evidência,
   `summary.txt`, `--only <bloco>`, os dois perfis via `lab/profile`), com um bloco marcado por
   frente pra o merge ser fácil;

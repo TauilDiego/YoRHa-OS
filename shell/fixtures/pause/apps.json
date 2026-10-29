@@ -565,20 +565,20 @@
    "windowClass": "nm-connection-editor"
   },
   {
-   "id": "rien-ghost.desktop",
+   "id": "yorha-ghost.desktop",
    "name": "Ghost Tool",
    "genericName": "Test app",
    "description": "A test entry whose command is not installed: opening it only logs why.",
    "category": "Other",
    "icon": "",
    "command": [
-    "rien-ghost-tool"
+    "yorha-ghost-tool"
    ],
    "keywords": [
     "missing"
    ],
    "uses": 0,
-   "windowClass": "rien-ghost"
+   "windowClass": "yorha-ghost"
   },
   {
    "id": "obs.desktop",

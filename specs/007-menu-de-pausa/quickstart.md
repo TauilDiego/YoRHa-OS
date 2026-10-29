@@ -1,14 +1,14 @@
 # Quickstart: validar o menu de pausa no laboratório
 
 O roteiro que prova cada critério de sucesso com evidência da VM (princípio IV). Tudo roda no
-ambiente privado (`rien-OS-private/lab`, branch `lab-007`) e **dentro de uma sessão de medição**.
+ambiente privado (`YoRHa-OS-private/lab`, branch `lab-007`) e **dentro de uma sessão de medição**.
 Nada disso roda na máquina do dono. O `lab/check-007` automatiza as linhas marcadas com ⚙; cada
 frente tem o seu bloco marcado no roteiro (`--only us1|compositor|apps|windows|power|live|gallery|burst|broken|reboot`).
 
 ## Preparação
 
 ```sh
-cd ~/projects/rien-OS-private
+cd ~/projects/YoRHa-OS-private
 export NIER_LAB_VM=teste-a NIER_LAB_CPUS=2 NIER_LAB_MEM=4G     # limite do dono: ≤ 4 VMs de 2 núcleos e 4 GB
 lab/perf begin "007: validação do menu de pausa" --kind validacao --task 007
 lab/up teste-a && lab/profile 1080
@@ -34,7 +34,7 @@ lab/sync --src <worktree>/shell --env NIER_FIXTURES=~/nier/ui/fixtures/pause-def
 | 7 ⚙ | SC-007 | Com `pause-default.json`: Enter em Lock e em Suspend; Enter em Log out, Reboot e Shut down (o diálogo, `row: cancel`), fechando com Esc, com clique fora e com `Cancel`; de novo, ↑ + Enter (confirma); Hibernate (apagado); o diálogo de Shut down com o bloqueio | `lastAction` só nas confirmações e em Lock/Suspend (`executed: false`); nenhum registro nos cancelamentos; Hibernate não faz nada; `blockers` com o `pacman` |
 | 8 | SC-007 (real) | Sessão `lab/perf` à parte: `fixtures clear`; `lab/ssh cat /proc/uptime`; menu → POWER → Reboot → ↑ → Enter; esperar a VM voltar (`lab/ssh` responde); `cat /proc/uptime` de novo | O tempo ligado zerou (a VM reiniciou); antes do reboot, o diálogo tinha a pipa em `Cancel` |
 | 9 ⚙ | SC-008 | Sem fixtures, `lab/burst 20 40` com `down` no meio, em APPS; outra rajada trocando de aba | A pipa some e volta inteira em até 0,21 s; nenhum quadro com pipa nas abas |
-| 10 ⚙ | SC-009 | `fixtures clear`; menu em APPS; `lab/ssh` copia `rien-test.desktop` pra `~/.local/share/applications/`; `pause dump` a cada 250 ms; depois fixa o app (`right`, `Pinned`), `lab/ssh 'pkill -x qs'`, espera, `dump` | O app aparece em ≤ 2 s; depois do reinício, continua em PINNED (`~/.local/state/rien-os/apps.json` com o id); `~/.config/rien-os/` intacto. Apagar o `.desktop` no fim |
+| 10 ⚙ | SC-009 | `fixtures clear`; menu em APPS; `lab/ssh` copia `yorha-test.desktop` pra `~/.local/share/applications/`; `pause dump` a cada 250 ms; depois fixa o app (`right`, `Pinned`), `lab/ssh 'pkill -x qs'`, espera, `dump` | O app aparece em ≤ 2 s; depois do reinício, continua em PINNED (`~/.local/state/yorha-os/apps.json` com o id); `~/.config/yorha-os/` intacto. Apagar o `.desktop` no fim |
 | 11 ⚙ | SC-010 | Relatório do `lab/perf end` (seção "Dentro da VM") + `qmllint` dentro da VM | 0 erros e 0 avisos de QML no roteiro; lint limpo, fora os falsos positivos conhecidos |
 | 12 ⚙ | SC-011 | `gallery open`, Tab ×3, `lab/shot galeria-007` | A página 4 com cada componente novo nos estados do contrato |
 | 13 ⚙ | SC-013 | Menu aberto; pra cada opção de `Pause menu`: `tab system`, ir até a opção, `right`; `tab` de volta pra aba que ela muda; shot + `dump` | `options` muda no `dump`; a prévia de APPS nos 3 estilos (3 shots); ALL APPS reordena; Enter num app com janela vai pra ela (`lastAction.kind: window`); `Every action` faz Lock pedir confirmação; `Action` começa o diálogo na ação |
@@ -50,5 +50,5 @@ lab/down
 lab/perf end --result pass --note "007 validada"
 ```
 
-O relatório vai pro `rien-OS-relatorios`. Os screenshots, as rajadas e os `dump`s são a evidência
+O relatório vai pro `YoRHa-OS-relatorios`. Os screenshots, as rajadas e os `dump`s são a evidência
 pra revisão do dono (SC-012).

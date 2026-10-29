@@ -21,7 +21,7 @@ linha no log); nenhum texto vindo do usuário passa por shell.
 | `setPinned(id, on)` | void | Grava o estado (sem fixture) |
 
 **Fonte real:** `DesktopEntries.applications` (atualiza sozinho, research R4) + o estado
-`$XDG_STATE_HOME/rien-os/apps.json` (R11). **Fixture:** domínio `apps` = caminho de um arquivo no
+`$XDG_STATE_HOME/yorha-os/apps.json` (R11). **Fixture:** domínio `apps` = caminho de um arquivo no
 formato `#/$defs/appsFile` de [pause-fixtures.schema.json](pause-fixtures.schema.json).
 
 ## `appsearch.js` (novo, `.pragma library`)

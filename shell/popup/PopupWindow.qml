@@ -42,7 +42,7 @@ PanelWindow {
     }
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "rien-popup"
+    WlrLayershell.namespace: "yorha-popup"
     WlrLayershell.keyboardFocus: keyboardActive ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     color: "transparent"
     mask: keyboardActive ? null : noInput

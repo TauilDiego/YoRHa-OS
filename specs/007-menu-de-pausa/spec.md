@@ -9,13 +9,13 @@ o menu reusa a moldura de popup da 003 e o layout lista + prévia + opções da 
 
 **Input**: Fase U3 do `PLAN.md` (§9): "U3 Menu de pausa | Launcher, janelas, energia | Screenshot de
 cada aba". O §7 diz que a UI NieR põe "menu de pausa no lugar do launcher". As abas são as do
-cabeçalho do mockup aprovado das configurações (`rien-OS-private/lab/mockups/configuracoes/`):
+cabeçalho do mockup aprovado das configurações (`YoRHa-OS-private/lab/mockups/configuracoes/`):
 **APPS**, **WINDOWS**, **SYSTEM** e **POWER**. Sobre a tela, o dono disse, na 003: "eu pensei em ele
 ter uma animação substituindo a tela como um todo, mas isso não é muito comum no mundo linux… por
 enquanto vamos fazer o fundo escurecer e essa janela abrir como um popup igual o SUPER+K do
 Serpantinum". Decisão do dono que vale aqui: as abas nunca têm a pipa; ela fica só nos itens de
 lista, parada, com o blink de 240 ms ao trocar de item. Mockup desta spec:
-https://claude.ai/artifact/QPR6gpmyWMDR9pgwXTLbEb (cópia em `rien-OS-private/lab/mockups/menu-de-pausa/`).
+https://claude.ai/artifact/QPR6gpmyWMDR9pgwXTLbEb (cópia em `YoRHa-OS-private/lab/mockups/menu-de-pausa/`).
 
 **Decisões do dono (2026-10-27)**, que substituem as suposições provisórias do rascunho:
 - **Regra geral:** toda alternativa de design vira uma opção em SYSTEM (as configurações), trocável
@@ -347,7 +347,7 @@ e ver que continua fixado.
   categoria nova `Pause menu` (FR-034). O que muda em relação à 003: a página ganha a barra de abas
   (a FR-008 da 003, "sem abas", deixa de valer), o título fica abaixo das abas, as colunas se
   ajustam ao corpo menor e o rodapé ganha `Tab Next tab`. O texto à esquerda continua a versão do
-  rien-OS. O popup avulso da 003 deixa de existir: `SUPER + I` e o comando `settings` abrem o menu
+  YoRHa-OS. O popup avulso da 003 deixa de existir: `SUPER + I` e o comando `settings` abrem o menu
   em SYSTEM (FR-001).
 
 **POWER (US4)**
@@ -396,7 +396,7 @@ e ver que continua fixado.
     depois);
   - **energia:** o gerenciador de sessão do sistema (o que ele diz que pode, os programas
     segurando, e as ações), e o bloqueio da sessão pelo mesmo caminho (quem desenha a tela de
-    bloqueio é o locker da sessão; o do rien-OS vem no U5).
+    bloqueio é o locker da sessão; o do YoRHa-OS vem no U5).
 - **FR-027**: Os apps fixados e as contagens de uso MUST ficar como estado do usuário, fora dos
   arquivos de configuração dele (constituição III), e sobreviver a reiniciar o shell. Com dados de
   teste, valem só em memória.

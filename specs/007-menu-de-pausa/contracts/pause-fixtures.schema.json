@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "rien-os/pause-fixtures",
+  "$id": "yorha-os/pause-fixtures",
   "title": "Arquivos de teste do menu de pausa (spec 007)",
   "description": "Os domínios `apps`, `windows` e `session` de uma fixture apontam (caminho relativo à pasta da UI) pra um arquivo em um destes formatos. Textos em inglês, aparecem como estão.",
   "oneOf": [

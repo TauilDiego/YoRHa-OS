@@ -31,7 +31,7 @@ revisão abaixo.
   o `StatusCard`, o `ConfirmDialog` com os bloqueios (`ListInhibitors`), a ordem de fechar e executar
   da FR-023 e o reboot real provado na VM.
 - **Dados reais (US5):** os apps do `DesktopEntries` (um `.desktop` novo em ≈0,3 s), o estado em
-  `~/.local/state/rien-os/apps.json`, as janelas ao vivo.
+  `~/.local/state/yorha-os/apps.json`, as janelas ao vivo.
 - **Opções (`SYSTEM › Pause menu`):** `App icons`, `App order`, `Running app`, `Confirm` e
   `Dialog starts on`, valendo na hora.
 - **Acabamento (T043, decisões do dono em 28.10):** a `GroupedList` rola em linhas inteiras (a
@@ -52,7 +52,7 @@ revisão abaixo.
 | SC-006 | 3 kitty reais em 2 áreas: Enter em C, B movida pra 02, A fechada em ≈0,3 s, `hyprctl` a cada passo | idem |
 | SC-007 | Com fixtures: Lock/Suspend sem diálogo, os outros com diálogo (Cancel por Esc, clique fora e `Cancel`), Hibernate apagado, o `pacman` no diálogo; sem fixtures, o `Lock` pelo sinal do logind; o reboot real zera o `/proc/uptime` | idem e `2026-10-28T235417-vm-teste-c-007-validacao` (`out/007-t046-007-reboot`, 3/0) |
 | SC-008 | Bloco `burst` do `check-007` (sem fixtures): no ↓ em APPS a pipa volta inteira 71 ms depois de sumir (critério: até 0,21 s, decisão do dono em 29.10); trocando de aba, os vãos entre as abas sem tinta em todos os quadros | `2026-10-29T003229-vm-teste-a-007-validacao-acabamento` (`out/007-t046c-007-both/sc008-down.txt`, `sc008-gone.png`, `sc008-back.png`) |
-| SC-009 | `rien-test.desktop` em ≈0,3 s com o menu aberto; fixado e usado continua depois do `pkill -x qs`; `~/.config/rien-os/` intacto | `2026-10-28T235337-vm-teste-a-007-validacao` |
+| SC-009 | `yorha-test.desktop` em ≈0,3 s com o menu aberto; fixado e usado continua depois do `pkill -x qs`; `~/.config/yorha-os/` intacto | `2026-10-28T235337-vm-teste-a-007-validacao` |
 | SC-010 | Log do roteiro inteiro com 0 erros e 0 avisos de QML (a única linha é a `expected-warn` do app de comando inexistente); `qmllint` dentro da VM limpo (os 12 falsos positivos conhecidos) | idem e `…-teste-c-007-validacao` (`out/007-t046-qmllint.txt`) |
 | SC-011 | Galeria, página 4, nos dois perfis (dois shots iguais, o Tab seguinte volta à 1) | `2026-10-29T000458-…` (`out/007-t046-007-gallery`) |
 | SC-012 | **Aguarda o dono:** `out/007-revisao-sc012.png` (mockup × VM 1080 × VM hidpi nas 7 telas, e os 3 estilos de ícone) | `2026-10-29T001018-container-teste-a-007-imagem-de-revisao-sc-012` |

@@ -16,9 +16,9 @@ quickstart.md)
 QML sem erro, sempre dentro de `lab/perf begin/end`.
 
 **Caminhos**:
-- `shell/…`, `specs/…`, `docs/…` = repositório público `nier-os`;
-- `lab/…` = repositório privado `rien-OS-private`, branch `lab-007`
-  (`~/projects/nier-os-project/rien-OS-private-wt/lab-007/lab/`; a T001 a criou como `lab007`, o caminho de hoje é este).
+- `shell/…`, `specs/…`, `docs/…` = repositório público `YoRHa-OS`;
+- `lab/…` = repositório privado `YoRHa-OS-private`, branch `lab-007`
+  (`~/projects/nier-os-project/YoRHa-OS-private-wt/lab-007/lab/`; a T001 a criou como `lab007`, o caminho de hoje é este).
 
 **VMs:** no máximo 4 ao mesmo tempo, cada uma com `NIER_LAB_CPUS=2 NIER_LAB_MEM=4G` (limite do
 dono). O contrato e a US1 usam a `teste-a`; as frentes usam `teste-a`, `teste-b` e `teste-c`. Se
@@ -29,7 +29,7 @@ outras rodadas estiverem com VMs, as frentes andam duas por vez.
 - **[P]**: vai pra um agente paralelo, com worktree e VM próprios (constituição VI). Nas fases 4–7,
   `[P]` quer dizer "em paralelo com as outras frentes"; **dentro de uma frente, a ordem é a dos IDs**.
 - **[Story]**: história da spec (US1–US5).
-- **Frentes:** **A** = APPS (worktree `nier-os-wt/impl007-apps`, branch `007-apps`, VM `teste-a`);
+- **Frentes:** **A** = APPS (worktree `YoRHa-OS-wt/impl007-apps`, branch `007-apps`, VM `teste-a`);
   **B** = WINDOWS (`impl007-janelas`, `007-janelas`, `teste-b`); **C** = POWER
   (`impl007-energia`, `007-energia`, `teste-c`). Todas saem da `007-menu-de-pausa` depois da T022.
 
@@ -39,8 +39,8 @@ outras rodadas estiverem com VMs, as frentes andam duas por vez.
 
 **Purpose**: o atalho na VM, a confirmação das APIs que o plano supõe e os ícones do projeto.
 
-- [x] T001 Criar a worktree privada `~/projects/rien-OS-private-wt/lab007` (branch `lab-007`, saindo da `lab-004-acab`) e, em `lab/guest/hyprland.lua`, acrescentar `hl.bind("ALT + Escape", hl.dsp.exec_cmd("qs -p ~/nier/ui ipc call pause toggle"))`, mantendo o `ALT + I` (research R3)
-- [x] T002 [P] Criar o esqueleto do `lab/check-007` no padrão do `lab/check-004` (`ok`/`ko`, pasta de evidência, `summary.txt`, `--only us1|apps|windows|power|live|gallery`, os dois perfis por `lab/profile`, VM deixada em 1080), com blocos marcados por frente (`# --- 007 frente A: início/fim` etc.), o ajudante que abre `kitty --title A|B|C` em duas áreas de trabalho e devolve os endereços (`hyprctl clients -j`), e o `lab/guest/rien-test.desktop` do SC-009; documentar na seção "Uso no dia a dia" do `lab/README.md` (sem VM)
+- [x] T001 Criar a worktree privada `~/projects/YoRHa-OS-private-wt/lab007` (branch `lab-007`, saindo da `lab-004-acab`) e, em `lab/guest/hyprland.lua`, acrescentar `hl.bind("ALT + Escape", hl.dsp.exec_cmd("qs -p ~/nier/ui ipc call pause toggle"))`, mantendo o `ALT + I` (research R3)
+- [x] T002 [P] Criar o esqueleto do `lab/check-007` no padrão do `lab/check-004` (`ok`/`ko`, pasta de evidência, `summary.txt`, `--only us1|apps|windows|power|live|gallery`, os dois perfis por `lab/profile`, VM deixada em 1080), com blocos marcados por frente (`# --- 007 frente A: início/fim` etc.), o ajudante que abre `kitty --title A|B|C` em duas áreas de trabalho e devolve os endereços (`hyprctl clients -j`), e o `lab/guest/yorha-test.desktop` do SC-009; documentar na seção "Uso no dia a dia" do `lab/README.md` (sem VM)
 - [x] T003 **Spike na VM** (`lab/perf begin "007: spike"`, `teste-a`, 2 núcleos, 4 GB): com duas janelas `kitty`, conferir por `lab/ipc 'hyprctl dispatch …'` as expressões do research R8 (`hl.dsp.focus({ window = "address:…" })` numa janela de outra área: troca de área?; `hl.dsp.window.move({ workspace = 2, follow = false, window = … })`; `hl.dsp.window.float({ action = "toggle", window = … })`; `hl.dsp.window.close({ window = … })`); a saída de `busctl --json=short call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager CanHibernate` e `ListInhibitors` (com um `systemd-inhibit --what=shutdown --mode=block sleep 60` rodando); o sinal `Lock` em `busctl monitor org.freedesktop.login1` depois de `loginctl lock-session`; `uwsm check is-active`; e um QML de rascunho (em `lab/mockups/desktop-spike/`, privado) mostrando que `DesktopEntries.applications` ganha um `.desktop` copiado pra `~/.local/share/applications/` em ≤ 2 s. Registrar os resultados no `research.md` (R4, R8, R9). **Se uma expressão não existir com esse nome, ajustar só a tabela do R8 antes da T012; se o `DesktopEntries` não acompanhar, parar e levar ao dono**
 - [x] T004 [P] Desenhar os ícones do projeto (SVG só de traço, 64 × 64, tinta `#4E4B42`, sem nada de terceiros): os ≈16 glifos genéricos do mockup em `shell/fixtures/pause/icons/` (terminal, browser, files, editor, mail, chat, music, video, image, pdf, settings, monitor, radio, wave, game, code) e os 8 genéricos de categoria em `shell/assets/icons/category-{system,network,media,office,dev,graphics,game,other}.svg` (sem VM)
 
@@ -184,8 +184,8 @@ acompanhando ao vivo.
 fixado depois de reiniciar o shell; janelas abrindo e fechando com o menu aberto (SC-009, US5).
 
 - [x] T039 [P] [US5] Frente A, `shell/services/Apps.qml`, fonte real (research R4): `DesktopEntries.applications` (ids repetidos descartados), a categoria mapeada pras 8 do projeto, `Quickshell.iconPath(icon, true)` com o genérico da categoria quando falta, `runInTerminal`, `startupClass`, as ações, e a lista refeita no `applicationsChanged`
-- [x] T040 [P] [US5] Frente A, estado dos apps (research R11): `$XDG_STATE_HOME/rien-os/apps.json` lido no início e gravado com `FileView` (`atomicWrites`) a cada fixar e a cada uso; arquivo ilegível começa vazio com uma linha no log; nada é gravado com a fixture `apps`; `~/.config` nunca é tocado
-- [x] T041 [P] [US5] Frente A, validar (`lab/perf begin "007: APPS reais"`, `teste-a`): bloco `live` do `lab/check-007`, metade dos apps (cenário 10, SC-009: o `rien-test.desktop` em ≤ 2 s, o fixado depois de `pkill -x qs`, o `apps.json` na VM, `~/.config/rien-os/` intacto) e um shot de APPS com os apps reais da VM
+- [x] T040 [P] [US5] Frente A, estado dos apps (research R11): `$XDG_STATE_HOME/yorha-os/apps.json` lido no início e gravado com `FileView` (`atomicWrites`) a cada fixar e a cada uso; arquivo ilegível começa vazio com uma linha no log; nada é gravado com a fixture `apps`; `~/.config` nunca é tocado
+- [x] T041 [P] [US5] Frente A, validar (`lab/perf begin "007: APPS reais"`, `teste-a`): bloco `live` do `lab/check-007`, metade dos apps (cenário 10, SC-009: o `yorha-test.desktop` em ≤ 2 s, o fixado depois de `pkill -x qs`, o `apps.json` na VM, `~/.config/yorha-os/` intacto) e um shot de APPS com os apps reais da VM
 - [x] T042 [P] [US5] Frente B, validar (`lab/perf begin "007: WINDOWS ao vivo"`, `teste-b`): bloco `live`, metade das janelas (US5, cenário 2: com WINDOWS aberto, abrir e fechar janelas por `lab/ipc`, o `dump` acompanha em ≤ 1 s e a pipa fica no mesmo item ou vai pro vizinho; uma janela que muda de título)
 
 **Evidência da T042 (28.10, `teste-b`):** `lab/perf` `2026-10-28T212708-vm-teste-b-007-windows-ao-vivo`
@@ -198,8 +198,8 @@ WARN/ERROR).
 
 **Evidência da frente A na fase 7 (28.10, `teste-a`):** `lab/perf` `2026-10-28T212938-vm-teste-a-007-apps-reais-desenvolvimento-t039-t040`
 (desenvolvimento) e `2026-10-28T213342-vm-teste-a-007-apps-reais` (T041: `check-007 --only us1,apps,live`
-30/0: o `rien-test.desktop` em ≈0,3 s, fixado e usado continua depois do `pkill -x qs`, `apps.json`
-em `~/.local/state/rien-os/`, `~/.config/rien-os/` intacto; `qmllint` limpo).
+30/0: o `yorha-test.desktop` em ≈0,3 s, fixado e usado continua depois do `pkill -x qs`, `apps.json`
+em `~/.local/state/yorha-os/`, `~/.config/yorha-os/` intacto; `qmllint` limpo).
 
 ---
 

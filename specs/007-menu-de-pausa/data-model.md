@@ -139,7 +139,7 @@ diálogo --(confirma)--> executa (R9)
 Ao fechar: a busca é limpa, as pipas guardadas são esquecidas (as regras de abertura da FR-006
 valem de novo) e `lastTab` fica com a aba em que o menu estava.
 
-## Arquivo de estado dos apps (`$XDG_STATE_HOME/rien-os/apps.json`)
+## Arquivo de estado dos apps (`$XDG_STATE_HOME/yorha-os/apps.json`)
 
 ```json
 { "version": 1, "pinned": ["kitty.desktop", "firefox.desktop"], "uses": { "kitty.desktop": 42 } }

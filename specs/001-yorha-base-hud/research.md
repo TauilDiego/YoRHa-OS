@@ -78,7 +78,7 @@ Cada item segue o formato: decisão, motivo e o que foi descartado. As APIs fora
 ## R6. Configuração do usuário
 
 - **Decisão:** padrões em `shell/config/defaults.json` (gerenciado). O arquivo do usuário fica
-  em `$XDG_CONFIG_HOME/rien-os/shell.json` e só sobrescreve as chaves que tiver. São lidos com
+  em `$XDG_CONFIG_HOME/yorha-os/shell.json` e só sobrescreve as chaves que tiver. São lidos com
   `FileView` + `JSON.parse`, com validação campo a campo (o `JsonAdapter` foi trocado na
   implementação). Chaves: `uiScale`, `barHeight` (28–96; no U1 era 28–48), `vignette` (bool) e
   `wallpaperMotion` (bool, H4).

@@ -39,7 +39,7 @@ lida com `JSON.parse`, R6),
 (OFL) vai junto no repositório.
 
 **Storage**: arquivos: `shell/config/defaults.json` (gerenciado),
-`$XDG_CONFIG_HOME/rien-os/shell.json` (usuário) e fixtures JSON.
+`$XDG_CONFIG_HOME/yorha-os/shell.json` (usuário) e fixtures JSON.
 
 **Testing**: evidência na VM:
 - screenshots (`lab/shot`, `lab/diffshot`);
@@ -121,7 +121,7 @@ shell/
 ├── fixtures/                  # hud-default.json, hud-live-ws.json, battery-low.json, no-battery.json, muted.json, long-title.json, no-window.json
 └── assets/fonts/              # MPLUS1[wght].ttf + OFL.txt
 
-rien-OS-private/lab/           # (privado) mudanças do laboratório
+YoRHa-OS-private/lab/           # (privado) mudanças do laboratório
 ├── up, profile                # NIER_LAB_PROFILE=hidpi (2560x1600) + lab/profile hidpi|1080
 ├── sync                       # --env KEY=VAL → ~/nier/ui.env
 ├── guest/nier-ui-run          # carrega ~/nier/ui.env antes do qs

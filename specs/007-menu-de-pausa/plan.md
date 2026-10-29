@@ -85,7 +85,7 @@ script fixo `command -v`). **Nenhuma dependência nova:** tudo vem com `systemd`
 `uwsm` e `quickshell`, que já estão na VM e na base do instalador.
 
 **Storage**:
-- `$XDG_STATE_HOME/rien-os/apps.json` (fixados e usos; estado, nunca config);
+- `$XDG_STATE_HOME/yorha-os/apps.json` (fixados e usos; estado, nunca config);
 - `shell/config/defaults.json` (+ `terminal`);
 - `shell/fixtures/settings-default.json` (+ categoria `menu`);
 - `shell/fixtures/pause-*.json` e `shell/fixtures/pause/` (dados e ícones de teste).
@@ -221,7 +221,7 @@ shell/
 specs/003-settings-popup/contracts/settings.schema.json   # + `ids` opcional nas escolhas
 docs/design-system.md                                      # + §9 Menu de pausa
 
-rien-OS-private/lab/             # (privado, branch lab-007)
+YoRHa-OS-private/lab/             # (privado, branch lab-007)
 ├── guest/hyprland.lua           # + ALT + Escape → pause toggle
 ├── check-003                    # adaptado: SYSTEM dentro do menu
 └── check-007                    # novo: o quickstart, com um bloco por frente

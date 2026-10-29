@@ -9,7 +9,7 @@ import "../ds"
 // What each monitor shows (spec 004, contracts/services.md): the "all monitors" choice, each
 // monitor's own choice, the transition and the pictures shown without the paper filter.
 // `set` and `step` only change the choice: each Wallpaper watches resolve(its monitor) and plays
-// its own transition. The choice is user state, kept in $XDG_STATE_HOME/rien-os/wallpaper.json
+// its own transition. The choice is user state, kept in $XDG_STATE_HOME/yorha-os/wallpaper.json
 // (contracts/state.schema.json), never in the user's config (constitution III). With the
 // `wallpaper` fixture everything comes from it and nothing is written.
 Singleton {
@@ -183,7 +183,7 @@ Singleton {
     // --- the state file (research R8) -------------------------------------------------------------
     readonly property string statePath: {
         const xdg = Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state");
-        return xdg + "/rien-os/wallpaper.json";
+        return xdg + "/yorha-os/wallpaper.json";
     }
 
     // Unreadable or missing: start empty (a broken file gets a line in the log).

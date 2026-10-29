@@ -25,7 +25,7 @@ PanelWindow {
     }
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Background
-    WlrLayershell.namespace: "rien-wallpaper"
+    WlrLayershell.namespace: "yorha-wallpaper"
     color: Tokens.color.darkYellow
 
     readonly property real s: height / 1080 * Settings.uiScale
