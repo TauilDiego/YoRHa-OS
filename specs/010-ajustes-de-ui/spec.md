@@ -15,8 +15,15 @@ lista.
 ### A. Régua do papel de parede igual à da barra
 
 A linha de baixo da cena `rules` do papel de parede (spec 004) está no tamanho do jogo (s=1), e a
-régua da barra (spec 001/004) está em s≈0,70. O dono pediu pra **igualar as duas** (29.10). Qual
-tamanho vence sai do `specify`, com as duas versões lado a lado pro dono escolher.
+régua da barra (spec 001/004) está em s≈0,70. O dono pediu pra **igualar as duas** (29.10).
+
+**Decidido (29.10):** vence o tamanho do jogo (s=1). O dono comparou as duas na proposta do login
+(artefato 28209760 "YoRHa-OS Login: proposta", v3.1, com a régua de cima no lugar da da barra) e
+disse que a de baixo "tá muito melhor". A barra passa a desenhar a régua em s=1.
+
+Fica pro `specify` resolver o encaixe: em s=1 o padrão da régua desce 28 px, e na barra de 68 px a
+soma (aba 33 + vão 12 + régua 28 = 73) passa da altura. Os caminhos: subir a barra pra ~73 px,
+encurtar o vão, ou deixar o padrão pendurado abaixo da zona reservada, por cima das janelas.
 
 ### B. Rodapé do painel com o diálogo de confirmação aberto
 
