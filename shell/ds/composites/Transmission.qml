@@ -371,6 +371,20 @@ Item {
     function focusReply(): void {
         input.forceActiveFocus();
     }
+    // The controls' boxes in `target`'s coordinates (for `notify dump`, so tests can click them):
+    // { buttons: [{ label, x, y, w, h }] (the actions, then Reply), field: the reply field or null }.
+    function controlBoxes(target: Item): var {
+        const box = it => {
+            const p = it.mapToItem(target, 0, 0);
+            return { x: Math.round(p.x), y: Math.round(p.y), w: Math.round(it.width), h: Math.round(it.height) };
+        };
+        const out = { buttons: [], field: replyRow.visible ? box(field) : null };
+        if (buttons.visible)
+            for (const c of buttons.children)
+                if (c.visible && c.text !== undefined && c.width > 0)
+                    out.buttons.push(Object.assign({ label: String(c.text) }, box(c)));
+        return out;
+    }
 
     // The × in place of the time, with the pointer over the transmission.
     Rectangle {

@@ -307,7 +307,7 @@ Item {
         for (let i = 0; i < rows.count; i++) {
             const d = rows.itemAt(i);
             if (d && !d.leaving && d.item)
-                out.push(Object.assign({ id: d.item.id }, d.box()));
+                out.push(Object.assign({ id: d.item.id, controls: d.view?.controlBoxes(root) ?? null }, d.box()));
         }
         if (more.visible)
             out.push({ id: "more", x: Math.round(more.x), y: Math.round(more.y), w: Math.round(more.width), h: Math.round(more.height) });
