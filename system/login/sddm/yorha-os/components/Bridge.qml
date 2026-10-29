@@ -1,8 +1,10 @@
 import QtQuick
 import "../ds"
 
-// The passage band (spec 011 FR-017, FR-013; mockup v3.2 ".bridge"; the 4K analysis of the game's
-// boot): a flat dark band across the middle with one line of text. It opens and closes like a CRT
+// The passage band (spec 011 FR-017, FR-013; mockup v3.2 ".bridge"): a flat dark band across the
+// middle with one line of text, in the numbers measured in the game (the 4K analysis, as the boot
+// theme's band draws it, contracts/plymouth-theme.md): rgb(15,15,15), the text rgb(138,137,135) in the
+// normal weight, without glow, so the two bands meet without a seam. It opens and closes like a CRT
 // line: a dot in the center, a thin line for one frame, the band; and back: a thin line for one
 // frame, then nothing. The parent drives `mode`: off | dot | line | band.
 Item {
@@ -21,15 +23,15 @@ Item {
         y: Math.round(root.height * 0.418)
         width: root.width
         height: Math.round(root.height * 0.177)
-        color: "#0F0F0F"
+        color: Qt.rgba(15 / 255, 15 / 255, 15 / 255, 1)
 
         Label {
             anchors.centerIn: parent
             s: root.s
             size: 20.16
             spacing: 1.92
-            weight: Font.Bold
-            color: "#96958F"
+            weight: Font.Normal
+            color: Qt.rgba(138 / 255, 137 / 255, 135 / 255, 1)
             text: root.text
         }
     }
