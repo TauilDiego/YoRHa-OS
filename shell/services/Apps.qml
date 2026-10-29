@@ -13,6 +13,9 @@ import "appsearch.js" as AppSearch
 //     Office, Development, Graphics, Game, Other), icon (a path or URL, "" = none), categoryIcon,
 //     command (argv), keywords, terminal, workingDirectory, windowClass, actions: [{ name,
 //     command }], pinned, uses }
+// Real apps (US5, research R4): the freedesktop entries Quickshell watches (DesktopEntries), one
+// per id; pins and uses are user state in $XDG_STATE_HOME/rien-os/apps.json (research R11),
+// written at once on every pin and every use, never in ~/.config.
 // Fixture "apps": the path of a file (pause-fixtures.schema.json, appsFile); its pins and uses
 // live in memory and nothing is written.
 Singleton {
@@ -189,9 +192,148 @@ Singleton {
         stateChanged();
     }
 
-    // Pins or uses changed: saved with the real apps (US5); with the fixture, memory only.
+    // Pins or uses changed: saved with the real apps; with the fixture, memory only.
     function stateChanged(): void {
+        if (!fixed)
+            Qt.callLater(root.saveState);
     }
+
+    // --- the real apps (US5, research R4) ------------------------------------------------------------
+    // freedesktop main categories → the project's eight (the first one known wins).
+    readonly property var categoryMap: ({
+        AudioVideo: "Media", Audio: "Media", Video: "Media", Development: "Development",
+        Education: "Office", Game: "Game", Graphics: "Graphics", Network: "Network", Office: "Office",
+        Settings: "System", System: "System", Science: "Other", Utility: "Other"
+    })
+
+    function categoryOf(categories: var): string {
+        for (const c of categories ?? []) {
+            const m = categoryMap[String(c)];
+            if (m)
+                return m;
+        }
+        return "Other";
+    }
+
+    // A theme icon name becomes the theme's file ("" when the theme has none); a path stays.
+    function iconOf(icon: string): string {
+        if (!icon)
+            return "";
+        if (icon.startsWith("/"))
+            return "file://" + icon;
+        return Quickshell.iconPath(icon, true) ?? "";
+    }
+
+    function fromEntry(e: var, id: string, command: var): var {
+        const category = categoryOf(e.categories);
+        return {
+            id: id,
+            name: String(e.name || id.replace(/\.desktop$/, "")),
+            genericName: String(e.genericName ?? ""),
+            description: String(e.comment ?? "") || String(e.genericName ?? ""),
+            category: category,
+            icon: iconOf(String(e.icon ?? "")),
+            categoryIcon: categoryIconOf(category),
+            command: command,
+            keywords: (e.keywords ?? []).map(String),
+            terminal: e.runInTerminal === true,
+            workingDirectory: String(e.workingDirectory ?? ""),
+            windowClass: String(e.startupClass || id.replace(/\.desktop$/, "")),
+            actions: (e.actions ?? []).map(a => ({ name: String(a.name), command: cleanArgv(a.command) }))
+                .filter(a => a.command.length > 0 && a.command[0] !== "")
+        };
+    }
+
+    // The list again (at the start and on every change Quickshell sees in the entry folders).
+    // Hidden entries are left out; a repeated id keeps its first entry (the user's wins); an
+    // entry without a command is left out with a line in the log.
+    function readLive(): void {
+        if (fixed)
+            return;
+        const seen = new Set();
+        const list = [];
+        for (const e of DesktopEntries.applications.values) {
+            if (e.noDisplay)
+                continue;
+            const raw = String(e.id ?? "");
+            const id = raw.endsWith(".desktop") ? raw : raw + ".desktop";
+            if (raw === "" || seen.has(id))
+                continue;
+            seen.add(id);
+            const command = cleanArgv(e.command);
+            if (command.length === 0 || command[0] === "") {
+                console.info(`apps: ${id} has no command, left out`);
+                continue;
+            }
+            list.push(fromEntry(e, id, command));
+        }
+        liveApps = list;
+        liveReady = true;
+    }
+
+    Connections {
+        target: DesktopEntries
+        enabled: !root.fixed
+        function onApplicationsChanged(): void {
+            root.readLive();
+        }
+    }
+
+    // --- the state file (research R11) ---------------------------------------------------------------
+    readonly property string statePath: {
+        const xdg = Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state");
+        return xdg + "/rien-os/apps.json";
+    }
+
+    // Missing: start empty. Unreadable: start empty, with a line in the log. Ids of apps that are
+    // gone stay (the app may come back) and are only left out of the list.
+    function loadState(): void {
+        const text = stateFile.text();
+        let d = null;
+        if (text) {
+            try {
+                d = JSON.parse(text);
+            } catch (e) {
+                d = null;
+            }
+            if (!d || typeof d !== "object" || Array.isArray(d)) {
+                console.info(`apps: ${statePath} is not a valid state file, starting empty`);
+                d = null;
+            }
+        }
+        pinnedIds = Array.isArray(d?.pinned) ? d.pinned.filter(x => typeof x === "string") : [];
+        const u = {};
+        if (d?.uses && typeof d.uses === "object")
+            for (const k of Object.keys(d.uses))
+                if (Number(d.uses[k]) > 0)
+                    u[k] = Math.floor(Number(d.uses[k]));
+        uses = u;
+    }
+
+    function saveState(): void {
+        if (fixed)
+            return;
+        stateFile.setText(JSON.stringify({ version: 1, pinned: pinnedIds, uses: uses }, null, 2) + "\n");
+    }
+
+    // Read once, blocking, before the first list; setText() writes atomically and creates the
+    // folder when needed.
+    FileView {
+        id: stateFile
+        path: root.fixed ? "" : root.statePath
+        blockLoading: true
+        printErrors: false
+        atomicWrites: true
+    }
+
+    function startLive(): void {
+        if (fixed)
+            return;
+        loadState();
+        readLive();          // touching the entries also starts Quickshell's scan
+    }
+
+    Component.onCompleted: startLive()
 
     // The executable lookup: a fixed script, the names as its arguments (never interpreted).
     Process {
@@ -284,6 +426,7 @@ Singleton {
     onFixedChanged: {
         lastLaunch = null;
         fixtureReady = false;
+        startLive();
     }
 
     Connections {
