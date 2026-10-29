@@ -276,13 +276,13 @@ congelado.**
 
 **Independent Test**: `lab/check-008 --only dnd,fullscreen` (SC-007).
 
-- [ ] T046 [P] [US6] `NotifyStore`:
+- [x] T046 [P] [US6] `NotifyStore`:
   - `held` = `NotifyPrefs.dnd` ou (`Compositor.focusedFullscreen` e `fullscreen == "hold"`);
   - com `held` ou `logOpen`, `low`/`normal` vão direto pro log não lidas, e as críticas aparecem;
   - ao sair da tela cheia, nada aparece de uma vez.
 
-  `notify dnd on|off|toggle`. A persistência do DND fica com o `NotifyPrefs` (T048) — **Frente B**
-- [ ] T047 [US6] `lab/check-008` blocos `dnd` (tecla real `ALT + CTRL + N`, 5 + 1, `DND 5` no `hud dump`, reinício do `qs`) e `fullscreen` (kitty em tela cheia)
+  `notify dnd on|off|toggle`. A persistência do DND fica com o `NotifyPrefs` (T048) — **Frente B** — **feito** (`lab/perf` 2026-10-29T115809, `teste-b`): com o não perturbe, as normais vão pro log não lidas e a crítica aparece; em tela cheia (kitty, `hl.dsp.window.fullscreen()`) a normal vai pro log e a crítica aparece; ao sair, nada aparece de uma vez; com `In fullscreen = Show` a transmissão aparece sobre a tela cheia. **Achado:** a palavra `show` como argumento é tomada pela linha de comando do `qs`; `qs ipc call -- notify pref fullscreen show` resolve (anotado em `contracts/ipc.md`)
+- [x] T047 [US6] `lab/check-008` blocos `dnd` (tecla real `ALT + CTRL + N`, 5 + 1, `DND 5` no `hud dump`, reinício do `qs`) e `fullscreen` (kitty em tela cheia) — **feito** (`lab/perf` 2026-10-29T115809, `teste-b`): `ALT + CTRL + N` liga; 5 normais + 1 crítica → 0 normais e 1 crítica na tela, 6 no log, `DND 5` na barra (SC-007, `out/check-008-1080-20261029-115820/dnd.png`); continua ligado depois de reiniciar o `qs` (`DND 0`); a tecla desliga. `lab/check-008 --only dnd,fullscreen` **7/0** em 1080 (`out/check-008-1080-20261029-115820` + `-115926`) e hidpi (`out/check-008-hidpi-20261029-120012`)
 
 ---
 

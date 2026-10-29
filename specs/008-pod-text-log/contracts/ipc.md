@@ -16,7 +16,7 @@ Chamada: `qs -p <pasta da UI> ipc call notify <função> [args]`; no laboratóri
 | `invoke(id: int, action: string)` | `"ok"` / `"error: …"` | Dispara uma ação (testes) |
 | `osd(kind: string, value: int, muted: bool)` | `"ok"` / `"error: …"` | `volume`, `mic`, `brightness` (FR-033, VM sem brilho) |
 | `sample(name: string)` | `"ok"` / `"error: …"` | **Injetor de testes** (FR-032): manda a notificação de exemplo pelo caminho real (`notify-send`/`gdbus`). Nomes: `normal`, `actions`, `reply`, `critical`, `flood5`, `long`, `progress`, `low`, `script100`, `system` |
-| `pref(key: string, value: string)` | `"ok"` / `"error: …"` | Muda uma opção (FR-039), com o mesmo efeito das configurações. Valores como no data-model (`position top`, `logSize 50`, `monitor ""`) |
+| `pref(key: string, value: string)` | `"ok"` / `"error: …"` | Muda uma opção (FR-039), com o mesmo efeito das configurações. Valores como no data-model (`position top`, `logSize 50`, `monitor ""`). O valor `show` (`fullscreen show`) precisa de `--` antes do alvo (`qs ipc call -- notify pref fullscreen show`): sozinha, a linha de comando do `qs` toma essa palavra pelo `ipc show` dela (achado de 2026-10-29) |
 | `prefsReset()` | `"ok"` | Volta as opções ao padrão e apaga as escolhas do estado |
 | `dump()` | JSON (abaixo) | "Comando que responde" (princípio IV) |
 
