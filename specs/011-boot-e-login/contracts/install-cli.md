@@ -26,10 +26,10 @@ da camada visual (futuro) chama este módulo.
 - `/usr/share/yorha-os/login/` e `/usr/share/yorha-os/boot/`, com os links nas pastas de tema do
   SDDM e do Plymouth;
 - `/usr/share/fonts/yorha-os/` (M PLUS 1, OFL);
-- `/etc/sddm.conf.d/yorha-os.conf`: `Current=yorha-os` e o X com `-background none`;
+- `/etc/sddm.conf.d/yorha-os.conf`: `Current=yorha-os` (o SDDM já passa `-background none` pro X);
 - `/etc/systemd/system/sddm.service.d/yorha-os.conf`: a passagem do Plymouth (research R8);
 - `/etc/systemd/system/yorha-boot-watch.service` e o script dele (research R7);
-- `/etc/mkinitcpio.conf.d/yorha-os.conf`: o hook `plymouth` e a fonte (research R12);
+- `/etc/mkinitcpio.conf.d/yorha-os.conf`: o hook `plymouth` (a fonte vem pelo `Font=` do tema; research R12);
 - `/etc/yorha-os/login.conf`, só se ainda não existir (é do usuário; nunca é sobrescrito);
 - `/var/lib/yorha-os/boot-login.json` (o manifesto) e `/var/lib/yorha-os/backup/<data>/`.
 

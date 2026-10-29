@@ -5,6 +5,9 @@ dependem de um comportamento que só a VM confirma têm uma verificação na tar
 
 ## R0. Uma sondagem no lab antes de tudo
 
+**Feita em 29.10; resultado em `sondagem.md`:** os seis itens passaram, a passagem na terceira
+tentativa.
+
 **Decisão:** a primeira tarefa depois das ferramentas do lab é uma sondagem curta na VM, que confirma
 seis coisas de que o plano depende:
 1. o systemd manda o nome de cada unidade pro Plymouth (`SetUpdateStatusFunction`);
@@ -133,7 +136,12 @@ o `quiet` esconde as mensagens.
 
 ## R8. A passagem do boot pro login
 
-**Decisão:** um drop-in do `sddm.service` muda a ordem e faz a passagem, no estilo do GDM:
+**Atualizado pela sondagem (sondagem.md):** as duas primeiras formas abaixo travam (o SDDM 0.21 sobe o X no
+VT 2 e o `--retain-splash` deixa o tty1 em modo gráfico, onde o kernel ignora a troca de VT). Vale a
+**tentativa 3**: limpar o tty1 e esconder o cursor dele com o Plymouth ainda na tela, e sair **sem**
+reter a imagem. O texto abaixo fica como registro do que foi planejado.
+
+**Decisão (original):** um drop-in do `sddm.service` muda a ordem e faz a passagem, no estilo do GDM:
 1. `Conflicts=plymouth-quit.service` e `After=plymouth-start.service`, pro Plymouth não sair antes da
    hora (o `sddm.service` do Arch espera o `plymouth-quit.service`, e é aí que o console pisca);
 2. `ExecStartPre`: avisa o script (`yorha:exit`), que começa a saída da lista;
@@ -186,7 +194,11 @@ reaproveita.
 
 ## R12. A fonte e o Plymouth no initramfs
 
-**Decisão:**
+**Atualizado pela sondagem:** o hook `plymouth` já copia a fonte do `Font=` do tema (como
+`Plymouth.ttf`), então o drop-in só põe o hook. No initramfs, o texto desenha só ASCII: todo texto do
+boot fica sem acento e sem "…".
+
+**Decisão (original):**
 - **A fonte:** a M PLUS 1 (OFL) vai pra `/usr/share/fonts/yorha-os/`, e um drop-in do mkinitcpio
   (`/etc/mkinitcpio.conf.d/yorha-os.conf`) acrescenta os arquivos dela.
 - **O hook:** o mesmo drop-in põe o hook `plymouth` logo depois do `kms`, ou do `systemd` no initramfs
