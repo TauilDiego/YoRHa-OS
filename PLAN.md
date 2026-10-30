@@ -229,6 +229,10 @@ não aparece no menu de pausa até o shell reiniciar (spec 007: spike T003, rese
   console do ligar ao login, o boot +0,80 s (limite de 1 s, aceito pelo dono), 20 de 20 no estresse do
   login e o journal limpo em 10 ciclos. O dono quase aprovou: a velocidade das linhas do boot (texto
   na hora, só o glitch) vira a spec 012.
+- **2026-10-30:** spec 012 concluída: as linhas do boot aparecem inteiras na hora (`typing=instant`,
+  o padrão), e a digitação do jogo fica como opção (`typing=game`). Na VM: 32 linhas num boot do
+  zero (eram 2 a 5), 35 quadros/s na rajada e o login +0,90 s em relação ao boot sem tema, com a base
+  remedida no mesmo dia. O limite é 1 s, então a margem é curta.
 
 ## Fontes
 

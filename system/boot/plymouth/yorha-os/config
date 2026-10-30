@@ -3,7 +3,10 @@
 # yorha-os.script: run it after a change, then rebuild the initramfs.
 #   exit     fast = the list fades out in 0.4 s | game = the game's 0.9 s (costs 0.5 s of boot)
 #   effects  full | calm = no interference bands, tear or flicker (reduced motion)
+#   typing   instant = each line shows whole as its stage arrives (spec 012) | game = typed as in the
+#            game's boot (77 letters/s, 0.11 s between lines)
 #   debug    off | on = a frame-rate counter in the corner (lab only)
 exit=fast
 effects=full
+typing=instant
 debug=off

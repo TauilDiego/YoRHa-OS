@@ -31,10 +31,12 @@ aparecem como uma linha comum.
 |---|---|---|
 | `exit` | `fast`, `game` | A saída da lista: 0,4 s (`fast`) ou os 0,9 s do jogo (`game`, R9) |
 | `effects` | `full`, `calm` | `calm` tira as faixas, o rasgo e a cintilação (movimento reduzido) |
+| `typing` | `instant`, `game` | `instant`: cada linha aparece inteira quando a etapa chega, até 4 por quadro, e a linha de cada grupo no máximo a cada 0,5 s (spec 012). `game`: a digitação do jogo (abaixo) |
+| `debug` | `off`, `on` | `on` mostra os quadros/s, as linhas e a fila num canto (só pro lab) |
 
 ## Números (da análise 4K; valores em 1080p)
 
-Entrada ~1,0 s linear. Digitação ~77 letras/s; a primeira linha a ~20 letras/s. A linha nasce apagada
+Entrada ~1,0 s linear. Digitação (`typing=game`) ~77 letras/s; a primeira linha a ~20 letras/s. A linha nasce apagada
 por ~50 ms, e as linhas ficam ~0,11 s uma da outra. Cursor 0,49 s aceso e 0,49 s apagado. Pontinhos
 do cabeçalho em ciclo de 1,156 s. Malha de 7 px. Faixas ~7/s, 1–8 quadros, escurecendo ~12 %, com
 rasgo de 3,5 px. Aberração só no vermelho, ~0,21 %. Cintilação geral de 3,5–5,4 %, uma vez a cada

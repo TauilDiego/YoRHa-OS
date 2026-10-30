@@ -11,8 +11,8 @@ de passagem. Plugin `script` do Plymouth.
   segue pasta ligada).
 - `stages.tsv`: o catálogo das etapas (nome da unidade → texto nosso, grupo). As regras estão no
   cabeçalho do arquivo.
-- `config`: as opções (`exit=fast|game`, `effects=full|calm`; `debug=on` mostra os quadros/s, só pro
-  lab).
+- `config`: as opções (`exit=fast|game`, `effects=full|calm`, `typing=instant|game`; `debug=on`
+  mostra os quadros/s, só pro lab).
 - `gen/embed-stages.py`: o Plymouth não lê arquivo em tempo de execução, então o catálogo, as opções e
   as larguras das letras da fonte vão pra dentro do script, entre os marcadores `@generated`. **Rode
   depois de mudar `stages.tsv` ou `config`** (no lab: `lab/011/boot-embed`) e refaça o initramfs.
@@ -41,10 +41,17 @@ de passagem. Plugin `script` do Plymouth.
   linha genérica por grupo quando a fila esvazia ("Starting system services (11)"). A primeira linha
   ("Kernel loaded") e a da raiz ("Mounting the root volume", no `SetRootMountedFunction`) são etapas
   reais que não passam pelo systemd.
-- **Digitação:** cada linha é desenhada uma vez (texto, cópia vermelha, brilho), um pedaço por quadro
-  antes da vez dela, e digitada recortando essa imagem nas posições das letras (as larguras da fonte,
-  embutidas no script). Os dois plugins de texto (o `label-freetype` no initramfs e o `label-pango`
-  depois da troca de raiz) posicionam as letras por essas larguras.
+- **Linhas na hora (`typing=instant`, o padrão, spec 012):** a linha aparece inteira no quadro em que
+  fica pronta, sem digitação, sem a letra sorteada, sem nascer apagada e sem o intervalo entre linhas;
+  só o glitch se mexe. Entram até 4 linhas novas por quadro, porque cada uma desenha três imagens
+  (texto, cópia vermelha, brilho). As unidades fora do catálogo viram a linha do grupo no máximo a
+  cada 0,5 s, com a contagem acumulada. Esperando, o cursor pisca depois da última linha. Num boot
+  do zero da VM passam umas 30 linhas em ~2,5 s, a ~35 quadros/s.
+- **Digitação (`typing=game`, a da 011):** cada linha é desenhada uma vez (texto, cópia vermelha,
+  brilho), um pedaço por quadro antes da vez dela, e digitada recortando essa imagem nas posições das
+  letras (as larguras da fonte, embutidas no script). Os dois plugins de texto (o `label-freetype` no
+  initramfs e o `label-pango` depois da troca de raiz) posicionam as letras por essas larguras. Num
+  boot rápido só dá tempo de 2 a 5 linhas.
 - **Falhas:** o `yorha-boot-watch` segue o journal e manda `yorha:fail:<unidade>`. A linha da unidade
   passa pra `[FAIL]` na cor de alerta; sem linha, ela entra na frente da fila com o texto do catálogo
   ou o genérico do grupo. Na saída, as falhas pendentes aparecem na hora (não dá tempo de digitar).
