@@ -171,9 +171,9 @@ o boot e o login voltam ao que eram, e os hashes dos arquivos editados batem com
 **Independent Test**: numa VM com disco criptografado, `lab/bootcap --until password`; errar uma vez,
 acertar e seguir até o login.
 
-- [ ] T044 [US4] Escrever `lab/011/archinstall-luks.json` (a configuração padrão do lab com LUKS no `@`) e criar as camadas `arch-iso-luks` e a equivalente da `boot-iso` (com `lab/011/provision-boot-iso --from arch-iso-luks`); documentar em `lab/README.md`
-- [ ] T045 [US4] Escrever o modo senha em `yorha-os.script`: `SetDisplayPasswordFunction(prompt, bullets)` e `SetDisplayNormalFunction`, com o campo do login (um quadradinho por caractere, os antigos saindo sob o "…", o erro e o campo limpo); sem o tema ativo, o pedido padrão continua (FR-030)
-- [ ] T046 [US4] Validar a US4 na VM com LUKS, dentro do `lab/perf`: o pedido no estilo do login, a senha errada uma vez, a certa e o boot seguindo até o login
+- [X] T044 [US4] Escrever `lab/011/archinstall-luks.json` (a configuração padrão do lab com LUKS no `@`) e criar as camadas `arch-iso-luks` e a equivalente da `boot-iso` (com `lab/011/provision-boot-iso --from arch-iso-luks`); documentar em `lab/README.md` — **adaptada (29.10):** em vez da camada `arch-iso-luks`, um volume LUKS de teste no `/etc/crypttab` (`lab/011/luks-test`), que pede a senha pelo Plymouth no boot com o tema na tela. A raiz criptografada (pedido dentro do initramfs) não foi testada; fica de pendência
+- [X] T045 [US4] Escrever o modo senha em `yorha-os.script`: `SetDisplayPasswordFunction(prompt, bullets)` e `SetDisplayNormalFunction`, com o campo do login (um quadradinho por caractere, os antigos saindo sob o "…", o erro e o campo limpo); sem o tema ativo, o pedido padrão continua (FR-030)
+- [X] T046 [US4] Validar a US4 na VM com LUKS, dentro do `lab/perf`: o pedido no estilo do login, a senha errada uma vez, a certa e o boot seguindo até o login — feito no boot real com o volume do `luks-test` (`bootcap-teste-011-20261029-211915`): o cartão, a senha errada com "Try again.", a certa e o boot até o login
 
 ---
 
