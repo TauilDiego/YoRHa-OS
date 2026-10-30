@@ -158,3 +158,53 @@ SHAPES = {
     "Loading_Circle": loading_circle,
     "Cursor_Loading": cursor_loading,
 }
+
+
+# --- spec 011 (and 010 item D): the ring as a PNG sequence, for Plymouth and the login ---------------
+# "ink" is the cursor's own palette (dark core and ring, light plates), for paper backgrounds.
+# "light" turns the lightness around inside a warm grey ramp, for the dark boot screen: the core and
+# the ring come out light, the plates dark grey, the alpha untouched.
+LIGHT_RAMP = ("#2E2C27", "#5A5852", "#96958F", "#D7D1B3", "#E6E1CC")
+_LIGHT_RGB = np.array([_rgb(c) for c in LIGHT_RAMP])
+_LIGHT_L = _luma(_LIGHT_RGB)
+
+
+def recolor_light(rgba):
+    """The ink recolor with its lightness inverted onto LIGHT_RAMP (straight alpha kept)."""
+    ink = recolor(rgba)
+    lum = 255.0 - _luma(ink[..., :3].astype(float))
+    lum = np.interp(lum, (255.0 - _DST_L[3], 255.0 - _DST_L[0]), (_LIGHT_L[0], _LIGHT_L[-1]))
+    out = ink.copy()
+    for ch in range(3):
+        out[..., ch] = np.clip(np.interp(lum, _LIGHT_L, _LIGHT_RGB[:, ch]) + 0.5, 0, 255).astype(np.uint8)
+    return out
+
+
+def export_frames(out_dir, palette="ink", size=64):
+    """Loading_Circle as ring-NN.png at `size` px (from the closest upstream size at or above it)
+    plus frames.txt with each frame's delay in ms."""
+    src = _upstream("Loading_Circle")
+    base = min([s for s in SIZES if s >= size] or [max(SIZES)])
+    paint = recolor_light if palette == "light" else recolor
+    os.makedirs(out_dir, exist_ok=True)
+    delays = []
+    for i, (px, delay) in enumerate(src[base]):
+        img = Image.fromarray(paint(px))
+        if base != size:
+            img = img.resize((size, size), Image.LANCZOS)
+        img.save(os.path.join(out_dir, f"ring-{i:02d}.png"), optimize=True)
+        delays.append(f"{i:02d} {delay}")
+    with open(os.path.join(out_dir, "frames.txt"), "w") as f:
+        f.write(f"# Loading_Circle, NieR Cursors by Beinsezii (MIT), recolored ({palette}); {size} px; frame delay_ms\n")
+        f.write("\n".join(delays) + "\n")
+    return len(delays)
+
+
+if __name__ == "__main__":
+    import argparse
+    ap = argparse.ArgumentParser(description="Export the loading ring as PNG frames (spec 011).")
+    ap.add_argument("--frames", required=True, help="output folder")
+    ap.add_argument("--palette", choices=("ink", "light"), default="ink")
+    ap.add_argument("--size", type=int, default=64)
+    a = ap.parse_args()
+    print(export_frames(a.frames, a.palette, a.size), "frames")

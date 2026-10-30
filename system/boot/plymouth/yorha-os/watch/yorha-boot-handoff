@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# yorha-boot-handoff: the boot screen gives way to the login screen (spec 011, research R8, take 3 of
+# the R0 probe). The sddm.service drop-in runs it before SDDM starts:
+#   1. one last pass for failed units (yorha-boot-watch --flush), so a late failure still shows;
+#   2. notes when the handoff happened (/run/yorha-os/handoff, the uptime) for the login screen,
+#      which plays its full intro only right after a boot;
+#   3. tells the boot screen to start its exit (yorha:exit) and waits for it: 0.4 s, or the game's
+#      0.9 s when the theme's config says exit=game or a unit failed (the screen does the same);
+#   4. clears tty1 and hides its cursor while Plymouth still covers it, then quits Plymouth without
+#      --retain-splash: with it, tty1 stays in graphics mode, the kernel ignores the switch to the VT
+#      where SDDM puts X, and X waits forever.
+# Bash and the system's own tools only. Every step may fail without stopping SDDM.
+set -u
+here=$(dirname "$(readlink -f "$0")")
+# Only a real handoff (Plymouth on screen) marks the boot: a restart of SDDM later must not replay the
+# login's full entry.
+command -v plymouth >/dev/null && plymouth --ping || exit 0
+mkdir -p /run/yorha-os
+cut -d' ' -f1 /proc/uptime > /run/yorha-os/handoff
+
+wait=0.4
+grep -qx 'exit=game' /usr/share/plymouth/themes/yorha-os/config 2>/dev/null && wait=0.9
+if [[ -n $(journalctl -b --no-pager -q -o cat --output-fields=UNIT _PID=1 JOB_RESULT=failed | head -1) ]]; then
+    wait=0.9
+fi
+"$here/yorha-boot-watch" --flush
+plymouth display-message --text=yorha:exit
+sleep "$wait"
+TERM=linux setterm --cursor off --clear all > /dev/tty1 2>/dev/null
+plymouth quit
+exit 0

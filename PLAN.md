@@ -150,7 +150,7 @@ Serpantinum.
 | U3 Menu de pausa ✅ | Launcher, janelas, energia | Screenshot de cada aba |
 | U4 Pod e text log | Notificações e OSD | Uma notificação de teste vira transmissão do Pod |
 | U5 Lock e polkit | Tela de bloqueio (PAM) e agente de polkit, testados de verdade na VM | Bloquear, desbloquear e autorizar uma ação funcionam na VM |
-| U5a Boot e login | Splash de boot no Plymouth e tela de login com a UI NieR: tema QML do SDDM ou um greeter em Quickshell (a escolha sai da spec). O bootloader continua o systemd-boot, escolha do dono, então o menu dele não ganha tema | Na VM, um reboot mostra o splash e cai na tela de login nova (screenshots dos dois, do boot até o login); entrar com senha certa abre o Hyprland e com senha errada mostra o erro; o log do boot fica sem erro do tema |
+| U5a Boot e login ✅ | Splash de boot no Plymouth e tela de login com a UI NieR: tema QML do SDDM (spec 011; a escolha ficou com o SDDM). O bootloader continua o systemd-boot, escolha do dono, então o menu dele não ganha tema | Na VM, um reboot mostra o splash e cai na tela de login nova (screenshots dos dois, do boot até o login); entrar com senha certa abre o Hyprland e com senha errada mostra o erro; o log do boot fica sem erro do tema |
 | U5b i18n | Troca de idioma da UI (inglês padrão; português e outros) | A UI inteira muda de idioma por configuração |
 | U6 Otimização | Medir o custo por quadro, cortar efeitos caros, opção de reduzir movimento | A UI cabe no orçamento numa GPU integrada |
 | U7 Troca | A UI NieR substitui o Serpantinum na sua máquina, só depois de homologada na VM | Você usa um dia inteiro sem voltar pro Serpantinum |
@@ -223,6 +223,12 @@ não aparece no menu de pausa até o shell reiniciar (spec 007: spike T003, rese
   nenhuma tecla, em cerca de 5,5 min, e congela a camada `arch-iso` (13 de 13 conferências). O dono
   decidiu que a cadeia do Hyprland passa a ser montada sobre ela, junto com as camadas do Niri e do
   Mango do estudo 009.
+- **2026-10-29:** U5a concluída (spec 011): o tema de boot do Plymouth (a lista de checagens com as
+  etapas reais, a faixa no desligar e o pedido de senha do disco), o tema de login do SDDM (o
+  protótipo aprovado) e o módulo `yorha-os-boot-login`, que instala com backup e desfaz. Na VM: nenhum
+  console do ligar ao login, o boot +0,80 s (limite de 1 s, aceito pelo dono), 20 de 20 no estresse do
+  login e o journal limpo em 10 ciclos. O dono quase aprovou: a velocidade das linhas do boot (texto
+  na hora, só o glitch) vira a spec 012.
 
 ## Fontes
 
