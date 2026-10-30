@@ -7,7 +7,7 @@ description: "Tarefas da 011: boot e login (U5a)"
 **Input**: `specs/011-boot-e-login/` (plan.md, spec.md, research.md, data-model.md, contracts/,
 quickstart.md)
 
-**Status**: aprovadas em 29.10 ("sim"). Setup e fundação feitos (T001–T010; a sondagem está em `sondagem.md`).
+**Status**: aprovadas em 29.10 ("sim"). 49 de 50 feitas; a T050 espera a aprovação visual do dono (SC-010). Relatório em `relatorio.md`.
 
 **Tests**: a spec não pede testes automatizados de código. A prova de cada tarefa é a evidência da VM
 (princípio IV): screenshot ou captura do boot, um comando que responde (`loginctl`, `pgrep`, o estado
@@ -183,7 +183,7 @@ acertar e seguir até o login.
 
 - [X] T047 Escrever os modos `journal` e `fallback` de `lab/check-011` e rodar o `lab/check-011` completo na `teste-011` nos dois perfis, dentro do `lab/perf`: 10 ciclos de boot, login e saída sem aviso de QML nem erro dos temas (SC-007); o tema quebrado de propósito (o `Main.qml` renomeado) deixa o login padrão do SDDM entrar (SC-008); `ds-sync` passa
 - [X] T048 [P] Conferir os créditos: o aviso do Qylock e a GPL-3.0 nos arquivos que espelham a conversa com o SDDM; `CREDITS.md` com o Qylock, o anel (MIT) e a fonte (OFL); o Qylock na lista "Inspirações" do `README.md` (layout); nada do jogo em `system/`
-- [ ] T049 Escrever `specs/011-boot-e-login/relatorio.md` (o que foi feito, os relatórios do `lab/perf`, os totais do `lab/check-011`) e montar a página de revisão do dono: o login nos dois perfis, a folha do boot lado a lado com a análise 4K, a passagem e o desligamento (SC-010)
+- [X] T049 Escrever `specs/011-boot-e-login/relatorio.md` (o que foi feito, os relatórios do `lab/perf`, os totais do `lab/check-011`) e montar a página de revisão do dono: o login nos dois perfis, a folha do boot lado a lado com a análise 4K, a passagem e o desligamento (SC-010) — página: artefato da8ed491 "YoRHa-OS 011: boot e login, revisão"
 - [ ] T050 Atualizar o status da U5a em `PLAN.md`, o mapa do projeto e a Central, e anotar a tarefa de depois: juntar as peças do design system do login e do shell num núcleo sem Quickshell, depois do merge da 008 e da 010 (research R3)
 
 ---
