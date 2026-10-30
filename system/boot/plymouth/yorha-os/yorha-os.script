@@ -300,8 +300,10 @@ if (cfg_exit == "game") EXIT_DUR = 0.9;
 
 # ---- the fixed layers: film, vignette, overlay
 film_p = Math.Clamp(round(7 * S), 4, 16);
+FILM_OPACITY = 0.5;          # the mesh at half of the game's strength (the owner, 29.10: "diminui a opacidade dos quadradinhos")
 film = Sprite(Image("assets/film-" + film_p + ".png").Tile(W, H));
 film.SetPosition(0, 0, 60);
+film.SetOpacity(FILM_OPACITY);
 vignette = Sprite(Image("assets/vignette.png").Scale(W, H));
 vignette.SetPosition(0, 0, 70);
 overlay = Sprite(Image("assets/px-black.png").Scale(W, H));
