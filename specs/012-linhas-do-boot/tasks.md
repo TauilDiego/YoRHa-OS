@@ -6,7 +6,7 @@ description: "Tarefas da 012: linhas do boot na hora"
 
 **Input**: `specs/012-linhas-do-boot/` (spec.md, plan.md)
 
-**Status**: aguardando a aprovação do dono.
+**Status**: aprovadas pelo dono em 29.10 ("pronto agora roda ele"). T001–T003 feitas; em teste na janela da VM.
 
 **Tests**: a prova é a evidência da VM (princípio IV), sempre dentro do `lab/perf`. A VM é a
 `teste-011` (camada `boot-iso`, com a 011 instalada pelo módulo). Sem agentes paralelos: é uma frente
@@ -14,9 +14,9 @@ só e pequena.
 
 ## Phase 1: User Story 1 - Ver as etapas do boot passando (Priority: P1) 🎯 MVP
 
-- [ ] T001 [US1] Acrescentar `typing=instant|game` (padrão `instant`) em `system/boot/plymouth/yorha-os/config` e em `gen/embed-stages.py`, que leva o valor pro script como `cfg_typing`
-- [ ] T002 [US1] Escrever o modo `instant` no `list_update` de `system/boot/plymouth/yorha-os/yorha-os.script`: a linha aparece inteira no quadro em que fica pronta, sem digitação, sem a letra sorteada, sem nascer apagada e sem o `GAP`; até 4 linhas novas por quadro (orçamento da preparação)
-- [ ] T003 [US1] Limitar as linhas por grupo no modo `instant`: no máximo uma linha de cada grupo a cada 0,5 s, com a contagem acumulada
+- [X] T001 [US1] Acrescentar `typing=instant|game` (padrão `instant`) em `system/boot/plymouth/yorha-os/config` e em `gen/embed-stages.py`, que leva o valor pro script como `cfg_typing`
+- [X] T002 [US1] Escrever o modo `instant` no `list_update` de `system/boot/plymouth/yorha-os/yorha-os.script`: a linha aparece inteira no quadro em que fica pronta, sem digitação, sem a letra sorteada, sem nascer apagada e sem o `GAP`; até 4 linhas novas por quadro (orçamento da preparação)
+- [X] T003 [US1] Limitar as linhas por grupo no modo `instant`: no máximo uma linha de cada grupo a cada 0,5 s, com a contagem acumulada
 - [ ] T004 [US1] Instalar pelo módulo na `teste-011` e capturar um boot do zero com `lab/bootcap` (SC-001: pelo menos 15 linhas antes da saída, nenhuma pela metade, faixas presentes); com `debug=on`, medir os quadros/s na rajada (SC-002, ≥ 25); `lab/011/boot-timing` com três boots (SC-003, ≤ +1 s)
 
 ## Phase 2: User Story 2 - A digitação do jogo como opção (Priority: P2)

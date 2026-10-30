@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-29
 
-**Status**: Rascunho, aguardando a aprovação do dono
+**Status**: Aprovada pelo dono em 29.10, junto com o plano e as tarefas
 
 **Input**: O dono testou a 011 numa janela da VM, em 29.10, e disse: "na tela dos [ ok ] ele foi tão
 rápido que eu nem vi animação nenhuma, nem nenhum log. […] deixa os texto printando na velocidade

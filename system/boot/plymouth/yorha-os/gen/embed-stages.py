@@ -12,7 +12,7 @@ import re
 import sys
 
 GROUPS = ("services", "volumes", "devices", "network", "session", "-")
-OPTIONS = {"exit": ("fast", "game"), "effects": ("full", "calm"), "debug": ("off", "on")}
+OPTIONS = {"exit": ("fast", "game"), "effects": ("full", "calm"), "typing": ("instant", "game"), "debug": ("off", "on")}
 BEGIN = "# @generated-begin"
 END = "# @generated-end"
 

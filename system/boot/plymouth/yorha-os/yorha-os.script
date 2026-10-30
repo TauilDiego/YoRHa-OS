@@ -21,16 +21,17 @@
 # @generated-begin (gen/embed-stages.py, from config, stages.tsv and the font; do not edit by hand)
 cfg_exit = "fast";
 cfg_effects = "full";
+cfg_typing = "instant";
 cfg_debug = "off";
-CW_AVG = 597;
-CW[" "] = 277; CW["!"] = 327; CW["#"] = 681; CW["$"] = 644; CW["%"] = 928; CW["&"] = 714; CW["'"] = 305; CW["("] = 409; CW[")"] = 409; CW["*"] = 525; CW["+"] = 695; CW[","] = 321;
-CW["-"] = 431; CW["."] = 320; CW["/"] = 502; CW["0"] = 643; CW["1"] = 643; CW["2"] = 643; CW["3"] = 643; CW["4"] = 643; CW["5"] = 643; CW["6"] = 643; CW["7"] = 643; CW["8"] = 643;
-CW["9"] = 643; CW[":"] = 353; CW[";"] = 371; CW["<"] = 718; CW["="] = 759; CW[">"] = 718; CW["?"] = 581; CW["@"] = 839; CW["A"] = 710; CW["B"] = 666; CW["C"] = 713; CW["D"] = 708;
-CW["E"] = 634; CW["F"] = 641; CW["G"] = 773; CW["H"] = 730; CW["I"] = 308; CW["J"] = 603; CW["K"] = 710; CW["L"] = 633; CW["M"] = 880; CW["N"] = 748; CW["O"] = 833; CW["P"] = 648;
-CW["Q"] = 826; CW["R"] = 693; CW["S"] = 649; CW["T"] = 670; CW["U"] = 733; CW["V"] = 699; CW["W"] = 941; CW["X"] = 712; CW["Y"] = 690; CW["Z"] = 653; CW["["] = 481; CW["]"] = 481;
-CW["^"] = 637; CW["_"] = 606; CW["`"] = 305; CW["a"] = 557; CW["b"] = 620; CW["c"] = 542; CW["d"] = 620; CW["e"] = 569; CW["f"] = 469; CW["g"] = 620; CW["h"] = 612; CW["i"] = 286;
-CW["j"] = 316; CW["k"] = 596; CW["l"] = 286; CW["m"] = 868; CW["n"] = 612; CW["o"] = 601; CW["p"] = 620; CW["q"] = 620; CW["r"] = 443; CW["s"] = 502; CW["t"] = 481; CW["u"] = 602;
-CW["v"] = 544; CW["w"] = 790; CW["x"] = 558; CW["y"] = 551; CW["z"] = 550; CW["{"] = 515; CW["|"] = 350; CW["}"] = 515; CW["~"] = 721;
+CW_AVG = 600;
+CW[" "] = 273; CW["!"] = 336; CW["#"] = 684; CW["$"] = 646; CW["%"] = 937; CW["&"] = 717; CW["'"] = 310; CW["("] = 410; CW[")"] = 410; CW["*"] = 527; CW["+"] = 691; CW[","] = 324;
+CW["-"] = 434; CW["."] = 323; CW["/"] = 512; CW["0"] = 647; CW["1"] = 647; CW["2"] = 647; CW["3"] = 647; CW["4"] = 647; CW["5"] = 647; CW["6"] = 647; CW["7"] = 647; CW["8"] = 647;
+CW["9"] = 647; CW[":"] = 355; CW[";"] = 372; CW["<"] = 712; CW["="] = 749; CW[">"] = 712; CW["?"] = 586; CW["@"] = 837; CW["A"] = 715; CW["B"] = 669; CW["C"] = 711; CW["D"] = 709;
+CW["E"] = 636; CW["F"] = 642; CW["G"] = 770; CW["H"] = 730; CW["I"] = 315; CW["J"] = 603; CW["K"] = 715; CW["L"] = 633; CW["M"] = 880; CW["N"] = 747; CW["O"] = 831; CW["P"] = 651;
+CW["Q"] = 824; CW["R"] = 697; CW["S"] = 653; CW["T"] = 669; CW["U"] = 732; CW["V"] = 701; CW["W"] = 947; CW["X"] = 712; CW["Y"] = 693; CW["Z"] = 649; CW["["] = 485; CW["]"] = 485;
+CW["^"] = 648; CW["_"] = 613; CW["`"] = 313; CW["a"] = 561; CW["b"] = 625; CW["c"] = 544; CW["d"] = 625; CW["e"] = 572; CW["f"] = 471; CW["g"] = 625; CW["h"] = 615; CW["i"] = 293;
+CW["j"] = 323; CW["k"] = 602; CW["l"] = 293; CW["m"] = 868; CW["n"] = 615; CW["o"] = 603; CW["p"] = 625; CW["q"] = 625; CW["r"] = 451; CW["s"] = 507; CW["t"] = 484; CW["u"] = 605;
+CW["v"] = 551; CW["w"] = 797; CW["x"] = 563; CW["y"] = 559; CW["z"] = 553; CW["{"] = 519; CW["|"] = 351; CW["}"] = 519; CW["~"] = 724;
 st_n = 0;
 st_kind[st_n] = 0; st_a[st_n] = "systemd-udevd.service"; st_b[st_n] = ""; st_alen[st_n] = 21; st_blen[st_n] = 0; st_label[st_n] = "Starting the device manager"; st_group[st_n] = "devices"; st_n++;
 st_kind[st_n] = 0; st_a[st_n] = "systemd-udev-trigger.service"; st_b[st_n] = ""; st_alen[st_n] = 28; st_blen[st_n] = 0; st_label[st_n] = "Scanning the hardware"; st_group[st_n] = "devices"; st_n++;
@@ -376,6 +377,12 @@ ROWS = Math.Int((1020 - LINE_BASE) / LINE_STEP) + 1;
 CPS = 77;                    # letters per second
 CPS_FIRST = 20;              # the first line, the system "waking up"
 GAP = 0.11;                  # between lines
+# spec 012: typing=instant shows each line whole as its stage arrives, a few per frame (each one
+# renders three images); the glitch is the only motion. The groups' lines come at most every 0.5 s.
+INSTANT = cfg_typing == "instant";
+INSTANT_PER_FRAME = 4;
+GROUP_EVERY = 0.5;
+gen_next = 0;
 fail_ts = text_set("[FAIL]", LINE_PX, ALERT_R, ALERT_G, ALERT_B);
 cursor_ts = text_set("_", LINE_PX, TXT_R, TXT_G, TXT_B);
 
@@ -644,7 +651,59 @@ fun queue_trim () {
     while (global.q_head < global.q_tail && global.q_dead[global.q_head]) global.q_head++;
 }
 
+
+# Waiting: the cursor blinks after the last line, 0.49 s on, 0.49 s off.
+fun cursor_blink () {
+    k = global.cur;
+    if (k >= 0 && global.t >= global.cursor_since && global.q_head == global.q_tail) {
+        if (Math.Int((global.t - global.cursor_since) / 0.49) % 2 == 0) {
+            x = round(global.LINE_X * global.S + global.ln_w[k]);
+            if (!global.items[global.cursor].on || global.items[global.cursor].x != x) line_place(k, global.cursor, global.cursor_ts, x);
+        } else item_hide(global.cursor);
+    } else item_hide(global.cursor);
+}
+
+# spec 012, typing=instant: the queue's lines show whole, up to INSTANT_PER_FRAME a frame, with no
+# typing, head letter, dim birth or gap; the units outside the catalog become their group's line at
+# most every GROUP_EVERY seconds.
+fun list_update_instant () {
+    if (global.exiting) return;
+    queue_trim();
+    if (global.q_head == global.q_tail && global.t >= global.gen_next) {
+        any = 0;
+        for (g = 0; g < 5; g++) {
+            gn = global.GROUPS[g];
+            if (global.cnt[gn] > 0) {
+                enqueue(global.GEN[gn] + " (" + global.cnt[gn] + ")", "", "ok", 0);
+                global.cnt[gn] = 0;
+                any = 1;
+            }
+        }
+        if (any) global.gen_next = global.t + global.GROUP_EVERY;
+    }
+    started = 0;
+    while (global.q_head < global.q_tail && started < global.INSTANT_PER_FRAME) {
+        q = global.q_head;
+        global.q_head++;
+        if (global.q_unit[q] != "") global.q_of[global.q_unit[q]] = 0;
+        s = line_text(global.q_label[q], global.q_status[q]);
+        line_start(global.q_label[q], global.q_unit[q], global.q_status[q], text_set(s, global.LINE_PX, global.TXT_R, global.TXT_G, global.TXT_B));
+        k = global.cur;
+        global.ln_n[k] = global.ln_full[k].Length();
+        global.ln_done[k] = 1;
+        line_finish(k);
+        started++;
+        queue_trim();
+    }
+    if (started) global.cursor_since = global.t;
+    cursor_blink();
+}
+
 fun list_update () {
+    if (global.INSTANT) {
+        list_update_instant();
+        return;
+    }
     k = global.cur;
     if (k >= 0 && !global.ln_done[k]) {
         e = global.t - global.ln_born[k];
@@ -692,13 +751,7 @@ fun list_update () {
             return;
         }
     }
-    # waiting: the cursor blinks after the last line, 0.49 s on, 0.49 s off
-    if (k >= 0 && global.t >= global.cursor_since && global.q_head == global.q_tail) {
-        if (Math.Int((global.t - global.cursor_since) / 0.49) % 2 == 0) {
-            x = round(global.LINE_X * global.S + global.ln_w[k]);
-            if (!global.items[global.cursor].on || global.items[global.cursor].x != x) line_place(k, global.cursor, global.cursor_ts, x);
-        } else item_hide(global.cursor);
-    } else item_hide(global.cursor);
+    cursor_blink();
 }
 
 # ---- interference bands, the tear, the flicker

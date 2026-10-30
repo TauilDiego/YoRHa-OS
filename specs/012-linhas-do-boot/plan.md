@@ -2,7 +2,7 @@
 
 **Branch**: `012-linhas-do-boot` | **Date**: 2026-10-29 | **Spec**: [spec.md](spec.md)
 
-**Status**: aguardando a aprovação do dono, junto com a spec e as tarefas.
+**Status**: aprovado pelo dono em 29.10, junto com a spec e as tarefas.
 
 ## Summary
 
