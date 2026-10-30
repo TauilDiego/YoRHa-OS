@@ -138,7 +138,8 @@ def band_dots(out):
 
 
 def pixels(out):
-    for name, rgb in (("px-bg", CELL), ("px-black", (0, 0, 0)), ("px-band", BAND)):
+    # px-text: the text colour, for the squares of the disk password field (US4)
+    for name, rgb in (("px-bg", CELL), ("px-black", (0, 0, 0)), ("px-band", BAND), ("px-text", (223, 218, 210))):
         save(Image.new("RGBA", (1, 1), rgb + (255,)), os.path.join(out, f"{name}.png"))
 
 

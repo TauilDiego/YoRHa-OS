@@ -891,6 +891,109 @@ fun debug_update () {
     global.dbg_f = global.frame;
 }
 
+# ---- the disk password (US4, FR-030)
+# cryptsetup asks through Plymouth. A card over everything (the bands do not tear it), in the login's
+# style turned to the dark screen: a light bar with the title, the prompt, a field with one square per
+# character typed (Plymouth sends only the count), the oldest squares sliding off under "..." past the
+# field's width, and "Try again." after a wrong one. ASCII text only (initramfs).
+pw_on = 0;
+pw_asked = 0;
+pw_built = 0;
+PW_MAX = 48;                            # squares kept as sprites; the field shows what fits
+
+fun pw_sprite (img, x, y, z) {
+    sp = Sprite(img);
+    sp.SetPosition(round(x), round(y), z);
+    sp.SetOpacity(0);
+    return sp;
+}
+
+fun pw_build () {
+    if (global.pw_built) return;
+    global.pw_built = 1;
+    s = global.S;
+    cw = round(760 * s); ch = round(236 * s);
+    cx = round(global.W / 2 - cw / 2); cy = round(global.H / 2 - ch / 2);
+    global.pw_cx = cx; global.pw_cy = cy;
+    global.pw_card = pw_sprite(Image("assets/px-band.png").Scale(cw, ch), cx, cy, 100);
+    global.pw_bar = pw_sprite(Image("assets/px-text.png").Scale(cw, round(44 * s)), cx, cy, 101);
+    mark = round(12 * s);
+    global.pw_mark = pw_sprite(Image("assets/px-band.png").Scale(mark, mark), cx + round(20 * s), cy + round(22 * s - mark / 2), 102);
+    title = Image.Text("Disk password", 27 / 255, 24 / 255, 20 / 255, 1, font(22));
+    global.pw_title = pw_sprite(title, cx + round(44 * s), cy + round(22 * s - title.GetHeight() / 2), 102);
+    global.pw_prompt = pw_sprite(Image.Text(" ", global.TXT_R, global.TXT_G, global.TXT_B, 1, font(20)), cx + round(28 * s), cy + round(62 * s), 102);
+    fw = cw - round(56 * s); fh = round(48 * s);
+    fx = cx + round(28 * s); fy = cy + round(104 * s);
+    global.pw_fx = fx; global.pw_fy = fy; global.pw_fw = fw; global.pw_fh = fh;
+    global.pw_field = pw_sprite(Image("assets/px-text.png").Scale(fw, fh), fx, fy, 101);
+    sq = round(16 * s);
+    global.pw_sq = sq;
+    global.pw_step = sq + round(8 * s);
+    sqimg = Image("assets/px-text.png").Scale(sq, sq);
+    for (k = 0; k < global.PW_MAX; k++) global.pw_dots[k] = pw_sprite(sqimg, fx, fy + round(fh / 2 - sq / 2), 103);
+    global.pw_caret = pw_sprite(Image("assets/px-text.png").Scale(Math.Max(1, round(2 * s)), round(26 * s)), fx, fy + round(fh / 2 - 13 * s), 103);
+    global.pw_ell = pw_sprite(Image.Text("...", global.TXT_R, global.TXT_G, global.TXT_B, 1, font(22)), fx + round(14 * s), fy, 103);
+    global.pw_err = pw_sprite(Image.Text("Try again.", global.ALERT_R, global.ALERT_G, global.ALERT_B, 1, font(18)), fx, fy + fh + round(14 * s), 102);
+}
+
+# the card's fixed parts (the field is a faint light rectangle)
+fun pw_frame (op) {
+    global.pw_card.SetOpacity(op);
+    global.pw_bar.SetOpacity(op);
+    global.pw_mark.SetOpacity(op);
+    global.pw_title.SetOpacity(op);
+    global.pw_prompt.SetOpacity(op);
+    global.pw_field.SetOpacity(op * 0.12);
+}
+
+fun pw_show (prompt, bullets) {
+    pw_build();
+    if (!global.pw_on) {
+        global.pw_on = 1;
+        global.pw_asked++;
+    }
+    p = prompt;
+    if (p.Length() > 64) p = p.SubString(0, 61) + "...";
+    if (p.Length() == 0) p = "Enter the passphrase to unlock the disk";
+    global.pw_prompt.SetImage(Image.Text(p, global.TXT_R, global.TXT_G, global.TXT_B, 1, font(20)));
+    pw_frame(1);
+    # the squares that fit after the ellipsis' room; the newest stay, as in the login
+    pad = round(18 * global.S);
+    room = global.pw_fw - 2 * pad - round(10 * global.S);
+    fit = Math.Int(room / global.pw_step);
+    over = bullets > fit;
+    first = 0;
+    x0 = global.pw_fx + pad;
+    if (over) {
+        fit = Math.Int((room - round(40 * global.S)) / global.pw_step);
+        first = bullets - fit;
+        x0 = x0 + round(40 * global.S);
+    }
+    shown = Math.Min(bullets, Math.Min(fit, global.PW_MAX));
+    for (k = 0; k < global.PW_MAX; k++) {
+        if (k < shown) {
+            global.pw_dots[k].SetX(x0 + k * global.pw_step);
+            global.pw_dots[k].SetOpacity(1);
+        } else global.pw_dots[k].SetOpacity(0);
+    }
+    global.pw_ell.SetOpacity(over);
+    global.pw_caret.SetX(x0 + shown * global.pw_step);
+    global.pw_caret.SetOpacity(1);
+    global.pw_err.SetOpacity(global.pw_asked > 1 && bullets == 0);
+}
+
+fun pw_hide () {
+    global.pw_on = 0;
+    if (!global.pw_built) return;
+    pw_frame(0);
+    for (k = 0; k < global.PW_MAX; k++) global.pw_dots[k].SetOpacity(0);
+    global.pw_ell.SetOpacity(0);
+    global.pw_caret.SetOpacity(0);
+    global.pw_err.SetOpacity(0);
+}
+Plymouth.SetDisplayPasswordFunction(pw_show);
+Plymouth.SetDisplayNormalFunction(pw_hide);
+
 # ---- every frame
 enqueue("Kernel loaded", "", "ok", 0);
 
