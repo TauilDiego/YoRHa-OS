@@ -214,6 +214,38 @@ valor, marcar e desmarcar dois layouts, cancelar com Esc, e conferir o estado co
 
 ---
 
+### User Story 7 - Som no boot e no login (Priority: P3)
+
+Ao ligar, quando a placa de som fica pronta (uns 2–4 s depois, durante a lista de checagens), toca o
+som de "sistema iniciando". A tela de login tem sons próprios:
+- a entrada com glitch;
+- mover na lista de usuários;
+- confirmar;
+- a senha errada;
+- Reboot e Shut down.
+
+Quando o desktop aparece depois do login, toca um som curto de confirmação.
+
+**Why this priority**: O dono pediu ("se tu conseguir adicionar o som no boot tu é um monstro"). É o
+mais arriscado da spec, porque mexe no boot e no módulo da 011.
+
+**Independent Test**: A VM ganha uma placa de som emulada, com a saída gravada num arquivo no host. Um
+boot do zero até o desktop mostra cada som no momento certo, e o `lab/011/boot-timing` mostra que o boot
+não ficou mais lento.
+
+**Acceptance Scenarios**:
+
+1. **Given** um boot do zero com o módulo instalado, **When** a placa de som fica pronta, **Then** toca
+   o som de início uma vez. O Plymouth continua igual e o áudio normal do sistema sobe depois sem erro.
+2. **Given** a tela de login, **When** ela entra, o usuário move na lista, confirma ou erra a senha, ou
+   escolhe Reboot ou Shut down, **Then** toca o som de cada evento.
+3. **Given** um login certo, **When** o desktop aparece, **Then** toca o som de entrada uma vez.
+4. **Given** a última sessão saiu com o som mudo, **When** o computador liga, **Then** nenhum som de boot
+   ou de login toca. **Given** um volume salvo, **Then** os sons seguem esse volume. **Given** nenhuma
+   informação salva, **Then** tocam baixo (30%).
+
+---
+
 ### Edge Cases
 
 - **Teclas rápidas:**
@@ -355,6 +387,24 @@ que o dono aprovou no protótipo.
   - com muitos valores, ela MUST rolar em linhas inteiras;
   - ela MUST seguir FR-001 a FR-012 (seleção, pulso, ponteiro, texto que rola);
   - nos dois modos de tela, ela MUST ficar dentro do menu.
+- **FR-028** (som de boot): o módulo de boot e login (da 011) MUST tocar o som de início uma vez,
+  quando a placa de som fica pronta, direto na placa e sem esperar o áudio da sessão. Ele MUST terminar
+  antes do áudio normal do sistema assumir e MUST NOT impedir que ele suba. O Plymouth MUST NOT mudar.
+- **FR-029** (sons do login): o tema de login MUST tocar os sons dos seus eventos, com o mesmo mapa e o
+  mesmo caráter de FR-019:
+  - a entrada com glitch;
+  - mover na lista;
+  - confirmar;
+  - a senha errada;
+  - Reboot e Shut down.
+- **FR-030** (som de entrada): ao abrir o desktop depois do login, MUST tocar o som de entrada uma vez.
+- **FR-031** (volume no boot): os sons de boot e de login MUST seguir o volume e o mudo salvos da última
+  sessão do último usuário que entrou. Sem informação, MUST tocar a 30%.
+- **FR-032** (opção): Configurações › Sound MUST ter "Boot and login sounds" (ligado por padrão), e o
+  `config` do tema de login MUST ter a mesma chave. O desinstalar do módulo MUST tirar tudo isso e
+  devolver o sistema como estava.
+- **FR-033** (sem atraso): os sons de boot e de login MUST NOT atrasar o boot. O login continua dentro
+  do limite de +1 s da 011, e a soma com o tema MUST NOT crescer mais de 0,1 s.
 
 ## Success Criteria *(mandatory)*
 
@@ -387,6 +437,12 @@ Cada critério diz a evidência que o comprova (constituição, princípio IV), 
   modos e nos dois perfis. *Evidência:* screenshots, `lab/burst` da abertura e o `dump` do estado depois
   de cada passo.
 - **SC-011**: O dono ouve os sons nossos e aprova o caráter deles. *Evidência:* a aprovação dele.
+- **SC-012**: Num boot do zero até o desktop, a gravação da saída de áudio da VM mostra o som de início,
+  os sons da tela de login e o som de entrada nos momentos certos, e mais nada fora deles. *Evidência:*
+  a gravação (placa emulada com saída em arquivo), com os tempos ao lado do journal.
+- **SC-013**: O boot não fica mais lento e o áudio do sistema sobe normal. *Evidência:*
+  `lab/011/boot-timing` com três boots (diferença ≤ 0,1 s em relação a sem os sons) e o estado do áudio
+  na sessão sem erro.
 
 ## Assumptions
 
@@ -397,7 +453,7 @@ Cada critério diz a evidência que o comprova (constituição, princípio IV), 
   os arquivos extraídos do jogo aos nossos eventos depende de uma cópia de PC original, que o dono ainda
   não tem. Até lá, a pasta própria funciona pelo nome do evento, e a documentação diz quais nomes usar.
 - **Notificações:** os sons de notificação (FR-019) entram na 008 já mesclada, sem mudar o resto dela.
-- **Boot e login:** sem som nesta spec.
+- **Desligar:** a faixa de passagem do desligar e do reiniciar fica sem som nesta spec. O Plymouth não toca som, e no desligar o áudio já está descendo.
 - **Nenhum material do jogo entra no repositório** (imagens, fontes, sons): os números foram medidos e
   o desenho é nosso.
 - **A 008 entra na `main` antes da implementação.** Se a 010 tocar as mesmas peças, ela vem depois ou
