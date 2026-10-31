@@ -5,7 +5,7 @@ porque as duas mexem nas mesmas peças do design system)
 
 **Created**: 2026-10-31
 
-**Status**: Rascunho, com 2 perguntas pro dono (a 1ª respondida em 31.10: só o movimento do jogo)
+**Status**: Rascunho completo, pra aprovação do dono. Em 31.10 ele decidiu: só o movimento do jogo, e sons e a janelinha de escolhas entram nesta spec ("faz tudo junto nessa")
 
 **Input**: Em 31.10 o dono disse: "a gente precisa adicionar algumas coisas pra deixar o negócio mais
 fiel […] tou sentindo muita originalidade em alguns efeitos e eu gosto disso, mas eu queria outras coisas
@@ -146,6 +146,74 @@ seletor de papel de parede e do text log nos dois modos e nos dois perfis.
 
 ---
 
+### User Story 5 - Os sons da interface (Priority: P2)
+
+Mover o cursor, confirmar, voltar, abrir e fechar o menu, trocar de aba, confirmar um diálogo e receber
+uma notificação têm som, no caráter dos sons do jogo:
+- curtos e agudos, construídos com clique e brilho, sem grave;
+- seco pra ação repetida e com cauda pra evento importante.
+
+Os sons são nossos, sintetizados a partir das medidas da frente C. Quem tem o jogo de PC pode apontar
+uma pasta com os sons originais extraídos da própria cópia, pra uso pessoal.
+
+**Why this priority**: O dono pediu tudo junto. O som completa a sensação do jogo, mas o menu funciona
+sem ele.
+
+**Independent Test**: Na VM, gravar a saída de áudio (o monitor do sink nulo) enquanto um roteiro aperta
+as teclas. Cada evento toca o som certo no tempo certo, e as opções de volume e de desligar funcionam.
+
+**Acceptance Scenarios**:
+
+1. **Given** os sons ligados, **When** o cursor anda numa lista, **Then** toca o tique curto (~30 ms)
+   a cada passo, inclusive ao mudar um valor.
+2. **Given** os sons ligados, **When** o usuário confirma, volta, abre ou fecha o menu, troca de aba ou
+   confirma um diálogo, **Then** toca o som de cada evento:
+   - confirmar: o brilho com cauda;
+   - voltar: o tique mais grave;
+   - abrir: o chiado de abertura;
+   - fechar: o chiado ao contrário;
+   - trocar de aba: o som de aba;
+   - confirmar o diálogo: as duas notas subindo.
+3. **Given** uma notificação normal ou crítica, **When** ela chega, **Then** toca o brilho
+   correspondente. Com "não perturbe" ou em tela cheia segurada (regras da 008), ela não toca.
+4. **Given** Configurações › Sound, **When** o usuário desliga os sons da interface ou baixa o volume
+   deles, **Then** isso vale na hora. O som da digitação vem desligado e liga numa opção própria.
+5. **Given** uma pasta de sons escolhida, **When** um evento tem um arquivo com o nome dele lá, **Then**
+   toca esse arquivo. **When** não tem, **Then** toca o som nosso.
+
+---
+
+### User Story 6 - Escolher numa janelinha, como no jogo (Priority: P2)
+
+Uma opção com muitos valores (rede, saída de som, layout de teclado) abre uma janelinha colada à
+direita da linha, como o menu de opções do jogo. A tela escurece, o ponteiro passa pro lado direito,
+apontando pra esquerda, e a lista de valores aparece. As configurações que são listas de coisas (os
+layouts de teclado ativos ao mesmo tempo, por exemplo) usam a mesma janelinha com quadradinhos
+marcáveis.
+
+**Why this priority**: O dono pediu. Cicla ◂ ▸ por dez valores é pior que escolher numa lista.
+
+**Independent Test**: Na VM, abrir Configurações › Network › Network e Keyboard › Layouts. Escolher um
+valor, marcar e desmarcar dois layouts, cancelar com Esc, e conferir o estado com o `dump`.
+
+**Acceptance Scenarios**:
+
+1. **Given** uma opção com mais de 3 valores, **When** o usuário aperta Enter nela, **Then**:
+   - a tela escurece até 80% em 170 ms;
+   - a janelinha aparece colada à direita da linha, com fade e desfoque em ~3 quadros;
+   - o ponteiro fica no lado direito, apontando pra esquerda, no valor atual.
+2. **Given** a janelinha aberta, **When** o usuário escolhe um valor com Enter (ou clique), **Then** ela
+   fecha, o valor muda e o escurecimento volta em 170 ms. **When** aperta Esc ou clica fora, **Then**
+   fecha sem mudar nada.
+3. **Given** uma configuração de lista (Keyboard › Layouts), **When** a janelinha abre, **Then** cada
+   valor tem um quadradinho. Enter marca ou desmarca, e o fechamento guarda o conjunto. Pelo menos um
+   fica sempre marcado.
+4. **Given** uma opção com até 3 valores, **When** o usuário mexe nela, **Then** continua o ◂ ▸ de
+   hoje.
+5. **Given** a janelinha aberta, **When** o texto de um valor não cabe, **Then** ele rola (US3).
+
+---
+
 ### Edge Cases
 
 - **Teclas rápidas:**
@@ -239,6 +307,54 @@ que o dono aprovou no protótipo.
   relatório: o ":" na coluna sem foco e o texto rolando no lugar do "…".
 - **FR-018** (desempenho): as transições MUST manter a fluidez (SC-002) nos dois modos, e um menu
   parado MUST NOT gastar mais CPU do que hoje, fora o pulso e o texto rolando.
+- **FR-019** (sons, eventos): a interface MUST tocar um som em cada um destes eventos:
+  - mover o cursor;
+  - mudar um valor;
+  - confirmar;
+  - voltar;
+  - abrir e fechar um menu;
+  - trocar de aba;
+  - confirmar um diálogo;
+  - abrir e escolher na janelinha;
+  - notificação normal e crítica;
+  - passo do OSD.
+
+  O mapa dos eventos segue a frente C (`C/sons.md` §4).
+- **FR-020** (sons, padrão): os sons padrão MUST ser nossos, sintetizados pelas receitas da frente C,
+  gerados no lab e versionados no repositório. Nenhum arquivo de som do jogo MUST entrar no
+  repositório.
+- **FR-021** (sons, pasta própria): uma opção MUST permitir apontar uma pasta de sons. Um arquivo com o
+  nome do evento nessa pasta MUST substituir o som nosso daquele evento, e o que faltar MUST continuar
+  com o nosso. A documentação MUST explicar, com links, como extrair os sons da própria cópia de PC do
+  jogo (guias e ferramentas da comunidade), sem nunca linkar arquivos prontos.
+- **FR-022** (sons, opções): Configurações › Sound MUST ter:
+  - "Interface sounds" (ligado por padrão);
+  - o volume deles (padrão 40%);
+  - "Typing sound" (desligado por padrão);
+  - a pasta de sons (padrão: os nossos).
+
+  Tudo MUST valer na hora e ficar salvo.
+- **FR-023** (sons, regras): os sons MUST respeitar o volume e o mudo do sistema. Os sons de
+  notificação MUST respeitar o "não perturbe" e a tela cheia segurada da 008. "Reduce motion" MUST NOT
+  desligar os sons.
+- **FR-024** (sons, tempo): o som MUST começar no máximo 50 ms depois da ação. Sons repetidos (cursor
+  segurado, digitação) MUST NOT se acumular nem cortar a interface.
+- **FR-025** (janelinha): uma opção com mais de 3 valores MUST abrir, com Enter, uma janelinha colada à
+  direita da linha, com a lista de valores. A janelinha:
+  - escurece a tela até 80% em 170 ms;
+  - aparece com fade e desfoque em ~3 quadros;
+  - põe o ponteiro do lado direito, apontando pra esquerda.
+
+  ↑↓ movem, Enter escolhe, Esc e o clique fora cancelam. ←→ na linha MUST continuar mudando o valor
+  direto.
+- **FR-026** (várias opções): uma configuração de lista MUST usar a mesma janelinha com quadradinhos
+  marcáveis. Enter marca ou desmarca; o fechamento guarda; pelo menos um valor MUST ficar marcado. A
+  primeira configuração assim é Keyboard › Layouts (os layouts ativos, trocados por um atalho).
+- **FR-027** (janelinha, limites):
+  - perto da borda de baixo, a janelinha MUST subir pra caber;
+  - com muitos valores, ela MUST rolar em linhas inteiras;
+  - ela MUST seguir FR-001 a FR-012 (seleção, pulso, ponteiro, texto que rola);
+  - nos dois modos de tela, ela MUST ficar dentro do menu.
 
 ## Success Criteria *(mandatory)*
 
@@ -261,21 +377,27 @@ Cada critério diz a evidência que o comprova (constituição, princípio IV), 
 - **SC-006**: "Reduce motion" desliga tudo. *Evidência:* rajadas que mostram o estado final já no
   primeiro quadro.
 - **SC-007**: O dono vê na janela da VM, nos dois modos, e aprova. *Evidência:* a aprovação dele.
+- **SC-008**: Cada evento de FR-019 toca o som certo e começa no máximo 50 ms depois da tecla.
+  *Evidência:* uma gravação da saída de áudio da VM durante um roteiro com `lab/key`, com os tempos de
+  cada tecla e de cada som.
+- **SC-009**: Desligar os sons, mudar o volume, ligar a digitação e apontar uma pasta com um arquivo de
+  um evento só funcionam na hora (o evento dessa pasta toca o arquivo, os outros tocam os nossos).
+  *Evidência:* a mesma gravação, em quatro passadas.
+- **SC-010**: A janelinha abre, escolhe, cancela e marca várias opções como em FR-025 a FR-027, nos dois
+  modos e nos dois perfis. *Evidência:* screenshots, `lab/burst` da abertura e o `dump` do estado depois
+  de cada passo.
+- **SC-011**: O dono ouve os sons nossos e aprova o caráter deles. *Evidência:* a aprovação dele.
 
 ## Assumptions
 
 - **A referência visual é o protótipo** ("YoRHa-OS Protótipo: menus do jogo"). O que estiver nele e não
   estiver aqui segue o protótipo.
-- **Sons:** fora desta spec. Vão numa spec própria, com:
-  - os sons nossos como padrão;
-  - volume e liga/desliga;
-  - a "pasta de sons" pra quem tem o jogo de PC.
-
-  No lab, os recortes provisórios continuam fora do git.
-  [NEEDS CLARIFICATION: confirmar que os sons ficam pra uma spec separada.]
-- **Escolhas com muitos valores** (a janelinha do jogo, que abre colada à direita da linha, e a
-  seleção de várias opções pra configurações que são listas): fora desta spec, por enquanto.
-  [NEEDS CLARIFICATION: entram aqui como um item a mais, ou depois?]
+- **Sons:** os nossos são a referência de caráter da frente C (`C/sons.md`), e o dono aprova de ouvido
+  (SC-011). Nos testes do lab, os recortes provisórios do vídeo continuam fora do git. A tabela que liga
+  os arquivos extraídos do jogo aos nossos eventos depende de uma cópia de PC original, que o dono ainda
+  não tem. Até lá, a pasta própria funciona pelo nome do evento, e a documentação diz quais nomes usar.
+- **Notificações:** os sons de notificação (FR-019) entram na 008 já mesclada, sem mudar o resto dela.
+- **Boot e login:** sem som nesta spec.
 - **Nenhum material do jogo entra no repositório** (imagens, fontes, sons): os números foram medidos e
   o desenho é nosso.
 - **A 008 entra na `main` antes da implementação.** Se a 010 tocar as mesmas peças, ela vem depois ou
