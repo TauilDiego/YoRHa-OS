@@ -1,6 +1,6 @@
 # Implementation Plan: Menus do jogo (efeitos medidos e tela cheia)
 
-**Branch**: `013-menus-do-jogo` | **Date**: 2026-10-31 | **Spec**: [spec.md](spec.md)
+**Branch**: `013-menus-do-jogo` | **Date**: 2026-10-31 | **Spec**: [spec.md](spec.md) | **Status**: aprovado pelo dono em 31.10 ("sim aprovo")
 
 **Input**: a spec aprovada em 31.10. As análises A–D ficam em `~/Videos/nier-ref/menus/analise/`, fora
 do repo. O protótipo é o artefato "YoRHa-OS Protótipo: menus do jogo", com o fonte privado em
