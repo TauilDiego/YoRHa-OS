@@ -5,7 +5,7 @@ porque as duas mexem nas mesmas peças do design system)
 
 **Created**: 2026-10-31
 
-**Status**: Rascunho completo, pra aprovação do dono. Em 31.10 ele decidiu: só o movimento do jogo, e sons e a janelinha de escolhas entram nesta spec ("faz tudo junto nessa")
+**Status**: Aprovada pelo dono em 31.10 ("vai manda bala"), com a aba LOG e o ponteiro atual. Em 31.10 ele decidiu: só o movimento do jogo, e sons e a janelinha de escolhas entram nesta spec ("faz tudo junto nessa")
 
 **Input**: Em 31.10 o dono disse: "a gente precisa adicionar algumas coisas pra deixar o negócio mais
 fiel […] tou sentindo muita originalidade em alguns efeitos e eu gosto disso, mas eu queria outras coisas
@@ -36,7 +36,8 @@ O usuário abre o menu de pausa e anda pelas listas, pelas abas e pelas colunas.
 jeito do jogo:
 - **seleção:** o fundo escuro da linha cresce da esquerda e o texto clareia só onde ele passou, e a
   linha selecionada "respira";
-- **ponteiro:** some numa linha e aparece na outra, sem deslizar;
+- **ponteiro:** continua como hoje, a nossa pipa piscando ao mudar de linha (escolha do dono no
+  protótipo);
 - **troca de aba:** o título digita e as linhas entram em cascata, digitando;
 - **rodapé:** a ajuda de teclas entra deslizando;
 - **sublista:** uma sublista nova entra escalonada.
@@ -59,9 +60,9 @@ Os tempos medidos batem com os do jogo (FR-001 a FR-008), com tolerância de 1 q
    claro só onde o fundo já passou.
 2. **Given** a seleção parada numa coluna com foco, **When** o tempo passa, **Then** a linha
    selecionada e a aba aberta clareiam e voltam num ciclo de 1,333 s.
-3. **Given** o foco numa lista, **When** a seleção muda de linha, **Then** o ponteiro não desliza: some
-   na antiga e aparece na nova. **When** o foco passa pra outra coluna, **Then** o ponteiro da coluna
-   nova entra deslizando 25 px pra direita, e a coluna sem foco fica só com o ":".
+3. **Given** o foco numa lista, **When** a seleção muda de linha, **Then** o ponteiro se comporta como
+   na 007: some (120 ms), pula pra linha nova e aparece (120 ms). Na coluna sem foco, ele fica claro e
+   parado.
 4. **Given** uma aba aberta, **When** o usuário troca de aba, **Then** o conteúdo some (133 ms), fica
    vazio (67 ms), o título digita (~20 letras/s, com a letra da ponta sorteada da própria palavra) e
    as linhas entram em cascata (33 ms entre elas) com os rótulos digitando (~28 letras/s).
@@ -246,6 +247,29 @@ não ficou mais lento.
 
 ---
 
+### User Story 8 - O histórico como aba do menu (Priority: P3)
+
+O text log da 008 (o histórico das notificações) vira a aba LOG do menu de pausa, entre WINDOWS e
+SYSTEM. Com isso, o menu reúne apps, janelas, histórico, sistema e energia. SUPER+N e o clique no
+contador da barra abrem o menu direto na aba LOG.
+
+**Why this priority**: O dono aprovou. É barato, porque a tela do log já foi feita pra viver dentro do
+menu.
+
+**Independent Test**: Na VM, abrir o menu com SUPER+N (ALT+N no lab) e pelo contador da barra, e
+navegar pelo log como na 008. Os roteiros da 008 passam com o log dentro do menu.
+
+**Acceptance Scenarios**:
+
+1. **Given** o desktop, **When** o usuário aperta SUPER+N ou clica no contador, **Then** o menu de pausa
+   abre na aba LOG.
+2. **Given** o menu aberto em outra aba, **When** o usuário troca até LOG, **Then** o histórico aparece
+   com a troca de aba do jogo (FR-006), e a lista, a prévia e as opções funcionam como na 008.
+3. **Given** a aba LOG, **When** o usuário fecha o menu, **Then** as notificações vistas contam como
+   lidas, como na 008.
+
+---
+
 ### Edge Cases
 
 - **Teclas rápidas:**
@@ -277,10 +301,13 @@ que o dono aprovou no protótipo.
 - **FR-002** (pulso): a linha selecionada da coluna com foco e a aba aberta MUST clarear e voltar num
   ciclo de 1,333 s (subida de ~0,35 s, topo curto, descida de ~0,32 s, repouso). O ciclo recomeça
   depois que a seleção assenta.
-- **FR-003** (ponteiro): o ponteiro MUST NOT deslizar entre linhas:
-  - ao trocar de linha, some na antiga (~0,18 s) enquanto aparece na nova (~0,15 s);
-  - ao ganhar foco, entra desfocado e desliza 25 px pra direita;
-  - na coluna sem foco, MUST mostrar só o ":".
+- **FR-003** (ponteiro): o ponteiro MUST continuar como na 007, por escolha do dono no protótipo (E4
+  "Atual"):
+  - a pipa nossa, parada;
+  - ao trocar de linha, ela pisca: some em 120 ms (ease-in), pula e aparece em 120 ms (ease-out);
+  - na coluna sem foco, fica clara e não pisca.
+
+  O ponteiro do jogo (o cruzamento e o ":") não entra.
 - **FR-004** (título): ao trocar de tela, o título antigo MUST sumir em 100 ms, ficar 200 ms vazio e o
   novo MUST digitar a ~20 letras/s, com uma letra sorteada do próprio texto na ponta e sem cursor.
 - **FR-005** (cascata): ao montar uma lista, as linhas MUST entrar uma a uma, 33 ms entre elas, com os
@@ -336,7 +363,7 @@ que o dono aprovou no protótipo.
   final, e o texto que não cabe MUST ser cortado com "…".
 - **FR-017** (sem regressão): parado, o modo janela MUST ficar igual às evidências atuais da 003, 004,
   007 e 008, fora os pontos que os efeitos mudam de propósito. Esses pontos ficam listados no
-  relatório: o ":" na coluna sem foco e o texto rolando no lugar do "…".
+  relatório, como o texto rolando no lugar do "…".
 - **FR-018** (desempenho): as transições MUST manter a fluidez (SC-002) nos dois modos, e um menu
   parado MUST NOT gastar mais CPU do que hoje, fora o pulso e o texto rolando.
 - **FR-019** (sons, eventos): a interface MUST tocar um som em cada um destes eventos:
@@ -405,6 +432,9 @@ que o dono aprovou no protótipo.
   devolver o sistema como estava.
 - **FR-033** (sem atraso): os sons de boot e de login MUST NOT atrasar o boot. O login continua dentro
   do limite de +1 s da 011, e a soma com o tema MUST NOT crescer mais de 0,1 s.
+- **FR-034** (aba LOG): o text log MUST virar a aba LOG do menu de pausa, entre WINDOWS e SYSTEM, com o
+  mesmo conteúdo e as mesmas teclas da 008. SUPER+N e o contador da barra MUST abrir o menu nessa aba.
+  O popup separado do log MUST sair, e o menu passa a ser o único lugar do histórico.
 
 ## Success Criteria *(mandatory)*
 
@@ -458,5 +488,4 @@ Cada critério diz a evidência que o comprova (constituição, princípio IV), 
   o desenho é nosso.
 - **A 008 entra na `main` antes da implementação.** Se a 010 tocar as mesmas peças, ela vem depois ou
   em paralelo, só onde não conflita.
-- **O text log como 5ª aba do menu de pausa** fica pra depois. Aqui ele continua um popup próprio.
 - **Os números podem ser ajustados** depois que o dono vir na VM, sem uma spec nova.
