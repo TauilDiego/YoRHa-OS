@@ -105,14 +105,46 @@ lido ao fechar passa pro fechamento do menu.
 **Por quê:** a página foi feita pra isso (frente D, "o mais pronto"), e um lugar só pro histórico é mais
 simples.
 
-## S1–S6. Som
+## S1–S6. Som (detalhes, evidências e riscos em [research-som.md](research-som.md))
 
-Vêm da pesquisa da frente de som (em andamento):
-- **S1:** como o shell toca;
-- **S2:** formato e geração dos nossos;
-- **S3:** o tema de login;
-- **S4:** o som de boot;
-- **S5:** o som de entrada;
-- **S6:** como gravar o áudio da VM.
-
-Cada um entra aqui com Decisão / Por quê / Alternativas / Evidência / Riscos.
+- **S1, tocar no shell.**
+  - **Decisão:** `SoundEffect` do QtMultimedia, com os arquivos carregados na abertura:
+    - um conjunto de 3 instâncias pros sons repetidos (tique e digitação);
+    - debounce de 40 ms;
+    - no máximo 4 sons ao mesmo tempo.
+  - Passa pelo PipeWire, então o volume e o mudo do sistema valem sozinhos.
+  - **Pacotes:** `qt6-multimedia`, `qt6-multimedia-ffmpeg`.
+  - **Alternativa (fallback):** `Process` com `pw-play` (`pipewire-audio`).
+  - O `Quickshell.Services.Pipewire` só lê e controla os nós (serve pra ler o volume), não toca som.
+  - **Risco:** a latência real contra os 50 ms, a medir na F0.
+- **S2, os nossos arquivos.**
+  - **Formato:** WAV PCM 16 bits, 48 kHz, mono.
+  - **Geração:** pelo `synth_demo.py` da frente C, no container `nier-lab-py`, com semente fixa (sai
+    sempre igual).
+  - **Boot:** o som de boot tem versões pré-calculadas por volume, então nada de `sox` em tempo de
+    execução.
+- **S3, a tela de login.**
+  - **Decisão:** `SoundEffect` no tema, pelo PipeWire do usuário `sddm`. O PAM do greeter tem
+    `pam_systemd`, e o Arch habilita os sockets do PipeWire pra todos os usuários.
+  - **Não verificado:** se o greeter alcança o PipeWire. A F0 confere na VM.
+  - **Plano B:** o serviço de boot (root) toca os sons de login pela placa. Plano C: login sem som,
+    com o boot e a sessão mantidos.
+- **S4, o som de boot.**
+  - **Gatilho:** uma regra udev no evento da placa (`SOUND_INITIALIZED=1`) dispara um serviço
+    `Type=simple`, sem nada ordenado depois dele, então nunca segura o login.
+  - **Saída:** toca com `aplay -D plughw:N`. O `default` iria pro PipeWire, pelo `pipewire-alsa`.
+  - **Volume e mudo:** vêm do `sound.json` do último usuário (`[Last] User=` em
+    `/var/lib/sddm/state.conf`). Sem informação, 30%; mudo, nada.
+  - **Greeter:** uma cópia vai pra `/run/yorha-os/sound.state`.
+  - **Riscos:**
+    - `EBUSY` se o WirePlumber pegar a placa antes;
+    - o mixer da placa mudo num sistema recém-instalado.
+- **S5, o som de entrada.** Uma vez por login: um `mkdir` atômico de uma trava em `$XDG_RUNTIME_DIR`.
+  Recarregar o shell não repete o som.
+- **S6, gravar o áudio da VM.**
+  - **Placa emulada:** `-audiodev wav,id=snd0,path=<arquivo>` + `-device ich9-intel-hda -device
+    hda-output,audiodev=snd0` (QEMU 11.1.3 aceita; o `hda-duplex` falha com o backend `wav`). Entra
+    no `lab/up` como `--audio-capture`.
+  - **Na sessão:** `pw-record` do monitor do sink nulo.
+  - **Alinhamento:** o WAV segue o relógio da VM, então um pulso marcador no começo alinha com os
+    tempos do `lab/key`.

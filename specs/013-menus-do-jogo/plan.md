@@ -37,8 +37,9 @@ lab), Python 3 (lab: síntese dos sons), shell e systemd (som de boot, no módul
 SDDM (Qt 6).
 
 **Primary Dependencies**:
-- `qt6-multimedia` com o backend, a confirmar na research S1;
-- `alsa-utils`, pro som de boot (S4).
+- `qt6-multimedia` e `qt6-multimedia-ffmpeg` (`SoundEffect`, S1);
+- `alsa-utils`, pro som de boot (S4);
+- `pipewire-audio`, pro fallback com `pw-play` (S1).
 
 Nenhuma dependência nova de runtime pros efeitos visuais.
 
@@ -260,6 +261,9 @@ docs/sons-do-jogo.md                    # como usar os sons da própria cópia (
   com o boot e a sessão mantidos.
 - **Som de boot e o PipeWire:** o `aplay` precisa terminar antes do PipeWire abrir a placa (S4).
 - **Keyboard › Layouts** com a configuração em Lua do 0.56: aplicar sem reiniciar (R6).
+- **Latência do `SoundEffect`** contra os 50 ms: medir na F0, com o `pw-play` como fallback (S1).
+- **Primeiro boot mudo:** o mixer da placa começa mudo num sistema novo até o estado ser salvo (S4).
+- **Os nossos sons nunca foram ouvidos:** o dono aprova de ouvido (SC-011) antes da junção.
 - **Regressão visual:** o `diffshot` contra as evidências do modo janela parado, com a lista de
   diferenças esperadas (FR-017).
 
