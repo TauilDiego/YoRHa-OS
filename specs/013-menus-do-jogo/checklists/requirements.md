@@ -8,7 +8,7 @@
 - [x] Todas as seções obrigatórias preenchidas
 
 ## Requisitos
-- [ ] Sem marcadores [NEEDS CLARIFICATION] (há 3: alternativa ao movimento, sons, escolhas com muitos valores)
+- [ ] Sem marcadores [NEEDS CLARIFICATION] (há 2: sons, escolhas com muitos valores; a da alternativa foi respondida: só o jogo)
 - [x] Requisitos testáveis e sem ambiguidade (cada um com números do jogo)
 - [x] Critérios de sucesso mensuráveis, cada um com a evidência
 - [x] Cenários de aceite em todas as histórias
@@ -17,4 +17,4 @@
 - [x] Dependências e premissas identificadas (008 antes; protótipo como referência)
 
 ## Pronto pra planejar
-- [ ] Depois das 3 respostas do dono
+- [ ] Depois das 2 respostas que faltam

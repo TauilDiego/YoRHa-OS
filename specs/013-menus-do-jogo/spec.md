@@ -5,7 +5,7 @@ porque as duas mexem nas mesmas peças do design system)
 
 **Created**: 2026-10-31
 
-**Status**: Rascunho, com 3 perguntas pro dono
+**Status**: Rascunho, com 2 perguntas pro dono (a 1ª respondida em 31.10: só o movimento do jogo)
 
 **Input**: Em 31.10 o dono disse: "a gente precisa adicionar algumas coisas pra deixar o negócio mais
 fiel […] tou sentindo muita originalidade em alguns efeitos e eu gosto disso, mas eu queria outras coisas
@@ -146,24 +146,6 @@ seletor de papel de parede e do text log nos dois modos e nos dois perfis.
 
 ---
 
-### User Story 5 - Manter o jeito atual como alternativa (Priority: P3)
-
-Quem preferir o movimento de hoje pode voltar a ele nas configurações. É a regra do dono: toda
-alternativa vira opção, e a recomendada fica como padrão.
-
-**Why this priority**: É a regra de sempre, mas o padrão já entrega o pedido.
-
-**Independent Test**: Trocar a opção e conferir que o movimento volta ao da 007 (varredura de 150 ms,
-pipa piscando, fade de abertura de 150 ms e o resto na hora).
-
-**Acceptance Scenarios**:
-
-1. **Given** a alternativa atual escolhida, **When** o usuário navega, **Then** o menu se mexe como na
-   007. [NEEDS CLARIFICATION: um interruptor só pra todos os efeitos ("Menu motion: Game / Classic"),
-   um por efeito, ou nenhum (só o jogo, mais o "Reduce motion")?]
-
----
-
 ### Edge Cases
 
 - **Teclas rápidas:**
@@ -247,8 +229,9 @@ que o dono aprovou no protótipo.
 
   A barra, as notificações, o OSD e o papel de parede MUST NOT mudar. Em tela cheia, as notificações
   críticas e o OSD MUST aparecer por cima do menu.
-- **FR-015** (alternativa): o movimento atual (da 007) MUST continuar disponível como opção.
-  [NEEDS CLARIFICATION: um interruptor só, um por efeito, ou nenhum? Ver a US5.]
+- **FR-015** (sem alternativa): o movimento do jogo MUST ser o único. O da 007 (varredura de 150 ms,
+  pipa piscando, o resto na hora) sai e não fica como opção. É decisão do dono em 31.10: "deixa tudo
+  como padrão do jogo, descarta o resto". A única variação é o "Reduce motion" (FR-016).
 - **FR-016** (reduce motion): com "Reduce motion" ligado, todos os efeitos MUST ir direto pro estado
   final, e o texto que não cabe MUST ser cortado com "…".
 - **FR-017** (sem regressão): parado, o modo janela MUST ficar igual às evidências atuais da 003, 004,
