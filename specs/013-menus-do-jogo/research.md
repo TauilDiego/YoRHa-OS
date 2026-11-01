@@ -131,8 +131,9 @@ simples.
   - **Pacotes:** `qt6-multimedia`, `qt6-multimedia-gstreamer`. **Junção (01.11):** o backend FFmpeg
     entra em laço (`QSocketNotifier: Invalid socket … disabling`, CPU cheia, log enchendo o disco)
     quando o shell abre um processo enquanto um som toca. O GStreamer não tem o problema e ainda tem
-    latência menor. O shell escolhe ele com `//@ pragma Env QT_MEDIA_BACKEND=gstreamer`, e o greeter
-    pelo `GreeterEnvironment` (ver sondagem.md, "Na junção").
+    latência menor. O shell escolhe ele com `//@ pragma Env QT_MEDIA_BACKEND=gstreamer`. O greeter fica
+    no FFmpeg (`GreeterEnvironment`): ele não abre processos, e o GStreamer atrasava a tela de login em
+    ~0,1 s (ver sondagem.md, "Na junção").
   - **Alternativa (fallback):** `Process` com `pw-play` (`pipewire-audio`).
   - O `Quickshell.Services.Pipewire` só lê e controla os nós (serve pra ler o volume), não toca som.
   - **Sondagem (T006):** tecla → som em até ~30 ms na VM (quantum de 21 ms), e `play()` repetido toca

@@ -37,8 +37,8 @@ lab), Python 3 (lab: síntese dos sons), shell e systemd (som de boot, no módul
 SDDM (Qt 6).
 
 **Primary Dependencies**:
-- `qt6-multimedia` e `qt6-multimedia-gstreamer` (`SoundEffect`, S1; na junção o backend trocou de
-  FFmpeg pra GStreamer, ver a sondagem);
+- `qt6-multimedia`, `qt6-multimedia-gstreamer` (o shell) e `qt6-multimedia-ffmpeg` (o greeter)
+  (`SoundEffect`, S1; na junção o shell trocou de FFmpeg pra GStreamer, ver a sondagem);
 - `alsa-utils`, pro som de boot (S4);
 - `pipewire-audio`, pro fallback com `pw-play` (S1).
 

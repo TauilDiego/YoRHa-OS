@@ -175,9 +175,11 @@ O plano B da R5 (o `NotifyLayer` recria a sua superfície quando o menu abre) fu
 o shell abre enquanto um som toca. Não é do nosso código.
 
 **A troca:**
-- `//@ pragma Env QT_MEDIA_BACKEND=gstreamer` no `shell.qml`;
-- `QT_MEDIA_BACKEND=gstreamer` no `GreeterEnvironment` do SDDM;
-- a dependência passa a ser o `qt6-multimedia-gstreamer`, que já puxa `gst-plugins-good`, `gst-libav`
-  e `libpulse`.
-
-Sem o `gst-plugin-pipewire` também toca, pelo `pipewire-pulse`.
+- **No shell:** `//@ pragma Env QT_MEDIA_BACKEND=gstreamer` no `shell.qml`.
+- **No greeter:** fica no FFmpeg, explícito no `GreeterEnvironment` (`QT_MEDIA_BACKEND=ffmpeg`). Com o
+  GStreamer no greeter, o `boot-timing` deu +0,13 s, acima do limite de 0,1. Com o FFmpeg, +0,03 s. O
+  greeter não abre processos com um som tocando, então o laço não o pega.
+- **Dependências:** passam a ser os dois backends:
+  - `qt6-multimedia-gstreamer` (o shell), que já puxa `gst-plugins-good`, `gst-libav` e `libpulse`.
+    Sem o `gst-plugin-pipewire` também toca, pelo `pipewire-pulse`;
+  - `qt6-multimedia-ffmpeg` (o greeter).

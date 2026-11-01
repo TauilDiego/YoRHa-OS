@@ -926,8 +926,9 @@ dono.
 ### Sons (FR-019 a FR-024)
 
 - **`Sounds.play(event)`:**
-  - `SoundEffect` (QtMultimedia, backend GStreamer: o FFmpeg do Qt 6.12 entra em laço quando um
-    processo abre enquanto um som toca), com 3 instâncias pros sons que se repetem (`move`, `change`,
+  - `SoundEffect` (QtMultimedia, backend GStreamer no shell: o FFmpeg do Qt 6.12 entra em laço quando
+    um processo abre enquanto um som toca; a tela de login fica no FFmpeg, que inicia mais rápido),
+    com 3 instâncias pros sons que se repetem (`move`, `change`,
     `osd`) e 1 pros outros;
   - 40 ms de debounce por som e no máximo 4 ao mesmo tempo;
   - tecla → som em ≤ ~30 ms na VM.
