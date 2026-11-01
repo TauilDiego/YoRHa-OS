@@ -190,6 +190,57 @@ cmd_ipc() {
     exec qs -p "$root/shell" ipc call "$@"
 }
 
+# --- the optional core: boot and login (US5, research R10) ----------------------------------------
+BOOT_LOGIN() { printf '%s/system/boot-login/%s-boot-login' "$(shell_root)" "$YORHA_NAME"; }
+
+cmd_boot_login() {
+    local sub=${1:-} mod
+    mod=$(BOOT_LOGIN)
+    [[ -x $mod ]] || yorha_fail "the boot and login module is not in this version"
+    case $sub in
+        status) exec sudo "$mod" status ;;
+        install)
+            yorha_say "the boot (Plymouth) and login (SDDM) themes change system files, with a backup of each;"
+            yorha_say "this is what would change:"
+            sudo "$mod" install --dry-run --src "$(shell_root)" || true
+            yorha_ask "install them (sudo)?" || { yorha_say "nothing changed"; exit 1; }
+            exec sudo "$mod" install --src "$(shell_root)" ;;
+        uninstall)
+            yorha_say "this is what would go back as it was:"
+            sudo "$mod" uninstall --dry-run || true
+            yorha_ask "undo the boot and login themes (sudo)?" || { yorha_say "nothing changed"; exit 1; }
+            exec sudo "$mod" uninstall ;;
+        *) usage ;;
+    esac
+}
+
+# --- uninstall (US6, research R11) -------------------------------------------------------------------
+cmd_uninstall() {
+    local mod rd pid
+    [[ -n $(yorha_current) ]] || yorha_fail "not installed"
+    yorha_ask "remove $YORHA_PRETTY from $YORHA_HOME (the versions and the $YORHA_CMD command)?" \
+        || { yorha_say "nothing removed"; exit 1; }
+    mod=$(BOOT_LOGIN)
+    if [[ -x $mod ]] && sudo -n true 2>/dev/null && sudo "$mod" status 2>/dev/null | grep -q 'installed.*yes'; then
+        yorha_say "the boot and login themes are installed"
+        if yorha_ask "undo them first (sudo)?"; then sudo "$mod" uninstall || yorha_say "the themes were not fully undone (see: sudo $mod status)"; fi
+    elif [[ -x $mod ]]; then
+        yorha_say "if you installed the boot and login themes, undo them first: $YORHA_CMD boot-login uninstall"
+    fi
+    rd=$(run_dir)
+    pkill -f "[$(printf '%s' "${YORHA_CMD:0:1}")]${YORHA_CMD:1} shell start" 2>/dev/null || true
+    pid=$(cat "$rd/shell.pid" 2>/dev/null || true)
+    [[ -n $pid ]] && kill "$pid" 2>/dev/null || true
+    rm -rf "$rd"
+    rm -f "$YORHA_BIN/$YORHA_CMD"
+    cd / && rm -rf "$YORHA_HOME"
+    if yorha_ask "also remove the saved state ($YORHA_STATE: what the menus saved, the update copies)?"; then
+        rm -rf "$YORHA_STATE"
+    fi
+    yorha_say "$YORHA_PRETTY removed. Kept: $YORHA_CONFIG and the system packages it installed."
+    yorha_say "remove its line from ~/.config/hypr/hyprland.lua (it does nothing now, but it is yours to clean)"
+}
+
 # The line the person adds at the top of ~/.config/hypr/hyprland.lua (contracts/encaixe.md).
 include_line() {
     local f="$YORHA_HOME/current/system/hypr/$YORHA_NAME.lua"
@@ -239,6 +290,8 @@ main() {
         update) shift; cmd_update "$@" ;;
         rollback) cmd_rollback ;;
         migrate) shift; cmd_migrate "$@" ;;
+        boot-login) shift; cmd_boot_login "$@" ;;
+        uninstall) cmd_uninstall ;;
         *) usage ;;
     esac
 }
