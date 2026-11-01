@@ -251,6 +251,12 @@ include_line() {
     fi
 }
 
+# Whether the person's hyprland.lua already has the include line (not commented out).
+has_include_line() {
+    local cfg=${XDG_CONFIG_HOME:-$HOME/.config}/hypr/hyprland.lua
+    [[ -f $cfg ]] && grep -v '^[[:space:]]*--' "$cfg" | grep -qF "/current/system/hypr/$YORHA_NAME.lua"
+}
+
 # Called by install.sh from the freshly unpacked version: make it the one in use.
 cmd__install() {
     local v
@@ -264,9 +270,20 @@ cmd__install() {
         yorha_say "another shell is running now; keep only one of them in your Hyprland autostart"
     fi
     case :$PATH: in *":$YORHA_BIN:"*) ;; *) yorha_say "add $YORHA_BIN to your PATH to run $YORHA_CMD" ;; esac
+    # T029: the line may be there already (a reinstall, or added by hand first); it is Lua for
+    # Hyprland, and people pasted it into the terminal, so say where it goes.
+    if has_include_line; then
+        cat <<DONE
+
+Your ~/.config/hypr/hyprland.lua already loads $YORHA_PRETTY: log in again to start it.
+To get newer versions later: $YORHA_CMD update
+DONE
+        return
+    fi
     cat <<DONE
 
-Last step: add this line at the top of ~/.config/hypr/hyprland.lua, then log in again:
+Last step: open ~/.config/hypr/hyprland.lua in a text editor, add this line at the top, save,
+then log in again. It is Lua for Hyprland, not a terminal command:
 
     $(include_line)
 

@@ -7,7 +7,7 @@ Tudo roda como o usuário. O root só entra pelo `sudo`, nos passos que pedem, e
 
 | Saída | Quando |
 |---|---|
-| 0 | Instalou; a última linha mostra a linha do `hyprland.lua` |
+| 0 | Instalou; mostra a linha do `hyprland.lua` e diz que ela vai no arquivo, não no terminal (T029). Se o `hyprland.lua` já tem a linha, só pede pra entrar de novo |
 | 1 | Pré-condição: é root, não é Arch, sem Hyprland, sem rede; nada mudou |
 | 2 | Já instalado; aponta pro `yorha update` |
 | 3 | Uma dependência obrigatória foi recusada; nada do produto foi instalado |
