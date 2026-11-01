@@ -40,6 +40,7 @@ FocusScope {
 
     property int index: 0
     property string dialogAction: ""         // the action the dialog asks about ("" = closed)
+    property bool dialogSettled: false       // spec 013, front D: false while a dialog opens
     property string waiting: ""              // a closing action run from here, until it answers
 
     readonly property var actions: Session.actions
@@ -114,6 +115,7 @@ FocusScope {
         if (!a || !a.available || Session.busy !== "" || dialogAction !== "")
             return;
         index = i;
+        Sounds.play("confirm");               // spec 013, front D
         if (a.confirm)
             openDialog(a.id);
         else
@@ -135,6 +137,8 @@ FocusScope {
         dialogAction = id;
         dialog.reset();
         dialog.forceActiveFocus();
+        dialogSettled = false;                // spec 013, front D: the dialog's own ↑↓ sound
+        Qt.callLater(() => root.dialogSettled = true);
     }
 
     function closeDialog(): void {
@@ -228,11 +232,13 @@ FocusScope {
         Keys.onPressed: event => {
             const k = event.key, n = root.actions.length;
             event.accepted = true;
-            if (k === Qt.Key_Up && n > 0)
+            if (k === Qt.Key_Up && n > 0) {
+                Sounds.play("move");              // spec 013, front D
                 root.index = (root.index - 1 + n) % n;
-            else if (k === Qt.Key_Down && n > 0)
+            } else if (k === Qt.Key_Down && n > 0) {
+                Sounds.play("move");              // spec 013, front D
                 root.index = (root.index + 1) % n;
-            else if (k === Qt.Key_Return || k === Qt.Key_Enter)
+            } else if (k === Qt.Key_Return || k === Qt.Key_Enter)
                 root.trigger(root.index);
             else if (k === Qt.Key_Escape)
                 root.closeRequested();
@@ -281,8 +287,11 @@ FocusScope {
         focused: root.dialogAction === ""
         keysEnabled: false
         onHoveredIndex: i => {
-            if (root.pointerMoved && root.dialogAction === "")
+            if (root.pointerMoved && root.dialogAction === "") {
+                if (i !== root.index)
+                    Sounds.play("move");      // spec 013, front D
                 root.index = i;
+            }
         }
         onActivated: i => root.trigger(i)
         onCursorRequested: i => {
@@ -338,11 +347,16 @@ FocusScope {
         note: root.dialogData && root.dialogData.id === root.current?.id && Session.lastError !== "" ? Session.lastError : ""
         blockers: root.dialogData?.blockers ?? []
         actionLabel: root.dialogData?.label ?? ""
+        onCurrentChanged: if (root.dialogSettled) Sounds.play("move")      // spec 013, front D
         onConfirmed: {
             const id = root.dialogAction;
+            Sounds.play("dialog");            // spec 013, front D
             root.closeDialog();
             root.execute(id);
         }
-        onCancelled: root.closeDialog()
+        onCancelled: {
+            Sounds.play("back");              // spec 013, front D
+            root.closeDialog();
+        }
     }
 }

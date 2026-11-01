@@ -87,12 +87,14 @@ FocusScope {
         if (t === "")
             return;
         layout.column = "list";
+        Sounds.play("typing");                // spec 013, front D
         query += t;
     }
     function backspace(): void {
         if (!searching)
             return;
         layout.column = "list";
+        Sounds.play("typing");                // spec 013, front D
         query = Array.from(query).slice(0, -1).join("");
     }
     function clear(): void {

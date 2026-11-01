@@ -151,32 +151,32 @@ hidpi falhou uma vez com 4 VMs na GPU e passou 3 de 3 sozinho.
 
 ## Phase 9: User Story 5 - Os sons da interface (P2) · Frente D
 
-- [ ] T042 [P] [US5] `services/Sounds.qml` completo:
+- [X] T042 [P] [US5] `services/Sounds.qml` completo:
   - `SoundEffect` em conjunto de 3, debounce de 40 ms, no máximo 4 sons;
   - pasta própria;
   - volume de interface;
   - digitação;
   - "não perturbe" e a tela cheia segurada nas notificações;
   - o `sound.json` (FR-019 a FR-024, S1).
-- [ ] T043 [US5] Ligar os eventos:
+- [X] T043 [US5] Ligar os eventos:
   - menus (`move`, `change`, `confirm`, `back`, `open`, `close`, `tab`, `dialog` e os da janelinha);
   - notificações, OSD e digitação;
   - o som de entrada uma vez por login (FR-019, FR-030, S5).
-- [ ] T044 [US5] Configurações › Sound: as opções da data-model (FR-022)
-- [ ] T045 [US5] `docs/sons-do-jogo.md`: como usar os sons da própria cópia de PC (só links pra guias e
+- [X] T044 [US5] Configurações › Sound: as opções da data-model (FR-022)
+- [X] T045 [US5] `docs/sons-do-jogo.md`: como usar os sons da própria cópia de PC (só links pra guias e
   ferramentas) e os nomes dos eventos (FR-021)
-- [ ] T046 [US5] Validar na `t013-som` com `--audio-capture`: blocos `sounds` e `sound-opts` (SC-008,
+- [X] T046 [US5] Validar na `t013-som` com `--audio-capture`: blocos `sounds` e `sound-opts` (SC-008,
   SC-009)
 
 ## Phase 10: User Story 7 - Som no boot e no login (P3) · Frente D
 
-- [ ] T047 [US7] `system/boot-login/`: a regra udev, o `yorha-os-boot-sound.service`, o script e os WAV
+- [X] T047 [US7] `system/boot-login/`: a regra udev, o `yorha-os-boot-sound.service`, o script e os WAV
   por nível; `install`, `uninstall` e `status` no manifesto (contracts/boot-sound.md, FR-028, FR-031,
   FR-032)
-- [ ] T048 [US7] `system/login/sddm/yorha-os/`: os sons do tema, a chave `sounds` e a leitura de
+- [X] T048 [US7] `system/login/sddm/yorha-os/`: os sons do tema, a chave `sounds` e a leitura de
   `/run/yorha-os/sound.state` (FR-029, S3)
-- [ ] T049 [US7] Lab: `check-011 undo` cobrindo o som de boot; `lab/bootcap --audio-capture`
-- [ ] T050 [US7] Validar na `teste-011`: blocos `bootsound`, `boot-timing` e `undo` (SC-012, SC-013)
+- [X] T049 [US7] Lab: `check-011 undo` cobrindo o som de boot; `lab/bootcap --audio-capture`
+- [X] T050 [US7] Validar na `teste-011`: blocos `bootsound`, `boot-timing` e `undo` (SC-012, SC-013)
 
 ## Phase 11: Polish & junção (F3)
 

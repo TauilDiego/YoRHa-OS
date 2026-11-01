@@ -71,6 +71,7 @@ PopupWindow {
         if (!tabIds.includes(id))
             return false;
         if (id !== tab) {
+            Sounds.play("tab");               // spec 013, front D
             pageOf(tab)?.leave();
             tab = id;
         }

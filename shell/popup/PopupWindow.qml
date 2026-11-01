@@ -84,6 +84,7 @@ PanelWindow {
     }
 
     function appear(): void {
+        Sounds.play("open");                  // spec 013, front D
         fade.stop();
         if (Tokens.instant)
             frame.opacity = 1;
@@ -91,5 +92,10 @@ PanelWindow {
             fade.start();
     }
     Component.onCompleted: appear()
-    onKeyboardActiveChanged: if (keyboardActive) appear()
+    onKeyboardActiveChanged: {
+        if (keyboardActive)
+            appear();
+        else
+            Sounds.play("close");             // spec 013, front D
+    }
 }

@@ -202,12 +202,17 @@ FocusScope {
         const n = opts.length;
         event.accepted = true;
         if (column === "categories") {
-            if (k === Qt.Key_Up && cats.length > 0)
+            if (k === Qt.Key_Up && cats.length > 0) {
+                Sounds.play("move");             // spec 013, front D
                 setCategory((category - 1 + cats.length) % cats.length);
-            else if (k === Qt.Key_Down && cats.length > 0)
+            } else if (k === Qt.Key_Down && cats.length > 0) {
+                Sounds.play("move");             // spec 013, front D
                 setCategory((category + 1) % cats.length);
-            else if (k === Qt.Key_Right || k === Qt.Key_Return || k === Qt.Key_Enter)
+            } else if (k === Qt.Key_Right || k === Qt.Key_Return || k === Qt.Key_Enter) {
+                if (opts.length > 0)
+                    Sounds.play("confirm");      // spec 013, front D
                 enterOptions();
+            }
             else if (k === Qt.Key_Escape)
                 closeRequested();
             else
@@ -215,23 +220,28 @@ FocusScope {
             return;
         }
         const o = opts[option];
-        if (k === Qt.Key_Up)
+        if (k === Qt.Key_Up) {
+            Sounds.play("move");                 // spec 013, front D
             option = (option - 1 + n) % n;
-        else if (k === Qt.Key_Down)
+        } else if (k === Qt.Key_Down) {
+            Sounds.play("move");                 // spec 013, front D
             option = (option + 1) % n;
-        else if (k === Qt.Key_Left) {
+        } else if (k === Qt.Key_Left) {
             if (changes(o))
                 SettingsModel.step(catId, o.id, -1);
-            else
+            else {
+                Sounds.play("back");             // spec 013, front D
                 column = "categories";
+            }
         } else if (k === Qt.Key_Right) {
             if (changes(o))
                 SettingsModel.step(catId, o.id, 1);
         } else if (k === Qt.Key_Return || k === Qt.Key_Enter)
             activateOption(o);
-        else if (k === Qt.Key_Escape)
+        else if (k === Qt.Key_Escape) {
+            Sounds.play("back");                 // spec 013, front D
             column = "categories";
-        else
+        } else
             event.accepted = false;
     }
 
@@ -255,6 +265,8 @@ FocusScope {
         pointerMoved = false;
         if (!h || !moved)
             return;
+        if (h.column !== column || (h.column === "categories" ? h.index !== category : h.index !== option))
+            Sounds.play("move");                 // spec 013, front D
         if (h.column === "categories") {
             column = "categories";
             setCategory(h.index);
@@ -386,6 +398,7 @@ FocusScope {
         keysEnabled: false
         onHoveredIndex: index => root.noteHover("categories", index)
         onActivated: index => {
+            Sounds.play("confirm");              // spec 013, front D
             root.setCategory(index);
             root.enterOptions();
         }

@@ -254,6 +254,7 @@ Singleton {
             const mon = critical?.monitor ?? monitorFor();
             critical = { ids: [e.id].concat((critical?.ids ?? []).filter(x => x !== e.id)), page: 0, monitor: mon };
             e.read = true;
+            Sounds.play("notifyCritical");       // spec 013, front D: it shows through do-not-disturb
             return;
         }
         if (logOpen) {
@@ -265,6 +266,7 @@ Singleton {
             e.read = false;
             return;
         }
+        Sounds.play("notify");                   // spec 013, front D: only what reaches the screen
         // The same app with a transmission on screen: that transmission shows the newest (FR-017).
         const same = e.appKey !== "" ? stack.find(t => t.appKey === e.appKey && !t.replying) : null;
         if (same) {
