@@ -37,7 +37,9 @@ Singleton {
     property var needs: ({})                     // toggle key → what to do while it is off
     property var current: ({})                   // "cat.opt" → value
 
-    readonly property var types: ["toggle", "choice", "slider", "action", "info"]
+    // spec 013 (front C): "multi", a list of marks (value: the marked indices of `values`), bound to a
+    // Settings key of type "layouts" by "setting"; its `ids` are the XKB layout names.
+    readonly property var types: ["toggle", "choice", "slider", "action", "info", "multi"]
 
     function find(catId: string, optId: string): var {
         for (const c of categories)
@@ -87,6 +89,8 @@ Singleton {
         const l = liveOf(opt);
         if (l && opt.type === "toggle")
             return l.src.levelOf(l.key) === true;
+        if (l && opt.type === "multi")
+            return markedOf(opt);
         if (l)
             return Math.max(0, l.src.levelsOf(l.key).indexOf(l.src.levelOf(l.key)));
         const k = catId + "." + optId;
@@ -95,6 +99,35 @@ Singleton {
             return saved;
         return Object.prototype.hasOwnProperty.call(current, k) ? current[k] : null;
     }
+
+    // --- spec 013, front C: the marks of a "multi" option and the popup's rule ----------------------
+    // The marked indices of `opt` (ascending): the saved layouts, else the compositor's current ones,
+    // else the first value; a layout the option doesn't list is dropped.
+    function markedOf(opt: var): var {
+        const saved = Settings.valueOf(Settings.keyOf(String(opt.setting)));
+        const from = saved.length > 0 ? saved : Compositor.keyboardLayouts;
+        const out = [];
+        opt.ids.forEach((id, i) => {
+            if (from.includes(id))
+                out.push(i);
+        });
+        return out.length > 0 ? out : [0];
+    }
+    // Save the marked indices of a "multi" option (never none: the caller keeps one marked).
+    function setMarked(catId: string, optId: string, marked: var): void {
+        const opt = find(catId, optId);
+        if (opt?.type !== "multi" || !Array.isArray(marked) || marked.length === 0)
+            return;
+        const ids = opt.ids.filter((id, i) => marked.includes(i));
+        const err = Settings.setKey(Settings.keyOf(String(opt.setting)), ids);
+        if (err !== "")
+            console.warn(`settings: ${catId}.${optId}: ${err}`);
+    }
+    // Enter opens the choice pop-up (FR-025, FR-026): a choice of more than 3 values, or a "multi".
+    function opensPopup(opt: var): bool {
+        return opt?.type === "multi" || (opt?.type === "choice" && resolve(opt).values.length > 3);
+    }
+    // --- end front C ---------------------------------------------------------------------------------
 
     // Is `v` a value `opt` can take (a saved value is checked before it is used)?
     function validValue(opt: var, v: var): bool {
@@ -118,6 +151,8 @@ Singleton {
             return String(resolve(opt).values[v] ?? "");
         case "slider":
             return v === null || v === undefined ? "" : String(v);
+        case "multi":
+            return Array.isArray(v) ? v.map(i => String(opt.ids[i] ?? "").toUpperCase()).join(" · ") : "";
         case "action":
         case "info":
             return String(opt.text ?? "");
@@ -277,7 +312,7 @@ Singleton {
                 if (o.type === "choice" && !(Array.isArray(o.values) && o.values.length >= 2
                         && Number.isInteger(o.value) && o.value >= 0 && o.value < o.values.length))
                     return `${where}: a choice needs values and an index`;
-                if (o.ids !== undefined && !(o.type === "choice" && Array.isArray(o.ids) && o.ids.length === o.values.length
+                if (o.ids !== undefined && !((o.type === "choice" || o.type === "multi") && Array.isArray(o.ids) && o.ids.length === o.values.length
                         && o.ids.every(x => typeof x === "string" && x !== "") && new Set(o.ids).size === o.ids.length))
                     return `${where}: ids are one unique, non-empty string per value`;
                 if (o.type === "slider" && !(Number.isInteger(o.value) && o.value >= 0 && o.value <= 100
@@ -287,7 +322,12 @@ Singleton {
                 if (live?.notify && !((o.type === "choice" || o.type === "toggle")
                         && NotifyPrefs.levelsOf(live.key).length > 0))
                     return `${where}: a notifications setting is a choice or a toggle over a known option`;
-                if (live && !live.notify && !(o.type === "choice"
+                if (o.type === "multi" && !(Array.isArray(o.values) && o.values.length >= 2 && Array.isArray(o.ids)
+                        && o.ids.length === o.values.length && new Set(o.ids).size === o.ids.length
+                        && Settings.keys[Settings.keyOf(String(o.setting))]?.type === "layouts"
+                        && o.ids.every(x => Settings.validKey(Settings.keyOf(String(o.setting)), [x]))))
+                    return `${where}: a multi is a list of layouts over a layouts setting, with one id per value`;
+                if (live && !live.notify && o.type !== "multi" && !(o.type === "choice"
                         && Settings.levelsOf(String(o.setting)).length === o.values.length))
                     return `${where}: a live setting is a choice over the setting's levels`;
             }

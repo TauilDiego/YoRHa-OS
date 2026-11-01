@@ -138,16 +138,16 @@ hidpi falhou uma vez com 4 VMs na GPU e passou 3 de 3 sozinho.
 
 ## Phase 8: User Story 6 - Escolher numa janelinha (P2) · Frente C
 
-- [ ] T038 [P] [US6] `ds/composites/ChoicePopup.qml`:
+- [X] T038 [P] [US6] `ds/composites/ChoicePopup.qml`:
   - presa à direita da linha, com escurecimento ×0,8;
   - ponteiro do lado direito;
   - sobe perto da borda e rola em linhas inteiras;
   - página na galeria (FR-025, FR-027).
-- [ ] T039 [US6] `ds/composites/OptionRow.qml`: Enter numa escolha com mais de 3 valores abre a
+- [X] T039 [US6] `ds/composites/OptionRow.qml`: Enter numa escolha com mais de 3 valores abre a
   janelinha; ←→ continuam mudando direto (FR-025)
-- [ ] T040 [US6] O modo múltiplo (quadradinhos, pelo menos um marcado) e Keyboard › Layouts aplicado no
+- [X] T040 [US6] O modo múltiplo (quadradinhos, pelo menos um marcado) e Keyboard › Layouts aplicado no
   Hyprland (FR-026, R6)
-- [ ] T041 [US6] Validar na `t013-escolha`: bloco `choice`, nos dois modos e nos dois perfis
+- [X] T041 [US6] Validar na `t013-escolha`: bloco `choice`, nos dois modos e nos dois perfis
 
 ## Phase 9: User Story 5 - Os sons da interface (P2) · Frente D
 

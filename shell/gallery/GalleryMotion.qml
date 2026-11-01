@@ -4,6 +4,7 @@ import QtQuick
 import "../ds"
 import "../ds/primitives"
 import "../ds/base"
+import "../ds/composites"
 import "../strings"
 
 // The gallery's page 7 (spec 013): the pieces of the game's motion. The scrolling label (FR-012)
@@ -46,6 +47,63 @@ Rectangle {
         s: root.s
         title: root.gs.title
         subtitle: root.gs.page7Subtitle
+    }
+
+    // spec 013, front C: the choice pop-up on the right of the page, in two panels of paper (the menu's
+    // body in miniature): one value to pick, and several marks with a list that scrolls in whole rows.
+    Column {
+        x: root.width - root.u(Tokens.space.pageMarginH) - root.u(600)
+        y: root.u(220)
+        spacing: root.u(14)
+
+        Label {
+            s: root.s
+            role: "subheader"
+            text: root.gs.choicePopup
+        }
+        Rectangle {
+            id: singlePanel
+            width: root.u(600)
+            height: root.u(400)
+            color: Tokens.color.darkYellow
+            border.width: Tokens.hair(1, root.dpr)
+            border.color: Tokens.color.darkGray
+            clip: true
+            ChoicePopup {
+                anchors.fill: parent
+                s: root.s
+                open: true
+                values: root.gs.choiceSample
+                current: 1
+                anchorX: root.u(24)
+                anchorY: root.u(30)
+                limitTop: root.u(10)
+                limitBottom: parent.height - root.u(10)
+            }
+        }
+        Caption { text: root.gs.choiceSingle }
+        Rectangle {
+            width: root.u(600)
+            height: root.u(280)
+            color: Tokens.color.darkYellow
+            border.width: Tokens.hair(1, root.dpr)
+            border.color: Tokens.color.darkGray
+            clip: true
+            ChoicePopup {
+                anchors.fill: parent
+                s: root.s
+                open: true
+                multi: true
+                values: ["English (US)", "Portuguese (Brazil)", "Portuguese (Portugal)", "Spanish", "German", "French"]
+                marked: [0, 1]
+                current: 1
+                anchorX: root.u(24)
+                anchorY: root.u(150)
+                limitTop: root.u(10)
+                limitBottom: parent.height - root.u(10)
+            }
+        }
+        Caption { text: root.gs.choiceMulti }
     }
 
     Column {

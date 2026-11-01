@@ -66,8 +66,34 @@ Singleton {
                 console.warn("compositor: no known compositor (Hyprland, Niri, Mango), using \"none\" (empty lists, no actions)");
             else
                 console.info(`compositor: backend ${item.name}`);
+            root.applyKeyboardLayouts();
         }
     }
+
+    // --- spec 013, front C: the keyboard layouts (Keyboard › Layouts, research R6) ------------------
+    // What the compositor has now, whether this one can set it, and a note for the settings card when
+    // it can't. Settings.kbLayouts (what the option saved) goes to the compositor at start, when it
+    // changes and after the compositor reloads its config (a reload returns to the file). [] = leave
+    // the compositor's own layout. The fixtures' capabilities don't apply here: the real backend's do.
+    readonly property var keyboardLayouts: backend?.keyboardLayouts ?? []
+    readonly property bool canSetKeyboardLayouts: backend?.capabilities?.keyboardLayouts === true
+    readonly property string keyboardLayoutsNote: canSetKeyboardLayouts || backend === null ? ""
+        : `The layouts are saved, but ${backendName === "none" ? "no known compositor is running" : backendName + " can't apply them yet"}.`
+    function applyKeyboardLayouts(): string {
+        const want = Settings.kbLayouts;
+        if (!want || want.length === 0)
+            return "ok";
+        if (!canSetKeyboardLayouts)
+            return "error: this compositor can't set the keyboard layouts";
+        return backend.setKeyboardLayouts(want);
+    }
+    Connections {
+        target: Settings
+        function onKbLayoutsChanged(): void {
+            root.applyKeyboardLayouts();
+        }
+    }
+    // --- end front C ---------------------------------------------------------------------------------
 
     // The backend's monitors: first the focused one, then the scales, so a handler of
     // monitorScalesChanged (a pop-up waiting to open) already reads the new focusedMonitor.

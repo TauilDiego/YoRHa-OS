@@ -34,6 +34,10 @@ Item {
     property string tag: ""
     property color markColor: "transparent"
     readonly property real cs: s * contentScale
+    // spec 013, front C (the choice pop-up): the parent draws the marker (a mark box) and/or the
+    // kite (mirrored, on the right) itself.
+    property bool showMark: true
+    property bool showSelector: true
 
     readonly property bool hovered: mouse.containsMouse
     readonly property int selectorRoom: Tokens.px(Tokens.space.selectorW + Tokens.space.selectorGap, s)
@@ -95,6 +99,7 @@ Item {
         height: root.bandH
         Square {
             x: root.pad
+            visible: root.showMark
             anchors.verticalCenter: parent.verticalCenter
             s: root.cs
             color: root.markColor.a > 0 ? root.markColor : parent.ink
@@ -199,7 +204,7 @@ Item {
         x: -root.selectorRoom
         y: Math.round((root.bandH - height) / 2)
         s: root.s
-        shown: root.inked
+        shown: root.inked && root.showSelector
         tone: root.state === "selected" ? "light" : "dark"
     }
 

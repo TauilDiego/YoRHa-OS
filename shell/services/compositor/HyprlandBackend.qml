@@ -23,7 +23,8 @@ Item {
         canMoveToWorkspace: true,
         actsOnAnyWindow: true,
         hasGeometry: "rect",
-        fullscreenKnown: true
+        fullscreenKnown: true,
+        keyboardLayouts: true       // spec 013 (front C)
     })
 
     // [Monitor] { name, x, y, w, h (logical), scale, focused }; replaced on every successful read.
@@ -216,7 +217,76 @@ Item {
     }
     // --- end spec 008 --------------------------------------------------------------------------------
 
-    Component.onCompleted: refresh("all")
+    // --- spec 013, front C: the keyboard layouts (research R6) ---------------------------------------
+    // `keyboardLayouts` is what the compositor has now (`input:kb_layout`, split at commas). A Lua config
+    // (0.56) takes `hyprctl eval 'hl.config({ input = { kb_layout = "us,br" } })'`, live for every
+    // keyboard; `hyprctl keyword` refuses ("Use eval"), so it is only the way for an old (hyprlang)
+    // config. A `hyprctl reload` puts the file's layout back, so the backend reads it again after a
+    // reload and sets the wanted ones back. The layout is also in the managed config, with the shortcut that
+    // switches (`hyprctl switchxkblayout all next`); writing it there is the installer's job.
+    property var keyboardLayouts: []
+    property string wantedLayouts: ""
+    property bool setAgain: false
+
+    // Only XKB layout names go into the command (a-z, 2–8 letters), whoever calls.
+    function setKeyboardLayouts(list: var): string {
+        if (!Array.isArray(list) || list.length === 0 || !list.every(x => /^[a-z]{2,8}$/.test(String(x))))
+            return "error: not a list of layout names";
+        wantedLayouts = list.join(",");
+        if (layoutSet.running) {
+            setAgain = true;
+            return "ok";
+        }
+        layoutSet.command = Hyprland.usingLua
+            ? ["hyprctl", "eval", `hl.config({ input = { kb_layout = "${wantedLayouts}" } })`]
+            : ["hyprctl", "keyword", "input:kb_layout", wantedLayouts];
+        layoutSet.running = true;
+        return "ok";
+    }
+    function refreshKeyboardLayouts(): void {
+        if (!layoutQuery.running)
+            layoutQuery.running = true;
+    }
+
+    Process {
+        id: layoutSet
+        stdout: StdioCollector {
+            id: setOut
+        }
+        onExited: code => {
+            if (code !== 0 || !setOut.text.startsWith("ok"))
+                console.warn(`compositor: setting the keyboard layouts to "${root.wantedLayouts}" failed (${code}): ${setOut.text.trim()}`);
+            if (root.setAgain) {
+                root.setAgain = false;
+                root.setKeyboardLayouts(root.wantedLayouts.split(","));
+            } else {
+                root.refreshKeyboardLayouts();
+            }
+        }
+    }
+    Process {
+        id: layoutQuery
+        command: ["hyprctl", "getoption", "-j", "input:kb_layout"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const str = String(JSON.parse(text).str ?? "");
+                    root.keyboardLayouts = str === "" || str === "[[EMPTY]]" ? [] : str.split(",");
+                    // A reload went back to the file's layout: the wanted ones come back.
+                    if (root.wantedLayouts !== "" && str !== root.wantedLayouts && !layoutSet.running)
+                        root.setKeyboardLayouts(root.wantedLayouts.split(","));
+                } catch (e) {
+                    // keep the last known layouts
+                }
+            }
+        }
+    }
+    // --- end front C ---------------------------------------------------------------------------------
+
+    Component.onCompleted: {
+        refresh("all");
+        refreshKeyboardLayouts();
+    }
 
     // A scale change alone (`hyprctl eval 'hl.monitor(…)'`, as `lab/profile` does) raises no event
     // that reaches onRawEvent, so the scales went stale until the next monitor query. It does change
@@ -243,6 +313,8 @@ Item {
             Qt.callLater(root.changed);
             if (event.name.startsWith("monitor") || event.name.startsWith("focusedmon") || event.name === "configreloaded")
                 monitorQuery.running = true;
+            if (event.name === "configreloaded")
+                root.refreshKeyboardLayouts();         // and sets the wanted layouts again if they were lost
             if (root.windowEvents.includes(event.name))
                 windowsTimer.restart();
             // spec 008: full screen (R10, R11)

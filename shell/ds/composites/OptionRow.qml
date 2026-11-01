@@ -19,6 +19,8 @@ import "../../strings"
 //   option: an option of the settings catalog (data-model); value: its current value.
 // spec 004: `contentScale` draws the label, the square and the value smaller on the same band,
 // rails and kite (the wallpaper picker's Options card).
+// spec 013: a "multi" option shows its marked values and an arrow, like an action; Enter on it (or on
+// a choice of more than 3 values) opens the choice pop-up, which the page owns (SettingsModel.opensPopup).
 // spec 008: `valueWidth` (game px) is the text's width between ◂ and ▸ of a toggle or a choice;
 // Tokens.space.stepperValueW by default (the text log narrows its toggle's).
 Item {
@@ -49,6 +51,8 @@ Item {
             return String(option.values?.[value] ?? "");
         case "slider":
             return value === null || value === undefined ? "" : String(value);
+        case "multi":       // spec 013: the marked layouts, e.g. "US · BR"; Enter opens the pop-up
+            return Array.isArray(value) ? value.map(i => String(option.ids?.[i] ?? "").toUpperCase()).join(" · ") : "";
         }
         return String(option?.text ?? "");
     }
@@ -57,7 +61,7 @@ Item {
     // Free text values (action, info) take at most this share of the row; an action's arrow
     // (11 px + 12 px before it) comes on top of its text.
     readonly property real textShare: 0.45
-    readonly property int arrowRoom: type === "action" ? Tokens.px(11, cs) + Tokens.px(12, cs) : 0
+    readonly property int arrowRoom: type === "action" || type === "multi" ? Tokens.px(11, cs) + Tokens.px(12, cs) : 0
     readonly property int numberW: Tokens.px(46, cs)         // the slider's number
 
     implicitWidth: Tokens.px(Tokens.space.settingsOptsW, s)     // the parent sets the width
@@ -182,7 +186,7 @@ Item {
             }
             Shape {
                 id: arrow
-                visible: root.type === "action"
+                visible: root.type === "action" || root.type === "multi"
                 anchors.verticalCenter: parent.verticalCenter
                 width: Tokens.px(11, root.cs)
                 height: Tokens.px(16, root.cs)

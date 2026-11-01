@@ -15,7 +15,8 @@ Item {
         canMoveToWorkspace: false,
         actsOnAnyWindow: false,
         hasGeometry: "none",
-        fullscreenKnown: false
+        fullscreenKnown: false,
+        keyboardLayouts: false
     })
     readonly property var monitors: []
     readonly property var workspaces: []
@@ -23,7 +24,14 @@ Item {
     readonly property string activeTitle: ""
     readonly property bool fullscreen: false
 
+    // spec 013 (front C): no keyboard layouts to read or set
+    readonly property var keyboardLayouts: []
     signal changed()
+    function setKeyboardLayouts(list: var): string {
+        return "error: no compositor";
+    }
+    function refreshKeyboardLayouts(): void {
+    }
 
     function activeIndexOn(monitorName: string): int {
         return 0;

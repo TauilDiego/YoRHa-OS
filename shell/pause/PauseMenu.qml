@@ -25,7 +25,7 @@ PopupWindow {
     // spec 013 (data-model.md, `pause dump`): the animation running, "idle" | "opening" |
     // "assembling" | "tab" | "closing" (front A sets it); the choice pop-up's state or null (front C).
     property string anim: "idle"
-    property var choice: null
+    readonly property var choice: systemPage.choiceState
     // spec 013 (research R7): while countFrames, every frame's time (ms) goes out in frame().
     property bool countFrames: false
 
@@ -106,6 +106,13 @@ PopupWindow {
         return systemPage.dumpState();
     }
 
+    // spec 013, front C: `pause choice open|pick|toggle|close` (SYSTEM only).
+    function choiceCommand(cmd: string, arg: string): string {
+        if (cmd === "open" && tab !== "system")
+            return "error: the menu is not on SYSTEM";
+        return systemPage.choiceCommand(cmd, arg);
+    }
+
     function restartSystem(index: int): void {
         systemPage.restart(index);
     }
@@ -144,6 +151,7 @@ PopupWindow {
             presentation: presentation,
             anim: anim,
             choice: choice,
+            choiceGeometry: systemPage.choiceGeometry(),       // spec 013 (front C): { plate, item, rows }
             title: `${tabText.title} ${tabText.subtitle}`,
             footerLeft: footerLeft,
             keys: pageKeys.map(k => `${k.key} ${k.label}`),
