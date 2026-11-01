@@ -4,12 +4,14 @@ import QtQuick
 import "../ds"
 import "../ds/primitives"
 import "../ds/base"
+import "../ds/composites"
 import "../strings"
 
 // The gallery's page 7 (spec 013): the pieces of the game's motion. The scrolling label (FR-012)
 // with a text that fits, one that does not, two copies scrolling as one (the ListItem's dark and
 // light faces) and the cut of Reduce motion (FR-016); the typed text with the tip letter (FR-004),
-// typing again every few seconds. Front A adds the rest of the motion here.
+// typing again every few seconds. Front A: a list whose cursor moves on its own (the selection's
+// sweep and fold, the pulse) and comes in again in cascade, and a title that changes the game's way.
 Rectangle {
     id: root
 
@@ -172,6 +174,62 @@ Rectangle {
                 repeat: true
                 onTriggered: typed.restartKey = typed.restartKey + 1
             }
+        }
+    }
+
+    // --- spec 013, front A: the list and the title, moving on their own ---------------------------
+    Column {
+        x: root.u(1000)
+        y: root.u(220)
+        spacing: root.u(18)
+
+        Label {
+            s: root.s
+            role: "subheader"
+            text: root.gs.motionList
+        }
+        CursorList {
+            id: demoList
+            width: root.u(520)
+            s: root.s
+            model: root.gs.motionItems
+            keysEnabled: false
+        }
+        Caption { text: root.gs.motionListNote }
+
+        Item { width: 1; height: root.u(20) }
+
+        Label {
+            s: root.s
+            role: "subheader"
+            text: root.gs.motionTitle
+        }
+        PageHeader {
+            id: demoTitle
+            property int k: 0
+            s: root.s
+            animated: true
+            title: root.gs.motionTitles[k][0]
+            subtitle: root.gs.motionTitles[k][1]
+        }
+    }
+    Timer {
+        interval: 1600
+        running: root.visible && !Tokens.instant
+        repeat: true
+        onTriggered: {
+            demoList.move(1);
+            if (demoList.currentIndex === demoList.count - 1)
+                demoList.currentIndex = 0;
+        }
+    }
+    Timer {
+        interval: 8000
+        running: root.visible && !Tokens.instant
+        repeat: true
+        onTriggered: {
+            demoList.enter(0, -1);
+            demoTitle.k = (demoTitle.k + 1) % root.gs.motionTitles.length;
         }
     }
 }

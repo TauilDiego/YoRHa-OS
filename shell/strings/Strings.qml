@@ -127,6 +127,12 @@ Singleton {
         readonly property string longText: "Notifications from an application with a very long name"
         readonly property string typedTip: "Typed text, tip letter"
         readonly property string typedSample: "SETTINGS"
+        // spec 013, front A: the list and the title, moving on their own
+        readonly property string motionList: "Selection, pulse, cascade"
+        readonly property string motionListNote: "the cursor moves every 1.6 s; the list comes in again every 8 s"
+        readonly property string motionTitle: "Title"
+        readonly property var motionItems: ["Display", "Sound", "Notifications", "Network", "Appearance"]
+        readonly property var motionTitles: [["SYSTEM", "-Settings"], ["WINDOWS", "-Open Windows"], ["POWER", "-Session"]]
     }
 
     // --- spec 003: settings pop-up ---------------------------------------------------------
