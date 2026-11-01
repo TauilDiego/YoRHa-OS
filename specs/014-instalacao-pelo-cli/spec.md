@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-01
 
-**Status**: Rascunho, pra aprovação do dono
+**Status**: Aprovada pelo dono em 01.11, junto com o plano (com os ajustes do FR-017 e do SC-007)
 
 **Input**: Em 01.11 o dono decidiu, entre seis jeitos de instalar e atualizar, fazer só o CLI: "gostei
 da ideia de fazer o F. só o cli pois depois a gente pode melhorar isso. quero algo funcional por agora
@@ -265,8 +265,9 @@ config e do estado da pessoa, e o Hyprland sobe sem o shell.
 
   O arquivo MUST apontar pra versão em uso (pelo `current` ou pelo `yorha`), nunca pra uma pasta de
   versão.
-- **FR-017**: O shell MUST achar os sons e os assets pela pasta da versão (sem `/usr/share`), e o
-  cursor MUST ir pra `~/.local/share/icons`.
+- **FR-017**: O shell MUST achar os sons e os assets pela pasta da versão (sem `/usr/share`). O cursor
+  fica fora da v0: o tema precisa ser compilado, e a versão é o `git archive` do commit (research R8,
+  aprovado pelo dono em 01.11). Ele entra quando as versões ganharem um passo de build.
 - **FR-018**: As variáveis de ambiente do produto MUST ter o nome do produto (`YORHA_OS_*`); as velhas
   (`NIER_*`) continuam aceitas enquanto o lab usar.
 - **FR-019**: O nome do produto (`yorha`, `yorha-os`, as pastas) MUST ficar num lugar só no instalador
@@ -310,8 +311,9 @@ config e do estado da pessoa, e o Hyprland sobe sem o shell.
 - **SC-005**: Da transmissão "Update available" até o shell na versão nova: no máximo 3 cliques e
   nenhum comando digitado.
 - **SC-006**: Depois do `yorha uninstall`, nenhum arquivo do produto sobra fora da config e do estado.
-- **SC-007**: Os roteiros 003, 004, 007, 008 e 013 passam com o shell iniciado pela instalação, e o log
-  de QML fica limpo.
+- **SC-007**: Os roteiros 003, 004, 007, 008 e 013 passam com as mudanças da 014 no shell, como hoje
+  pelo lab. O shell iniciado pela instalação sobe com o log de QML limpo e responde ao IPC
+  (`check-014`; research R9, aprovado pelo dono em 01.11).
 
 ## Assumptions
 
