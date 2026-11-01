@@ -117,7 +117,7 @@ PanelWindow {
         anchors.fill: parent
         focus: true
         Keys.onEscapePressed: root.closeRequested()
-        Keys.onTabPressed: root.page = (root.page + 1) % 6     // spec 003: page 2; 004: page 3; 007: page 4; 008: pages 5 and 6
+        Keys.onTabPressed: root.page = (root.page + 1) % 7     // spec 003: page 2; 004: page 3; 007: page 4; 008: pages 5 and 6; 013: page 7
 
         Rectangle {
             anchors.fill: parent
@@ -699,6 +699,17 @@ PanelWindow {
             sourceComponent: GalleryLog {
                 readonly property var window: QsWindow.window
                 s: Math.min(root.s, root.width > 0 ? root.width / 1920 : root.s)
+                dpr: Tokens.scaleOf(window?.screen?.name ?? "")
+            }
+        }
+
+        // --- spec 013: page 7 (Tab), the game's motion: scrolling label, typed text with a tip -------
+        Loader {
+            anchors.fill: parent
+            active: root.page === 6
+            sourceComponent: GalleryMotion {
+                readonly property var window: QsWindow.window
+                s: root.s
                 dpr: Tokens.scaleOf(window?.screen?.name ?? "")
             }
         }

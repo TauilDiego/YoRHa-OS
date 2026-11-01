@@ -54,7 +54,7 @@ Singleton {
         readonly property string samplePageTitle: "Items"
         readonly property string samplePageSubtitle: "All Items"
         // spec 003: the settings pieces, on the gallery's second page (Tab)
-        readonly property string page2Subtitle: "-Design System 2/6"
+        readonly property string page2Subtitle: "-Design System 2/7"
         readonly property string valueStepper: "Value stepper"
         readonly property string stepperMiddle: "middle"
         readonly property string stepperStart: "start"
@@ -69,10 +69,10 @@ Singleton {
         readonly property string cursorListUnfocused: "Cursor list, unfocused"
         readonly property string popupFrame: "Pop-up frame"
         // spec 004: the wallpaper pieces, on the gallery's third page (Tab)
-        readonly property string page3Subtitle: "-Design System 3/6"
+        readonly property string page3Subtitle: "-Design System 3/7"
         // spec 008: transmissions, the OSD and the text log (pages 5 and 6)
-        readonly property string page5Subtitle: "-Design System 5/6"
-        readonly property string page6Subtitle: "-Design System 6/6"
+        readonly property string page5Subtitle: "-Design System 5/7"
+        readonly property string page6Subtitle: "-Design System 6/7"
         readonly property string band: "Band"
         readonly property string overPaper: "over paper"
         readonly property string overDark: "over the dark scene"
@@ -102,7 +102,7 @@ Singleton {
         readonly property string camouflageAt: "700 ms"
         readonly property string halfway: "50%"
         // spec 007: the pause menu's pieces, on the gallery's fourth page (Tab)
-        readonly property string page4Subtitle: "-Design System 4/6"
+        readonly property string page4Subtitle: "-Design System 4/7"
         readonly property string tabbedFrame: "Pop-up frame with tabs"
         readonly property string tabHovered: "%1 hovered"
         readonly property string searchHeader: "Search header"
@@ -116,6 +116,17 @@ Singleton {
         readonly property string mapChosen: "chosen"
         readonly property string statusCard: "Status card"
         readonly property string statusNote: "Battery not found."
+        // spec 013: the game's motion, on the gallery's seventh page (Tab)
+        readonly property string page7Subtitle: "-Design System 7/7"
+        readonly property string scrollingLabel: "Scrolling label"
+        readonly property string fits: "fits: still"
+        readonly property string scrolls: "too long: holds, scrolls, holds, back"
+        readonly property string synced: "two copies, one follows the other"
+        readonly property string cut: "Reduce motion: cut"
+        readonly property string shortText: "Wi-Fi"
+        readonly property string longText: "Notifications from an application with a very long name"
+        readonly property string typedTip: "Typed text, tip letter"
+        readonly property string typedSample: "SETTINGS"
     }
 
     // --- spec 003: settings pop-up ---------------------------------------------------------
@@ -211,7 +222,8 @@ Singleton {
             apps: { label: "APPS", title: "APPS", subtitle: "-Launcher" },
             windows: { label: "WINDOWS", title: "WINDOWS", subtitle: "-Open Windows" },
             system: { label: "SYSTEM", title: "SYSTEM", subtitle: "-Settings" },
-            power: { label: "POWER", title: "POWER", subtitle: "-Session" }
+            power: { label: "POWER", title: "POWER", subtitle: "-Session" },
+            log: { label: "LOG", title: "LOG", subtitle: "-Text Log" }          // spec 013 (US8)
         })
         // the footer's left text
         readonly property string appsFooter: "%1 apps · type to search"        // %1 = how many

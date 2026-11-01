@@ -26,5 +26,7 @@ Chamada: `qs -p <pasta da UI> ipc call <alvo> <função> [args]`; no lab, `lab/i
 
 ## `settings`
 
-As chaves novas (data-model.md) mudam pelo mesmo caminho das outras (`settings set <chave> <valor>`) e
-aparecem no `settings dump`.
+As chaves novas (data-model.md) mudam por `settings set <chave> <valor>` e aparecem no `settings dump`
+(`shellValues`). O valor é lido como JSON quando dá (`true`, `40`), senão como texto. Uma lista vai
+separada por vírgula (`settings set input.kbLayouts us,br`), porque o `qs ipc call` não passa os
+colchetes. `null` volta pro valor da configuração.

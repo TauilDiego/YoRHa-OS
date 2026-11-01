@@ -22,8 +22,15 @@ PopupWindow {
 
     property string tab: "apps"
     property int systemCategory: 0               // where SYSTEM opens (shell.qml keeps it)
+    // spec 013 (data-model.md, `pause dump`): the animation running, "idle" | "opening" |
+    // "assembling" | "tab" | "closing" (front A sets it); the choice pop-up's state or null (front C).
+    property string anim: "idle"
+    property var choice: null
+    // spec 013 (research R7): while countFrames, every frame's time (ms) goes out in frame().
+    property bool countFrames: false
 
     signal closeRequested()
+    signal frame(real ms)
 
     readonly property var tabList: [
         { id: "apps" },
@@ -112,6 +119,21 @@ PopupWindow {
 
     readonly property var pageKeys: tab === "system" ? systemPage.keys : withTab(page?.keys ?? [])
 
+    // spec 013 (research R7): the frame counter of `pause fps`, ticking with this window's frames.
+    // The first tick after a start is dropped (its time runs from before the start).
+    FrameAnimation {
+        id: frames
+        running: root.countFrames
+        property bool first: true
+        onRunningChanged: first = true
+        onTriggered: {
+            if (first)
+                first = false;
+            else
+                root.frame(frameTime * 1000);
+        }
+    }
+
     // --- pause dump (contracts/ipc.md) -------------------------------------------------------------
     function dumpState(): var {
         const geo = page?.geometry?.() ?? null;
@@ -119,6 +141,9 @@ PopupWindow {
             open: keyboardActive,
             monitor: screen?.name ?? "",
             tab: tab,
+            presentation: presentation,
+            anim: anim,
+            choice: choice,
             title: `${tabText.title} ${tabText.subtitle}`,
             footerLeft: footerLeft,
             keys: pageKeys.map(k => `${k.key} ${k.label}`),

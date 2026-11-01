@@ -22,6 +22,10 @@ import "../services"
 // with the date and time on its right (`clock`), the plain rule at y 189, and the body starts at
 // `bodyTop` (y 221; research R12). A click on a tab emits tabClicked(index). Without tabs, nothing
 // changes (the wallpaper picker).
+// spec 013 (research R4): `presentation` "floating" (the panel above) or "fullscreen": the panel is
+// the whole area, with no ink around it and no shadow. `s` comes from the floating panel in both,
+// so the letters keep their size and the floating mode stays as it was (FR-017); the extra room is
+// the layouts' (PickerLayout's stretch, front B).
 Item {
     id: root
 
@@ -35,20 +39,26 @@ Item {
     property int tab: 0
     property bool clock: false
     property int hoveredTab: -1                  // the gallery: a tab drawn hovered without the pointer
+    // spec 013
+    property string presentation: "floating"     // "floating" | "fullscreen"
+    readonly property bool fullscreen: presentation === "fullscreen"
     readonly property bool tabbed: tabs.length > 0
     readonly property int bodyTop: u(tabbed ? Tokens.space.pauseBodyY : 150)
 
     signal dismissed()
     signal tabClicked(int index)
 
-    readonly property real s: Math.min(panelH / Tokens.space.popupH, panelW / Tokens.space.popupW) * Settings.uiScale
+    readonly property real s: Math.min(shareH / Tokens.space.popupH, shareW / Tokens.space.popupW) * Settings.uiScale
     readonly property Item panel: panelItem
 
     // Edges on the monitor's physical pixels, as the other surfaces do.
     readonly property var window: QsWindow.window
     readonly property real dpr: Tokens.scaleOf(window?.screen?.name ?? "")
-    readonly property real panelW: Tokens.snap(width * Tokens.space.popupShare, dpr)
-    readonly property real panelH: Tokens.snap(height * Tokens.space.popupShare, dpr)
+    // The floating panel's size (it sets `s` in both presentations), and the panel's.
+    readonly property real shareW: Tokens.snap(width * Tokens.space.popupShare, dpr)
+    readonly property real shareH: Tokens.snap(height * Tokens.space.popupShare, dpr)
+    readonly property real panelW: fullscreen ? width : shareW
+    readonly property real panelH: fullscreen ? height : shareH
 
     function u(v: real): int {
         return Tokens.px(v, root.s);
@@ -63,6 +73,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
+        visible: !root.fullscreen
         color: Tokens.color.dim
     }
 
@@ -84,6 +95,7 @@ Item {
         readonly property int footerY: height - root.u(Tokens.space.popupH - 846)
 
         Rectangle {
+            visible: !root.fullscreen
             x: root.u(Tokens.shadow.popup)
             y: root.u(Tokens.shadow.popup)
             width: parent.width

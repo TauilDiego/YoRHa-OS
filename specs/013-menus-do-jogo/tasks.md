@@ -57,26 +57,30 @@ erro, sempre dentro do `lab/perf begin/end`.
 
 ## Phase 2: Foundational (fundação, F1, o que as frentes dividem)
 
-- [ ] T009 `shell/ds/Tokens.qml`: o bloco `motion` com os números da research R1; tudo 0 com
+- [X] T009 `shell/ds/Tokens.qml`: o bloco `motion` com os números da research R1; tudo 0 com
   `Tokens.instant`
-- [ ] T010 `shell/ds/primitives/ScrollingLabel.qml`: pausa, rola a 60 px/s, pausa, volta; só quando não
+- [X] T010 `shell/ds/primitives/ScrollingLabel.qml`: pausa, rola a 60 px/s, pausa, volta; só quando não
   cabe; corta com "…" com `Tokens.instant` (FR-012, FR-016); página na galeria
-- [ ] T011 `shell/ds/base/TypedText.qml`: letra da ponta sorteada do próprio texto, velocidade por
+- [X] T011 `shell/ds/base/TypedText.qml`: letra da ponta sorteada do próprio texto, velocidade por
   parâmetro (FR-004, FR-005)
-- [ ] T012 `shell/services/Settings.qml` / `SettingsState`: as chaves de data-model.md, as strings novas
+- [X] T012 `shell/services/Settings.qml` / `SettingsState`: as chaves de data-model.md, as strings novas
   em `shell/strings/Strings.qml`
-- [ ] T013 `shell/popup/PopupFrame.qml` e `PopupWindow.qml`: `presentation` (`floating` | `fullscreen`),
+- [X] T013 `shell/popup/PopupFrame.qml` e `PopupWindow.qml`: `presentation` (`floating` | `fullscreen`),
   a geometria do painel e o `s` do painel de 84% nos dois modos (R4), ainda sem animação
-- [ ] T014 `shell/ds/composites/PickerLayout.qml`: dividir o `fluid` em `stretch` e `bodyOnly` (frente D
+- [X] T014 `shell/ds/composites/PickerLayout.qml`: dividir o `fluid` em `stretch` e `bodyOnly` (frente D
   §5), sem mudar o modo janela
-- [ ] T015 IPC: `pause dump` com `presentation`, `anim` e `choice`; `pause fps start|stop` (R7);
+- [X] T015 IPC: `pause dump` com `presentation`, `anim` e `choice`; `pause fps start|stop` (R7);
   `sounds` com `play` e `dump` (contracts/ipc.md); `settings set <chave> <valor>`, que o contrato
   supõe e o `shell.qml` ainda não tem (o `check-013 --mode` usa)
-- [ ] T016 `shell/services/Sounds.qml`: a API (`play(event)`) e os nomes dos eventos, ainda sem tocar,
+- [X] T016 `shell/services/Sounds.qml`: a API (`play(event)`) e os nomes dos eventos, ainda sem tocar,
   pras frentes A e C chamarem
 
 **Checkpoint**: a fundação na `teste-b` sem erro de QML, e os roteiros da 003, 004, 007 e 008 verdes
 (nada visível mudou).
+
+Feito em 31.10: log de QML e `qmllint` limpos; `check-003` 25/0 nos dois perfis, `check-004` 58/0,
+`check-007` 76/0 (com a galeria de 7 páginas), `check-008` 110/0 nos dois perfis. O `first` da 008 em
+hidpi falhou uma vez com 4 VMs na GPU e passou 3 de 3 sozinho.
 
 ## Phase 3: User Story 1 - Navegar com o movimento do jogo (P1) 🎯 MVP · Frente A
 
@@ -182,6 +186,8 @@ erro, sempre dentro do `lab/perf begin/end`.
   `check-008` e `check-011` verdes (SC-004)
 - [ ] T053 A lista das diferenças esperadas do modo janela parado (FR-017), com `lab/diffshot` contra as
   evidências
+  - já conhecida: a galeria passou de 6 pra 7 páginas (a 7 é a da fundação), então os subtítulos
+    "N/6" viraram "N/7" (o `check-007` agora dá Tab ×4 pra voltar à 1)
 - [ ] T054 `docs/design-system.md` (movimento, `ScrollingLabel`, `ChoicePopup`, apresentação, sons) e
   `README.md`
 - [ ] T055 Sessão do dono numa janela da VM: os dois modos, a janelinha e os sons; ajustar os números

@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import "../ds"
+import "../services"
 
 // A pop-up over the desktop (spec 003, research R1/R2/R11): one transparent window over the
 // whole monitor, on the Overlay layer, with the PopupFrame (the dimmed desktop and the paper
@@ -13,6 +14,8 @@ import "../ds"
 // with `keyboardActive: false` it hides, gives up the keyboard and lets clicks through, and the
 // owner unloads it a moment later (closing in two steps keeps Qt's text-input plugin quiet).
 // A click on the dimmed area emits dismissed(). Children go to the panel (see PopupFrame).
+// spec 013: `presentation` (Appearance › Menu presentation by default) is the frame's: "floating"
+// or "fullscreen" (PopupFrame).
 PanelWindow {
     id: root
 
@@ -30,6 +33,8 @@ PanelWindow {
     property bool clock: false
     readonly property int bodyTop: frame.bodyTop
     readonly property PopupFrame popupFrame: frame
+    // spec 013
+    property string presentation: Settings.menuPresentation
 
     signal dismissed()
     signal tabClicked(int index)
@@ -63,6 +68,7 @@ PanelWindow {
         tabs: root.tabs
         tab: root.currentTab
         clock: root.clock
+        presentation: root.presentation
         onDismissed: root.dismissed()
         onTabClicked: index => root.tabClicked(index)
     }

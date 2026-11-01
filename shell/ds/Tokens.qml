@@ -166,8 +166,11 @@ Singleton {
     }
 
     // --- motion -----------------------------------------------------------------------------
-    readonly property Motions motion: Motions {}
+    readonly property Motions motion: Motions {
+        instant: root.instant
+    }
     component Motions: QtObject {
+        property bool instant: false
         readonly property int highlight: 150               // ink sweep (FR-004), calibrate later
         readonly property int touch: 160                   // selected tab's stem down to the rule
         readonly property int untouch: 120                 // the stem back up, when deselected
@@ -176,6 +179,55 @@ Singleton {
         // spec 003
         readonly property int popupFade: 150               // pop-up opening fade; closing is instant
         readonly property int actionBusy: 2000             // an action's "in progress" note
+
+        // --- spec 013: the game's menu motion (research R1), approved in the prototype. Every
+        // duration below is 0 with Tokens.instant (Reduce motion, fixtures); the rates, distances
+        // and ratios stay, and their users skip the effect when instant (FR-016).
+        // Selection (FR-001): the ink sweeps in (OutQuart); the row losing it folds back (InOutQuad).
+        readonly property int selectIn: instant ? 0 : 400
+        readonly property int selectOut: instant ? 0 : 200
+        // Pulse on the live row and the open tab (FR-002): a trapezoid of light over the ink band,
+        // rise, top, fall, then rest until the period ends.
+        readonly property int pulse: instant ? 0 : 1333
+        readonly property int pulseRise: instant ? 0 : 350
+        readonly property int pulseTop: instant ? 0 : 83
+        readonly property int pulseFall: instant ? 0 : 317
+        readonly property real pulseLight: 0.32
+        // Title (FR-004): out, empty, then typed at titleCps with a random tip letter.
+        readonly property int titleOut: instant ? 0 : 100
+        readonly property int titleGap: instant ? 0 : 200
+        readonly property real titleCps: 20
+        // Cascade (FR-005): one row every cascadeStep, labels typed at labelCps (the selected
+        // one at titleCps).
+        readonly property int cascadeStep: instant ? 0 : 33
+        readonly property real labelCps: 28
+        // Tab change (FR-006): the body out, empty, then mounted again.
+        readonly property int tabOut: instant ? 0 : 133
+        readonly property int tabGap: instant ? 0 : 67
+        // Footer (FR-007): fade with blur, and a slide from the left.
+        readonly property int footFade: instant ? 0 : 130
+        readonly property int footSlide: instant ? 0 : 300
+        readonly property real footDx: 20
+        // Level change (FR-008): a sublist staggered in; the row left behind stretches and fades.
+        readonly property int levelStep: instant ? 0 : 34
+        readonly property int levelIn: instant ? 0 : 170
+        readonly property real levelDx: 10
+        readonly property int leave: instant ? 0 : 120
+        readonly property real leaveStretch: 2.1
+        // Open and close (FR-009): the grid, then the triangles (240×120 game px, 30% through a
+        // dark frame); closing runs the triangles backwards.
+        readonly property int openGrid: instant ? 0 : 100
+        readonly property int openTris: instant ? 0 : 300
+        readonly property int closeTris: instant ? 0 : 230
+        readonly property real triW: 240
+        readonly property real triH: 120
+        readonly property real triDark: 0.3
+        // Dialog (FR-010): the menu dims to dialogTo.
+        readonly property int dialogDim: instant ? 0 : 170
+        readonly property real dialogTo: 0.8
+        // Text that does not fit (FR-012): hold, scroll, hold, back.
+        readonly property real marqueeSpeed: 60            // game px per second
+        readonly property int marqueeHold: 1000
     }
     // Set by shell.qml while fixtures are active, so screenshots are pixel-identical (SC-002).
     property bool frozen: false

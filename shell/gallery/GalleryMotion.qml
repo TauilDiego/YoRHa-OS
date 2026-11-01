@@ -1,0 +1,177 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import "../ds"
+import "../ds/primitives"
+import "../ds/base"
+import "../strings"
+
+// The gallery's page 7 (spec 013): the pieces of the game's motion. The scrolling label (FR-012)
+// with a text that fits, one that does not, two copies scrolling as one (the ListItem's dark and
+// light faces) and the cut of Reduce motion (FR-016); the typed text with the tip letter (FR-004),
+// typing again every few seconds. Front A adds the rest of the motion here.
+Rectangle {
+    id: root
+
+    property real s: 1
+    property real dpr: 1
+
+    readonly property var gs: Strings.gallery
+    readonly property int boxW: u(300)
+
+    function u(v: real): int {
+        return Tokens.px(v, s);
+    }
+
+    color: Tokens.color.darkYellow
+
+    component Caption: Label {
+        s: root.s
+        role: "small"
+        color: Tokens.color.darkGray
+        opacity: 0.7
+    }
+    // A sample's box: a hairline frame boxW wide, the sample inside.
+    component Box: Rectangle {
+        width: root.boxW + 2 * root.u(12)
+        height: root.u(48)
+        color: Tokens.color.lightGray
+        border.width: Tokens.hair(1, root.dpr)
+        border.color: Tokens.color.darkGray
+    }
+
+    PageHeader {
+        x: root.u(Tokens.space.pageMarginH)
+        y: root.u(Tokens.space.pageMarginV)
+        s: root.s
+        title: root.gs.title
+        subtitle: root.gs.page7Subtitle
+    }
+
+    Column {
+        x: root.u(Tokens.space.pageMarginH)
+        y: root.u(220)
+        spacing: root.u(18)
+
+        Label {
+            s: root.s
+            role: "subheader"
+            text: root.gs.scrollingLabel
+        }
+
+        Row {
+            spacing: root.u(40)
+            Column {
+                spacing: root.u(8)
+                Box {
+                    ScrollingLabel {
+                        x: root.u(12)
+                        width: root.boxW
+                        anchors.verticalCenter: parent.verticalCenter
+                        s: root.s
+                        role: "listButton"
+                        text: root.gs.shortText
+                    }
+                }
+                Caption { text: root.gs.fits }
+            }
+            Column {
+                spacing: root.u(8)
+                Box {
+                    ScrollingLabel {
+                        objectName: "galleryMarquee"
+                        x: root.u(12)
+                        width: root.boxW
+                        anchors.verticalCenter: parent.verticalCenter
+                        s: root.s
+                        role: "listButton"
+                        text: root.gs.longText
+                    }
+                }
+                Caption { text: root.gs.scrolls }
+            }
+        }
+
+        Row {
+            spacing: root.u(40)
+            Column {
+                spacing: root.u(8)
+                // The dark copy over the paper, the light one over the left half's ink, clipped.
+                Box {
+                    id: pair
+                    ScrollingLabel {
+                        id: leader
+                        x: root.u(12)
+                        width: root.boxW
+                        anchors.verticalCenter: parent.verticalCenter
+                        s: root.s
+                        role: "listButton"
+                        text: root.gs.longText
+                    }
+                    Rectangle {
+                        width: Math.round(pair.width / 2)
+                        height: pair.height
+                        color: Tokens.color.darkGray
+                        clip: true
+                        ScrollingLabel {
+                            x: root.u(12)
+                            width: root.boxW
+                            anchors.verticalCenter: parent.verticalCenter
+                            s: root.s
+                            role: "listButton"
+                            text: root.gs.longText
+                            color: Tokens.color.lightYellow
+                            follow: leader
+                        }
+                    }
+                }
+                Caption { text: root.gs.synced }
+            }
+            Column {
+                spacing: root.u(8)
+                Box {
+                    Label {
+                        x: root.u(12)
+                        width: root.boxW
+                        anchors.verticalCenter: parent.verticalCenter
+                        s: root.s
+                        role: "listButton"
+                        text: root.gs.longText
+                        elide: Text.ElideRight
+                    }
+                }
+                Caption { text: root.gs.cut }
+            }
+        }
+
+        Item { width: 1; height: root.u(20) }
+
+        Label {
+            s: root.s
+            role: "subheader"
+            text: root.gs.typedTip
+        }
+        Box {
+            TypedText {
+                id: typed
+                x: root.u(12)
+                width: root.boxW
+                anchors.verticalCenter: parent.verticalCenter
+                s: root.s
+                role: "subheader"
+                color: Tokens.color.darkGray
+                maxLines: 1
+                text: root.gs.typedSample
+                cps: Tokens.motion.titleCps
+                tip: "letter"
+                instant: Tokens.instant
+            }
+            Timer {
+                interval: 3000
+                running: true
+                repeat: true
+                onTriggered: typed.restartKey = typed.restartKey + 1
+            }
+        }
+    }
+}

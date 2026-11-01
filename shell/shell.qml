@@ -119,6 +119,9 @@ ShellRoot {
     property string pausePendingQuery: ""        // `pause search` before the menu is up
     property int settingsCategory: 0             // where SYSTEM reopens
     property var pauseLast: null                 // the closed menu's last `pause dump`
+    // spec 013 (research R7): `pause fps start|stop`, the frame times (ms) of the menu's window.
+    property bool fpsOn: false
+    property var fpsTimes: []
     property var settingsLast: ({})              // the SYSTEM page's last state, for `settings dump`
     property var pauseLastAction: null           // { kind, id, detail }
     readonly property var pauseScreen: {
@@ -213,6 +216,8 @@ ShellRoot {
             }
             onCloseRequested: shell.closePause()
             Component.onCompleted: if (shell.pausePendingQuery !== "") search(shell.pausePendingQuery)
+            countFrames: shell.fpsOn
+            onFrame: ms => shell.fpsTimes.push(ms)
         }
     }
 
@@ -587,6 +592,32 @@ ShellRoot {
                 shell.pauseMenu.restart();
             }
         }
+        // spec 013 (research R7), tests only: `start` clears and starts counting the menu's frames
+        // (also across opening and closing); `stop` gives { frames, seconds, mean, p95, p95Ms,
+        // worstMs }: mean and p95 in frames per second (p95: what 95% of the frames reach).
+        function fps(cmd: string): string {
+            if (cmd === "start") {
+                shell.fpsTimes = [];
+                shell.fpsOn = true;
+                return "ok";
+            }
+            if (cmd !== "stop")
+                return `error: unknown command ${cmd} (start or stop)`;
+            shell.fpsOn = false;
+            const t = shell.fpsTimes.slice().sort((a, b) => a - b);
+            const n = t.length;
+            const total = t.reduce((a, b) => a + b, 0);
+            const p95Ms = n ? t[Math.min(n - 1, Math.ceil(n * 0.95) - 1)] : 0;
+            const r = v => Math.round(v * 10) / 10;
+            return JSON.stringify({
+                frames: n,
+                seconds: r(total / 1000),
+                mean: total > 0 ? r(n * 1000 / total) : 0,
+                p95: p95Ms > 0 ? r(1000 / p95Ms) : 0,
+                p95Ms: r(p95Ms),
+                worstMs: n ? r(t[n - 1]) : 0
+            });
+        }
         function dump(): string {
             const live = shell.pauseMenu;
             const d = live ? live.dumpState() : (shell.pauseLast ?? {
@@ -603,7 +634,11 @@ ShellRoot {
                     "confirm-start": SettingsModel.choiceId("menu", "confirm-start")
                 },
                 lastAction: shell.pauseLastAction,
-                compositor: { backend: Compositor.backendName, capabilities: Compositor.capabilities }
+                compositor: { backend: Compositor.backendName, capabilities: Compositor.capabilities },
+                // spec 013: a closed menu shows the presentation it would open in, and no animation
+                presentation: live ? d.presentation : Settings.menuPresentation,
+                anim: live ? d.anim : "idle",
+                choice: live ? d.choice : null
             }));
         }
     }
@@ -636,6 +671,29 @@ ShellRoot {
                 shell.pauseMenu.restartSystem(0);
             }
         }
+        // spec 013 (contracts/ipc.md): a shell setting by key (Settings.keys, e.g.
+        // shell.menuPresentation, sound.volume, input.kbLayouts, and shell.barContrast). `value` is
+        // read as JSON when it parses (true, 40), else as text; a list is comma-separated ("us,br":
+        // `qs ipc call` does not pass brackets through); "null" goes back to the config. Takes
+        // effect at once, as from the menus.
+        function set(key: string, value: string): string {
+            let v = value;
+            try {
+                v = JSON.parse(value);
+            } catch (e) {
+            }
+            if (key === "shell.barContrast" || key === "barContrast") {
+                if (v !== null && !Settings.barContrastLevels.includes(v))
+                    return `error: not a value of shell.barContrast: ${value}`;
+                Settings.setLevel("barContrast", v ?? "");
+                return "ok";
+            }
+            const k = Settings.keyOf(key);
+            if (Settings.keys[k]?.type === "layouts" && typeof v === "string")
+                v = v.split(",").map(x => x.trim()).filter(x => x !== "");
+            const err = Settings.setKey(k || key, v);
+            return err === "" ? "ok" : `error: ${err}`;
+        }
         function dump(): string {
             const open = shell.pauseOpen && shell.pauseTab === "system";
             const page = shell.pauseMenu ? shell.pauseMenu.systemDump() : shell.settingsLast;
@@ -651,10 +709,19 @@ ShellRoot {
                 keys: page.keys ?? [],
                 card: page.card ?? { title: "", note: "" },
                 values: SettingsModel.dumpValues(),
+                // spec 013: the shell settings by key (Settings.keys), as `settings set` takes them
+                shellValues: Object.keys(Settings.keys).reduce((o, k) => (o[k] = Settings.valueOf(k), o), {}),
                 dimmed: SettingsModel.dimmedIds(),
                 geometry: open ? page.geometry : null
             });
         }
+    }
+
+    // spec 013 (contracts/ipc.md): the interface sounds.
+    IpcHandler {
+        target: "sounds"
+        function play(event: string): string { return Sounds.play(event); }
+        function dump(): string { return JSON.stringify(Sounds.dump()); }
     }
 
     IpcHandler {

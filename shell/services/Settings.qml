@@ -108,21 +108,111 @@ Singleton {
     readonly property string barContrast: barContrastLevels.includes(barContrastSaved) ? barContrastSaved : barContrastConfigured
 
     // The shell settings the settings pop-up changes live: an option with `"setting": key` in the
-    // catalog is a choice over these values, in this order.
+    // catalog is a choice over these values, in this order (spec 013: or a toggle, over [true, false]).
     function levelsOf(key: string): var {
-        return key === "barContrast" ? barContrastLevels : [];
+        if (key === "barContrast")
+            return barContrastLevels;
+        const k = keyOf(key);
+        if (k && keys[k].type === "choice")
+            return keys[k].values;
+        if (k && keys[k].type === "bool")
+            return [true, false];
+        return [];
     }
-    function levelOf(key: string): string {
-        return key === "barContrast" ? barContrast : "";
+    function levelOf(key: string): var {
+        if (key === "barContrast")
+            return barContrast;
+        const k = keyOf(key);
+        return k ? valueOf(k) : "";
     }
     // Save `level` for `key` (SettingsState, "shell.<key>"); "" goes back to shell.json / defaults.
-    function setLevel(key: string, level: string): void {
+    function setLevel(key: string, level: var): void {
+        if (key !== "barContrast" && keyOf(key)) {
+            setKey(keyOf(key), level === "" ? null : level);
+            return;
+        }
         if (levelsOf(key).includes(level))
             SettingsState.set("shell." + key, level);
         else
             SettingsState.remove("shell." + key);
     }
     // --- end 004 acabamento ------------------------------------------------------------------------
+
+    // --- spec 013: the menus' presentation, the sounds and the keyboard layouts (data-model.md) ----
+    // Each key: its type and the default when neither SettingsState (what the menus saved) nor
+    // shell.json / defaults.json (`menuPresentation`, `sound.<x>`, `kbLayouts`) give a valid value.
+    // A catalog option binds to one with "setting": "<key>" (the "shell." prefix may be left out).
+    //   input.kbLayouts: [] = the compositor's layout as it is (the Keyboard › Layouts option fills it).
+    readonly property var keys: ({
+        "shell.menuPresentation": { type: "choice", values: ["floating", "fullscreen"], fallback: "floating", config: ["menuPresentation"] },
+        "sound.ui": { type: "bool", fallback: true, config: ["sound", "ui"] },
+        "sound.volume": { type: "int", min: 0, max: 100, fallback: 40, config: ["sound", "volume"] },
+        "sound.typing": { type: "bool", fallback: false, config: ["sound", "typing"] },
+        "sound.folder": { type: "string", fallback: "", config: ["sound", "folder"] },
+        "sound.bootLogin": { type: "bool", fallback: true, config: ["sound", "bootLogin"] },
+        "input.kbLayouts": { type: "layouts", fallback: [], config: ["kbLayouts"] }
+    })
+    // The key of the table for `key` or "shell." + `key`, or "".
+    function keyOf(key: string): string {
+        return keys[key] ? key : keys["shell." + key] ? "shell." + key : "";
+    }
+    // Is `v` a value of `key`? (layouts: XKB layout names, e.g. "us", "br"; an empty list is the default only)
+    function validKey(key: string, v: var): bool {
+        const t = keys[key];
+        switch (t?.type) {
+        case "choice":
+            return t.values.includes(v);
+        case "bool":
+            return typeof v === "boolean";
+        case "int":
+            return Number.isInteger(v) && v >= t.min && v <= t.max;
+        case "string":
+            return typeof v === "string";
+        case "layouts":
+            return Array.isArray(v) && v.length > 0 && v.every(x => typeof x === "string" && /^[a-z]{2,8}$/.test(x));
+        }
+        return false;
+    }
+    // From shell.json over defaults.json; a bad value falls back with an INFO line.
+    function configuredOf(key: string): var {
+        const t = keys[key];
+        let v = merged;
+        for (const p of t.config)
+            v = v && typeof v === "object" ? v[p] : undefined;
+        if (v === undefined || JSON.stringify(v) === JSON.stringify(t.fallback))
+            return t.fallback;
+        if (validKey(key, v))
+            return v;
+        console.info(`settings: ${t.config.join(".")} = ${JSON.stringify(v)} is not valid, using the default`);
+        return t.fallback;
+    }
+    // What a menu saved (SettingsState) wins over the config.
+    function valueOf(key: string): var {
+        const saved = SettingsState.get(key, undefined);
+        return saved !== undefined && validKey(key, saved) ? saved : configuredOf(key);
+    }
+    // Save `v` for `key`; null goes back to the config. "" on success, else what is wrong.
+    function setKey(key: string, v: var): string {
+        if (!keys[key])
+            return `unknown key: ${key}`;
+        if (v === null || v === undefined) {
+            SettingsState.remove(key);
+            return "";
+        }
+        if (!validKey(key, v))
+            return `not a value of ${key}: ${JSON.stringify(v)}`;
+        SettingsState.set(key, v);
+        return "";
+    }
+    // valueOf reads SettingsState.values and the config, so these follow every change.
+    readonly property string menuPresentation: valueOf("shell.menuPresentation")
+    readonly property bool soundUi: valueOf("sound.ui")
+    readonly property int soundVolume: valueOf("sound.volume")
+    readonly property bool soundTyping: valueOf("sound.typing")
+    readonly property string soundFolder: valueOf("sound.folder")
+    readonly property bool soundBootLogin: valueOf("sound.bootLogin")
+    readonly property var kbLayouts: valueOf("input.kbLayouts")
+    // --- end spec 013 --------------------------------------------------------------------------------
 
     // --- spec 007: the terminal that runs terminal apps (APPS, research R4) -----------------------
     // An argv prefix: a terminal app opens as [...terminal, "-e", ...its command]. A non-empty list
