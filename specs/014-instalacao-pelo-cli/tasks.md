@@ -148,9 +148,18 @@ O MVP é a US1 com a US4: sem o encaixe, o shell instalado não sobe no login.
 
 ## Phase 9: Polish & junção (F3)
 
-- [ ] T027 Juntar as frentes. Rodar o `check-014` inteiro e os roteiros 003, 004, 007, 008 e 013
-  (SC-007), com a lista das diferenças esperadas
-- [ ] T028 Documentação:
+- [X] T027 Juntar as frentes. Rodar o `check-014` inteiro e os roteiros 003, 004, 007, 008 e 013
+  (SC-007), com a lista das diferenças esperadas. Feito em 01.11, em sequência (sem frentes):
+  - `check-014` completo 65/0;
+  - `check-003` 25/0 ×2, `check-004` 63/0, `check-007` 76/0 (e o FR-015: no lab, Updates diz
+    "Not installed with yorha"), `check-008` 110/0 ×2;
+  - `check-013` 169/1 em 1080 janela: a navegação do bloco de sons contava 9 categorias; corrigido,
+    o bloco de sons deu 44/0;
+  - as diferenças esperadas da categoria Updates (a última do catálogo): o `check-003` conta só as
+    apagadas do Bluetooth (o "Update now" fica apagado fora da instalação), e o bloco de sons do
+    `check-013` conta as categorias
+- [X] T028 Documentação (o README, o design system §12 e o `lab/README.md`; o `PLAN.md` fica pro
+  fechamento, T030):
   - README: instalar e atualizar;
   - `docs/design-system.md`: a categoria Updates e a transmissão;
   - `PLAN.md`: S3 e S4;
