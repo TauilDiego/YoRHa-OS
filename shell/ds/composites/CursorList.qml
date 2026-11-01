@@ -100,13 +100,17 @@ Item {
         return n * pitch - (pitch - rowH) + 2 * railRoom;
     }
 
-    property real scrollY: 0
+    // The scroll is kept in rows: the panel changing size (another presentation, another scale)
+    // only moves the clamp, never leaves the column scrolled with nothing to hide.
+    property int topRow: 0
+    readonly property int maxTop: Math.max(0, count - visibleRows)
+    readonly property real scrollY: Math.min(topRow, maxTop) * pitch
     property real wheelRest: 0                    // the wheel's turn not yet spent (touchpads)
     function firstRow(): int {
-        return Math.round(scrollY / Math.max(1, pitch)) || 0;
+        return Math.min(topRow, maxTop);
     }
     function scrollTo(first: int): void {
-        scrollY = Math.max(0, Math.min(first, count - visibleRows)) * pitch;
+        topRow = Math.max(0, Math.min(first, maxTop));
     }
 
     // Just enough whole rows to show row `currentIndex` with its rails.
@@ -121,8 +125,8 @@ Item {
         scrollTo(first);
     }
     onCurrentIndexChanged: follow()
-    onHeightChanged: follow()
-    onCountChanged: follow()
+    onHeightChanged: Qt.callLater(follow)
+    onCountChanged: Qt.callLater(follow)
 
     // One wheel notch (120) scrolls one row.
     function wheelBy(delta: real): void {
@@ -138,11 +142,11 @@ Item {
             wheelRest += 120;
             first++;
         }
-        const before = scrollY;
+        const before = firstRow();
         scrollTo(first);
-        if (scrollY === before)
-            return;
         first = firstRow();
+        if (first === before)
+            return;
         if (currentIndex >= first && currentIndex < first + visibleRows)
             return;
         const pick = currentIndex < first ? first : first + visibleRows - 1;

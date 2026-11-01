@@ -301,13 +301,13 @@ FocusScope {
             option: opt ? opt.id : null,
             keys: keys.map(k => `${k.key} ${k.label}`),
             card: { title: card.title, note: card.note },
-            // spec 014: the columns' scroll (whole rows)
-            scroll: {
-                categories: categoryList.scrollState(),
-                options: { y: Math.round(options.scrollY), overflows: options.overflows }
-            },
             geometry: {
                 s: Math.round(s * 1000) / 1000,
+                // spec 014: the columns' scroll, in whole rows (layout: it follows the panel's size)
+                scroll: {
+                    categories: categoryList.scrollState(),
+                    options: { y: Math.round(options.scrollY), overflows: options.overflows }
+                },
                 panel: rectOf(root, 0, 0, width, height),
                 item: row ? rectOf(row, 0, 0, row.width, row.height)
                           : cat ? rectOf(categoryList, categoryList.itemX, catItemY, categoryList.width - categoryList.itemX, options.rowH) : null,

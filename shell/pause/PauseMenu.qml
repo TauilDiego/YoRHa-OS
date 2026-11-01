@@ -189,7 +189,7 @@ PopupWindow {
             log: tab === "log" ? logPage.dumpState() : null,
             system: (() => {
                 const d = systemPage.dumpState();
-                return { focus: d.focus, category: d.category, option: d.option, scroll: d.scroll };
+                return { focus: d.focus, category: d.category, option: d.option };
             })(),
             power: powerPage.dumpState(),
             geometry: {
@@ -198,7 +198,8 @@ PopupWindow {
                 tabs: tabIds.map((t, i) => popupFrame.tabGeometry(i)),
                 item: geo?.item ?? null,
                 value: geo?.value ?? null,
-                columns: geo?.columns ?? null            // spec 013: the tab's three columns
+                columns: geo?.columns ?? null,           // spec 013: the tab's three columns
+                scroll: geo?.scroll ?? null              // spec 014: SYSTEM's columns, in whole rows
             }
         };
     }

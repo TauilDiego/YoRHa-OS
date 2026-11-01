@@ -102,21 +102,23 @@ Item {
         return n * pitch - (pitch - rowH) + 2 * railRoom;
     }
 
-    // Scroll by whole rows, just enough to show row `currentIndex` with its rails.
-    property real scrollY: 0
+    // Scroll by whole rows, just enough to show row `currentIndex` with its rails. spec 014: kept in
+    // rows (as the CursorList's), so a panel that grows never leaves the column scrolled for nothing.
+    property int topRow: 0
+    readonly property int maxTop: Math.max(0, count - visibleRows)
+    readonly property real scrollY: Math.min(topRow, maxTop) * pitch
     function follow(): void {
         if (pitch <= 0)                          // still being built
             return;
-        let first = Math.round(scrollY / pitch) || 0;
+        let first = Math.min(topRow, maxTop);
         if (currentIndex < first)
             first = currentIndex;
         else if (currentIndex >= first + visibleRows)
             first = currentIndex - visibleRows + 1;
-        first = Math.max(0, Math.min(first, count - visibleRows));
-        scrollY = first * pitch;
+        topRow = Math.max(0, Math.min(first, maxTop));
     }
     onCurrentIndexChanged: follow()
-    onHeightChanged: follow()
+    onHeightChanged: Qt.callLater(follow)
 
     // One wheel notch (120) scrolls one row (spec 014).
     readonly property bool overflows: count > visibleRows
@@ -125,7 +127,7 @@ Item {
         if (!overflows)
             return;
         wheelRest += delta;
-        let first = Math.round(scrollY / pitch) || 0;
+        let first = Math.min(topRow, maxTop);
         while (wheelRest >= 120) {
             wheelRest -= 120;
             first--;
@@ -134,10 +136,10 @@ Item {
             wheelRest += 120;
             first++;
         }
-        first = Math.max(0, Math.min(first, count - visibleRows));
-        if (first * pitch === scrollY)
+        first = Math.max(0, Math.min(first, maxTop));
+        if (first === Math.min(topRow, maxTop))
             return;
-        scrollY = first * pitch;
+        topRow = first;
         if (currentIndex >= first && currentIndex < first + visibleRows)
             return;
         cursorRequested(currentIndex < first ? first : first + visibleRows - 1);
@@ -148,7 +150,7 @@ Item {
         onWheel: event => root.wheelBy(event.angleDelta.y)
     }
     onOptionsChanged: {
-        scrollY = 0;
+        topRow = 0;
         follow();
     }
 
