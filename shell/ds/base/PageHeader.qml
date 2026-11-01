@@ -89,8 +89,8 @@ Item {
         }
         stopAll();
         phase = "gap";
-        gapTimer.interval = Math.max(1, delay);
-        gapTimer.start();
+        delayPause.duration = Math.max(0, delay);
+        delayAnim.start();
         return delay + typeMs(title) + typeMs(subFull);
     }
 
@@ -104,8 +104,8 @@ Item {
             settle();
             return;
         }
-        if (phase === "gap" && !gapTimer.fromChange)
-            return;                              // still waiting for typeIn's delay: it types the new one
+        if (phase === "gap" && !outAnim.running)
+            return;                              // waiting for typeIn's delay (or held): it types the new one
         const shownTitle = headText, shownSub = subText;
         stopAll();
         outTitle = shownTitle;
@@ -118,8 +118,7 @@ Item {
 
     function stopAll(): void {
         outAnim.stop();
-        gapTimer.stop();
-        gapTimer.fromChange = false;
+        delayAnim.stop();
         halting = true;
         typist.complete();
         halting = false;
@@ -135,6 +134,7 @@ Item {
         typist.restartKey = typist.restartKey + 1;
     }
 
+    // Out, empty, then typed: one animation, so the gap ends on a frame (no timer's lag).
     SequentialAnimation {
         id: outAnim
         NumberAnimation { target: root; property: "opacity"; from: 1; to: 0; duration: Tokens.motion.titleOut }
@@ -142,20 +142,15 @@ Item {
             script: {
                 root.phase = "gap";
                 root.opacity = 1;
-                gapTimer.interval = Math.max(1, Tokens.motion.titleGap);
-                gapTimer.fromChange = true;
-                gapTimer.start();
             }
         }
+        PauseAnimation { duration: Tokens.motion.titleGap }
+        ScriptAction { script: root.typeTitle() }
     }
-
-    Timer {
-        id: gapTimer
-        property bool fromChange: false
-        onTriggered: {
-            fromChange = false;
-            root.typeTitle();
-        }
+    SequentialAnimation {
+        id: delayAnim
+        PauseAnimation { id: delayPause }
+        ScriptAction { script: root.typeTitle() }
     }
 
     // The clock of the typing: never drawn.

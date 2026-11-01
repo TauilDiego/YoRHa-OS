@@ -119,9 +119,15 @@ Item {
         // The clock starts with the window's first frame (making the menu takes a frame or more).
         firstFrame.restart();
     }
+    // The second tick: the first frame is out (making it can take a while: the shader, the texture),
+    // so no part of the grid is spent before it shows.
     FrameAnimation {
         id: firstFrame
+        property int ticks: 0
+        onRunningChanged: if (running) ticks = 0
         onTriggered: {
+            if (++ticks < 2)
+                return;
             stop();
             root.startOpen();
         }
@@ -272,8 +278,8 @@ Item {
         swapHold = true;
         tabBusy = true;
         mountAt = Date.now() + Tokens.motion.tabOut + Tokens.motion.tabGap;
-        mountTimer.interval = Math.max(1, Tokens.motion.tabOut + Tokens.motion.tabGap);
-        mountTimer.restart();
+        mountAnim.stop();
+        mountAnim.start();
     }
     NumberAnimation {
         id: swapOut
@@ -283,15 +289,18 @@ Item {
         to: 0
         duration: Tokens.motion.tabOut
     }
-    Timer {
-        id: mountTimer
-        onTriggered: {
-            root.swapFrom = -1;
-            root.swapHold = false;
-            const end = root.enterBody(0, -1);
-            busyTimer.interval = Math.max(1, end);
-            busyTimer.restart();
-        }
+    // The mount on a frame, as the rest of the motion (a timer could land a frame late).
+    SequentialAnimation {
+        id: mountAnim
+        PauseAnimation { duration: Tokens.motion.tabOut + Tokens.motion.tabGap }
+        ScriptAction { script: root.mount() }
+    }
+    function mount(): void {
+        swapFrom = -1;
+        swapHold = false;
+        const end = enterBody(0, -1);
+        busyTimer.interval = Math.max(1, end);
+        busyTimer.restart();
     }
     Timer {
         id: busyTimer
@@ -299,7 +308,7 @@ Item {
     }
     function swapReset(): void {
         swapOut.stop();
-        mountTimer.stop();
+        mountAnim.stop();
         busyTimer.stop();
         swapFrom = -1;
         swapLevel = 1;
