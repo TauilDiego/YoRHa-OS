@@ -34,15 +34,15 @@ erro, sempre dentro do `lab/perf begin/end`.
 
 - [X] T001 Mesclar a 008 na `main` (depois do agente da 008), dar push e trazer a `main` pra
   `013-menus-do-jogo`
-- [ ] T002 Criar a `lab-013` a partir da `lab-008` (que já tem a `main` privada e a `lab-007`, com o `check-007`; a `main` privada não tem) e a worktree
+- [X] T002 Criar a `lab-013` a partir da `lab-008` (que já tem a `main` privada e a `lab-007`, com o `check-007`; a `main` privada não tem) e a worktree
   `YoRHa-OS-private-wt/lab-013`
-- [ ] T003 `lab/up --audio-capture`: placa emulada `ich9-intel-hda` + `hda-output` com `-audiodev wav`,
+- [X] T003 `lab/up --audio-capture`: placa emulada `ich9-intel-hda` + `hda-output` com `-audiodev wav`,
   saída em `out/audio-<vm>-<data>.wav` (research S6); documentar no `lab/README.md`
-- [ ] T004 `lab/013/audio-rec`: gravar o monitor do sink nulo na sessão (`pw-record`), com um pulso
+- [X] T004 `lab/013/audio-rec`: gravar o monitor do sink nulo na sessão (`pw-record`), com um pulso
   marcador pra alinhar com os tempos do `lab/key`
-- [ ] T005 `lab/provision-step sound`: `qt6-multimedia`, `qt6-multimedia-ffmpeg`, `alsa-utils`,
+- [X] T005 `lab/provision-step sound`: `qt6-multimedia`, `qt6-multimedia-ffmpeg`, `alsa-utils`,
   `pipewire-audio` na VM; `lab/013/qsb`: compilar shaders com `qt6-shadertools` num container
-- [ ] T006 Sondagem na `teste-b` e na `teste-011`, registrada em `specs/013-menus-do-jogo/sondagem.md`:
+- [X] T006 Sondagem na `teste-b` e na `teste-011`, registrada em `specs/013-menus-do-jogo/sondagem.md`:
   - latência do `SoundEffect` contra os 50 ms (S1);
   - o greeter alcança o PipeWire? (S3);
   - `aplay -D plughw` antes do WirePlumber e o `EBUSY` (S4);
@@ -51,9 +51,9 @@ erro, sempre dentro do `lab/perf begin/end`.
   - a ordem das camadas Overlay, toast sobre o menu (R5).
 
   Ajustar a research no que mudar.
-- [ ] T007 `lab/013/sounds-gen`: gerar `system/sounds/*.wav` (eventos da data-model) e os níveis do
+- [X] T007 `lab/013/sounds-gen`: gerar `system/sounds/*.wav` (eventos da data-model) e os níveis do
   `boot-start` no container `nier-lab-py`, com semente fixa (S2); nota no `CREDITS.md` (sons nossos)
-- [ ] T008 Esqueleto do `lab/check-013` com os blocos do quickstart (`--only`, `--profile`, `--mode`)
+- [X] T008 Esqueleto do `lab/check-013` com os blocos do quickstart (`--only`, `--profile`, `--mode`)
 
 ## Phase 2: Foundational (fundação, F1, o que as frentes dividem)
 
@@ -70,7 +70,8 @@ erro, sempre dentro do `lab/perf begin/end`.
 - [ ] T014 `shell/ds/composites/PickerLayout.qml`: dividir o `fluid` em `stretch` e `bodyOnly` (frente D
   §5), sem mudar o modo janela
 - [ ] T015 IPC: `pause dump` com `presentation`, `anim` e `choice`; `pause fps start|stop` (R7);
-  `sounds` com `play` e `dump` (contracts/ipc.md)
+  `sounds` com `play` e `dump` (contracts/ipc.md); `settings set <chave> <valor>`, que o contrato
+  supõe e o `shell.qml` ainda não tem (o `check-013 --mode` usa)
 - [ ] T016 `shell/services/Sounds.qml`: a API (`play(event)`) e os nomes dos eventos, ainda sem tocar,
   pras frentes A e C chamarem
 

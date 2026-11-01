@@ -21,15 +21,19 @@ Tudo entra no manifesto da 011. O `uninstall` remove, e o `status` mostra.
    - com `muted` ou `bootLogin: false`, termina calado;
    - sem o arquivo, usa 30%;
    - com o arquivo, escolhe o nível mais próximo de `volume`.
-4. **Greeter:** grava `/run/yorha-os/sound.state` (`{ "level": …, "enabled": … }`), pro tema de login ler.
-5. **Toca:** `aplay -q -D plughw:<placa> boot-start-<nível>.wav`. Se der `EBUSY` (o WirePlumber já
+4. **Toca:** `aplay -q -D plughw:<placa> boot-start-<nível>.wav`. Se der `EBUSY` (o WirePlumber já
    pegou a placa), desiste calado e registra uma linha no journal.
+5. **Greeter:** só depois do passo 4 (ou logo, quando não toca), grava `/run/yorha-os/sound.state`
+   (`{ "level": …, "enabled": … }`), pro tema de login ler. A ordem importa: se o PipeWire do greeter
+   abre a placa enquanto o `aplay` toca, o nó da placa some até o WirePlumber reiniciar (sondagem S4).
 
 ## O tema de login
 
 - **Config:** `sounds=on|off` (padrão `on`), no `config` do tema.
 - **Arquivos:** os sons de `intro`, `move`, `confirm`, `error` e `close` ficam no tema.
 - **Volume:** vem de `/run/yorha-os/sound.state`. Sem o arquivo, 30%.
+- **Espera:** o tema só cria os seus sons quando o `sound.state` existe, esperando no máximo 2 s (é ele
+  que diz que o som de boot acabou). Sem o arquivo depois disso, toca a 30%. O login não espera nada.
 - **Sem servidor de áudio** (S3): fica calado, sem erro na tela.
 
 ## Opção do usuário

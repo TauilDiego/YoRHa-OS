@@ -36,6 +36,13 @@
   escuro) e pra tela de login (tinta sobre papel), gerado pelo mesmo `fam_loading.py` (spec 011). O
   aviso MIT vai junto dos quadros (`frames.txt` e este arquivo).
 
+## Sons
+
+- **Sons da interface, do boot e do login** (`system/sounds/`, spec 013): nossos, gerados pela
+  receita de `system/sounds/gen/synth.py`, sob a licença do projeto. Nenhum arquivo do jogo é usado:
+  o estudo de som da spec mediu só o caráter dos sons (brilho, duração, ordem de volume). Quem tem o
+  jogo no PC pode trocar pelos da própria cópia, pela pasta de sons (`docs/sons-do-jogo.md`).
+
 ## Código de terceiros
 
 Código de outros projetos só entra com licença compatível com a AGPL-3.0 e com crédito aqui e no

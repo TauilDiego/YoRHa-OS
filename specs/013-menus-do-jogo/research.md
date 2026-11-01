@@ -41,6 +41,9 @@ do boot da 011.
   versão em canvas resolveu. Aqui o equivalente é o shader.
 - **Modo janela:** o shader recorta só o retângulo do painel, então funciona igual.
 
+**Sondagem (T006):** um `.qsb` do `lab/013/qsb` carregou num `ShaderEffect` no Quickshell da VM, sem
+erro ([sondagem.md](sondagem.md)).
+
 **Alternativas:**
 - 150 `Shape` com opacidade: mais objetos e mais trabalho na CPU.
 - `Canvas` do QML: desenho por software, lento em tela cheia.
@@ -77,12 +80,18 @@ garantir que o toast fica por cima, o `NotifyLayer` recria a sua superfície dep
 **Por quê:** a frente D apontou o risco. Não há como declarar a ordem entre duas superfícies da mesma
 camada.
 
+**Sondagem (T006):** a superfície Overlay criada por último fica em cima. Um toast que já estava na tela
+fica coberto pelo menu, e recriar a superfície dele traz ele pra frente. O plano B vale.
+
 ## R6. Keyboard › Layouts no Hyprland 0.56 (configuração em Lua)
 
-**Decisão:** a lista vira `input.kb_layout` (separado por vírgula), aplicada sem reiniciar. A troca é por
-um atalho de "próximo layout" (`hyprctl switchxkblayout`). Na F0, conferir na VM qual caminho o 0.56 com
-Lua aceita em tempo de execução (`hyprctl keyword` ou a API Lua). Se nenhum aceitar sem recarregar, a
-opção escreve na configuração gerenciada e pede um recarregamento.
+**Decisão:** a lista vira `input.kb_layout` (separado por vírgula), aplicada sem reiniciar por
+`hyprctl eval 'hl.config({ input = { kb_layout = "us,br" } })'` e gravada também na configuração
+gerenciada (o `hyprctl reload` volta ao arquivo). A troca é por um atalho de "próximo layout"
+(`hyprctl switchxkblayout all next`).
+
+**Sondagem (T006):** o `hyprctl keyword` não funciona com a configuração em Lua ("Use eval"); o `eval`
+aplica na hora em todos os teclados.
 
 **Por quê:** é a primeira configuração "lista" que faz sentido no desktop, e o dono pediu um exemplo
 real.
@@ -116,7 +125,8 @@ simples.
   - **Pacotes:** `qt6-multimedia`, `qt6-multimedia-ffmpeg`.
   - **Alternativa (fallback):** `Process` com `pw-play` (`pipewire-audio`).
   - O `Quickshell.Services.Pipewire` só lê e controla os nós (serve pra ler o volume), não toca som.
-  - **Risco:** a latência real contra os 50 ms, a medir na F0.
+  - **Sondagem (T006):** tecla → som em até ~30 ms na VM (quantum de 21 ms), e `play()` repetido toca
+    sempre. O `pw-play` fica sem uso previsto.
 - **S2, os nossos arquivos.**
   - **Formato:** WAV PCM 16 bits, 48 kHz, mono.
   - **Geração:** pelo `synth_demo.py` da frente C, no container `nier-lab-py`, com semente fixa (sai
@@ -126,7 +136,8 @@ simples.
 - **S3, a tela de login.**
   - **Decisão:** `SoundEffect` no tema, pelo PipeWire do usuário `sddm`. O PAM do greeter tem
     `pam_systemd`, e o Arch habilita os sockets do PipeWire pra todos os usuários.
-  - **Não verificado:** se o greeter alcança o PipeWire. A F0 confere na VM.
+  - **Sondagem (T006):** o usuário `sddm` alcança o PipeWire, que sobe pelo socket no primeiro cliente, e
+    um `SoundEffect` toca como `sddm`. Falta conferir dentro do próprio greeter (T048).
   - **Plano B:** o serviço de boot (root) toca os sons de login pela placa. Plano C: login sem som,
     com o boot e a sessão mantidos.
 - **S4, o som de boot.**
@@ -137,11 +148,16 @@ simples.
     `/var/lib/sddm/state.conf`). Sem informação, 30%; mudo, nada.
   - **Greeter:** uma cópia vai pra `/run/yorha-os/sound.state`.
   - **Riscos:**
-    - `EBUSY` se o WirePlumber pegar a placa antes;
+    - `EBUSY` se o WirePlumber pegar a placa antes: o script desiste calado;
     - o mixer da placa mudo num sistema recém-instalado.
+  - **Sondagem (T006):** no boot da `teste-011`, o som toca de 3,04 a 4,27 s, antes do greeter. Mas se o
+    PipeWire pede a placa enquanto o `aplay` toca, o nó da placa some e só volta reiniciando o
+    WirePlumber. Por isso o `sound.state` é gravado **depois** do `aplay`, e o tema só cria os sons
+    quando ele existe (até 2 s de espera). O PipeWire do greeter só sobe no primeiro som.
 - **S5, o som de entrada.** Uma vez por login: um `mkdir` atômico de uma trava em `$XDG_RUNTIME_DIR`.
   Recarregar o shell não repete o som.
-- **S6, gravar o áudio da VM.**
+- **S6, gravar o áudio da VM.** (Sondagem: a placa vai num endereço fixo, `00:1b.0`, senão o disco muda
+  de slot e o UEFI não acha o boot; o `lab/down` corrige o cabeçalho do WAV.)
   - **Placa emulada:** `-audiodev wav,id=snd0,path=<arquivo>` + `-device ich9-intel-hda -device
     hda-output,audiodev=snd0` (QEMU 11.1.3 aceita; o `hda-duplex` falha com o backend `wav`). Entra
     no `lab/up` como `--audio-capture`.

@@ -22,7 +22,7 @@ Chamada: `qs -p <pasta da UI> ipc call <alvo> <função> [args]`; no lab, `lab/i
 | Função | Retorno | Uso |
 |---|---|---|
 | `play(event)` | `"ok"` / `"error: …"` | Toca um evento (contracts/sounds.md) |
-| `dump()` | JSON | `{ enabled, volume, typing, folder, overrides: [eventos], last: [{ event, t }] }`. `t` em ms desde o boot do shell, pros testes de tempo |
+| `dump()` | JSON | `{ enabled, volume, typing, folder, overrides: [eventos], last: [{ event, t }] }`. `t` é o `Date.now()` do `play()` (ms, relógio da VM), pra comparar com os ataques do `lab/013/audio-rec onsets` |
 
 ## `settings`
 
