@@ -10,7 +10,8 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    property string source: resolve(Quickshell.env("NIER_FIXTURES") ?? "")
+    // YORHA_OS_FIXTURES; the lab's older NIER_FIXTURES still works (spec 014).
+    property string source: resolve(Quickshell.env("YORHA_OS_FIXTURES") || Quickshell.env("NIER_FIXTURES") || "")
     readonly property bool active: source !== "" && data !== null
     readonly property var data: file.loaded ? parse(file.text()) : null
 

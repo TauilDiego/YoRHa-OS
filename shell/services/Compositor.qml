@@ -26,8 +26,10 @@ Singleton {
 
     // --- the backend -------------------------------------------------------------------------------
     readonly property var backendFiles: ({ hyprland: "HyprlandBackend.qml", none: "NullBackend.qml" })
+    // YORHA_OS_COMPOSITOR forces a backend (tests); the lab's older NIER_COMPOSITOR still works (spec 014).
+    readonly property string forcedCompositor: String(Quickshell.env("YORHA_OS_COMPOSITOR") || Quickshell.env("NIER_COMPOSITOR") || "")
     readonly property string backendWanted: {
-        const forced = String(Quickshell.env("NIER_COMPOSITOR") ?? "").toLowerCase();
+        const forced = root.forcedCompositor.toLowerCase();
         if (forced !== "")
             return forced;
         if (String(Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE") ?? "") !== "")
@@ -59,7 +61,7 @@ Singleton {
         // A warning when the session's compositor has no backend (or none was found); forcing
         // "none" on purpose (NIER_COMPOSITOR=none, tests) is only noted.
         onLoaded: {
-            const forced = String(Quickshell.env("NIER_COMPOSITOR") ?? "") !== "";
+            const forced = root.forcedCompositor !== "";
             if (root.backendWanted !== item.name)
                 console.warn(`compositor: no backend for "${root.backendWanted}", using "${item.name}" (empty lists, no actions)`);
             else if (item.name === "none" && !forced)

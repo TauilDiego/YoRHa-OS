@@ -14,9 +14,9 @@ import Quickshell.Io
 //
 // Where the sounds are (decision of T042): `soundsDir`, the first of
 //   1. $YORHA_OS_SOUNDS                     the lab, a test, an unusual install
-//   2. /usr/share/yorha-os/sounds           the installed system
-//   3. <shell>/../system/sounds             running from the repository (shell/ and system/ side by side)
-// that has move.wav. lab/sync sends system/sounds/*.wav to ~/nier/system/sounds, so the third rule
+//   2. <shell>/../system/sounds             the installed version (spec 014: shell/ and system/ side by
+//                                           side in ~/.local/share/yorha-os/versions/<v>), or the repo
+// that has move.wav. lab/sync sends system/sounds/*.wav to ~/nier/system/sounds, so the second rule
 // finds them on the lab's VMs (~/nier/ui is shell/) with no environment. The boot and login sounds
 // don't come from here (the module installs its own copies).
 //
@@ -61,12 +61,9 @@ Singleton {
 
     // --- where the files are -----------------------------------------------------------------------
     readonly property string envDir: Quickshell.env("YORHA_OS_SOUNDS") ?? ""
-    readonly property string systemDir: "/usr/share/yorha-os/sounds"
     readonly property string repoDir: Quickshell.shellDir + "/../system/sounds"
-    readonly property string soundsDir: envDir !== "" && envProbe.loaded ? envDir
-        : systemProbe.loaded ? systemDir : repoProbe.loaded ? repoDir : ""
+    readonly property string soundsDir: envDir !== "" && envProbe.loaded ? envDir : repoProbe.loaded ? repoDir : ""
     FileView { id: envProbe; path: root.envDir !== "" ? root.envDir + "/move.wav" : ""; blockLoading: true; printErrors: false }
-    FileView { id: systemProbe; path: root.systemDir + "/move.wav"; blockLoading: true; printErrors: false }
     FileView { id: repoProbe; path: root.repoDir + "/move.wav"; blockLoading: true; printErrors: false }
 
     // --- the user's folder -------------------------------------------------------------------------

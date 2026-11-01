@@ -22,12 +22,63 @@ cmd_status() {
     cur=$(yorha_current)
     prev=$(cat "$YORHA_HOME/previous" 2>/dev/null || true)
     channel=$(cat "$YORHA_HOME/channel" 2>/dev/null || true)
-    pgrep -x qs >/dev/null && running=yes || running=no
+    [[ -s $(run_dir)/shell.pid ]] && running="yes (pid $(cat "$(run_dir)/shell.pid"))" || running=no
     printf '%s %s\n' "$YORHA_PRETTY" "${cur:-not installed}"
     printf '  previous:  %s\n' "${prev:-none}"
     printf '  channel:   %s\n' "${channel:-none}"
     printf '  folder:    %s\n' "$YORHA_HOME"
     printf '  shell:     %s\n' "$running"
+}
+
+# --- the shell (research R4) ------------------------------------------------------------------------
+run_dir() { printf '%s/%s' "${XDG_RUNTIME_DIR:-/tmp}" "$YORHA_NAME"; }
+shell_root() { readlink -f "$YORHA_HOME/current"; }
+
+# Supervise qs on the version in use: one instance (a lock), restarted when it exits, so that
+# `shell restart` (and an update) bring up whatever "current" points at. Stops when uninstalled.
+# --relaunch: the same supervisor, re-executed from a newer version (it keeps the lock on fd 9).
+cmd_shell_start() {
+    local rd root qspid log
+    rd=$(run_dir); mkdir -p "$rd" "$YORHA_STATE"
+    if [[ ${1:-} != --relaunch ]]; then
+        exec 9>"$rd/shell.lock"
+        flock -n 9 || { yorha_say "the shell is already running"; exit 0; }
+        # Qt registers with the portal at start; wait for it (at most 30 s), as the lab's runner does.
+        timeout 30 systemctl --user start xdg-desktop-portal.service >/dev/null 2>&1 || true
+        for _ in $(seq 60); do busctl --user status org.freedesktop.portal.Desktop >/dev/null 2>&1 && break; sleep 0.5; done
+    fi
+    # Two known Qt 6.12 warnings that are not ours (see lab/guest/nier-ui-run).
+    export QT_LOGGING_RULES="qt.qpa.wayland.textinput.warning=false;qt.qpa.services.warning=false"
+    log="$YORHA_STATE/shell.log"
+    while [[ -L $YORHA_HOME/current ]]; do
+        root=$(shell_root)
+        # A newer version took over: run its own supervisor (its code may differ from this one's).
+        if [[ $root != "$YORHA_ROOT" && -x $root/bin/$YORHA_CMD ]]; then
+            exec "$root/bin/$YORHA_CMD" shell start --relaunch
+        fi
+        [[ -s $log ]] && mv -f "$log" "$log.1"     # the previous run, kept once
+        YORHA_OS_ROOT="$root" qs -p "$root/shell" >>"$log" 2>&1 &
+        qspid=$!
+        echo "$qspid" > "$rd/shell.pid"
+        wait "$qspid" || true
+        rm -f "$rd/shell.pid"
+        sleep 1
+    done
+    yorha_say "not installed anymore; the shell stays off"
+}
+
+# Stop the running qs; the supervisor brings the version in use back up.
+cmd_shell_restart() {
+    local pid
+    pid=$(cat "$(run_dir)/shell.pid" 2>/dev/null || true)
+    if [[ -n $pid ]] && kill "$pid" 2>/dev/null; then yorha_say "shell restarting"
+    else yorha_say "the shell is not running (start it with: $YORHA_CMD shell start)"; fi
+}
+
+# The shell's IPC, on the same path the supervisor used (so qs finds the instance).
+cmd_ipc() {
+    [[ -L $YORHA_HOME/current ]] || yorha_fail "not installed"
+    exec qs -p "$(shell_root)/shell" ipc call "$@"
 }
 
 # The line the person adds at the top of ~/.config/hypr/hyprland.lua (contracts/encaixe.md).
@@ -69,6 +120,13 @@ main() {
         version) echo "$YORHA_NAME $(yorha_version_of "$YORHA_ROOT")" ;;
         status) cmd_status ;;
         _install) cmd__install ;;
+        shell)
+            case ${2:-} in
+                start) shift 2; cmd_shell_start "$@" ;;
+                restart) cmd_shell_restart ;;
+                *) usage ;;
+            esac ;;
+        ipc) shift; (($#)) || usage; cmd_ipc "$@" ;;
         *) usage ;;
     esac
 }
