@@ -203,8 +203,14 @@ nesta VM, então do ambiente.
     evento `typing` no campo de busca de APPS, a opção Sound › Typing sound, a chave `sound.typing` e os
     casos dela no `sound-opts`. O `typing.wav` fica no repo, sem uso;
   - ligar `choiceOpen`/`choicePick` na janelinha da frente C (as frentes C e D trabalharam separadas)
-- [ ] T052 `check-013` inteiro nos dois perfis e nos dois modos; `check-003`, `check-004`, `check-007`,
+- [X] T052 `check-013` inteiro nos dois perfis e nos dois modos; `check-003`, `check-004`, `check-007`,
   `check-008` e `check-011` verdes (SC-004)
+  - feito na junção (01.11): `check-013` verde no modo janela nos dois perfis; na tela cheia, 154/6 e
+    153/7, com as falhas nas medidas de tempo da frente A (decisão 7 da página de revisão);
+    `check-003` 25/0 ×2, `check-004` 58/0, `check-007` 76/0, `check-008` 110/0 ×2; na `teste-011`,
+    `bootsound` + `boot-timing` 11/0 (+0,04 s), `check-011 login` 6/0, `intro` 13/0, `undo` ok;
+  - achado na regressão: o backend FFmpeg do Qt entra em laço com processo + som; o shell usa o
+    GStreamer, e o greeter fica no FFmpeg (sondagem.md, "Na junção")
 - [X] T053 A lista das diferenças esperadas do modo janela parado (FR-017), com `lab/diffshot` contra as
   evidências: `diferencas-janela.md` (17 telas, antes e depois, na junção)
   - já conhecida: a galeria passou de 6 pra 7 páginas (a 7 é a da fundação), então os subtítulos
