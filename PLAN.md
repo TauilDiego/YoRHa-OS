@@ -148,15 +148,15 @@ Serpantinum.
 |---|---|---|
 | S1 Serpantinum × YoRHa-OS | O que o Serpantinum faz por você hoje e o que o YoRHa-OS já tem | Você revisou a tabela, e ela diz o que falta pra U7 |
 | S2 Arch completo na VM ✅ | ISO + archinstall desassistido | Um comando entrega um `arch-limpo` instalado pela ISO |
-| S3 Instalação e encaixe (CLI) | `install.sh`, o CLI `yorha`, as dependências do shell e o arquivo de atalhos do Hyprland (spec 014) | Numa VM limpa, um comando instala e o shell sobe pelo Hyprland da pessoa |
-| S4 Updates | `yorha update` e `rollback`, migrations, o aviso no shell e o "Update now" (a v0 entra na spec 014) | Atualizar de v0.1 pra v0.2 funciona na VM, pelo CLI e pelo menu |
+| S3 Instalação e encaixe (CLI) ✅ | `install.sh`, o CLI `yorha`, as dependências do shell e o arquivo de atalhos do Hyprland (spec 014) | Numa VM limpa, um comando instala e o shell sobe pelo Hyprland da pessoa |
+| S4 Updates ✅ (v0) | `yorha update` e `rollback`, migrations, o aviso no shell e o "Update now" (a v0 veio na spec 014; o canal público e a assinatura ficam pra S6) | Atualizar de v0.1 pra v0.2 funciona na VM, pelo CLI e pelo menu |
 | S5 Niri | O adaptador do shell e um arquivo de atalhos pro Niri | O mesmo checklist passa no Niri |
 | S6 Público | Docs, nome definitivo, release assinada, testes em EndeavourOS/CachyOS | Alguém de fora instala sem ajuda |
 | S7 (opcional) | Pacote de plugins pro Omarchy usando o mesmo código da UI | — |
 
-**Lembrete pra S3 (instalador):** criar `~/.local/share/applications/` antes de subir o shell. O
-Quickshell só observa essa pasta se ela existir quando ele sobe; sem isso, um app instalado depois
-não aparece no menu de pausa até o shell reiniciar (spec 007: spike T003, research R4, e T041).
+**Lembrete da S3, feito na 014:** o supervisor (`yorha shell start`) cria `~/.local/share/applications/`
+antes de subir o shell. O Quickshell só observa essa pasta se ela existir quando ele sobe (spec 007:
+spike T003, research R4, e T041).
 
 ## 10. Riscos
 
@@ -242,6 +242,13 @@ não aparece no menu de pausa até o shell reiniciar (spec 007: spike T003, rese
   T058, e as decisões abertas estão no `relatorio.md` da spec. No mesmo dia, todas as branches dos
   dois repositórios foram mescladas na `main` e apagadas (as specs 005, 009 e 010 entraram na `main`),
   e o código órfão saiu.
+- **2026-11-01:** S3 e S4 concluídas na v0 (spec 014): um comando instala o YoRHa-OS na pasta dele
+  (`~/.local/share/yorha-os`, versões lado a lado), uma linha no `hyprland.lua` encaixa o shell e os
+  atalhos, e o `yorha` atualiza, volta, migra, liga o boot e o login e desinstala. O canal da v0 é o
+  repositório local. Na VM, o `check-014` passou inteiro, e os roteiros 003, 004, 007, 008 e 013
+  também. Na sessão do dono, uma instalação do zero recebeu uma correção pelo aviso e pelo "Update
+  now", voltou com `yorha rollback` e foi de novo com `yorha update`. Os achados da sessão viraram
+  correções na hora: as categorias do SYSTEM passaram a rolar, e o instalador diz onde a linha vai.
 
 ## Fontes
 

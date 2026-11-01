@@ -164,9 +164,20 @@ O MVP é a US1 com a US4: sem o encaixe, o shell instalado não sobe no login.
   - `docs/design-system.md`: a categoria Updates e a transmissão;
   - `PLAN.md`: S3 e S4;
   - `lab/README.md`: a 014
-- [ ] T029 Sessão do dono numa janela da VM:
+- [X] T029 Sessão do dono numa janela da VM:
   - instalar do zero;
   - commitar uma correção e ver chegar, pelo `yorha update` e pelo "Update now"
+
+  Feito em 01.11, na `t014`: o dono instalou a 0.94 do zero; o aviso da 0.97 → "Update now" → 0.97;
+  `yorha rollback` → 0.94; `yorha update` → 0.97 ("deu tudo bem"). Os achados viraram correções:
+  - as 10 categorias do SYSTEM passavam do rodapé no painel flutuante: a `CursorList` rola em
+    linhas inteiras, e a roda do mouse rola as duas colunas (8af2c2b, bc19aca; 003 25/0, 007 76/0,
+    013 modes 44/0);
+  - a linha do `hyprland.lua` foi colada no terminal, e ela já estava no arquivo: o instalador diz
+    que ela vai no arquivo e reconhece quando ela já está lá (39e2fa0; check-014 install 11/0,
+    uninstall 7/0);
+  - de quebra, o lembrete da S3: o supervisor cria `~/.local/share/applications` (0310b55);
+  - no lab, o `GUEST_ENV` pega a instância mais nova do Hyprland depois de um relogin
 - [ ] T030 Fechamento:
   - `relatorio.md` e a página de revisão;
   - Mapa e Central;

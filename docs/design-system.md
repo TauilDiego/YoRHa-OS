@@ -378,7 +378,13 @@ atual:
 - **O mouse move o foco junto,** mas só quando o ponteiro se mexe de verdade: um ponteiro parado
   sobre itens que aparecem embaixo dele (popup abrindo, outra categoria) não rouba o foco do
   teclado.
-- **Rolagem:** uma coluna que não cabe rola em linhas inteiras, com a pipa sempre visível.
+- **Rolagem:** uma coluna que não cabe rola em linhas inteiras, com a pipa sempre visível. Vale
+  pras duas colunas (desde a 014, T029, a das categorias também: com a Updates, as 10 não cabem no
+  painel flutuante a 1080p). A coluna termina na última linha que cabe inteira antes do rodapé
+  (`fitHeight`), e a roda do mouse rola uma linha por passo; se a linha atual sai da vista, o
+  cursor vai pra linha mais perto à vista e o foco vai pra essa coluna. A rolagem é guardada em
+  linhas: se o painel cresce (tela cheia), a coluna volta a mostrar tudo, e ao voltar fica onde
+  estava. Regra do dono (01.11): todo menu cabe onde precisa caber e rola pra caber mais opções.
 
 ## 8. Papel de parede (spec 004)
 
