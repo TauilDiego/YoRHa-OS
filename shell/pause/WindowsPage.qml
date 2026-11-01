@@ -27,6 +27,8 @@ FocusScope {
 
     property real s: 1
     property real startY: Tokens.space.pauseBodyY
+    // spec 013, front B: the columns follow the width (the full-screen menu)
+    property bool stretch: false
 
     signal closeRequested()
 
@@ -262,6 +264,7 @@ FocusScope {
         id: layout
         anchors.fill: parent
         s: root.s
+        stretch: root.stretch
         focus: true
         startY: root.startY
         entries: root.entries

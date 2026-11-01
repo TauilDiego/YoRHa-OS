@@ -2,17 +2,18 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import "../ds"
+import "../notify"
 import "../popup"
 import "../services"
 import "../settings"
 import "../strings"
 
 // The pause menu (spec 007, U3): the pop-up frame of spec 003 with the game's tab bar and one page
-// per tab: APPS (launcher), WINDOWS, SYSTEM (the settings page of spec 003) and POWER. shell.qml
+// per tab: APPS (launcher), WINDOWS, LOG (the text log of spec 008, spec 013 US8), SYSTEM (the
+// settings page of spec 003) and POWER. shell.qml
 // opens it on the focused monitor, in the tab it asks for, and unloads it after closing (two
 // steps, like every pop-up).
-// Tabs (research R15) are data: an entry here and a page are all a new tab needs (spec 008's LOG
-// goes after WINDOWS). Tab and Shift+Tab (Backtab) go round them; a click on a tab opens it; tabs
+// Tabs (research R15) are data: an entry here and a page are all a new tab needs. Tab and Shift+Tab (Backtab) go round them; a click on a tab opens it; tabs
 // never take the kite nor a keyboard focus of their own (FR-004). Each page keeps its cursor while
 // the menu is open; a fresh menu starts each page by its opening rule (FR-006).
 // Keys the page doesn't use reach this scope: Tab/Backtab switch, and on APPS any printable text
@@ -35,6 +36,7 @@ PopupWindow {
     readonly property var tabList: [
         { id: "apps" },
         { id: "windows" },
+        { id: "log" },
         { id: "system" },
         { id: "power" }
     ]
@@ -43,12 +45,18 @@ PopupWindow {
     readonly property var tabText: Strings.pause.tabs[tab] ?? Strings.pause.tabs.apps
     readonly property var page: pageOf(tab)
 
+    function u(v: real): int {
+        return Tokens.px(v, s);
+    }
+
     function pageOf(id: string): var {
         switch (id) {
         case "apps":
             return appsPage;
         case "windows":
             return windowsPage;
+        case "log":
+            return logPage;
         case "system":
             return systemPage;
         case "power":
@@ -95,6 +103,7 @@ PopupWindow {
     function restart(): void {
         appsPage.restart();
         windowsPage.restart();
+        logPage.restart();
         systemPage.restart(systemCategory);
         powerPage.restart();
         pageOf(tab)?.enter();
@@ -108,6 +117,11 @@ PopupWindow {
 
     function restartSystem(index: int): void {
         systemPage.restart(index);
+    }
+
+    // spec 013, front B: the LOG page's state, in the format of `notify dump` (shell.qml).
+    function logDump(): var {
+        return logPage.dumpState();
     }
 
     // The footer's hints of a page, with "Tab Next tab" before Esc (SYSTEM adds its own).
@@ -149,6 +163,7 @@ PopupWindow {
             keys: pageKeys.map(k => `${k.key} ${k.label}`),
             apps: appsPage.dumpState(),
             windows: windowsPage.dumpState(),
+            log: tab === "log" ? logPage.dumpState() : null,
             system: (() => {
                 const d = systemPage.dumpState();
                 return { focus: d.focus, category: d.category, option: d.option };
@@ -210,6 +225,7 @@ PopupWindow {
             visible: root.tab === "apps"
             enabled: visible
             s: root.s
+            stretch: root.popupFrame.fullscreen
             onCloseRequested: root.closeRequested()
         }
 
@@ -219,12 +235,44 @@ PopupWindow {
             visible: root.tab === "windows"
             enabled: visible
             s: root.s
+            stretch: root.popupFrame.fullscreen
             onCloseRequested: root.closeRequested()
         }
 
+        // spec 013 (US8): the text log as a tab. The page is a rect of its own: its list starts at the
+        // body's first row (as APPS's does) and its cards stop where APPS's do, 24 px over the footer
+        // rule; it stretches with the width in both presentations (PickerLayout's fluid).
+        LogPage {
+            id: logPage
+            readonly property var hostScreen: root.screen       // read through a var (qmllint: QuickshellScreenInfo)
+            readonly property int bodyY: root.u(Tokens.space.pauseBodyY) - root.u(20)
+            x: 0
+            y: bodyY
+            width: parent.width
+            height: parent.height - root.u(Tokens.space.popupH - 820) - root.u(24) + root.u(8) - bodyY
+            visible: root.tab === "log"
+            enabled: visible
+            s: root.s
+            dpr: Tokens.scaleOf(hostScreen?.name ?? "")
+            host: "pause"
+            monitor: hostScreen?.name ?? ""
+            onCloseRequested: root.closeRequested()
+
+            function enter(): void {
+            }
+            function leave(): void {
+            }
+            function geometry(): var {
+                return dumpState().geometry;
+            }
+        }
+
+        // SYSTEM's columns sit at fixed x in the 1612 px frame; full screen centers that frame.
         SettingsPage {
             id: systemPage
-            anchors.fill: parent
+            x: root.popupFrame.fullscreen ? Tokens.snap((parent.width - width) / 2, root.popupFrame.dpr) : 0
+            width: root.popupFrame.fullscreen ? Math.min(parent.width, root.u(Tokens.space.popupW)) : parent.width
+            height: parent.height
             visible: root.tab === "system"
             enabled: visible
             s: root.s
@@ -250,6 +298,7 @@ PopupWindow {
             enabled: visible
             s: root.s
             active: root.keyboardActive && root.tab === "power"
+            originX: root.popupFrame.fullscreen ? Tokens.snap((width - root.u(Tokens.space.popupW)) / 2, root.popupFrame.dpr) : 0
             onCloseRequested: root.closeRequested()
         }
     }

@@ -30,6 +30,8 @@ FocusScope {
 
     property real s: 1
     property real startY: Tokens.space.pauseBodyY
+    // spec 013, front B: where the 1612 px frame starts (the full-screen menu centers it)
+    property real originX: 0
     property bool active: false              // the tab is open and the menu has the keyboard
     readonly property string confirmMode: Session.confirmMode
     readonly property string dialogStart: SettingsModel.choiceId("menu", "confirm-start") || "cancel"
@@ -269,7 +271,7 @@ FocusScope {
 
     GroupedList {
         id: list
-        x: root.u(48)
+        x: root.originX + root.u(48)
         y: root.topY
         width: implicitWidth
         height: Math.min(implicitHeight, root.bottomY - y)
@@ -291,7 +293,7 @@ FocusScope {
 
     DescriptionCard {
         id: description
-        x: root.u(560)
+        x: root.originX + root.u(560)
         y: root.topY
         width: root.u(Tokens.space.pickerPreviewW)
         s: root.s
@@ -306,7 +308,7 @@ FocusScope {
 
     StatusCard {
         id: statusCard
-        x: root.u(1160)
+        x: root.originX + root.u(1160)
         y: root.topY
         width: root.u(Tokens.space.pickerOptionsW)
         s: root.s
