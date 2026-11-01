@@ -228,6 +228,30 @@ Singleton {
         // Text that does not fit (FR-012): hold, scroll, hold, back.
         readonly property real marqueeSpeed: 60            // game px per second
         readonly property int marqueeHold: 1000
+        // spec 013, front A: the prototype's smaller numbers (lab/mockups/menus-jogo, E1–E10).
+        readonly property int pulseDelay: instant ? 0 : 150    // the pulse starts once the row settles
+        readonly property int cascadeWipe: instant ? 0 : 130   // a row wipes in from the left (OutQuart)
+        readonly property int cascadeType: instant ? 0 : 60    // and its label starts typing after it
+        readonly property int leaveOthers: instant ? 0 : 70    // the other rows fade as one leaves
+        readonly property int kiteIn: instant ? 0 : 200        // the kite's entry while a menu assembles
+        readonly property real kiteDx: 25
+        readonly property int openDim: instant ? 0 : 400       // the ink around the panel, opening
+        readonly property int dialogFirst: instant ? 0 : 33    // the dialog's title band alone (a frame)
+        readonly property int dialogIn: instant ? 0 : 120      // then its card and body fade in
+        readonly property int dialogOut: instant ? 0 : 80      // closing: the card blurs out
+        // The assembly after the triangles (E1): ms from their end to each part's start.
+        readonly property int buildRules: 230                  // the rules draw themselves (duration)
+        readonly property int buildStrips: 330                 // the tab bar's strips (fade of buildFade)
+        readonly property int buildTabs: 370                   // the tabs, cascadeStep apart
+        readonly property int buildFade: 70
+        readonly property int buildTitle: 500                  // the title types, the clock fades in
+        readonly property int buildBody: 560                   // the cards fade in, the rows cascade
+        readonly property int buildBodyFade: 90
+        readonly property int buildFoot: 620                   // the footer slides in
+        readonly property int buildKite: 670                   // the kite comes in
+        readonly property int buildEnd: 1400                   // the assembly is over
+        // What a pop-up's owner waits for before unloading it: the leaving row, then the triangles.
+        readonly property int popupClose: leave + closeTris
     }
     // Set by shell.qml while fixtures are active, so screenshots are pixel-identical (SC-002).
     property bool frozen: false

@@ -12,6 +12,9 @@ import "../base"
 // The rule spans the bar's whole width; the tabs start at the left.
 // `tone` (spec 004 US6): the top bar's tone, 0 paper → 1 light, handed to strips, tabs and rule.
 // `high` (004 acabamento): the bar's High contrast, handed to the tabs.
+// spec 013 (front A): `pulse` makes the selected tab breathe (FR-002, the pause menu). `buildT` is
+// the ms into a menu's assembly (PopupFrame, E1), < 0 when there is none: the dotted rule draws
+// itself from the right, then the strips and the tabs fade in, one after the other.
 Item {
     id: root
 
@@ -22,6 +25,13 @@ Item {
     property real ruleGap: 10                    // game px between the tabs and the rule
     property real ruleScale: s                   // scale of the rule's dotted pattern
     property real tabWidth: 0                    // spec 007: game px per tab; 0 = fit the label
+    property bool pulse: false                   // spec 013
+    property real buildT: -1
+
+    // spec 013: how far a part that starts at `start` and lasts `dur` is into the assembly (0–1).
+    function level(start: real, dur: real): real {
+        return buildT < 0 ? 1 : Math.max(0, Math.min(1, (buildT - start) / Math.max(1, dur)));
+    }
 
     // Index of the tab under the pointer, or -1.
     readonly property int hoveredIndex: hover.index
@@ -70,6 +80,7 @@ Item {
         s: root.s
         tone: root.tone
         height: root.bandH
+        opacity: root.level(Tokens.motion.buildStrips, Tokens.motion.buildFade)
     }
 
     Row {
@@ -95,6 +106,8 @@ Item {
                 reachRule: true
                 fixedWidth: root.tabWidth
                 ruleY: root.ruleY
+                pulse: root.pulse
+                opacity: root.level(Tokens.motion.buildTabs + index * Tokens.motion.cascadeStep, Tokens.motion.buildFade)
                 onClicked: root.activated(index)
                 onHoveredChanged: Qt.callLater(hover.sync)
                 Component.onDestruction: Qt.callLater(hover.sync)
@@ -102,12 +115,23 @@ Item {
         }
     }
 
-    Rule {
-        id: rule
-        kind: "dotted"
+    // The rule, drawn from the right while the menu assembles (OutQuart).
+    Item {
+        readonly property real drawn: 1 - Math.pow(1 - root.level(0, Tokens.motion.buildRules), 4)
+        x: Math.round(root.width * (1 - drawn))
         y: root.ruleY
-        s: root.ruleScale
-        tone: root.tone
-        width: root.width
+        width: root.width - x
+        height: rule.implicitHeight
+        clip: drawn < 1
+        visible: drawn > 0
+
+        Rule {
+            id: rule
+            x: -parent.x
+            kind: "dotted"
+            s: root.ruleScale
+            tone: root.tone
+            width: root.width
+        }
     }
 }

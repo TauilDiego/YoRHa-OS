@@ -36,6 +36,9 @@ import "../base"
 // of 100 costs about the same as one of 10. Notes, the search line and the empty line keep the
 // Column (their height wraps); the default (lazy: false) is the Column list, unchanged. The scroll
 // (stops, wheel, the window's bottom) reads every row's place through rowBox(), in both modes.
+// spec 013 (FR-005, front A): enter(delay, kiteAt) brings the entries in view in, one every
+// cascadeStep from `delay` ms: an item wipes in and types (ListItem.enter), a title or a note fades
+// in; the ones out of view are just there. It returns { next, end }, as the CursorList's.
 Item {
     id: root
 
@@ -163,6 +166,41 @@ Item {
         readonly property bool dim: isItem && entryData?.dim === true
         readonly property Item row: isItem ? listItem : null
 
+        // spec 013: a title, a note or a search line fades in with the cascade.
+        property real level: 1
+        opacity: isItem ? 1 : level
+        function enter(delay: int, kiteAt: int): int {
+            if (isItem)
+                return listItem.enter(delay, kiteAt);
+            levelAnim.stop();
+            if (Tokens.instant) {
+                level = 1;
+                return 0;
+            }
+            level = 0;
+            levelPause.duration = Math.max(0, delay);
+            levelAnim.start();
+            return delay + Tokens.motion.cascadeWipe;
+        }
+        function complete(): void {
+            if (isItem)
+                listItem.complete();
+            levelAnim.stop();
+            level = 1;
+        }
+        SequentialAnimation {
+            id: levelAnim
+            PauseAnimation { id: levelPause }
+            NumberAnimation {
+                target: entry
+                property: "level"
+                from: 0
+                to: 1
+                duration: Tokens.motion.cascadeWipe
+                easing.type: Easing.OutQuart
+            }
+        }
+
         // A title's line box is its text size, as the mockup's (CSS line-height 1): the
         // label's taller natural line is centered on it.
         readonly property int topPad: isGroup && idx > 0 ? root.groupTop : 0
@@ -244,7 +282,8 @@ Item {
         Rectangle {
             width: listItem.inkW
             height: listItem.bandH
-            visible: entry.dim && width > 0
+            visible: entry.dim && width > 0 && listItem.reveal >= 1
+            opacity: listItem.bandLevel
             color: Qt.rgba(Tokens.color.darkGray.r, Tokens.color.darkGray.g, Tokens.color.darkGray.b, 0.45)
         }
     }
@@ -283,6 +322,27 @@ Item {
             currentIndex = ((currentIndex + step) % count + count) % count;
         else
             currentIndex = Math.max(0, Math.min(count - 1, currentIndex + step));
+    }
+
+    // spec 013: the cascade over the entries in view (see the header).
+    readonly property string motionList: "list"
+    function enter(delay: int, kiteAt: int): var {
+        let d = delay, end = 0;
+        const top = scrollY, bottom = scrollY + viewHeight;
+        for (let i = 0; i < entries.length; i++) {
+            const e = entryAt(i);
+            if (!e)
+                continue;
+            const r = rowBox(i);
+            const y = topRoom + (r ? r.y : 0), h = r ? r.height : 0;
+            if (y + h <= top + 0.5 || y >= bottom - 0.5) {
+                e.complete();
+                continue;
+            }
+            end = Math.max(end, e.enter(d, kiteAt));
+            d += Tokens.motion.cascadeStep;
+        }
+        return { next: d, end: end };
     }
 
     Keys.enabled: keysEnabled
