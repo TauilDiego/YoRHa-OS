@@ -7,7 +7,8 @@ description: "Tarefas da 014: instalação e encaixe do shell, v0 pelo CLI"
 **Input**: `specs/014-instalacao-pelo-cli/` (spec.md, plan.md, research.md, data-model.md, contracts/,
 quickstart.md)
 
-**Status**: geradas em 01.11, depois da aprovação do plano pelo dono ("sim").
+**Status**: geradas em 01.11, depois da aprovação do plano pelo dono ("sim"). Setup e fundação feitos em 01.11
+(lab-014 `cbde342`; perf `…104434-vm-t014-…` e `…104645-vm-t014-…`).
 
 **Tests**: sem testes automatizados de código. A prova de cada tarefa é a evidência da VM (princípio
 IV): a saída dos comandos, o `dump` do IPC, screenshots e o log de QML sem erro, sempre dentro do
@@ -35,26 +36,26 @@ que o canal segue. Nada dele vai pra `main`.
 
 ## Phase 1: Setup (F0)
 
-- [ ] T001 Criar a `lab-014` a partir da `main` privada e o worktree `YoRHa-OS-private-wt/lab-014`
-- [ ] T002 `lab/014/canal`, em python só com a biblioteca padrão (contracts/canal.md):
+- [X] T001 Criar a `lab-014` a partir da `main` privada e o worktree `YoRHa-OS-private-wt/lab-014`
+- [X] T002 `lab/014/canal`, em python só com a biblioteca padrão (contracts/canal.md):
   - `start`, `stop`, `status`, `follow <pasta> [ref]` e `log`;
   - `/latest`, o tarball pelo `git archive --add-virtual-file`, o `.sha256` e o `/install.sh`;
   - uma opção de teste pra servir um checksum errado (US2, cenário 5)
-- [ ] T003 O worktree descartável `YoRHa-OS-wt/t014-canal` (branch `t014-canal`, saindo da 014), e o
+- [X] T003 O worktree descartável `YoRHa-OS-wt/t014-canal` (branch `t014-canal`, saindo da 014), e o
   canal seguindo ele
-- [ ] T004 A camada `t014` (`lab/new t014 --from hypr-iso`), o `lab/014/prep` e o
+- [X] T004 A camada `t014` (`lab/new t014 --from hypr-iso`), o `lab/014/prep` e o
   `lab/014/hyprland-limpo.lua`, um Hyprland de pessoa comum, sem o `nier-ui-run` nem o `~/nier/ui`
-- [ ] T005 O esqueleto do `lab/check-014`, por blocos, no padrão do `check-013`, e a seção da 014 no
+- [X] T005 O esqueleto do `lab/check-014`, por blocos, no padrão do `check-013`, e a seção da 014 no
   `lab/README.md`. Validar: de dentro da `t014`, `curl 10.0.2.2:8714/latest` responde (medido)
 
 ## Phase 2: Foundational (F1, o que as frentes dividem)
 
-- [ ] T006 `lib/yorha/name.sh`, com o nome, as pastas e o arquivo do canal num lugar só (FR-019), e o
+- [X] T006 `lib/yorha/name.sh`, com o nome, as pastas e o arquivo do canal num lugar só (FR-019), e o
   `lib/yorha/common.sh`, levado do `lab/u2/comum/yorha-common.sh` (sem a instalação de pacotes por
   listas)
-- [ ] T007 `bin/yorha`: o despacho, `version` e `status`; o `VERSION` lido da pasta da versão
-- [ ] T008 `system/deps` (research R3) e o `migrations/README.md` (o formato da data-model)
-- [ ] T009 Validar na `t014`: uma versão desempacotada à mão e o `current` apontando pra ela. O
+- [X] T007 `bin/yorha`: o despacho, `version` e `status`; o `VERSION` lido da pasta da versão
+- [X] T008 `system/deps` (research R3) e o `migrations/README.md` (o formato da data-model)
+- [X] T009 Validar na `t014`: uma versão desempacotada à mão e o `current` apontando pra ela. O
   `yorha version` e o `yorha status` respondem (medido)
 
 ## Phase 3: User Story 1 - Instalar com um comando (P1) 🎯 MVP · Frente A
