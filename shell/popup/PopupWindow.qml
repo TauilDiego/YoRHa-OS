@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import "../ds"
 import "../services"
 
 // A pop-up over the desktop (spec 003, research R1/R2/R11): one transparent window over the

@@ -10,7 +10,6 @@ Singleton {
     readonly property string vol: "VOL"
     readonly property string bat: "BAT"
     readonly property string system: "SYSTEM"
-    readonly property string brand: "YoRHa-OS"
     readonly property string charging: "+"         // after the battery percent while charging
     readonly property string muted: "MUTE"         // in place of the volume percent
 
@@ -43,7 +42,6 @@ Singleton {
         readonly property string stateHovered: "hovered"
         readonly property string stateSelected: "selected"
         readonly property string stateDimmed: "dimmed"
-        readonly property string sampleItem: "Recovery"
         readonly property var sampleList: ["Recovery", "Enhancements", "Support", "Materials", "Key Items"]
         readonly property var sampleTabs: ["MAP", "QUESTS", "ITEMS", "SYSTEM"]
         // Added by the gallery (T033).
@@ -283,7 +281,6 @@ Singleton {
         // WINDOWS
         readonly property string workspaceN: "WORKSPACE %1"
         readonly property string special: "SPECIAL"
-        readonly property string groupNote: "%1 · %2"                          // monitor · count
         readonly property string focusedMark: "●"
         readonly property string noWindows: "No open windows."
         readonly property string noWindowsText: "No open windows. Open an app in APPS."
@@ -429,7 +426,6 @@ Singleton {
         readonly property string serverMissingText: "Another program owns the notification name (%1). Transmissions stay off until it quits."
         // the Notifications category of the settings (FR-039, FR-042)
         readonly property string category: "Notifications"
-        readonly property string categoryAbout: "How transmissions, the text log and the on-screen display behave. These options apply at once and are kept."
         readonly property var prefLabels: ({
             dnd: "Do not disturb", position: "Position", osdPosition: "OSD position", voice: "System voice",
             log: "Text log", logSize: "Log size", monitor: "Monitor", onScreen: "On screen",

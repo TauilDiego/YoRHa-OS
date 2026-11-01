@@ -40,7 +40,7 @@ Lido no boot pelo `yorha-boot-sound`, do último usuário que entrou (`/var/lib/
 | `choiceOpen` / `choicePick` | abrir / escolher na janelinha | `open.wav` / `confirm.wav` | 19 / 06 |
 | `notify` / `notifyCritical` | notificação normal / crítica | `notify.wav` / `notify-critical.wav` | 09 / 10 |
 | `osd` | passo do volume ou do brilho | `move.wav` | 03 |
-| ~~`typing`~~ | não toca (decisão do dono, 01.11) | `typing.wav` fica no repo, sem uso | 08 |
+| ~~`typing`~~ | não toca (decisão do dono, 01.11) | `typing.wav` e a receita saíram na limpeza de 01.11 | 08 |
 | `sessionStart` | o desktop aparece depois do login | `session-start.wav` | 02 |
 | `bootStart` | a placa de som fica pronta no boot | `boot-start.wav` | 01 |
 | `loginIntro`, `loginMove`, `loginConfirm`, `loginError`, `loginPower` | eventos da tela de login | `intro.wav`, `move.wav`, `confirm.wav`, `error.wav`, `close.wav` | 01, 03, 06, inventado, 19 ao contrário |

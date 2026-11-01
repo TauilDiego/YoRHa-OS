@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import ".."
 import "../primitives"
-import "../base"
 import "../../strings"
 
 // The stack of transmissions on one monitor (spec 008, FR-004, FR-005, FR-018, FR-041), in one of

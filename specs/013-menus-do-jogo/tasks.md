@@ -201,7 +201,7 @@ nesta VM, então do ambiente.
   `PopupFrame`
   - decisão do dono (01.11): **sem som de digitação, nem como opção**. Tirar o que a frente D ligou: o
     evento `typing` no campo de busca de APPS, a opção Sound › Typing sound, a chave `sound.typing` e os
-    casos dela no `sound-opts`. O `typing.wav` fica no repo, sem uso;
+    casos dela no `sound-opts`. O `typing.wav` ficou no repo, sem uso, até a limpeza de 01.11;
   - ligar `choiceOpen`/`choicePick` na janelinha da frente C (as frentes C e D trabalharam separadas)
 - [X] T052 `check-013` inteiro nos dois perfis e nos dois modos; `check-003`, `check-004`, `check-007`,
   `check-008` e `check-011` verdes (SC-004)

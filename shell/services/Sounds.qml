@@ -8,7 +8,7 @@ import Quickshell.Io
 
 // The interface sounds (spec 013, contracts/sounds.md, research S1).
 //   play(event): "ok" when the sound started; "skipped: <why>" when a rule held it back (sounds off,
-//   system muted, do-not-disturb, typing off, the 40 ms debounce, 4 at once); "error: …" for an
+//   system muted, do-not-disturb, the 40 ms debounce, 4 at once); "error: …" for an
 //   unknown event. Every call is kept in `last` (the newest 20, { event, t: Date.now(), played }) for
 //   the tests' timing (`sounds dump`).
 //

@@ -125,13 +125,6 @@ def tab():                                              # a short run of bright 
     return norm(b, -12)
 
 
-def typing():
-    b = silence(30)
-    tt = t(12)
-    place(b, (hp_noise(len(tt), 8000) * 0.5 + sine(13100, tt)) * env_exp(tt, 0.3, 2.2), 0)
-    return norm(b, -16)
-
-
 # --- the chime family: confirm, notifications, the session -------------------------------------
 
 def shimmer(ms, tau, att=20):
@@ -230,7 +223,7 @@ def intro():                                            # the login screen appea
 
 
 SOUNDS = {
-    "move": move, "back": back, "error": error, "tab": tab, "typing": typing,
+    "move": move, "back": back, "error": error, "tab": tab,
     "confirm": confirm, "notify": notify, "notify-critical": notify_critical,
     "session-start": session_start, "dialog": dialog,
     "open": open_, "close": close, "boot-start": boot_start, "intro": intro,

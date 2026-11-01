@@ -1,7 +1,6 @@
 import QtQuick
 import ".."
 import "../primitives"
-import "../base"
 
 // The on-screen display (spec 008, FR-028): a band of 600 × 72 with the light block, a square, the
 // label (VOLUME, BRIGHTNESS, MIC ON / MIC OFF), the inverted hp-bar of 300 (at 35% when muted, full

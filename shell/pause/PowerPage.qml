@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import "../ds"
-import "../ds/primitives"
 import "../ds/composites"
 import "../services"
 import "../strings"
