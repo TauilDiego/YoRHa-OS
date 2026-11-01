@@ -235,11 +235,12 @@ Rectangle {
     }
 
     // --- spec 013, front A: the list and the title, moving on their own ---------------------------
+    // The list under the left column, the title right of the typed text (the junction: front C's
+    // pop-ups hold the right of the page, which is narrower than 1920 game px in hidpi).
     Column {
-        x: root.u(1000)
-        y: root.u(220)
+        x: root.u(Tokens.space.pageMarginH)
+        y: root.u(650)
         spacing: root.u(18)
-
         Label {
             s: root.s
             role: "subheader"
@@ -247,15 +248,17 @@ Rectangle {
         }
         CursorList {
             id: demoList
-            width: root.u(520)
+            width: root.u(400)
             s: root.s
             model: root.gs.motionItems
             keysEnabled: false
         }
         Caption { text: root.gs.motionListNote }
-
-        Item { width: 1; height: root.u(20) }
-
+    }
+    Column {
+        x: root.u(Tokens.space.pageMarginH + 420)
+        y: root.u(504)
+        spacing: root.u(18)
         Label {
             s: root.s
             role: "subheader"

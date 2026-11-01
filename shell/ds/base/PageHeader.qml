@@ -39,7 +39,13 @@ Item {
     property string outTitle: ""
     property string outSub: ""
     property bool halting: false
-    readonly property string subFull: subtitle === "" || subtitle.startsWith("-") ? subtitle : "-" + subtitle
+    readonly property string subFull: subOf(subtitle)
+    // The handlers below read the subtitle through this, not subFull: onSubtitleChanged runs before
+    // subFull's binding follows, and would copy the old one (the junction, 01.11: with Tokens.instant
+    // SYSTEM showed "-Open Windows" after WINDOWS).
+    function subOf(text: string): string {
+        return text === "" || text.startsWith("-") ? text : "-" + text;
+    }
     // The tip: a letter drawn from the text at every step (the typist's own is only drawn once its
     // animation runs, so the first step would show nothing).
     property string tip: ""
@@ -63,14 +69,14 @@ Item {
     Component.onCompleted: {
         if (phase === "") {
             curTitle = title;
-            curSub = subFull;
+            curSub = subOf(subtitle);
         }
     }
 
     function settle(): void {
         stopAll();
         curTitle = title;
-        curSub = subFull;
+        curSub = subOf(subtitle);
         phase = "";
     }
 
@@ -91,7 +97,7 @@ Item {
         phase = "gap";
         delayPause.duration = Math.max(0, delay);
         delayAnim.start();
-        return delay + typeMs(title) + typeMs(subFull);
+        return delay + typeMs(title) + typeMs(subOf(subtitle));
     }
 
     // The planned typing of `text`, in ms.
@@ -127,7 +133,7 @@ Item {
 
     function typeTitle(): void {
         curTitle = title;
-        curSub = subFull;
+        curSub = subOf(subtitle);
         phase = "title";
         typist.text = curTitle;
         typist.shown = 0;                        // no stale count before the animation's first step
