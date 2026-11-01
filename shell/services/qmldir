@@ -16,3 +16,4 @@ singleton NotifyPrefs 1.0 NotifyPrefs.qml
 singleton NotifyStore 1.0 NotifyStore.qml
 singleton Osd 1.0 Osd.qml
 singleton Sounds 1.0 Sounds.qml
+UiSound 1.0 UiSound.qml

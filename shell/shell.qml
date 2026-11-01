@@ -43,6 +43,14 @@ ShellRoot {
 
     property bool galleryOpen: false
 
+    // spec 013, front D: the entry sound, once per login (Sounds.sessionStart, research S5). A moment
+    // after the start so the desktop is up; not with fixtures (frozen screenshots).
+    Timer {
+        interval: 700
+        running: !Fixtures.active
+        onTriggered: Sounds.sessionStart()
+    }
+
     // The desktop background, one per monitor (US4). The arcs and bundles drift through one
     // cycle every ~10 min, advanced 10 times a second; the layers only move on whole pixels,
     // so most steps change nothing on screen. Stopped by fixtures, by `wallpaperMotion: false`

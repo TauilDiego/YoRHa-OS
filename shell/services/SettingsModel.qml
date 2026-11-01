@@ -61,6 +61,10 @@ Singleton {
     // its values from NotifyPrefs (the Monitor option lists the outputs).
     function resolve(opt: var): var {
         const l = liveOf(opt);
+        // spec 013, front D: the sound folder's info row shows the path in use (the catalog's text
+        // is "ours", the built-in sounds).
+        if (l && opt.type === "info" && l.key === "sound.folder")
+            return Settings.soundFolder !== "" ? Object.assign({}, opt, { text: Settings.soundFolder }) : opt;
         if (!l?.notify)
             return opt;
         const N = Strings.notify;
@@ -87,7 +91,9 @@ Singleton {
         const l = liveOf(opt);
         if (l && opt.type === "toggle")
             return l.src.levelOf(l.key) === true;
-        if (l)
+        if (l && opt.type === "slider")          // spec 013: sound.volume
+            return Number(l.src.levelOf(l.key));
+        if (l && opt.type === "choice")
             return Math.max(0, l.src.levelsOf(l.key).indexOf(l.src.levelOf(l.key)));
         const k = catId + "." + optId;
         const saved = opt?.persist === false ? undefined : SettingsState.get("settings." + k, undefined);
@@ -181,7 +187,9 @@ Singleton {
             l.src.setLevel(l.key, opt.type === "toggle" ? v === true : l.src.levelsOf(l.key)[v]);
             return;
         }
-        if (opt?.setting)
+        if (opt?.setting && (opt.type === "toggle" || opt.type === "slider"))
+            Settings.setLevel(opt.setting, v);      // spec 013: sound.ui, sound.volume, …
+        else if (opt?.setting)
             Settings.setLevel(opt.setting, Settings.levelsOf(opt.setting)[v] ?? "");
         else if (opt && opt.persist !== false)
             SettingsState.set("settings." + catId + "." + optId, v);
@@ -202,6 +210,8 @@ Singleton {
             set(catId, optId, Math.max(0, Math.min(resolve(opt).values.length - 1, v + dir)));
         else if (opt.type === "slider")
             set(catId, optId, Math.max(0, Math.min(100, v + dir * opt.step)));
+        if (value(catId, optId) !== v)
+            Sounds.play("change");               // spec 013, front D: after the set, at the new volume
     }
 
     // Enter: toggle flips; choice advances, wrapping; action shows its note for a while.
@@ -210,11 +220,18 @@ Singleton {
         if (!opt || isDimmed(catId, optId))
             return;
         const v = value(catId, optId);
-        if (opt.type === "toggle")
+        if (opt.type === "toggle") {
             set(catId, optId, !v);
-        else if (opt.type === "choice")
+            Sounds.play("change");               // spec 013, front D
+        } else if (opt.type === "choice") {
             set(catId, optId, (v + 1) % resolve(opt).values.length);
-        else if (opt.type === "action") {
+            Sounds.play("change");               // spec 013, front D
+        } else if (opt.type === "action") {
+            Sounds.play("confirm");              // spec 013, front D
+            // spec 013, front D: an action with `clears` saves "" for that setting (Sound › Use
+            // ours: the sound folder back to the built-in sounds, even over a shell.json folder).
+            if (opt.clears && Settings.keyOf(String(opt.clears)))
+                Settings.setKey(Settings.keyOf(String(opt.clears)), "");
             busy = catId + "." + optId;
             busyTimer.restart();
         }
@@ -226,6 +243,7 @@ Singleton {
         if (opt?.type !== "slider" || isDimmed(catId, optId))
             return;
         set(catId, optId, Math.max(0, Math.min(100, Math.round(v * 100))));
+        Sounds.play("change");                   // spec 013, front D
     }
 
     // The catalog's values; what was saved still wins (value()).
@@ -287,12 +305,30 @@ Singleton {
                 if (live?.notify && !((o.type === "choice" || o.type === "toggle")
                         && NotifyPrefs.levelsOf(live.key).length > 0))
                     return `${where}: a notifications setting is a choice or a toggle over a known option`;
-                if (live && !live.notify && !(o.type === "choice"
-                        && Settings.levelsOf(String(o.setting)).length === o.values.length))
-                    return `${where}: a live setting is a choice over the setting's levels`;
+                if (live && !live.notify && !liveFits(o))
+                    return `${where}: a live setting is a choice over the setting's levels (or, spec 013, a toggle of a yes/no one, a slider of a 0–100 one, an info of a text one)`;
+                if (o.type === "action" && o.clears !== undefined && !Settings.keyOf(String(o.clears)))
+                    return `${where}: clears names no shell setting`;
             }
         }
         return "";
+    }
+
+    // Does a live (non-notification) option fit the shell setting it names?
+    function liveFits(o: var): bool {
+        const key = Settings.keyOf(String(o.setting));
+        const t = key ? Settings.keys[key] : null;
+        switch (o.type) {
+        case "choice":
+            return Settings.levelsOf(String(o.setting)).length === o.values.length;
+        case "toggle":
+            return t?.type === "bool";
+        case "slider":
+            return t?.type === "int" && t.min === 0 && t.max === 100;
+        case "info":
+            return t?.type === "string";
+        }
+        return false;
     }
 
     function load(text: string): void {

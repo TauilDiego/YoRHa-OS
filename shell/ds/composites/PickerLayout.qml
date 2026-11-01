@@ -4,6 +4,7 @@ import QtQuick
 import ".."
 import "../primitives"
 import "../base"
+import "../../services"
 import "../../strings"
 
 // List + preview + options (spec 004, design-system §8): the game's ITEMS screen as a picker's
@@ -108,6 +109,7 @@ FocusScope {
     function enterOptions(): void {
         if (options.length === 0)
             return;
+        Sounds.play("confirm");          // spec 013, front D
         column = "options";
         option = 0;
     }
@@ -120,42 +122,53 @@ FocusScope {
     }
 
     function apply(i: int): void {
-        if (list.itemData(i)?.dim !== true)
+        if (list.itemData(i)?.dim !== true) {
+            Sounds.play("confirm");      // spec 013, front D
             applied(i);
+        }
     }
 
     // A value changed by ← → or an arrow: no wrapping; `back` (keys only) leaves on ← at the start.
     function step(i: int, dir: int, back: bool): void {
         const t = typeOf(i);
         if (t === "action") {
-            if (dir < 0 && back)
+            if (dir < 0 && back) {
+                Sounds.play("back");     // spec 013, front D
                 column = "list";
+            }
             return;
         }
         if (t === "toggle") {
+            Sounds.play("change");       // spec 013, front D
             picked(i, valueOf(i) ? 0 : 1);
             return;
         }
         const v = valueOf(i), n = lengthOf(i);
         if (dir < 0 && v <= 0) {
-            if (back)
+            if (back) {
+                Sounds.play("back");     // spec 013, front D
                 column = "list";
+            }
             return;
         }
         if (dir > 0 && v >= n - 1)
             return;
+        Sounds.play("change");           // spec 013, front D
         picked(i, v + dir);
     }
 
     // Enter or a click on a row: the next value, wrapping.
     function advance(i: int): void {
         if (typeOf(i) === "action") {
+            Sounds.play("confirm");      // spec 013, front D
             triggered(i);
             return;
         }
         const n = lengthOf(i);
-        if (n > 0)
+        if (n > 0) {
+            Sounds.play("change");       // spec 013, front D
             picked(i, (valueOf(i) + 1) % n);
+        }
     }
 
     // The options may shrink (e.g. a row only pictures have): keep the cursor on one.
@@ -170,11 +183,13 @@ FocusScope {
         const k = event.key;
         event.accepted = true;
         if (column === "list") {
-            if (k === Qt.Key_Up && count > 0)
+            if (k === Qt.Key_Up && count > 0) {
+                Sounds.play("move");     // spec 013, front D
                 index = (index - 1 + count) % count;
-            else if (k === Qt.Key_Down && count > 0)
+            } else if (k === Qt.Key_Down && count > 0) {
+                Sounds.play("move");     // spec 013, front D
                 index = (index + 1) % count;
-            else if (k === Qt.Key_Return || k === Qt.Key_Enter)
+            } else if (k === Qt.Key_Return || k === Qt.Key_Enter)
                 apply(index);
             else if (k === Qt.Key_Right)
                 enterOptions();
@@ -185,19 +200,22 @@ FocusScope {
             return;
         }
         const n = options.length;
-        if (k === Qt.Key_Up && n > 0)
+        if (k === Qt.Key_Up && n > 0) {
+            Sounds.play("move");         // spec 013, front D
             option = (option - 1 + n) % n;
-        else if (k === Qt.Key_Down && n > 0)
+        } else if (k === Qt.Key_Down && n > 0) {
+            Sounds.play("move");         // spec 013, front D
             option = (option + 1) % n;
-        else if (k === Qt.Key_Left)
+        } else if (k === Qt.Key_Left)
             step(option, -1, true);
         else if (k === Qt.Key_Right)
             step(option, 1, true);
         else if (k === Qt.Key_Return || k === Qt.Key_Enter)
             advance(option);
-        else if (k === Qt.Key_Escape)
+        else if (k === Qt.Key_Escape) {
+            Sounds.play("back");         // spec 013, front D
             column = "list";
-        else
+        } else
             event.accepted = false;
     }
 
@@ -218,6 +236,8 @@ FocusScope {
         pointerMoved = false;
         if (!h || !moved)
             return;
+        if (h.column !== column || (h.column === "list" ? h.index !== index : h.index !== option))
+            Sounds.play("move");         // spec 013, front D
         column = h.column;
         if (h.column === "list")
             index = h.index;
