@@ -6,6 +6,7 @@ set -euo pipefail
 YORHA_ROOT=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
 source "$YORHA_ROOT/lib/yorha/name.sh"
 source "$YORHA_ROOT/lib/yorha/common.sh"
+source "$YORHA_ROOT/lib/yorha/deps.sh"
 [[ $EUID -ne 0 ]] || yorha_fail "run as your user, not root"
 
 usage() {
@@ -29,10 +30,45 @@ cmd_status() {
     printf '  shell:     %s\n' "$running"
 }
 
+# The line the person adds at the top of ~/.config/hypr/hyprland.lua (contracts/encaixe.md).
+include_line() {
+    local f="$YORHA_HOME/current/system/hypr/$YORHA_NAME.lua"
+    if [[ $f == "$HOME"/* ]]; then
+        printf 'pcall(dofile, os.getenv("HOME") .. "%s")\n' "${f#"$HOME"}"
+    else
+        printf 'pcall(dofile, "%s")\n' "$f"
+    fi
+}
+
+# Called by install.sh from the freshly unpacked version: make it the one in use.
+cmd__install() {
+    local v
+    v=$(yorha_version_of "$YORHA_ROOT")
+    yorha_switch "$v"
+    yorha_mark_migrations "$YORHA_ROOT"
+    mkdir -p "$YORHA_STATE"
+    echo "$v" > "$YORHA_STATE/last-version"
+    yorha_say "$YORHA_PRETTY $v installed in $YORHA_HOME"
+    if pgrep -x qs >/dev/null || pgrep -f serpantinumd >/dev/null; then
+        yorha_say "another shell is running now; keep only one of them in your Hyprland autostart"
+    fi
+    case :$PATH: in *":$YORHA_BIN:"*) ;; *) yorha_say "add $YORHA_BIN to your PATH to run $YORHA_CMD" ;; esac
+    cat <<DONE
+
+Last step: add this line at the top of ~/.config/hypr/hyprland.lua, then log in again:
+
+    $(include_line)
+
+It starts the shell and adds its keys (SUPER; set YORHA_MOD = "ALT" on the line before to change).
+To get newer versions later: $YORHA_CMD update
+DONE
+}
+
 main() {
     case ${1:-} in
         version) echo "$YORHA_NAME $(yorha_version_of "$YORHA_ROOT")" ;;
         status) cmd_status ;;
+        _install) cmd__install ;;
         *) usage ;;
     esac
 }

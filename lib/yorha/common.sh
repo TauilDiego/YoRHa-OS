@@ -6,9 +6,11 @@
 yorha_say() { printf '%s: %s\n' "$YORHA_CMD" "$*"; }
 yorha_fail() { printf '%s: %s\n' "$YORHA_CMD" "$*" >&2; exit "${2:-1}"; }
 
-# "y"/"s" is yes; anything else, or no terminal to ask on, is no.
+# "y"/"s" is yes; anything else, or no terminal to ask on, is no. YORHA_YES=1 answers yes to all
+# (automation and the lab's checks).
 yorha_ask() {
     local a
+    [[ ${YORHA_YES:-} == 1 ]] && { yorha_say "$* [y/N] y (YORHA_YES=1)"; return 0; }
     [[ -t 0 ]] || return 1
     read -r -p "$YORHA_CMD: $* [y/N] " a || return 1
     [[ $a == [yYsS]* ]]
@@ -55,4 +57,26 @@ yorha_backup_state() {
     rm -rf "$dest" && mkdir -p "$dest"
     (cd "$YORHA_STATE" && find . -mindepth 1 -maxdepth 1 ! -name backups -exec cp -a -t "$dest" {} +)
     printf '%s\n' "$dest"
+}
+
+# Point "current" (and the command) at versions/$1, atomically; remember the one it replaces.
+yorha_switch() {
+    local v=$1 old
+    old=$(yorha_current)
+    ln -sfn "versions/$v" "$YORHA_HOME/.current.tmp"
+    mv -Tf "$YORHA_HOME/.current.tmp" "$YORHA_HOME/current"
+    sync -f "$YORHA_HOME" 2>/dev/null || true
+    [[ -n $old && $old != "$v" ]] && echo "$old" > "$YORHA_HOME/previous"
+    mkdir -p "$YORHA_BIN"
+    ln -sfn "$YORHA_HOME/current/bin/$YORHA_CMD" "$YORHA_BIN/$YORHA_CMD"
+}
+
+# Keep the newest $YORHA_KEEP versions, never the one in use; drop leftovers of interrupted unpacks.
+yorha_prune() {
+    local cur v
+    cur=$(yorha_current)
+    find "$YORHA_HOME/versions" -mindepth 1 -maxdepth 1 -type d ! -name '.*' -printf '%f\n' | sort -V \
+        | head -n -"$YORHA_KEEP" | while read -r v; do [[ $v == "$cur" ]] || rm -rf "${YORHA_HOME:?}/versions/$v"; done
+    find "$YORHA_HOME/versions" -mindepth 1 -maxdepth 1 -name '.*.part' -exec rm -rf {} +
+    rm -rf "$YORHA_HOME/downloads"
 }
