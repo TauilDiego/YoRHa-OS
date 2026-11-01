@@ -11,6 +11,9 @@ import ".."
 // Tokens.motion.blink; showing waits that half, then fades in (ease-out). When the cursor moves,
 // the old item's selector fades out while the new one waits, so it reads as one blink.
 // Frozen (fixtures) or reduced motion (spec 003): no fade, it just jumps.
+// spec 013 (E1): while a menu assembles, hold() hides the kite and slideIn(delay) brings it in from
+// motion.kiteDx to the left, fading, over motion.kiteIn (OutQuart). The blink above is unchanged
+// (FR-003, the owner's pick in the prototype).
 Item {
     id: root
 
@@ -55,9 +58,39 @@ Item {
         }
     ]
 
+    property real intro: 1
+    function hold(): void {
+        introAnim.stop();
+        intro = Tokens.instant ? 1 : 0;
+    }
+    function slideIn(delay: int): void {
+        introAnim.stop();
+        if (Tokens.instant) {
+            intro = 1;
+            return;
+        }
+        intro = 0;
+        introPause.duration = Math.max(0, delay);
+        introAnim.start();
+    }
+    SequentialAnimation {
+        id: introAnim
+        PauseAnimation { id: introPause }
+        NumberAnimation {
+            target: root
+            property: "intro"
+            from: 0
+            to: 1
+            duration: Tokens.motion.kiteIn
+            easing.type: Easing.OutQuart
+        }
+    }
+
     Item {
         width: root.width
         height: root.height
+        opacity: root.intro
+        x: -Math.round((1 - root.intro) * Tokens.motion.kiteDx * root.s)
 
         Shape {
             width: root.kiteW

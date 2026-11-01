@@ -1,6 +1,8 @@
 # Strays from the private test environment
 *.qcow2
 *.qsb
+# spec 013: the menus' triangles are compiled in the lab (lab/013/qsb) and versioned
+!shell/popup/shaders/*.qsb
 
 # Private test environment (VM lab, containers): kept out of the public repo.
 /lab/

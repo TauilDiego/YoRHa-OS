@@ -8,8 +8,8 @@ import "../primitives"
 // Value stepper (spec 003): "◂ value ▸", the value of a toggle or a choice. The arrows only show
 // with `arrows` (the focused row) but always keep their room; at an end of the list its arrow
 // fades to 30%. A click on an arrow emits stepped(-1 / +1). The text is centered in
-// `valueWidth` (game px, Tokens.space.stepperValueW by default) and cut with an ellipsis when it is
-// longer.
+// `valueWidth` (game px, Tokens.space.stepperValueW by default); a longer one scrolls (spec 013,
+// FR-012), or is cut with an ellipsis with Tokens.instant.
 Item {
     id: root
 
@@ -72,18 +72,17 @@ Item {
         end: root.atStart
     }
 
-    Label {
+    // spec 013 (FR-012): centered when it fits; a longer value scrolls in the whole width.
+    ScrollingLabel {
         id: label
-        x: root.arrowW + root.gap
-        width: root.valueW
+        width: Math.min(Math.ceil(implicitWidth), root.valueW)
+        x: root.arrowW + root.gap + Math.round((root.valueW - width) / 2)
         anchors.verticalCenter: parent.verticalCenter
         s: root.s
         role: "standard"
-        font.weight: Font.Medium                     // the mockup's values: 23 px, weight 500
-        font.variableAxes: ({ "wght": Font.Medium })
-        font.features: ({ "tnum": 1 })
-        horizontalAlignment: Text.AlignHCenter
-        elide: Text.ElideRight
+        label.font.weight: Font.Medium               // the mockup's values: 23 px, weight 500
+        label.font.variableAxes: ({ "wght": Font.Medium })
+        label.font.features: ({ "tnum": 1 })
         text: root.text
         color: root.ink
     }

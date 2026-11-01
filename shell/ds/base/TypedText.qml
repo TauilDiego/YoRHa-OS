@@ -13,6 +13,9 @@ import "../TextCut.js" as TextCut
 //   instant: the whole text at once, no cursor (fixtures, reduced motion, Typing: Off; FR-031);
 //   restartKey: a new value types again (a replacement, a log entry receiving the focus);
 //   maxLines: the text is cut there with an ellipsis (`truncated` says so).
+// Spec 013 (FR-004, FR-005): `cps` > 0 sets the speed in characters per second instead of `ms`;
+// `tip: "letter"` ends the typed part with a letter drawn from the text itself, new at every step,
+// and no cursor (the game's titles and labels); "cursor" is the block cursor of spec 008.
 // complete() shows it all now; done() when the end is reached.
 Item {
     id: root
@@ -21,6 +24,8 @@ Item {
     property string text
     property int from: 0
     property int ms: 0
+    property real cps: 0
+    property string tip: "cursor"                // "cursor" | "letter"
     property var restartKey: 0
     property bool instant: false
     property int maxLines: Tokens.notify.lines
@@ -32,6 +37,11 @@ Item {
 
     readonly property int length: TextCut.visibleLength(text)
     property real shown: length
+    readonly property int count: Math.floor(shown)
+    readonly property int plannedMs: cps > 0 ? Math.round((length - Math.max(0, from)) * 1000 / cps) : ms
+    // The tip letter, drawn again at every step (escaped for the styled text).
+    property string tipLetter: ""
+    onCountChanged: tipLetter = tip === "letter" && typing && count < length ? drawTip() : ""
     readonly property bool typing: anim.running || stillAt >= 0
     readonly property bool truncated: full.truncated
     readonly property var textStyle: Tokens.type[role] ?? Tokens.type.bandBody
@@ -47,20 +57,28 @@ Item {
         }
     }
 
+    function drawTip(): string {
+        const letters = TextCut.plain(text).replace(/\s/g, "");
+        if (letters.length === 0)
+            return "";
+        const c = letters[Math.floor(Math.random() * letters.length)];
+        return c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : c;
+    }
+
     function start(): void {
         anim.stop();
         if (stillAt >= 0) {
             shown = Math.floor(length * stillAt);
             return;
         }
-        if (instant || ms <= 0 || from >= length) {
+        if (instant || plannedMs <= 0 || from >= length) {
             shown = length;
             done();
             return;
         }
         anim.from = Math.max(0, Math.min(from, length));
         anim.to = length;
-        anim.duration = ms;
+        anim.duration = plannedMs;
         anim.start();
     }
     onRestartKeyChanged: start()
@@ -95,12 +113,20 @@ Item {
         visible: !root.typing
     }
 
+    // spec 013: while typing with the tip letter, the first characters and the letter. No
+    // lineLaidOut handler here: with one, a fixed line height lays the line out higher than the
+    // whole text's, and the text would jump when the typing ends.
+    Body {
+        visible: root.typing && root.tip === "letter"
+        text: TextCut.cut(root.text, root.count) + root.tipLetter
+    }
+
     // While typing: the first characters, and the cursor after them. Text has no
     // positionToRectangle: the end of the last laid-out line places the cursor.
     Body {
         id: part
-        visible: root.typing
-        text: TextCut.cut(root.text, Math.floor(root.shown))
+        visible: root.typing && root.tip === "cursor"
+        text: TextCut.cut(root.text, root.count)
         property real endX: 0
         property real endY: 0
         property real endH: 0
@@ -114,7 +140,7 @@ Item {
     }
     Rectangle {
         id: cursor
-        visible: root.typing
+        visible: root.typing && root.tip === "cursor"
         readonly property bool empty: part.text === ""
         x: Math.round((empty ? 0 : part.endX) + Tokens.px(1, root.s))
         y: Math.round((empty ? 0 : part.endY) + ((empty ? part.lineHeight : part.endH) - height) / 2)

@@ -37,7 +37,9 @@ Singleton {
     property var needs: ({})                     // toggle key → what to do while it is off
     property var current: ({})                   // "cat.opt" → value
 
-    readonly property var types: ["toggle", "choice", "slider", "action", "info"]
+    // spec 013 (front C): "multi", a list of marks (value: the marked indices of `values`), bound to a
+    // Settings key of type "layouts" by "setting"; its `ids` are the XKB layout names.
+    readonly property var types: ["toggle", "choice", "slider", "action", "info", "multi"]
 
     function find(catId: string, optId: string): var {
         for (const c of categories)
@@ -61,6 +63,10 @@ Singleton {
     // its values from NotifyPrefs (the Monitor option lists the outputs).
     function resolve(opt: var): var {
         const l = liveOf(opt);
+        // spec 013, front D: the sound folder's info row shows the path in use (the catalog's text
+        // is "ours", the built-in sounds).
+        if (l && opt.type === "info" && l.key === "sound.folder")
+            return Settings.soundFolder !== "" ? Object.assign({}, opt, { text: Settings.soundFolder }) : opt;
         if (!l?.notify)
             return opt;
         const N = Strings.notify;
@@ -87,7 +93,11 @@ Singleton {
         const l = liveOf(opt);
         if (l && opt.type === "toggle")
             return l.src.levelOf(l.key) === true;
-        if (l)
+        if (l && opt.type === "multi")
+            return markedOf(opt);
+        if (l && opt.type === "slider")          // spec 013: sound.volume
+            return Number(l.src.levelOf(l.key));
+        if (l && opt.type === "choice")
             return Math.max(0, l.src.levelsOf(l.key).indexOf(l.src.levelOf(l.key)));
         const k = catId + "." + optId;
         const saved = opt?.persist === false ? undefined : SettingsState.get("settings." + k, undefined);
@@ -95,6 +105,35 @@ Singleton {
             return saved;
         return Object.prototype.hasOwnProperty.call(current, k) ? current[k] : null;
     }
+
+    // --- spec 013, front C: the marks of a "multi" option and the popup's rule ----------------------
+    // The marked indices of `opt` (ascending): the saved layouts, else the compositor's current ones,
+    // else the first value; a layout the option doesn't list is dropped.
+    function markedOf(opt: var): var {
+        const saved = Settings.valueOf(Settings.keyOf(String(opt.setting)));
+        const from = saved.length > 0 ? saved : Compositor.keyboardLayouts;
+        const out = [];
+        opt.ids.forEach((id, i) => {
+            if (from.includes(id))
+                out.push(i);
+        });
+        return out.length > 0 ? out : [0];
+    }
+    // Save the marked indices of a "multi" option (never none: the caller keeps one marked).
+    function setMarked(catId: string, optId: string, marked: var): void {
+        const opt = find(catId, optId);
+        if (opt?.type !== "multi" || !Array.isArray(marked) || marked.length === 0)
+            return;
+        const ids = opt.ids.filter((id, i) => marked.includes(i));
+        const err = Settings.setKey(Settings.keyOf(String(opt.setting)), ids);
+        if (err !== "")
+            console.warn(`settings: ${catId}.${optId}: ${err}`);
+    }
+    // Enter opens the choice pop-up (FR-025, FR-026): a choice of more than 3 values, or a "multi".
+    function opensPopup(opt: var): bool {
+        return opt?.type === "multi" || (opt?.type === "choice" && resolve(opt).values.length > 3);
+    }
+    // --- end front C ---------------------------------------------------------------------------------
 
     // Is `v` a value `opt` can take (a saved value is checked before it is used)?
     function validValue(opt: var, v: var): bool {
@@ -118,6 +157,8 @@ Singleton {
             return String(resolve(opt).values[v] ?? "");
         case "slider":
             return v === null || v === undefined ? "" : String(v);
+        case "multi":
+            return Array.isArray(v) ? v.map(i => String(opt.ids[i] ?? "").toUpperCase()).join(" · ") : "";
         case "action":
         case "info":
             return String(opt.text ?? "");
@@ -181,7 +222,9 @@ Singleton {
             l.src.setLevel(l.key, opt.type === "toggle" ? v === true : l.src.levelsOf(l.key)[v]);
             return;
         }
-        if (opt?.setting)
+        if (opt?.setting && (opt.type === "toggle" || opt.type === "slider"))
+            Settings.setLevel(opt.setting, v);      // spec 013: sound.ui, sound.volume, …
+        else if (opt?.setting)
             Settings.setLevel(opt.setting, Settings.levelsOf(opt.setting)[v] ?? "");
         else if (opt && opt.persist !== false)
             SettingsState.set("settings." + catId + "." + optId, v);
@@ -202,6 +245,8 @@ Singleton {
             set(catId, optId, Math.max(0, Math.min(resolve(opt).values.length - 1, v + dir)));
         else if (opt.type === "slider")
             set(catId, optId, Math.max(0, Math.min(100, v + dir * opt.step)));
+        if (value(catId, optId) !== v)
+            Sounds.play("change");               // spec 013, front D: after the set, at the new volume
     }
 
     // Enter: toggle flips; choice advances, wrapping; action shows its note for a while.
@@ -210,11 +255,18 @@ Singleton {
         if (!opt || isDimmed(catId, optId))
             return;
         const v = value(catId, optId);
-        if (opt.type === "toggle")
+        if (opt.type === "toggle") {
             set(catId, optId, !v);
-        else if (opt.type === "choice")
+            Sounds.play("change");               // spec 013, front D
+        } else if (opt.type === "choice") {
             set(catId, optId, (v + 1) % resolve(opt).values.length);
-        else if (opt.type === "action") {
+            Sounds.play("change");               // spec 013, front D
+        } else if (opt.type === "action") {
+            Sounds.play("confirm");              // spec 013, front D
+            // spec 013, front D: an action with `clears` saves "" for that setting (Sound › Use
+            // ours: the sound folder back to the built-in sounds, even over a shell.json folder).
+            if (opt.clears && Settings.keyOf(String(opt.clears)))
+                Settings.setKey(Settings.keyOf(String(opt.clears)), "");
             busy = catId + "." + optId;
             busyTimer.restart();
         }
@@ -226,6 +278,7 @@ Singleton {
         if (opt?.type !== "slider" || isDimmed(catId, optId))
             return;
         set(catId, optId, Math.max(0, Math.min(100, Math.round(v * 100))));
+        Sounds.play("change");                   // spec 013, front D
     }
 
     // The catalog's values; what was saved still wins (value()).
@@ -277,7 +330,7 @@ Singleton {
                 if (o.type === "choice" && !(Array.isArray(o.values) && o.values.length >= 2
                         && Number.isInteger(o.value) && o.value >= 0 && o.value < o.values.length))
                     return `${where}: a choice needs values and an index`;
-                if (o.ids !== undefined && !(o.type === "choice" && Array.isArray(o.ids) && o.ids.length === o.values.length
+                if (o.ids !== undefined && !((o.type === "choice" || o.type === "multi") && Array.isArray(o.ids) && o.ids.length === o.values.length
                         && o.ids.every(x => typeof x === "string" && x !== "") && new Set(o.ids).size === o.ids.length))
                     return `${where}: ids are one unique, non-empty string per value`;
                 if (o.type === "slider" && !(Number.isInteger(o.value) && o.value >= 0 && o.value <= 100
@@ -287,12 +340,35 @@ Singleton {
                 if (live?.notify && !((o.type === "choice" || o.type === "toggle")
                         && NotifyPrefs.levelsOf(live.key).length > 0))
                     return `${where}: a notifications setting is a choice or a toggle over a known option`;
-                if (live && !live.notify && !(o.type === "choice"
-                        && Settings.levelsOf(String(o.setting)).length === o.values.length))
-                    return `${where}: a live setting is a choice over the setting's levels`;
+                if (o.type === "multi" && !(Array.isArray(o.values) && o.values.length >= 2 && Array.isArray(o.ids)
+                        && o.ids.length === o.values.length && new Set(o.ids).size === o.ids.length
+                        && Settings.keys[Settings.keyOf(String(o.setting))]?.type === "layouts"
+                        && o.ids.every(x => Settings.validKey(Settings.keyOf(String(o.setting)), [x]))))
+                    return `${where}: a multi is a list of layouts over a layouts setting, with one id per value`;
+                if (live && !live.notify && o.type !== "multi" && !liveFits(o))
+                    return `${where}: a live setting is a choice over the setting's levels (or, spec 013, a toggle of a yes/no one, a slider of a 0–100 one, an info of a text one)`;
+                if (o.type === "action" && o.clears !== undefined && !Settings.keyOf(String(o.clears)))
+                    return `${where}: clears names no shell setting`;
             }
         }
         return "";
+    }
+
+    // Does a live (non-notification) option fit the shell setting it names?
+    function liveFits(o: var): bool {
+        const key = Settings.keyOf(String(o.setting));
+        const t = key ? Settings.keys[key] : null;
+        switch (o.type) {
+        case "choice":
+            return Settings.levelsOf(String(o.setting)).length === o.values.length;
+        case "toggle":
+            return t?.type === "bool";
+        case "slider":
+            return t?.type === "int" && t.min === 0 && t.max === 100;
+        case "info":
+            return t?.type === "string";
+        }
+        return false;
     }
 
     function load(text: string): void {

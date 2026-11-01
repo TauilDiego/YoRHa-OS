@@ -20,7 +20,11 @@
         {"id": "volume", "label": "Volume", "type": "slider", "desc": "Output volume. The top bar shows it as VOL.", "value": 64, "default": 50, "step": 2},
         {"id": "mute", "label": "Mute", "type": "toggle", "desc": "Silences every output. The top bar shows MUTE.", "value": false, "default": false},
         {"id": "mic", "label": "Microphone", "type": "slider", "desc": "Input level of the active microphone.", "value": 80, "default": 80, "step": 5},
-        {"id": "ui-sounds", "label": "Interface sounds", "type": "toggle", "desc": "Short sounds when you move through menus and confirm.", "value": true, "default": true}
+        {"id": "ui-sounds", "label": "Interface sounds", "type": "toggle", "setting": "sound.ui", "desc": "Short sounds when you move through menus and confirm. The sound of the desktop opening after login follows Boot and login sounds.", "value": true, "default": true},
+        {"id": "ui-volume", "label": "Interface volume", "type": "slider", "setting": "sound.volume", "desc": "How loud the interface sounds are, on top of the system volume. The system volume and Mute still apply.", "value": 40, "default": 40, "step": 5},
+        {"id": "sound-folder", "label": "Sound folder", "type": "info", "setting": "sound.folder", "text": "Ours (built in)", "desc": "A folder with your own sounds, one file per event (move.wav, confirm.wav, … or .ogg). An event without a file plays ours. Set it in ~/.config/yorha-os/shell.json (\"sound\": {\"folder\": \"~/sounds\"}) or with `settings set sound.folder <path>`. See docs/sons-do-jogo.md."},
+        {"id": "sound-folder-ours", "label": "Use our sounds", "type": "action", "clears": "sound.folder", "text": "Use", "desc": "Go back to the built-in sounds, even when shell.json names a folder.", "busy": "Using the built-in sounds."},
+        {"id": "boot-login-sounds", "label": "Boot and login sounds", "type": "toggle", "setting": "sound.bootLogin", "desc": "The sound when the machine boots, the sounds of the login screen and the one when the desktop opens. They follow the volume and Mute you left in your last session.", "value": true, "default": true}
       ]
     },
     {
@@ -45,7 +49,7 @@
       "about": "Wi-Fi, cable and VPN.",
       "options": [
         {"id": "wifi", "label": "Wi-Fi", "type": "toggle", "desc": "Turns the wireless adapter on or off.", "key": "wifi", "value": true, "default": true},
-        {"id": "network", "label": "Network", "type": "choice", "desc": "The wireless network in use. Saved networks connect on their own.", "needs": "wifi", "values": ["home-5G", "home-2G", "office"], "value": 0, "default": 0},
+        {"id": "network", "label": "Network", "type": "choice", "desc": "The wireless network in use. Saved networks connect on their own.", "needs": "wifi", "values": ["home-5G", "home-2G", "office", "guest"], "value": 0, "default": 0},
         {"id": "wired", "label": "Wired", "type": "info", "desc": "Ethernet. Plug in a cable and it connects on its own.", "text": "Not connected"},
         {"id": "vpn", "label": "VPN", "type": "action", "desc": "Adds a WireGuard or OpenVPN connection.", "text": "Set up", "busy": "Opening the VPN setup…"},
         {"id": "airplane", "label": "Airplane mode", "type": "toggle", "desc": "Turns off every radio: Wi-Fi and Bluetooth.", "value": false, "default": false}
@@ -68,6 +72,7 @@
         {"id": "ui-scale", "label": "Interface scale", "type": "choice", "desc": "Size of the YoRHa-OS interface, on top of the screen scale.", "values": ["90%", "100%", "110%", "125%"], "value": 1, "default": 1},
         {"id": "bar-height", "label": "Top bar height", "type": "choice", "desc": "Height of the bar at the top of the screen. The tabs and the dotted rule follow it.", "values": ["40 px", "50 px", "68 px", "80 px"], "value": 2, "default": 2},
         {"id": "bar-contrast", "label": "Bar contrast", "type": "choice", "desc": "How the texts of the top bar stand out from the wallpaper. High draws the texts darker, on a light plate over paper, and the clock heavier.", "setting": "barContrast", "values": ["Normal", "High"], "value": 0, "default": 0},
+        {"id": "menu-presentation", "label": "Menu presentation", "type": "choice", "desc": "How the pause menu and the other menus open. Floating panel keeps the desktop around a panel; Full screen fills the whole screen, like the game. Switching is live, with the menu open.", "setting": "menuPresentation", "values": ["Floating panel", "Full screen"], "value": 0, "default": 0},
         {"id": "vignette", "label": "Vignette", "type": "toggle", "desc": "Darkens the edges and corners of full-screen menus and the desktop, like the game.", "value": true, "default": true},
         {"id": "bg-motion", "label": "Background motion", "type": "toggle", "desc": "The arcs and beams that drift slowly behind the desktop.", "value": true, "default": true},
         {"id": "reduce-motion", "label": "Reduce motion", "type": "toggle", "desc": "Stops the ink sweeps and the blink of the selector.", "value": false, "default": false},
@@ -90,7 +95,7 @@
       "id": "keyboard", "label": "Keyboard",
       "about": "Layout, repeat and shortcuts.",
       "options": [
-        {"id": "layout", "label": "Layout", "type": "choice", "desc": "The keyboard layout. Accents work with dead keys on US International.", "values": ["US International", "US", "ABNT2"], "value": 0, "default": 0},
+        {"id": "layouts", "label": "Layouts", "type": "multi", "desc": "The keyboard layouts in use, switched by a shortcut. Mark at least one; the first is the one the keyboard starts with.", "setting": "input.kbLayouts", "values": ["English (US)", "Portuguese (Brazil)", "Portuguese (Portugal)", "Spanish", "German", "French"], "ids": ["us", "br", "pt", "es", "de", "fr"]},
         {"id": "caps", "label": "Caps Lock", "type": "choice", "desc": "What the Caps Lock key does.", "values": ["Caps Lock", "Escape", "Control"], "value": 1, "default": 0},
         {"id": "delay", "label": "Repeat delay", "type": "choice", "desc": "How long a key has to be held before it starts repeating.", "values": ["200 ms", "300 ms", "400 ms", "600 ms"], "value": 1, "default": 2},
         {"id": "rate", "label": "Repeat rate", "type": "slider", "desc": "How fast a held key repeats.", "value": 50, "default": 50, "step": 5},

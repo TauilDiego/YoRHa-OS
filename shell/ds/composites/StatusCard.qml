@@ -81,15 +81,14 @@ Item {
                     w: Tokens.space.statusMeterW
                     value: row.hasMeter ? row.modelData.meter : 0
                 }
-                Label {
+                // spec 013 (FR-012): a value that doesn't fit scrolls.
+                ScrollingLabel {
                     id: valueText
                     x: row.width - width
-                    width: Math.min(implicitWidth, row.width * 0.6)
+                    width: Math.min(Math.ceil(implicitWidth), Math.round(row.width * 0.6))
                     s: root.s
                     role: "standard"
-                    font.features: ({ "tnum": 1 })
-                    horizontalAlignment: Text.AlignRight
-                    elide: Text.ElideRight
+                    label.font.features: ({ "tnum": 1 })
                     text: String(row.modelData?.value ?? "")
                 }
             }

@@ -4,6 +4,7 @@ import QtQuick
 import ".."
 import "../primitives"
 import "../base"
+import "../../services"
 import "../../strings"
 
 // List + preview + options (spec 004, design-system §8): the game's ITEMS screen as a picker's
@@ -41,8 +42,13 @@ import "../../strings"
 //                pause-menu tab; the list reaches 24 px short of the preview, as in the log's mockup;
 //   lazyList     the list creates only the rows in view (GroupedList.lazy), for a long log;
 //   toggleValueW the width (game px) of a toggle's ON/OFF between ◂ and ▸; the default is every
-//                stepper's (Tokens.space.stepperValueW), the log narrows it so its labels fit.
-// The default (fluid: false) is the picker of specs 004 and 007, unchanged.
+//                stepper's (Tokens.space.stepperValueW), the log narrows it so its labels fit;
+//   choiceValueW (spec 013, T057) the same for a choice's value, so a layout can give both one column.
+// spec 013 (front D §5): `fluid` was two things, now apart (it still sets both):
+//   stretch      the columns come from the layout's own width, in the frame's proportions (the
+//                full-screen menus: APPS, WINDOWS, the picker, the log);
+//   bodyOnly     the layout fills its whole rect, with no room for a title or a footer of its own.
+// The default (fluid, stretch and bodyOnly false) is the picker of specs 004 and 007, unchanged.
 FocusScope {
     id: root
 
@@ -66,8 +72,11 @@ FocusScope {
     readonly property GroupedList groupedList: list
     // spec 008
     property bool fluid: false
+    property bool stretch: fluid
+    property bool bodyOnly: fluid
     property bool lazyList: false
     property real toggleValueW: Tokens.space.stepperValueW
+    property real choiceValueW: Tokens.space.stepperValueW
 
     signal applied(int index)
     signal picked(int option, int value)
@@ -82,9 +91,9 @@ FocusScope {
     function u(v: real): int {
         return Tokens.px(v, root.s);
     }
-    // A horizontal position or width of the 1612 px frame: scaled with `s`, or (fluid) with the width.
+    // A horizontal position or width of the 1612 px frame: scaled with `s`, or (stretch) with the width.
     function hx(v: real): int {
-        return fluid ? Math.round(v * width / Tokens.space.popupW) : u(v);
+        return stretch ? Math.round(v * width / Tokens.space.popupW) : u(v);
     }
 
     function valueOf(i: int): int {
@@ -102,6 +111,7 @@ FocusScope {
     function enterOptions(): void {
         if (options.length === 0)
             return;
+        Sounds.play("confirm");          // spec 013, front D
         column = "options";
         option = 0;
     }
@@ -114,42 +124,53 @@ FocusScope {
     }
 
     function apply(i: int): void {
-        if (list.itemData(i)?.dim !== true)
+        if (list.itemData(i)?.dim !== true) {
+            Sounds.play("confirm");      // spec 013, front D
             applied(i);
+        }
     }
 
     // A value changed by ← → or an arrow: no wrapping; `back` (keys only) leaves on ← at the start.
     function step(i: int, dir: int, back: bool): void {
         const t = typeOf(i);
         if (t === "action") {
-            if (dir < 0 && back)
+            if (dir < 0 && back) {
+                Sounds.play("back");     // spec 013, front D
                 column = "list";
+            }
             return;
         }
         if (t === "toggle") {
+            Sounds.play("change");       // spec 013, front D
             picked(i, valueOf(i) ? 0 : 1);
             return;
         }
         const v = valueOf(i), n = lengthOf(i);
         if (dir < 0 && v <= 0) {
-            if (back)
+            if (back) {
+                Sounds.play("back");     // spec 013, front D
                 column = "list";
+            }
             return;
         }
         if (dir > 0 && v >= n - 1)
             return;
+        Sounds.play("change");           // spec 013, front D
         picked(i, v + dir);
     }
 
     // Enter or a click on a row: the next value, wrapping.
     function advance(i: int): void {
         if (typeOf(i) === "action") {
+            Sounds.play("confirm");      // spec 013, front D
             triggered(i);
             return;
         }
         const n = lengthOf(i);
-        if (n > 0)
+        if (n > 0) {
+            Sounds.play("change");       // spec 013, front D
             picked(i, (valueOf(i) + 1) % n);
+        }
     }
 
     // The options may shrink (e.g. a row only pictures have): keep the cursor on one.
@@ -164,11 +185,13 @@ FocusScope {
         const k = event.key;
         event.accepted = true;
         if (column === "list") {
-            if (k === Qt.Key_Up && count > 0)
+            if (k === Qt.Key_Up && count > 0) {
+                Sounds.play("move");     // spec 013, front D
                 index = (index - 1 + count) % count;
-            else if (k === Qt.Key_Down && count > 0)
+            } else if (k === Qt.Key_Down && count > 0) {
+                Sounds.play("move");     // spec 013, front D
                 index = (index + 1) % count;
-            else if (k === Qt.Key_Return || k === Qt.Key_Enter)
+            } else if (k === Qt.Key_Return || k === Qt.Key_Enter)
                 apply(index);
             else if (k === Qt.Key_Right)
                 enterOptions();
@@ -179,19 +202,22 @@ FocusScope {
             return;
         }
         const n = options.length;
-        if (k === Qt.Key_Up && n > 0)
+        if (k === Qt.Key_Up && n > 0) {
+            Sounds.play("move");         // spec 013, front D
             option = (option - 1 + n) % n;
-        else if (k === Qt.Key_Down && n > 0)
+        } else if (k === Qt.Key_Down && n > 0) {
+            Sounds.play("move");         // spec 013, front D
             option = (option + 1) % n;
-        else if (k === Qt.Key_Left)
+        } else if (k === Qt.Key_Left)
             step(option, -1, true);
         else if (k === Qt.Key_Right)
             step(option, 1, true);
         else if (k === Qt.Key_Return || k === Qt.Key_Enter)
             advance(option);
-        else if (k === Qt.Key_Escape)
+        else if (k === Qt.Key_Escape) {
+            Sounds.play("back");         // spec 013, front D
             column = "list";
-        else
+        } else
             event.accepted = false;
     }
 
@@ -212,6 +238,8 @@ FocusScope {
         pointerMoved = false;
         if (!h || !moved)
             return;
+        if (h.column !== column || (h.column === "list" ? h.index !== index : h.index !== option))
+            Sounds.play("move");         // spec 013, front D
         column = h.column;
         if (h.column === "list")
             index = h.index;
@@ -264,16 +292,16 @@ FocusScope {
 
     // --- layout ----------------------------------------------------------------------------------
     // The columns start at `startY` (150) and stop 24 px above the footer rule (88 px above the
-    // bottom); fluid, they take the whole rect.
-    readonly property int topY: fluid ? 0 : u(startY)
-    readonly property int bottomY: fluid ? height : height - u(Tokens.space.popupH - 820) - u(24)
+    // bottom); bodyOnly, they take the whole rect.
+    readonly property int topY: bodyOnly ? 0 : u(startY)
+    readonly property int bottomY: bodyOnly ? height : height - u(Tokens.space.popupH - 820) - u(24)
 
     GroupedList {
         id: list
         x: root.hx(48)
         y: root.topY
-        // fluid (the text log, as its mockup): the list reaches 24 px short of the preview
-        width: root.fluid ? root.hx(560 - 48) - root.u(24) : implicitWidth
+        // stretch (the text log, as its mockup): the list reaches 24 px short of the preview
+        width: root.stretch ? root.hx(560 - 48) - root.u(24) : implicitWidth
         height: Math.min(implicitHeight, root.bottomY - y)
         s: root.s
         model: root.entries
@@ -309,7 +337,7 @@ FocusScope {
         id: optionsBox
         x: root.hx(1160)
         y: root.topY
-        width: root.fluid ? Math.min(root.hx(Tokens.space.pickerOptionsW), root.width - x - root.u(8)) : root.u(Tokens.space.pickerOptionsW)
+        width: root.stretch ? Math.min(root.hx(Tokens.space.pickerOptionsW), root.width - x - root.u(8)) : root.u(Tokens.space.pickerOptionsW)
         height: infoColumn.y + infoColumn.height + root.u(22)
         visible: root.optionsVisible
 
@@ -342,7 +370,7 @@ FocusScope {
                     contentScale: Tokens.space.pickerOptionScale
                     option: Object.assign({ type: "choice" }, modelData)
                     value: modelData?.type === "toggle" ? root.valueOf(index) !== 0 : root.valueOf(index)
-                    valueWidth: modelData?.type === "toggle" ? root.toggleValueW : Tokens.space.stepperValueW
+                    valueWidth: modelData?.type === "toggle" ? root.toggleValueW : root.choiceValueW
                     focused: root.column === "options" && index === root.option
 
                     onHoveredChanged: if (hovered) root.noteHover("options", index)

@@ -8,8 +8,8 @@ import "../services"
 import "../strings"
 
 // The text log's body (spec 008 US4, FR-020–FR-024, FR-044; contracts/components.md): one piece that
-// any host frames. Now in its own pop-up (LogPopup, host "popup"); later as the 5th tab of the pause
-// menu (spec 007, host "pause"). It has no window and no title or footer of its own: it exposes
+// any host frames. The pause menu's LOG tab (spec 013 US8, host "pause"); the gallery still shows it
+// as a pop-up body (host "popup", spec 008's LogPopup is gone). It has no window and no title or footer of its own: it exposes
 // `title`, `subtitle`, `footerLeft` and `keys` for the host to draw, and fits whatever rect it gets
 // (PickerLayout { fluid: true }):
 //   left    the transmissions, newest first, grouped in NOW (the last hour) and EARLIER, each row
@@ -160,7 +160,8 @@ FocusScope {
         fluid: true
         lazyList: true
         // A narrower ON/OFF than the settings' steppers, so the options' labels show whole.
-        toggleValueW: Tokens.notify.logToggleW
+        toggleValueW: Tokens.notify.logValueW
+        choiceValueW: Tokens.notify.logValueW             // spec 013, T057: OFF and All on one center
         focus: true
         entries: root.rows
         options: root.options

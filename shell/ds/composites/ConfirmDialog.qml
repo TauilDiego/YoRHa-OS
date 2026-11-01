@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import ".."
 import "../primitives"
 import "../base"
@@ -18,6 +19,11 @@ import "../../strings"
 // click on a row confirms that row. Hovering a row moves the kite only after the pointer really
 // moved (a pointer resting where the dialog appears must never pick the action).
 // The parent fills the panel with it and shows it; reset() puts the kite back on `start`.
+// spec 013 (FR-010, front A): `shown` (not `visible`) opens and closes it, the game's way. The ink
+// is the game's: the menu dims to ×motion.dialogTo (black at 1 − dialogTo) over dialogDim; the
+// card's title band shows on the first frame, its paper and its body fade in after dialogFirst
+// over dialogIn, the body unblurring; closing, the card fades out blurring over dialogOut while the
+// ink goes back over dialogDim, and only then it hides. With Tokens.instant it just shows.
 FocusScope {
     id: root
 
@@ -33,6 +39,50 @@ FocusScope {
 
     signal confirmed()
     signal cancelled()
+
+    // --- spec 013 ---------------------------------------------------------------------------------
+    property bool shown: true
+    property real dimP: 1
+    property real paperP: 1
+    property real bodyP: 1
+    property real outP: 0
+    readonly property bool closing: outAnim.running
+    visible: shown || closing
+    onShownChanged: {
+        inAnim.stop();
+        outAnim.stop();
+        if (shown) {
+            reset();
+            outP = 0;
+            if (Tokens.instant) {
+                dimP = 1;
+                paperP = 1;
+                bodyP = 1;
+                return;
+            }
+            dimP = 0;
+            paperP = 0;
+            bodyP = 0;
+            inAnim.start();
+        } else if (!Tokens.instant)
+            outAnim.start();
+    }
+    ParallelAnimation {
+        id: inAnim
+        NumberAnimation { target: root; property: "dimP"; from: 0; to: 1; duration: Tokens.motion.dialogDim; easing.type: Easing.InOutQuad }
+        SequentialAnimation {
+            PauseAnimation { duration: Tokens.motion.dialogFirst }
+            ParallelAnimation {
+                NumberAnimation { target: root; property: "paperP"; from: 0; to: 1; duration: Tokens.motion.dialogIn }
+                NumberAnimation { target: root; property: "bodyP"; from: 0; to: 1; duration: Tokens.motion.dialogIn }
+            }
+        }
+    }
+    ParallelAnimation {
+        id: outAnim
+        NumberAnimation { target: root; property: "outP"; from: 0; to: 1; duration: Tokens.motion.dialogOut }
+        NumberAnimation { target: root; property: "dimP"; to: 0; duration: Tokens.motion.dialogDim; easing.type: Easing.InOutQuad }
+    }
 
     readonly property var keys: [
         { key: Strings.settings.keyUpDown, label: Strings.settings.select },
@@ -82,7 +132,6 @@ FocusScope {
     }
 
     onStartChanged: reset()
-    onVisibleChanged: if (visible) reset()
 
     Keys.onPressed: event => {
         const k = event.key;
@@ -111,13 +160,16 @@ FocusScope {
         }
     }
 
+    // spec 013: the game's ink, ×dialogTo.
     Rectangle {
         anchors.fill: parent
-        color: Tokens.color.dim
+        opacity: root.dimP
+        color: Qt.rgba(0, 0, 0, 1 - Tokens.motion.dialogTo)
     }
 
     MouseArea {
         anchors.fill: parent
+        enabled: root.shown
         acceptedButtons: Qt.AllButtons
         onClicked: root.cancelled()
     }
@@ -128,6 +180,14 @@ FocusScope {
         height: hints.y + hints.height + root.u(24)
         x: Math.round((root.width - width) / 2)
         y: Math.round((root.height - height) / 2)
+        // spec 013: closing, the card goes with a blur.
+        opacity: 1 - root.outP
+        layer.enabled: root.outP > 0
+        layer.effect: MultiEffect {
+            blurEnabled: true
+            blurMax: 16
+            blur: Math.min(1, 4 * root.outP * 2 * root.s / 16)
+        }
 
         // Clicks on the card never reach the ink behind it.
         MouseArea {
@@ -141,83 +201,98 @@ FocusScope {
             s: root.s
             mark: true
             title: root.title
+            paper: root.paperP
         }
 
-        Label {
-            id: body
-            x: card.margin
-            y: card.headerH + root.u(26)
-            width: parent.width - 2 * card.margin
-            s: root.s
-            role: "standard"
-            font.weight: Font.Medium
-            font.variableAxes: ({ "wght": Font.Medium })
-            lineHeightMode: Text.FixedHeight
-            lineHeight: Math.round(size * 1.5)
-            wrapMode: Text.Wrap
-            text: root.text
-        }
+        // spec 013: the body comes in faint and blurred, after the title band.
+        Item {
+            id: content
+            width: box.width
+            height: box.height
+            opacity: root.bodyP
+            layer.enabled: root.bodyP < 1
+            layer.effect: MultiEffect {
+                blurEnabled: true
+                blurMax: 16
+                blur: Math.min(1, 3 * (1 - root.bodyP) * 2 * root.s / 16)
+            }
 
-        Label {
-            id: alert
-            x: card.margin
-            y: body.y + body.implicitHeight + root.u(18)
-            width: parent.width - 2 * card.margin
-            visible: root.alertText !== ""
-            s: root.s
-            role: "small"
-            font.weight: Font.DemiBold
-            font.variableAxes: ({ "wght": Font.DemiBold })
-            font.letterSpacing: root.s
-            lineHeightMode: Text.FixedHeight
-            lineHeight: Math.round(size * 1.4)
-            wrapMode: Text.Wrap
-            text: root.alertText
-            color: Tokens.color.alert
-        }
+            Label {
+                id: body
+                x: card.margin
+                y: card.headerH + root.u(26)
+                width: parent.width - 2 * card.margin
+                s: root.s
+                role: "standard"
+                font.weight: Font.Medium
+                font.variableAxes: ({ "wght": Font.Medium })
+                lineHeightMode: Text.FixedHeight
+                lineHeight: Math.round(size * 1.5)
+                wrapMode: Text.Wrap
+                text: root.text
+            }
 
-        Column {
-            id: rowColumn
-            x: Math.round((parent.width - width) / 2)
-            y: (alert.visible ? alert.y + alert.implicitHeight : body.y + body.implicitHeight) + root.u(30)
-            width: root.u(Tokens.space.confirmRowsW)
-            spacing: Tokens.px(Tokens.space.listItemGap, root.s)
+            Label {
+                id: alert
+                x: card.margin
+                y: body.y + body.implicitHeight + root.u(18)
+                width: parent.width - 2 * card.margin
+                visible: root.alertText !== ""
+                s: root.s
+                role: "small"
+                font.weight: Font.DemiBold
+                font.variableAxes: ({ "wght": Font.DemiBold })
+                font.letterSpacing: root.s
+                lineHeightMode: Text.FixedHeight
+                lineHeight: Math.round(size * 1.4)
+                wrapMode: Text.Wrap
+                text: root.alertText
+                color: Tokens.color.alert
+            }
 
-            Repeater {
-                id: rowRepeater
-                model: root.rows
+            Column {
+                id: rowColumn
+                x: Math.round((parent.width - width) / 2)
+                y: (alert.visible ? alert.y + alert.implicitHeight : body.y + body.implicitHeight) + root.u(30)
+                width: root.u(Tokens.space.confirmRowsW)
+                spacing: Tokens.px(Tokens.space.listItemGap, root.s)
 
-                OptionRow {
-                    required property var modelData
-                    width: rowColumn.width
-                    s: root.s
-                    option: modelData.option
-                    focused: root.current === modelData.id
-                    onHoveredChanged: if (hovered && root.pointerMoved) root.current = modelData.id
-                    onActivated: {
-                        root.current = modelData.id;
-                        root.choose(modelData.id);
+                Repeater {
+                    id: rowRepeater
+                    model: root.rows
+
+                    OptionRow {
+                        required property var modelData
+                        width: rowColumn.width
+                        s: root.s
+                        option: modelData.option
+                        focused: root.current === modelData.id
+                        onHoveredChanged: if (hovered && root.pointerMoved) root.current = modelData.id
+                        onActivated: {
+                            root.current = modelData.id;
+                            root.choose(modelData.id);
+                        }
                     }
                 }
             }
-        }
 
-        Rectangle {
-            id: rule
-            x: card.margin
-            y: rowColumn.y + rowColumn.height + root.u(30)
-            width: parent.width - 2 * card.margin
-            height: Tokens.line(Tokens.space.rule, root.s)
-            color: Tokens.color.lightGray
-        }
+            Rectangle {
+                id: rule
+                x: card.margin
+                y: rowColumn.y + rowColumn.height + root.u(30)
+                width: parent.width - 2 * card.margin
+                height: Tokens.line(Tokens.space.rule, root.s)
+                color: Tokens.color.lightGray
+            }
 
-        KeyHints {
-            id: hints
-            anchors.right: parent.right
-            anchors.rightMargin: card.margin
-            y: rule.y + rule.height + root.u(16)
-            s: root.s
-            model: root.keys
+            KeyHints {
+                id: hints
+                anchors.right: parent.right
+                anchors.rightMargin: card.margin
+                y: rule.y + rule.height + root.u(16)
+                s: root.s
+                model: root.keys
+            }
         }
     }
 }

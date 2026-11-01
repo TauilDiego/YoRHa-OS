@@ -32,6 +32,7 @@ Singleton {
             return "error: kind is volume, mic or brightness";
         if (kind !== "mic" && value < 0)
             return "error: value must be 0 or more";
+        Sounds.play("osd");                      // spec 013, front D: one per step
         current = {
             kind: kind,
             value: kind === "brightness" ? Math.min(100, value) : value,

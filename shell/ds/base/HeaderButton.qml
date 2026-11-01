@@ -14,6 +14,8 @@ import "../primitives"
 // Tabs have no Selector (the owner's call): only list items carry the Pod cursor.
 // `tone` (spec 004 US6): the top bar's tone, 0 paper → 1 light (plate, ink and the selected ink).
 // `high` (004 acabamento): the bar's High contrast (Tokens.hudPaperHigh over paper).
+// spec 013 (FR-002): with `pulse`, a selected tab's plate brightens by motion.pulseLight in the
+// game's trapezoid, every motion.pulse (the pause menu's open tab; the top bar never sets it).
 Item {
     id: root
 
@@ -24,6 +26,7 @@ Item {
     property bool reachRule: false
     property real ruleY: 0
     property real fixedWidth: 0                  // game px; 0 = fit the label
+    property bool pulse: false                   // spec 013
 
     readonly property bool hovered: mouse.containsMouse
 
@@ -75,6 +78,26 @@ Item {
             touchAnim.start();
         } else
             untouchAnim.start();
+    }
+
+    // spec 013 (FR-002): the open tab breathes.
+    readonly property bool pulsing: pulse && state === "selected" && visible && !Tokens.instant
+    property real pulseT: 0
+    readonly property real pulseLevel: pulsing ? Tokens.pulseAt(pulseT) : 0
+    onPulsingChanged: {
+        pulseAnim.stop();
+        pulseT = 0;
+        if (pulsing)
+            pulseAnim.start();
+    }
+    NumberAnimation {
+        id: pulseAnim
+        target: root
+        property: "pulseT"
+        from: 0
+        to: Tokens.motion.pulse
+        duration: Tokens.motion.pulse
+        loops: Animation.Infinite
     }
 
     SequentialAnimation {
@@ -166,6 +189,17 @@ Item {
         visible: width > 0
         clip: true
         color: Tokens.hudColorAt("sel", root.tone, root.high)
+
+        // spec 013: the pulse's light, over the plate (and its stem) and under the text.
+        Rectangle {
+            readonly property color sel: Tokens.hudColorAt("sel", root.tone, root.high)
+            readonly property real k: 1 + Tokens.motion.pulseLight
+            width: parent.width
+            height: parent.height
+            visible: root.pulseLevel > 0
+            opacity: root.pulseLevel
+            color: Qt.rgba(Math.min(1, sel.r * k), Math.min(1, sel.g * k), Math.min(1, sel.b * k), sel.a)
+        }
 
         Face { ink: Tokens.hudColorAt("selInk", root.tone, root.high) }
     }

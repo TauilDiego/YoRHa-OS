@@ -1,0 +1,13 @@
+# YoRHa-OS boot sound (spec 013, contracts/boot-sound.md). Started by the udev rule when the card
+# is ready, never ordered before anything and wanted by nothing else: the boot does not wait for it
+# and a failure here costs nothing. Once per boot (the script leaves the .done file).
+[Unit]
+Description=YoRHa-OS boot sound
+ConditionPathExists=!/run/yorha-os/boot-sound.done
+ConditionPathExists=/usr/share/yorha-os/boot/sound/yorha-boot-sound
+
+[Service]
+Type=simple
+ExecStart=/usr/share/yorha-os/boot/sound/yorha-boot-sound
+RuntimeMaxSec=6
+Nice=10

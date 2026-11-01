@@ -5,6 +5,13 @@
 // that never enabled it), an upstream bug already fixed in Qt dev. Drop the rule once Arch ships
 // a Qt with the fix. It has to be in the environment qs starts with: `//@ pragma Env` sets it too
 // late for Quickshell 0.3.2's logger (tried in the lab VM, 2026-10-27).
+//
+// Spec 013: the interface sounds (SoundEffect) play through Qt Multimedia's GStreamer backend. With
+// the FFmpeg one (Qt 6.12.0), starting any process while a sound plays now and then leaves a socket
+// notifier on a closed fd: qs then loops on "QSocketNotifier: Invalid socket … disabling" at full
+// CPU and fills the log (the lab, 2026-11-01: 13.6 M lines in 60 rounds; 0 with GStreamer, whose
+// latency is also lower). Qt Multimedia reads the variable when it first loads, after this.
+//@ pragma Env QT_MEDIA_BACKEND=gstreamer
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -43,13 +50,23 @@ ShellRoot {
 
     property bool galleryOpen: false
 
+    // spec 013, front D: the entry sound, once per login (Sounds.sessionStart, research S5). A moment
+    // after the start so the desktop is up; not with fixtures (frozen screenshots).
+    Timer {
+        interval: 700
+        running: !Fixtures.active
+        onTriggered: Sounds.sessionStart()
+    }
+
     // The desktop background, one per monitor (US4). The arcs and bundles drift through one
     // cycle every ~10 min, advanced 10 times a second; the layers only move on whole pixels,
     // so most steps change nothing on screen. Stopped by fixtures, by `wallpaperMotion: false`
     // in shell.json, or over IPC.
     property var wallpaperMotionOverride: null   // IPC: true/false; null = follow Settings
+    // spec 013, front A (FR-011): still while a menu is open, as the game's background.
     readonly property bool wallpaperMoving: !Tokens.frozen
         && (wallpaperMotionOverride ?? Settings.wallpaperMotion)
+        && !(pauseOpen || pickerOpen || logOpen)
     property real wallpaperPhase: 0
     Timer {
         running: shell.wallpaperMoving
@@ -119,6 +136,9 @@ ShellRoot {
     property string pausePendingQuery: ""        // `pause search` before the menu is up
     property int settingsCategory: 0             // where SYSTEM reopens
     property var pauseLast: null                 // the closed menu's last `pause dump`
+    // spec 013 (research R7): `pause fps start|stop`, the frame times (ms) of the menu's window.
+    property bool fpsOn: false
+    property var fpsTimes: []
     property var settingsLast: ({})              // the SYSTEM page's last state, for `settings dump`
     property var pauseLastAction: null           // { kind, id, detail }
     readonly property var pauseScreen: {
@@ -139,7 +159,6 @@ ShellRoot {
         if (pauseOpening)
             return;
         closePicker();
-        closeLog();                              // spec 008
         pauseOpening = true;
         Compositor.refreshFocusedMonitor();
         pauseFallback.restart();
@@ -195,7 +214,7 @@ ShellRoot {
     }
     Timer {
         id: pauseUnload
-        interval: 150
+        interval: 150 + Tokens.motion.popupClose     // spec 013, front A: the closing triangles first
         onTriggered: if (!shell.pauseOpen) shell.pauseLoaded = false
     }
     LazyLoader {
@@ -213,6 +232,8 @@ ShellRoot {
             }
             onCloseRequested: shell.closePause()
             Component.onCompleted: if (shell.pausePendingQuery !== "") search(shell.pausePendingQuery)
+            countFrames: shell.fpsOn
+            onFrame: ms => shell.fpsTimes.push(ms)
         }
     }
 
@@ -260,7 +281,6 @@ ShellRoot {
         if (pickerOpen || pickerOpening)
             return;
         closePause();
-        closeLog();                              // spec 008
         pickerOpening = true;
         Compositor.refreshFocusedMonitor();
         pickerFallback.restart();
@@ -299,7 +319,7 @@ ShellRoot {
     }
     Timer {
         id: pickerUnload
-        interval: 150
+        interval: 150 + Tokens.motion.popupClose     // spec 013, front A: the closing triangles first
         onTriggered: if (!shell.pickerOpen) shell.pickerLoaded = false
     }
     LazyLoader {
@@ -334,9 +354,27 @@ ShellRoot {
             readonly property bool wanted: NotifyStore.stack.some(t => t.monitor === notifySlot.name)
                 || NotifyStore.critical?.monitor === notifySlot.name
             property bool loaded: false
+            // spec 013, front B (R5): a layer kept from before the full-screen menu opened is below it; a
+            // wanted one that lingers is brought up as a new surface (the last one created is on top).
+            property bool bounce: false
+            property bool behind: false          // loaded before the menu: under it
+            function bringFront(): void {
+                if (!loaded || !behind)
+                    return;
+                behind = false;
+                bounce = true;
+                bounceBack.restart();
+            }
+            Timer {
+                id: bounceBack
+                interval: 60
+                onTriggered: notifySlot.bounce = false
+            }
             onWantedChanged: {
                 if (wanted) {
                     linger.stop();
+                    if (shell.menuCover)
+                        bringFront();
                     loaded = true;
                 } else {
                     linger.restart();
@@ -346,11 +384,14 @@ ShellRoot {
             Timer {
                 id: linger
                 interval: Tokens.notify.fade + 150
-                onTriggered: if (!notifySlot.wanted) notifySlot.loaded = false
+                onTriggered: if (!notifySlot.wanted) {
+                    notifySlot.loaded = false;
+                    notifySlot.behind = false;
+                }
             }
             LazyLoader {
                 id: notifyLoader
-                active: notifySlot.loaded
+                active: notifySlot.loaded && !notifySlot.bounce
                 NotifyLayer {
                     modelData: notifySlot.modelData
                     onOpenLogRequested: shell.openLog()
@@ -360,6 +401,28 @@ ShellRoot {
                 return notifyLoader.item?.dumpBoxes() ?? null;
             }
             readonly property real critBottom: notifyLoader.item?.critBottom ?? 0
+        }
+    }
+    // spec 013, front B (R5, FR-014): over a full-screen menu (the pause menu or the wallpaper picker)
+    // the critical band, the toasts and the OSD stay on top. Overlay surfaces stack in the order they
+    // were created, so when such a menu opens (or the presentation switches to full screen) the ones
+    // already up are recreated after it; the ones that appear later are born on top.
+    readonly property bool menuCover: Settings.menuPresentation === "fullscreen" && (pauseOpen || pickerOpen)
+    onMenuCoverChanged: {
+        if (!menuCover)
+            return;
+        for (const slot of notifyLayers.instances)
+            slot.behind = slot.loaded;
+        osdBehind = osdLoaded;
+        frontTimer.restart();
+    }
+    Timer {
+        id: frontTimer
+        interval: 150
+        onTriggered: {
+            for (const slot of notifyLayers.instances)
+                slot.bringFront();
+            shell.bringOsdFront();
         }
     }
     function critBottomOn(name: string): real {
@@ -373,12 +436,28 @@ ShellRoot {
     // The OSD's window exists while there is an OSD, and a moment after (its fade out).
     property var osdLast: null
     property bool osdLoaded: false
+    property bool osdBounce: false               // spec 013, front B: recreated over a full-screen menu
+    property bool osdBehind: false
+    function bringOsdFront(): void {
+        if (!osdLoaded || !osdBehind)
+            return;
+        osdBehind = false;
+        osdBounce = true;
+        osdBounceBack.restart();
+    }
+    Timer {
+        id: osdBounceBack
+        interval: 60
+        onTriggered: shell.osdBounce = false
+    }
     Connections {
         target: Osd
         function onCurrentChanged(): void {
             if (Osd.current) {
                 shell.osdLast = Osd.current;
                 osdUnload.stop();
+                if (shell.menuCover)
+                    shell.bringOsdFront();
                 shell.osdLoaded = true;
             } else {
                 osdUnload.restart();
@@ -388,12 +467,15 @@ ShellRoot {
     Timer {
         id: osdUnload
         interval: Tokens.notify.fade + 100
-        onTriggered: if (!Osd.current) shell.osdLoaded = false
+        onTriggered: if (!Osd.current) {
+            shell.osdLoaded = false;
+            shell.osdBehind = false;
+        }
     }
     readonly property var osdItem: osdLoader.item      // a var: qmllint types a LazyLoader's item as QObject
     LazyLoader {
         id: osdLoader
-        active: shell.osdLoaded
+        active: shell.osdLoaded && !shell.osdBounce
         OsdWindow {
             modelData: shell.screenNamed(shell.osdLast?.monitor ?? "")
             osd: shell.osdLast
@@ -403,73 +485,22 @@ ShellRoot {
     }
 
     // --- spec 008: log ----------------------------------------------------------------------------
-    // The text log's pop-up, like the pause menu and the picker: it opens on the focused monitor (re-read
-    // first), closes in two steps, and only one of the three is open at a time (opening one closes the
-    // others). While it shows, the store knows (NotifyStore.logOpen: new ones go to its list, and opening
-    // marks everything read).
-    property bool logOpen: false
-    property bool logOpening: false
-    property bool logLoaded: false
-    property string logMonitor: ""
+    // spec 013, front B (US8, FR-034): the text log is the pause menu's LOG tab, its only place. While
+    // the menu shows that tab the store knows (NotifyStore.logOpen: new ones go to its list, opening
+    // marks everything read, and leaving or closing takes the NEW tags off).
+    readonly property bool logOpen: pauseOpen && pauseTab === "log"
+    readonly property bool logOpening: pauseOpening && pauseTab === "log"
     Binding {
         target: NotifyStore
         property: "logOpen"
         value: shell.logOpen
     }
     function openLog(): void {
-        if (logOpen || logOpening)
-            return;
-        closePause();
-        closePicker();
-        logOpening = true;
-        Compositor.refreshFocusedMonitor();
-        logFallback.restart();
-    }
-    function showLog(): void {
-        if (!logOpening)
-            return;
-        logOpening = false;
-        logFallback.stop();
-        logMonitor = Compositor.focusedMonitor;
-        logOpen = true;
+        openPause("log");
     }
     function closeLog(): void {
-        logOpening = false;
-        logOpen = false;
-    }
-    Connections {
-        target: Compositor
-        function onMonitorScalesChanged(): void {
-            shell.showLog();
-        }
-    }
-    Timer {
-        id: logFallback
-        interval: 250
-        onTriggered: shell.showLog()
-    }
-    onLogOpenChanged: {
-        if (logOpen) {
-            logUnload.stop();
-            logLoaded = true;
-        } else {
-            logUnload.restart();
-        }
-    }
-    Timer {
-        id: logUnload
-        interval: 150
-        onTriggered: if (!shell.logOpen) shell.logLoaded = false
-    }
-    readonly property var logItem: logLoader.item
-    LazyLoader {
-        id: logLoader
-        active: shell.logLoaded
-        LogPopup {
-            screen: shell.screenNamed(shell.logMonitor)
-            keyboardActive: shell.logOpen
-            onCloseRequested: shell.closeLog()
-        }
+        if (logOpen || logOpening)
+            closePause();
     }
     // --- end spec 008 -----------------------------------------------------------------------------
 
@@ -553,8 +584,8 @@ ShellRoot {
         function close(): void { shell.closePause(); }
         function toggle(): void { shell.togglePause(); }
         function tab(name: string): string {
-            if (!["apps", "windows", "system", "power"].includes(name))
-                return `error: unknown tab ${name} (apps, windows, system or power)`;
+            if (!["apps", "windows", "log", "system", "power"].includes(name))
+                return `error: unknown tab ${name} (apps, windows, log, system or power)`;
             shell.openPause(name);
             return "ok";
         }
@@ -587,6 +618,39 @@ ShellRoot {
                 shell.pauseMenu.restart();
             }
         }
+        // spec 013 (research R7), tests only: `start` clears and starts counting the menu's frames
+        // (also across opening and closing); `stop` gives { frames, seconds, mean, p95, p95Ms,
+        // worstMs }: mean and p95 in frames per second (p95: what 95% of the frames reach).
+        function fps(cmd: string): string {
+            if (cmd === "start") {
+                shell.fpsTimes = [];
+                shell.fpsOn = true;
+                return "ok";
+            }
+            if (cmd !== "stop")
+                return `error: unknown command ${cmd} (start or stop)`;
+            shell.fpsOn = false;
+            const t = shell.fpsTimes.slice().sort((a, b) => a - b);
+            const n = t.length;
+            const total = t.reduce((a, b) => a + b, 0);
+            const p95Ms = n ? t[Math.min(n - 1, Math.ceil(n * 0.95) - 1)] : 0;
+            const r = v => Math.round(v * 10) / 10;
+            return JSON.stringify({
+                frames: n,
+                seconds: r(total / 1000),
+                mean: total > 0 ? r(n * 1000 / total) : 0,
+                p95: p95Ms > 0 ? r(1000 / p95Ms) : 0,
+                p95Ms: r(p95Ms),
+                worstMs: n ? r(t[n - 1]) : 0
+            });
+        }
+        // spec 013 (front C), tests only: the choice pop-up of the option with the focus on SYSTEM.
+        // `open`; `pick <i>` (a single choice); `toggle <i>` (a multiple one); `close`.
+        function choice(cmd: string, arg: string): string {
+            if (!shell.pauseMenu || !shell.pauseOpen)
+                return "error: the menu is closed";
+            return shell.pauseMenu.choiceCommand(cmd, arg);
+        }
         function dump(): string {
             const live = shell.pauseMenu;
             const d = live ? live.dumpState() : (shell.pauseLast ?? {
@@ -603,7 +667,11 @@ ShellRoot {
                     "confirm-start": SettingsModel.choiceId("menu", "confirm-start")
                 },
                 lastAction: shell.pauseLastAction,
-                compositor: { backend: Compositor.backendName, capabilities: Compositor.capabilities }
+                compositor: { backend: Compositor.backendName, capabilities: Compositor.capabilities },
+                // spec 013: a closed menu shows the presentation it would open in, and no animation
+                presentation: live ? d.presentation : Settings.menuPresentation,
+                anim: live ? d.anim : "idle",
+                choice: live ? d.choice : null
             }));
         }
     }
@@ -636,6 +704,29 @@ ShellRoot {
                 shell.pauseMenu.restartSystem(0);
             }
         }
+        // spec 013 (contracts/ipc.md): a shell setting by key (Settings.keys, e.g.
+        // shell.menuPresentation, sound.volume, input.kbLayouts, and shell.barContrast). `value` is
+        // read as JSON when it parses (true, 40), else as text; a list is comma-separated ("us,br":
+        // `qs ipc call` does not pass brackets through); "null" goes back to the config. Takes
+        // effect at once, as from the menus.
+        function set(key: string, value: string): string {
+            let v = value;
+            try {
+                v = JSON.parse(value);
+            } catch (e) {
+            }
+            if (key === "shell.barContrast" || key === "barContrast") {
+                if (v !== null && !Settings.barContrastLevels.includes(v))
+                    return `error: not a value of shell.barContrast: ${value}`;
+                Settings.setLevel("barContrast", v ?? "");
+                return "ok";
+            }
+            const k = Settings.keyOf(key);
+            if (Settings.keys[k]?.type === "layouts" && typeof v === "string")
+                v = v.split(",").map(x => x.trim()).filter(x => x !== "");
+            const err = Settings.setKey(k || key, v);
+            return err === "" ? "ok" : `error: ${err}`;
+        }
         function dump(): string {
             const open = shell.pauseOpen && shell.pauseTab === "system";
             const page = shell.pauseMenu ? shell.pauseMenu.systemDump() : shell.settingsLast;
@@ -651,10 +742,19 @@ ShellRoot {
                 keys: page.keys ?? [],
                 card: page.card ?? { title: "", note: "" },
                 values: SettingsModel.dumpValues(),
+                // spec 013: the shell settings by key (Settings.keys), as `settings set` takes them
+                shellValues: Object.keys(Settings.keys).reduce((o, k) => (o[k] = Settings.valueOf(k), o), {}),
                 dimmed: SettingsModel.dimmedIds(),
                 geometry: open ? page.geometry : null
             });
         }
+    }
+
+    // spec 013 (contracts/ipc.md): the interface sounds.
+    IpcHandler {
+        target: "sounds"
+        function play(event: string): string { return Sounds.play(event); }
+        function dump(): string { return JSON.stringify(Sounds.dump()); }
     }
 
     IpcHandler {
@@ -673,6 +773,7 @@ ShellRoot {
     // --- spec 008 (specs/008-pod-text-log/contracts/ipc.md) -------------------------------------------
     IpcHandler {
         target: "notify"
+        // spec 013 (contracts/ipc.md): shortcuts to the pause menu on its LOG tab.
         function open(): void { shell.openLog(); }
         function close(): void { shell.closeLog(); }
         function toggle(): void {
@@ -730,8 +831,7 @@ ShellRoot {
             if (d.osd && osdWin)
                 d.osd.box = osdWin.box();
             d.osd = d.osd ? Object.assign(d.osd, { position: NotifyPrefs.osdPosition }) : null;
-            const logWin = shell.logOpen ? shell.logItem : null;
-            d.page = logWin ? logWin.dumpState() : null;
+            d.page = shell.logOpen ? (shell.pauseMenu?.logDump() ?? null) : null;
             d.windows = Object.keys(boxes);
             return JSON.stringify(d);
         }

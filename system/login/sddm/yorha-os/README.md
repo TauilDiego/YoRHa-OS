@@ -16,7 +16,7 @@ autenticação, Session, Reboot e Shut down, e a entrada depois do boot. Qt 6, g
 ## Opções
 
 No `theme.conf` (o padrão primeiro): `intro` = `full` | `fade` | `none`, `clock` = `big` | `small` |
-`none`, `userList` = `always` | `auto`, `reduceMotion` = `false` | `true`. As do usuário ficam em
+`none`, `userList` = `always` | `auto`, `reduceMotion` = `false` | `true`, `sounds` = `on` | `off` (spec 013). As do usuário ficam em
 `/etc/yorha-os/login.conf`, que o instalador liga como `theme.conf.user`. Um valor inválido vale o padrão
 e gera um aviso no log, uma vez.
 
@@ -39,3 +39,13 @@ theme" e mostra o tema padrão dele.
 
 `lab/011/install-dev <vm> --no-boot --login <esta pasta>` e `sudo systemctl restart sddm` na VM; depois
 `lab/check-011 login`, `power` e `intro` (no `lab/README.md` privado).
+
+## Sons (spec 013)
+
+`components/LoginSounds.qml` toca `intro` (só na entrada completa), `move` (a lista), `confirm` (entrar),
+`error` (senha errada) e `close` (Reboot e Shut down), com `assets/sounds/*.wav`, cópias dos sons nossos
+de `system/sounds/`. O volume vem de `/run/yorha-os/sound.state` (o `level` em %, ganho = nível²), que o
+script do som de boot grava **depois** de tocar: o tema só cria os `SoundEffect` quando o arquivo existe,
+esperando no máximo 2 s (depois toca a 30%), porque um PipeWire que abre a placa durante o `aplay` faz o
+nó da placa sumir. `enabled: false` no arquivo (mudo, ou "Boot and login sounds" desligado) deixa o login
+calado. Sem QtMultimedia ou sem servidor de áudio, o login fica calado e sem erro na tela.

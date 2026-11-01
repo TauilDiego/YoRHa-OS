@@ -77,6 +77,104 @@ FocusScope {
         return SettingsModel.hasValue(o) && !SettingsModel.isDimmed(catId, o.id);
     }
 
+    // --- spec 013, front C: the choice pop-up (FR-025 to FR-027) ----------------------------------------
+    // Enter (or a click) on a choice of more than 3 values, or on a "multi" option, opens the pop-up
+    // glued to the row; ←→ still change a choice's value in place. choiceId is "cat.opt" while it is
+    // open. A single choice stores the picked value and closes; a multi one stores its marks when it
+    // closes, however it closes (Esc, a click outside).
+    property string choiceId: ""
+    property string choiceCat: ""
+    property string choiceOptId: ""
+    property bool choiceMulti: false
+    // { option, values, selected, multi, checked[] } or null (the `pause dump`'s `choice`)
+    readonly property var choiceState: choiceId === "" ? null : {
+        option: choiceId,
+        values: choicePopup.values,
+        selected: choicePopup.current,
+        multi: choiceMulti,
+        checked: choiceMulti ? choicePopup.marked : []
+    }
+
+    function activateOption(o: var): void {
+        if (SettingsModel.opensPopup(o) && !SettingsModel.isDimmed(catId, o.id))
+            openChoice();
+        else
+            SettingsModel.activate(catId, o.id);
+    }
+
+    // "" on success, else why not.
+    function openChoice(): string {
+        const o = column === "options" ? opt : null;
+        const row = o ? options.rowAt(option) : null;
+        if (!o || !row)
+            return "error: no option has the focus";
+        if (!SettingsModel.opensPopup(o) || SettingsModel.isDimmed(catId, o.id))
+            return "error: this option has no choice pop-up";
+        const v = SettingsModel.value(catId, o.id);
+        const p = row.mapToItem(root, 0, 0);
+        choiceMulti = o.type === "multi";
+        choiceCat = catId;
+        choiceOptId = o.id;
+        choicePopup.values = o.values;
+        choicePopup.multi = choiceMulti;
+        choicePopup.marked = choiceMulti ? v : [];
+        choicePopup.current = choiceMulti ? (v[0] ?? 0) : v;
+        choicePopup.anchorX = p.x + row.width;
+        choicePopup.anchorY = p.y;
+        choicePopup.anchorH = row.height;
+        choicePopup.limitTop = listsY - options.railRoom;
+        choicePopup.limitBottom = bottomY;
+        choiceId = catId + "." + o.id;
+        choicePopup.open = true;
+        choicePopup.forceActiveFocus();
+        Sounds.play("choiceOpen");               // junction: front C's pop-up, front D's sounds
+        return "";
+    }
+
+    function closeChoice(): void {
+        if (choiceId === "")
+            return;
+        if (choiceMulti)
+            SettingsModel.setMarked(choiceCat, choiceOptId, choicePopup.marked);
+        choicePopup.open = false;
+        choiceId = "";
+        root.forceActiveFocus();
+    }
+
+    // Where the pop-up's plate and the cursor's row are on the screen (tests), or null.
+    function choiceGeometry(): var {
+        return choiceId === "" ? null : choicePopup.geometry();
+    }
+
+    // `pause choice`: open | pick <i> | toggle <i> | close; "ok" or "error: …".
+    function choiceCommand(cmd: string, arg: string): string {
+        if (cmd === "open") {
+            const err = openChoice();
+            return err === "" ? "ok" : err;
+        }
+        if (choiceId === "")
+            return "error: no choice pop-up is open";
+        const i = parseInt(arg);
+        if (cmd === "close") {
+            closeChoice();
+            return "ok";
+        }
+        if (cmd !== "pick" && cmd !== "toggle")
+            return `error: unknown command ${cmd} (open, pick, toggle or close)`;
+        if (!Number.isInteger(i) || i < 0 || i >= choicePopup.count)
+            return `error: ${arg} is not a value index`;
+        if (cmd === "pick" && choiceMulti)
+            return "error: a multiple choice marks with toggle";
+        if (cmd === "toggle" && !choiceMulti)
+            return "error: a single choice picks with pick";
+        if (cmd === "pick")
+            choicePopup.activate(i);
+        else if (!choicePopup.toggle(i))
+            return "error: at least one value stays marked";
+        return "ok";
+    }
+    // --- end front C ------------------------------------------------------------------------------------
+
     function setCategory(i: int): void {
         if (i === category)
             return;
@@ -93,6 +191,8 @@ FocusScope {
 
     // Back to the categories, on category `i` (a reopened pop-up, `settings reset`).
     function restart(i: int): void {
+        choicePopup.open = false;           // spec 013: a reopened menu has no pop-up
+        choiceId = "";
         column = "categories";
         category = Math.max(0, Math.min(i, Math.max(0, cats.length - 1)));
         option = 0;
@@ -103,12 +203,17 @@ FocusScope {
         const n = opts.length;
         event.accepted = true;
         if (column === "categories") {
-            if (k === Qt.Key_Up && cats.length > 0)
+            if (k === Qt.Key_Up && cats.length > 0) {
+                Sounds.play("move");             // spec 013, front D
                 setCategory((category - 1 + cats.length) % cats.length);
-            else if (k === Qt.Key_Down && cats.length > 0)
+            } else if (k === Qt.Key_Down && cats.length > 0) {
+                Sounds.play("move");             // spec 013, front D
                 setCategory((category + 1) % cats.length);
-            else if (k === Qt.Key_Right || k === Qt.Key_Return || k === Qt.Key_Enter)
+            } else if (k === Qt.Key_Right || k === Qt.Key_Return || k === Qt.Key_Enter) {
+                if (opts.length > 0)
+                    Sounds.play("confirm");      // spec 013, front D
                 enterOptions();
+            }
             else if (k === Qt.Key_Escape)
                 closeRequested();
             else
@@ -116,23 +221,28 @@ FocusScope {
             return;
         }
         const o = opts[option];
-        if (k === Qt.Key_Up)
+        if (k === Qt.Key_Up) {
+            Sounds.play("move");                 // spec 013, front D
             option = (option - 1 + n) % n;
-        else if (k === Qt.Key_Down)
+        } else if (k === Qt.Key_Down) {
+            Sounds.play("move");                 // spec 013, front D
             option = (option + 1) % n;
-        else if (k === Qt.Key_Left) {
+        } else if (k === Qt.Key_Left) {
             if (changes(o))
                 SettingsModel.step(catId, o.id, -1);
-            else
+            else {
+                Sounds.play("back");             // spec 013, front D
                 column = "categories";
+            }
         } else if (k === Qt.Key_Right) {
             if (changes(o))
                 SettingsModel.step(catId, o.id, 1);
         } else if (k === Qt.Key_Return || k === Qt.Key_Enter)
-            SettingsModel.activate(catId, o.id);
-        else if (k === Qt.Key_Escape)
+            activateOption(o);
+        else if (k === Qt.Key_Escape) {
+            Sounds.play("back");                 // spec 013, front D
             column = "categories";
-        else
+        } else
             event.accepted = false;
     }
 
@@ -156,6 +266,8 @@ FocusScope {
         pointerMoved = false;
         if (!h || !moved)
             return;
+        if (h.column !== column || (h.column === "categories" ? h.index !== category : h.index !== option))
+            Sounds.play("move");                 // spec 013, front D
         if (h.column === "categories") {
             column = "categories";
             setCategory(h.index);
@@ -209,12 +321,15 @@ FocusScope {
             };
         const dimmed = SettingsModel.isDimmed(catId, opt.id);
         const busy = SettingsModel.busy === catId + "." + opt.id;
+        // spec 013: a "multi" option the compositor can't apply says why
+        const multiNote = opt.type === "multi" ? Compositor.keyboardLayoutsNote : "";
         return {
             title: opt.label,
             text: opt.desc ?? "",
-            note: dimmed ? SettingsModel.needsText(catId, opt.id) : busy ? String(opt.busy ?? "") : "",
-            kind: dimmed ? "alert" : "info",
-            meta: SettingsModel.hasValue(opt) ? [
+            note: dimmed ? SettingsModel.needsText(catId, opt.id) : busy ? String(opt.busy ?? "") : multiNote,
+            kind: dimmed || multiNote !== "" ? "alert" : "info",
+            meta: opt.type === "multi" ? [{ label: Strings.settings.nowLabel, value: SettingsModel.display(catId, opt.id) }]
+                : SettingsModel.hasValue(opt) ? [
                 { label: Strings.settings.defaultLabel, value: SettingsModel.defaultDisplay(catId, opt.id) },
                 { label: Strings.settings.nowLabel, value: SettingsModel.display(catId, opt.id) }
             ] : []
@@ -222,7 +337,14 @@ FocusScope {
     }
 
     // The extra hints go before Esc, as in the pause menu's mockup ("… Tab Next tab, Esc Close").
-    readonly property var keys: {
+    readonly property var keys: choiceId !== "" ? choiceKeys : listKeys
+    // spec 013: the pop-up takes Tab too, so the hints have no "Next tab"
+    readonly property var choiceKeys: [
+        { key: Strings.settings.keyUpDown, label: Strings.settings.select },
+        { key: Strings.settings.keyEnter, label: choiceMulti ? Strings.settings.mark : Strings.settings.choose },
+        { key: Strings.settings.keyEsc, label: choiceMulti ? Strings.settings.done : Strings.settings.cancel }
+    ]
+    readonly property var listKeys: {
         const b = baseKeys, last = b[b.length - 1];
         return last?.key === Strings.settings.keyEsc ? b.slice(0, -1).concat(extraKeys, [last]) : b.concat(extraKeys);
     }
@@ -240,6 +362,8 @@ FocusScope {
             out.push({ key: S.keyLeftRight, label: S.change });
         else if (!dimmed && opt.type === "action")
             out.push({ key: S.keyEnter, label: String(opt.text ?? "") });
+        else if (!dimmed && opt.type === "multi")
+            out.push({ key: S.keyEnter, label: S.open });
         out.push({ key: S.keyEsc, label: S.back });
         return out;
     }
@@ -275,6 +399,7 @@ FocusScope {
         keysEnabled: false
         onHoveredIndex: index => root.noteHover("categories", index)
         onActivated: index => {
+            Sounds.play("confirm");              // spec 013, front D
             root.setCategory(index);
             root.enterOptions();
         }
@@ -322,7 +447,7 @@ FocusScope {
         onActivated: index => {
             root.column = "options";
             root.option = index;
-            SettingsModel.activate(root.catId, root.opts[index].id);
+            root.activateOption(root.opts[index]);
         }
         onStepped: (index, dir) => {
             root.column = "options";
@@ -349,6 +474,24 @@ FocusScope {
         note: root.cardInfo.note
         noteKind: root.cardInfo.kind
         meta: root.cardInfo.meta
+    }
+
+    // spec 013, front C: the choice pop-up, over the whole page (and so the menu's panel)
+    ChoicePopup {
+        id: choicePopup
+        anchors.fill: parent
+        s: root.s
+        onPicked: index => {
+            Sounds.play("choicePick");           // junction: front D's sounds on front C's pop-up
+            SettingsModel.set(root.choiceCat, root.choiceOptId, index);
+            root.closeChoice();
+        }
+        onToggled: Sounds.play("choicePick")
+        onCurrentChanged: if (open) Sounds.play("move")
+        onDismissed: {
+            Sounds.play("back");
+            root.closeChoice();
+        }
     }
 
     // The pointer's moves, seen by the page itself (an item on top would take the rows' hover).

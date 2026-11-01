@@ -812,12 +812,10 @@ o fundo escuro. O clique abre o log.
 
 O layout de lista + prévia + opções (§8, `PickerLayout { fluid: true; lazyList: true }`), numa peça
 sem janela que se ajusta ao corpo que recebe:
-- **no popup** (`LogPopup`, `ALT + N` na VM, ou o clique no contador da barra): a moldura da 003,
-  título `LOG -Transmissions`. Convive com o menu de pausa (§9) e o seletor de papel de parede: só um
-  dos três fica aberto, e abrir um fecha os outros;
-- **pronta pra uma aba do menu de pausa** (ainda não ligada): `LogPage { host: "pause"; s; width;
-  height }` no corpo da aba; a moldura lê `title`, `subtitle`, `footerLeft` e `keys` da página, e
-  abrir a aba faz `NotifyStore.logOpen = true` e `markAllRead()`.
+- **como a aba LOG do menu de pausa** (spec 013, US8): `LogPage { host: "pause" }`, entre WINDOWS e
+  SYSTEM. `ALT + N` na VM (`SUPER + N` no sistema), o clique no contador da barra e
+  `notify open|toggle` abrem o menu nessa aba. As marcas NEW saem ao fechar o menu ou ao sair da
+  aba. O popup próprio da 008 (`LogPopup`) saiu.
 
 Colunas:
 - **lista:** NOW (última hora) e EARLIER; cada linha com o quadradinho (`alert` nas críticas), quem
@@ -827,16 +825,17 @@ Colunas:
   novo a cada troca, com as ações que ainda valem; "The app closed this notification." ou "From an
   earlier session." quando não valem; APP, RECEIVED, URGENCY e STATUS embaixo;
 - **opções:** `Do not disturb` (toggle), `Show` (All, Unread, Critical) e `Clear all` (ação); depois
-  UNREAD, KEPT (n / limite) e SERVER. O `ON`/`OFF` do toggle fica numa coluna de valor mais estreita
-  (`Tokens.notify.logToggleW` 70, contra os 190 do `stepperValueW`), pra `Do not disturb` caber
-  inteiro; as configurações, APPS, WINDOWS e o seletor continuam com a coluna de 190.
+  UNREAD, KEPT (n / limite) e SERVER. O toggle e a escolha usam uma coluna de valor só, mais estreita
+  (`Tokens.notify.logValueW` 92, contra os 190 do `stepperValueW`; spec 013, T057). Assim
+  `Do not disturb` cabe inteiro, `Critical` também, e `OFF` e `All` ficam no mesmo centro. As
+  configurações, APPS, WINDOWS e o seletor continuam com a coluna de 190.
 
 Teclas: lista ↑↓, Enter a ação padrão, Delete dispensa (o foco vai pra próxima), → opções, Esc
 fecha; opções ↑↓, ←→ mudam, Enter, Esc volta. O rodapé mostra só as que valem.
 
 **Acréscimos às peças da 003/004/007:** `ListItem.lead`, `.tag` e `.markColor`; `GroupedList.lazy`
 (a rolagem em linhas inteiras da 007 vale também nas linhas sob demanda); `PickerLayout.fluid`,
-`.lazyList` e `.toggleValueW`; `OptionRow.valueWidth` e `ValueStepper.valueWidth` (padrão
+`.lazyList`, `.toggleValueW` e `.choiceValueW` (013); `OptionRow.valueWidth` e `ValueStepper.valueWidth` (padrão
 `stepperValueW`). As opções `toggle` e `action` são as da 007 (§9).
 
 ### Opções, tokens e comandos
@@ -862,6 +861,103 @@ sobre o escuro, as transmissões (digitando, com ações, com imagem e resposta 
 `×5`), a faixa crítica com `1/2`, o botão de ação e as etiquetas, o OSD nos quatro tipos, as três
 posições em miniatura, o contador nos dois tons e a `LogPage` nos dois corpos (popup e menu de pausa).
 <!-- spec 008 (008-pod-text-log): fim -->
+
+## 11. Menus do jogo (spec 013)
+
+Os menus ganham o movimento medido nos vídeos do jogo, a tela cheia como opção, a janelinha de
+escolhas e os sons da interface. Os números ficam todos em `Tokens.motion` (research R1), num lugar
+só pra ajustar. Com `Tokens.instant` (Reduce motion, dados de teste), todas as durações vão a 0 e
+tudo aparece no estado final (FR-016). O ponteiro (`Selector`) continua o da 007, por escolha do
+dono.
+
+### Movimento
+
+| Efeito | Peça | Números (`Tokens.motion`) |
+|---|---|---|
+| Seleção (FR-001) | `ListItem`, `HeaderButton` | entra em `selectIn` 400 OutQuart; a linha que perde recolhe em `selectOut` 200 InOutQuad; o texto só clareia onde a tinta passou |
+| Pulso (FR-002) | linha "viva" (a coluna com foco) e aba aberta | trapézio de `pulse` 1333 (`pulseRise` 350, `pulseTop` 83, `pulseFall` 317), +32% de luz, depois de `pulseDelay` 150 |
+| Título (FR-004) | `PageHeader` + `TypedText { tip: "letter" }` | some em `titleOut` 100, vazio `titleGap` 200, digita a `titleCps` 20 com a letra da ponta sorteada da própria palavra |
+| Cascata (FR-005) | `CursorList`, `GroupedList`, `OptionList` (`enter(delay, kiteAt)`) | uma linha a cada `cascadeStep` 33, recorte de `cascadeWipe` 130, rótulos a `labelCps` 28 (o selecionado a 20) |
+| Troca de aba (FR-006) | `PopupFrame` (`swapFrom`, `swapLevel`) | some em `tabOut` 133, vazio `tabGap` 67, monta; uma troca nova recomeça o vazio |
+| Rodapé (FR-007) | `KeyHints` + o texto da esquerda, num contêiner | opacidade em `footFade` 130, desfoque, deslize de `footDx` 20 em `footSlide` 300 |
+| Nível (FR-008) | `OptionList`, `OptionRow.enterLevel()`, `ListItem.leave()` | escalonado `levelStep` 34, `levelIn` 170, `levelDx` 10; a ação que sai estica ×`leaveStretch` 2,1 e apaga em `leave` 120 |
+| Abrir e fechar (FR-009) | `TriangleReveal` + `popup/shaders/triangles.frag(.qsb)` | grade `openGrid` 100, triângulos `openTris` 300 (`triW`×`triH` 240×120, `triDark` 30% pelo quadro escuro), montagem em ordem (`build*`), fechar `closeTris` 230 |
+| Diálogo (FR-010) | `ConfirmDialog` | escurece pra ×`dialogTo` 0,8 em `dialogDim` 170; a faixa do título num quadro, o corpo com fade e desfoque; fecha desfocando |
+| Fundo (FR-011) | `shell.qml` | o papel de parede para com um menu aberto |
+| Texto que não cabe (FR-012) | `ScrollingLabel` (rótulos, valores, cartões, info) | parado `marqueeHold` 1 s, rola a `marqueeSpeed` 60 px/s, parado, volta; com `Tokens.instant`, corta com "…" |
+
+- **`ScrollingLabel`** (`ds/primitives`): um `Label` num recorte. `follow: <outro ScrollingLabel>`
+  faz duas cópias rolarem juntas (as faces escura e clara da `ListItem`). `running: false` estaciona
+  no começo.
+- **`TypedText`** ganhou `cps` (letras por segundo) e `tip: "letter"` (a letra da ponta sorteada, sem
+  cursor). O padrão continua o cursor de bloco da 008.
+- **O shader dos triângulos** é compilado por `lab/013/qsb` (`qsb --qt6`, num container), e o `.qsb`
+  vai versionado ao lado do fonte. Ele roda sobre uma textura do painel só durante a animação.
+- **Estado pros testes:** `PauseMenu.anim` (`idle | opening | assembling | tab | closing`) no
+  `pause dump`.
+
+### Janela ou tela cheia (FR-013, FR-014)
+
+- **Appearance › Menu presentation** (`shell.menuPresentation`: `floating`, o padrão, ou
+  `fullscreen`), troca ao vivo, mantendo aba, seleção e foco.
+- **`PopupFrame.presentation`:** na tela cheia, o painel cresce até a janela (`morph`, em
+  `popupFade`), sem tinta em volta e sem sombra, com o papel parado por baixo. O `s` vem do painel
+  flutuante de 84% nos dois modos, então as letras têm o mesmo tamanho (research R4).
+- **Layouts:** APPS, WINDOWS e o seletor esticam as colunas (`PickerLayout.stretch`). SYSTEM e
+  POWER ficam centralizados no quadro de 1612. Em ultrawide, o conteúdo fica numa faixa 16:9 no meio
+  (`inset`).
+- **`PickerLayout`:** o `fluid` da 008 virou `stretch` (colunas pela largura) e `bodyOnly` (sem
+  espaço pra título e rodapé próprios). O `fluid` ainda liga os dois.
+- **Notificações por cima:** a superfície Overlay criada por último fica em cima. O `NotifyLayer` e o
+  OSD recriam a deles quando o menu cheio abre.
+
+### Janelinha de escolhas (`ChoicePopup`, FR-025 a FR-027)
+
+- **Onde:** presa à direita da linha da opção, com o menu escurecido pra ×0,8 e o ponteiro do lado
+  direito. Perto da borda de baixo ela sobe, e com muitos valores rola em linhas inteiras.
+- **Quando abre:** Enter numa escolha com mais de 3 valores. ←→ continuam mudando o valor direto, e
+  Esc fecha sem mudar.
+- **Modo múltiplo** (`type: "multi"`): quadradinhos, com pelo menos um sempre marcado. É usado em
+  Keyboard › Layouts (`input.kbLayouts`), aplicado no Hyprland por
+  `hyprctl eval 'hl.config({ input = { kb_layout = … } })'` e reaplicado depois de um
+  `hyprctl reload`. No Niri e no Mango, a opção guarda e avisa que não aplica.
+- **Teste:** `pause choice open|pick|toggle|close`; o `pause dump` mostra `choice`.
+
+### Sons (FR-019 a FR-024)
+
+- **`Sounds.play(event)`:**
+  - `SoundEffect` (QtMultimedia, backend GStreamer no shell: o FFmpeg do Qt 6.12 entra em laço quando
+    um processo abre enquanto um som toca; a tela de login fica no FFmpeg, que inicia mais rápido),
+    com 3 instâncias pros sons que se repetem (`move`, `change`,
+    `osd`) e 1 pros outros;
+  - 40 ms de debounce por som e no máximo 4 ao mesmo tempo;
+  - tecla → som em ≤ ~30 ms na VM.
+- **Eventos:** `move`, `change`, `confirm`, `back`, `open`, `close`, `tab`, `dialog`, `choiceOpen`,
+  `choicePick`, `notify`, `notifyCritical`, `osd` e `sessionStart` (uma vez por login).
+  - **Sem som de digitação** (decisão do dono, 01.11), nem como opção.
+- **Os arquivos:** os nossos, em `system/sounds/`, gerados pela receita `system/sounds/gen/synth.py`.
+  O shell acha a pasta por `$YORHA_OS_SOUNDS`, depois `/usr/share/yorha-os/sounds`, depois
+  `<shell>/../system/sounds`.
+- **Configurações › Sound:** Interface sounds, Interface volume (por cima do volume do sistema; o
+  mudo do sistema cala), Sound folder (a pasta própria, um arquivo por evento;
+  [`docs/sons-do-jogo.md`](sons-do-jogo.md)), Use our sounds e Boot and login sounds.
+- **Notificações:** respeitam o "não perturbe" e a tela cheia segurada da 008.
+- **Boot e login:** o som de início toca quando a placa de som fica pronta, pelo módulo da 011 (regra
+  do udev, `yorha-os-boot-sound.service`, `aplay` direto na placa), e o tema de login tem os seus.
+  Os dois leem o volume e o mudo da última sessão (`~/.local/state/yorha-os/sound.json`).
+
+### Comandos e galeria
+
+- **IPC:**
+  - `pause dump` com `presentation`, `anim` e `choice`;
+  - `pause fps start|stop` (quadros por segundo do menu);
+  - `pause tab log`;
+  - `settings set <chave> <valor>` (listas com vírgula) e `shellValues` no `settings dump`;
+  - `sounds play <evento> | dump`.
+- **Galeria:** a página 7 (Tab seis vezes) mostra o texto que rola, as duas cópias juntas, o corte do
+  Reduce motion, a digitação com a letra da ponta, a lista e o título se mexendo sozinhos, e a
+  janelinha simples e a múltipla.
+<!-- spec 013 (013-menus-do-jogo): fim -->
 
 ## Créditos
 

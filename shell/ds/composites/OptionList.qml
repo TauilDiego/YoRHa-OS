@@ -9,6 +9,9 @@ import ".."
 // The kite hangs in the first selectorRoom px of the list's own width, so nothing is clipped.
 //   options: the category's options; values / dims: maps option id → value / dimmed.
 //   focused: false → no row is highlighted (the options column without the focus).
+// spec 013 (front A): enter(delay, kiteAt) is the cascade over the rows in view (FR-005, as the
+// CursorList's). When the options change to another set (another category), the new rows come in
+// as the game's sublist (FR-008): hidden when made, then OptionRow.enterLevel, levelStep apart.
 Item {
     id: root
 
@@ -30,6 +33,59 @@ Item {
     readonly property int rowH: Tokens.px(Tokens.space.listItemH, s)
     readonly property int pitch: rowH + Tokens.px(Tokens.space.listItemGap, s)
     readonly property int count: options?.length ?? 0
+
+    // --- spec 013 ------------------------------------------------------------------------------------
+    readonly property string motionList: "list"
+    property bool leaving: false                 // as the GroupedList's: the window widens
+    function enter(delay: int, kiteAt: int): var {
+        leaving = false;
+        let d = delay, end = 0;
+        const first = Math.round(scrollY / Math.max(1, pitch)) || 0;
+        for (let i = 0; i < rows.count; i++) {
+            const row = rows.itemAt(i) as OptionRow;
+            if (!row)
+                continue;
+            row.enterLevel(0);
+            if (i < first || i >= first + visibleRows) {
+                row.complete();
+                continue;
+            }
+            end = Math.max(end, row.enter(d, kiteAt));
+            d += Tokens.motion.cascadeStep;
+        }
+        return { next: d, end: end };
+    }
+
+    // The ids of the options shown, and of the last set that came in.
+    readonly property string optionsKey: (options ?? []).map(o => String(o?.id ?? "")).join("|")
+    property string shownKey: ""
+    property bool levelArmed: false
+    Component.onCompleted: shownKey = optionsKey
+    function rowMade(row: OptionRow): void {
+        if (shownKey === optionsKey || !visible || Tokens.instant)
+            return;
+        row.arrive = 0;
+        if (!levelArmed) {
+            levelArmed = true;
+            Qt.callLater(root.levelIn);
+        }
+    }
+    function levelIn(): void {
+        levelArmed = false;
+        shownKey = optionsKey;
+        const first = Math.round(scrollY / Math.max(1, pitch)) || 0;
+        let k = 0;
+        for (let i = 0; i < rows.count; i++) {
+            const row = rows.itemAt(i) as OptionRow;
+            if (!row)
+                continue;
+            if (i < first || i >= first + visibleRows)
+                row.enterLevel(0);
+            else
+                row.enterLevel(k++ * Tokens.motion.levelStep);
+        }
+    }
+    onVisibleChanged: if (!visible) shownKey = optionsKey
 
     // The row at `index` (OptionRow), e.g. for its geometry; null when out of range.
     function rowAt(index: int): var {
@@ -65,7 +121,8 @@ Item {
 
     // A clipped window on the rows; the column moves up by scrollY (whole rows).
     Item {
-        anchors.fill: parent
+        width: root.width + (root.leaving ? root.width * Tokens.motion.leaveStretch : 0)
+        height: root.height
         clip: true
 
         Column {
@@ -90,6 +147,7 @@ Item {
                     dimmed: root.dims[modelData?.id] === true
                     focused: root.focused && index === root.currentIndex
 
+                    Component.onCompleted: root.rowMade(this)
                     onHoveredChanged: if (hovered) root.hoveredIndex(index)
                     onStepped: dir => root.stepped(index, dir)
                     onPicked: v => root.picked(index, v)

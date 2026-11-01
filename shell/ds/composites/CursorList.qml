@@ -17,6 +17,9 @@ import "../base"
 // list that lost the focus); `wrap` makes move() go round at the ends; `keysEnabled: false`
 // hands the list to its parent: no keys, and hover and clicks only report (hoveredIndex,
 // activated) without moving `currentIndex`.
+// spec 013 (FR-005, front A): enter(delay, kiteAt) brings the rows in, one every cascadeStep from
+// `delay` ms (ListItem.enter); it returns { next, end }: the delay after its last row, and when the
+// last one is complete (ms from now). A menu's frame (PopupFrame) calls it for every list it shows.
 Item {
     id: root
 
@@ -59,6 +62,20 @@ Item {
             currentIndex = Math.max(0, Math.min(count - 1, currentIndex + step));
     }
 
+    readonly property string motionList: "list"
+    property bool leaving: false                 // nothing to widen here (no clipped window)
+    function enter(delay: int, kiteAt: int): var {
+        let d = delay, end = 0;
+        for (let i = 0; i < rows.count; i++) {
+            const row = rows.itemAt(i) as ListItem;
+            if (!row)
+                continue;
+            end = Math.max(end, row.enter(d, kiteAt));
+            d += Tokens.motion.cascadeStep;
+        }
+        return { next: d, end: end };
+    }
+
     Keys.enabled: keysEnabled
     Keys.onUpPressed: move(-1)
     Keys.onDownPressed: move(1)
@@ -80,6 +97,7 @@ Item {
         spacing: Tokens.px(Tokens.space.listItemGap, root.s)
 
         Repeater {
+            id: rows
             model: root.model
 
             ListItem {

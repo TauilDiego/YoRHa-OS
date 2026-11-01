@@ -148,7 +148,7 @@ Serpantinum.
 | U1 Base visual | Design system (tokens, componentes, shaders), fixtures e HUD | Screenshot do HUD com dados de teste |
 | U2 Estudo de instalação | Métodos A–D comparados, com o HUD como carga (8.4) | `docs/estudo-instalacao.md` escrito e método escolhido |
 | U3 Menu de pausa ✅ | Launcher, janelas, energia | Screenshot de cada aba |
-| U4 Pod e text log | Notificações e OSD | Uma notificação de teste vira transmissão do Pod |
+| U4 Pod e text log ✅ | Notificações e OSD | Uma notificação de teste vira transmissão do Pod |
 | U5 Lock e polkit | Tela de bloqueio (PAM) e agente de polkit, testados de verdade na VM | Bloquear, desbloquear e autorizar uma ação funcionam na VM |
 | U5a Boot e login ✅ | Splash de boot no Plymouth e tela de login com a UI NieR: tema QML do SDDM (spec 011; a escolha ficou com o SDDM). O bootloader continua o systemd-boot, escolha do dono, então o menu dele não ganha tema | Na VM, um reboot mostra o splash e cai na tela de login nova (screenshots dos dois, do boot até o login); entrar com senha certa abre o Hyprland e com senha errada mostra o erro; o log do boot fica sem erro do tema |
 | U5b i18n | Troca de idioma da UI (inglês padrão; português e outros) | A UI inteira muda de idioma por configuração |
@@ -233,6 +233,10 @@ não aparece no menu de pausa até o shell reiniciar (spec 007: spike T003, rese
   o padrão), e a digitação do jogo fica como opção (`typing=game`). Na VM: 32 linhas num boot do
   zero (eram 2 a 5), 35 quadros/s na rajada e o login +0,90 s em relação ao boot sem tema, com a base
   remedida no mesmo dia. O limite é 1 s, então a margem é curta.
+- **2026-10-31:** U4 concluída (spec 008): as notificações viram transmissões do Pod, com o text log,
+  o OSD e as opções. Visual aprovado pelo dono. A `main` (007) foi mesclada na 008, com os conflitos
+  resolvidos pelas decisões do dono. Os roteiros 003, 004, 007 e 008 passaram (110/0 na 008, nos dois
+  perfis).
 
 ## Fontes
 

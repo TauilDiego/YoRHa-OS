@@ -25,12 +25,15 @@ FocusScope {
 
     property real s: 1
     property real startY: Tokens.space.pauseBodyY
+    // spec 013, front B: the columns follow the width (the full-screen menu)
+    property bool stretch: false
     // The SYSTEM › Pause menu options, live (FR-034).
     property string iconStyle: SettingsModel.choiceId("menu", "icons") || "ink"
     property string order: SettingsModel.choiceId("menu", "app-order") || "az"
     property string runningApp: SettingsModel.choiceId("menu", "running-app") || "new"
 
     signal closeRequested()
+    signal leaving()                             // spec 013: the close that follows is an action's
 
     readonly property var ps: Strings.pause
 
@@ -142,6 +145,7 @@ FocusScope {
                 const r = Compositor.focusWindow(w[0].id);
                 if (r !== "ok")
                     console.info(`apps: ${r}`);
+                leaving();
                 closeRequested();
                 return;
             }
@@ -149,6 +153,7 @@ FocusScope {
         const r = Apps.launch(a.id, action, workspace);
         if (r !== "ok")
             console.info(`apps: ${r}`);
+        leaving();
         closeRequested();
     }
 
@@ -243,6 +248,7 @@ FocusScope {
         anchors.fill: parent
         focus: true
         s: root.s
+        stretch: root.stretch
         startY: root.startY
         entries: root.entries
         options: root.options
