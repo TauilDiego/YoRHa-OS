@@ -32,24 +32,29 @@ cmd_status() {
 
 # --- versions (US2, research R2) ----------------------------------------------------------------------
 channel() { cat "$YORHA_HOME/channel" 2>/dev/null || true; }
+# Test hook (the lab's check-014, SC-004): YORHA_TEST_STOP_AT=download|unpacked|switched kills the
+# update right there, as a crash or a power cut would.
+test_stop() { [[ ${YORHA_TEST_STOP_AT:-} == "$1" ]] && { yorha_say "test stop at $1"; kill -9 $$; }; return 0; }
 is_newer() { [[ $1 != "$2" && $(printf '%s\n' "$1" "$2" | sort -V | tail -1) == "$1" ]]; }
 
 # Download, check and prepare version $1 into versions/$1 (nothing in use is touched).
 fetch() {
     local v=$1 ch dl f tmp
     [[ -d $YORHA_HOME/versions/$v ]] && return 0
-    ch=$(channel); dl="$YORHA_HOME/downloads/$v"
+    ch=$(channel); dl="$YORHA_HOME/downloads/$v"   # a leftover of an interrupted update is redone
     rm -rf "$dl" && mkdir -p "$dl"
     yorha_say "downloading $v"
     for f in "$YORHA_NAME-$v.tar.gz" "$YORHA_NAME-$v.tar.gz.sha256"; do
         curl -fsS -o "$dl/$f" "$ch/$f" || { rm -rf "$dl"; yorha_fail "download of $f failed; nothing changed"; }
     done
     (cd "$dl" && sha256sum --quiet -c "$YORHA_NAME-$v.tar.gz.sha256") || { rm -rf "$dl"; yorha_fail "checksum mismatch for $v; refusing, nothing changed" 4; }
+    test_stop download
     tmp="$YORHA_HOME/versions/.$v.part"
     rm -rf "$tmp" && mkdir -p "$tmp"
     tar -xzf "$dl/$YORHA_NAME-$v.tar.gz" -C "$tmp" --strip-components=1
     yorha_deps_ensure "$tmp/system/deps" >/dev/null || yorha_say "a dependency of $v is missing (see: $YORHA_CMD status)"
     yorha_prepare "$tmp"
+    test_stop unpacked
     mv -T "$tmp" "$YORHA_HOME/versions/$v"
     rm -rf "$dl"
 }
@@ -89,6 +94,7 @@ cmd_update() {
     new="$YORHA_HOME/versions/$latest"
     yorha_backup_state "$cur" >/dev/null
     yorha_switch "$latest"
+    test_stop switched
     "$new/bin/$YORHA_CMD" migrate --from "$cur" || yorha_fail "the update to $latest stopped at a migration; $YORHA_CMD rollback goes back to $cur" 5
     yorha_prune
     "$new/bin/$YORHA_CMD" shell restart >/dev/null || true
