@@ -60,9 +60,12 @@ tinta). Muda só a animação (R1), e entra o recolher da linha que perde a sele
 
 **Decisão:** `s` continua o do painel de 84% (`min(panelH/908, panelW/1612) × uiScale`) nos dois modos.
 Na tela cheia, só a geometria do painel muda (a janela inteira), e o espaço extra vai pro layout:
-- colunas `stretch`;
-- SYSTEM centralizado;
+- colunas `stretch` em todas as abas: a da esquerda na margem do título, a do meio no meio e a da
+  direita terminando na ponta da régua, como nos frames do jogo;
 - limite de largura em ultrawide.
+
+A primeira versão centralizava o quadro de 1612 da SYSTEM (e da POWER). O dono pediu as colunas
+alinhadas às margens (01.11, T058).
 
 **Por quê:**
 - **Tamanho igual nos dois modos:** a spec pede as letras do mesmo tamanho (US4.2), e a frente D mostrou

@@ -286,7 +286,13 @@ FocusScope {
             item: row ? rectOf(row, 0, 0, row.width, row.height) : null,
             value: value ? rectOf(value, 0, 0, value.width, value.height) : null,
             preview: rectOf(previewSlot, 0, 0, previewSlot.width, previewSlot.childrenRect.height),
-            options: optionsVisible ? rectOf(optionsBox, 0, 0, optionsBox.width, optionsBox.height) : null
+            options: optionsVisible ? rectOf(optionsBox, 0, 0, optionsBox.width, optionsBox.height) : null,
+            // spec 013: the three columns, as SettingsPage and PowerPage give them (the full-screen check)
+            columns: {
+                left: rectOf(list, 0, 0, list.width, list.height),
+                middle: rectOf(previewSlot, 0, 0, previewSlot.width, previewSlot.childrenRect.height),
+                right: optionsVisible ? rectOf(optionsBox, 0, 0, optionsBox.width, optionsBox.height) : null
+            }
         };
     }
 

@@ -197,7 +197,8 @@ PopupWindow {
                 panel: rectOf(panel),
                 tabs: tabIds.map((t, i) => popupFrame.tabGeometry(i)),
                 item: geo?.item ?? null,
-                value: geo?.value ?? null
+                value: geo?.value ?? null,
+                columns: geo?.columns ?? null            // spec 013: the tab's three columns
             }
         };
     }
@@ -295,16 +296,16 @@ PopupWindow {
             }
         }
 
-        // SYSTEM's columns sit at fixed x in the 1612 px frame; full screen centers that frame.
+        // spec 013: SYSTEM and POWER stretch their columns in full screen, as the other tabs do: the
+        // left one at the title's margin, the right one at the rule's end.
         SettingsPage {
             id: systemPage
-            x: root.popupFrame.fullscreen ? Tokens.snap((parent.width - width) / 2, root.popupFrame.dpr) : 0
-            width: root.popupFrame.fullscreen ? Math.min(parent.width, root.u(Tokens.space.popupW)) : parent.width
-            height: parent.height
+            anchors.fill: parent
             visible: root.pageShown("system")
             opacity: root.pageOpacity("system")
             enabled: root.tab === "system"
             s: root.s
+            stretch: root.popupFrame.fullscreen
             startY: Tokens.space.pauseBodyY + 34
             extraKeys: [{ key: Strings.pause.keyTab, label: Strings.pause.nextTab }]
             category: root.systemCategory
@@ -328,7 +329,7 @@ PopupWindow {
             enabled: root.tab === "power"
             s: root.s
             active: root.keyboardActive && root.tab === "power"
-            originX: root.popupFrame.fullscreen ? Tokens.snap((width - root.u(Tokens.space.popupW)) / 2, root.popupFrame.dpr) : 0
+            stretch: root.popupFrame.fullscreen
             onLeaving: root.leaving()
             onCloseRequested: root.closeRequested()
         }

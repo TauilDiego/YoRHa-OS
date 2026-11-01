@@ -11,7 +11,7 @@ import "../strings"
 // The settings pop-up's body (spec 003): the categories on the left, the category's options in
 // the middle and, on the right, a card about what has the focus; the key hints go to the
 // pop-up's footer through `keys`. Laid out in game px of the 1612×908 panel frame times `s`
-// (contracts/components.md).
+// (contracts/components.md); with `stretch`, the columns' x and widths follow the page's width.
 // One focus, in one of two columns (FR-010, research R8):
 //   categories  ↑↓ move (wrapping) and show that category's options at once; → or Enter go to
 //               the first option; Esc closes.
@@ -30,6 +30,9 @@ FocusScope {
     // above), and hints added to the footer's keys.
     property real startY: 170
     property var extraKeys: []
+    // spec 013: the columns come from the page's own width, in the frame's proportions (the
+    // full-screen menu), as PickerLayout.stretch does on the other tabs.
+    property bool stretch: false
 
     signal closeRequested()
 
@@ -56,6 +59,10 @@ FocusScope {
 
     function u(v: real): int {
         return Tokens.px(v, root.s);
+    }
+    // A horizontal position or width of the 1612 px frame: scaled with `s`, or (stretch) with the width.
+    function hx(v: real): int {
+        return stretch ? Math.round(v * width / Tokens.space.popupW) : u(v);
     }
 
     // spec 008 (FR-029, R12): no OSD for a value this page already shows. While the focus is on
@@ -300,7 +307,13 @@ FocusScope {
                 panel: rectOf(root, 0, 0, width, height),
                 item: row ? rectOf(row, 0, 0, row.width, row.height)
                           : cat ? rectOf(categoryList, categoryList.itemX, catItemY, categoryList.width - categoryList.itemX, options.rowH) : null,
-                value: value ? rectOf(value, 0, 0, value.width, value.height) : null
+                value: value ? rectOf(value, 0, 0, value.width, value.height) : null,
+                // spec 013: the three columns (the middle one is the option rows, past the kite's room)
+                columns: {
+                    left: rectOf(categoryList, 0, 0, categoryList.width, categoryList.height),
+                    middle: rectOf(options, options.selectorRoom, 0, hx(Tokens.space.settingsOptsW), options.height),
+                    right: rectOf(card, 0, 0, card.width, card.height)
+                }
             }
         };
     }
@@ -372,7 +385,7 @@ FocusScope {
     // Lists start at y 170 with their items (the rails go 7 px above); the footer rule sits
     // 88 px above the panel's bottom, and the columns stop 24 px before it.
     readonly property int listsY: u(startY)
-    readonly property int optionsX: u(480)
+    readonly property int optionsX: hx(480)
     readonly property int bottomY: height - u(Tokens.space.popupH - 820) - u(24)
 
     Label {
@@ -386,9 +399,9 @@ FocusScope {
 
     CursorList {
         id: categoryList
-        x: root.u(48)
+        x: root.hx(48)
         y: root.listsY - railRoom
-        width: itemX + root.u(Tokens.space.settingsCatsW)
+        width: itemX + root.hx(Tokens.space.settingsCatsW)
         visible: root.cats.length > 0
         s: root.s
         variant: "opaque"
@@ -419,7 +432,7 @@ FocusScope {
             font.weight: Font.DemiBold
             font.variableAxes: ({ "wght": Font.DemiBold })
             elide: Text.ElideRight
-            width: Math.min(implicitWidth, root.u(Tokens.space.settingsOptsW) - countLabel.implicitWidth - parent.spacing)
+            width: Math.min(implicitWidth, root.hx(Tokens.space.settingsOptsW) - countLabel.implicitWidth - parent.spacing)
             text: root.cat?.label ?? ""
         }
         Label {
@@ -435,7 +448,7 @@ FocusScope {
         id: options
         x: root.optionsX - selectorRoom
         y: root.listsY - railRoom
-        width: root.u(Tokens.space.settingsOptsW) + selectorRoom + shadowRoom
+        width: root.hx(Tokens.space.settingsOptsW) + selectorRoom + shadowRoom
         height: fitHeight(root.bottomY - y)
         s: root.s
         options: root.opts
@@ -463,9 +476,9 @@ FocusScope {
 
     DescriptionCard {
         id: card
-        x: root.u(1124)
+        x: root.hx(1124)
         y: root.listsY
-        width: root.u(Tokens.space.settingsCardW)
+        width: root.hx(Tokens.space.settingsCardW)
         s: root.s
         minHeight: root.u(360)
         maxHeight: root.bottomY - y
