@@ -24,6 +24,8 @@ import "../primitives"
 //             the row is complete (ms from now); complete() ends it at once;
 //   leave     (FR-008) leave(): the live row's ink stretches ×leaveStretch and everything fades in
 //             motion.leave; another row just fades in leaveOthers. restore() undoes it.
+// The label is a ScrollingLabel (FR-012): a text that doesn't fit scrolls (the light copy follows
+// the dark one), and is cut with an ellipsis with Tokens.instant.
 // With Tokens.instant all of it is the final state at once (FR-016).
 Item {
     id: root
@@ -111,25 +113,28 @@ Item {
     // spec 013 (FR-002): the pulse, only while the row is shown.
     property bool live: state === "hovered"
     readonly property bool pulsing: live && inked && visible && !Tokens.instant
-    property real pulseLevel: 0
+    // One clock per cycle (a single looping animation keeps the period exact), the trapezoid from it.
+    property real pulseT: 0
+    readonly property real pulseLevel: pulsing ? Tokens.pulseAt(pulseT) : 0
     readonly property color pulseInk: Qt.rgba(Math.min(1, Tokens.color.darkGray.r * (1 + Tokens.motion.pulseLight)),
                                               Math.min(1, Tokens.color.darkGray.g * (1 + Tokens.motion.pulseLight)),
                                               Math.min(1, Tokens.color.darkGray.b * (1 + Tokens.motion.pulseLight)), 1)
     onPulsingChanged: {
         pulseAnim.stop();
-        pulseLevel = 0;
+        pulseT = 0;
         if (pulsing)
             pulseAnim.start();
     }
     SequentialAnimation {
         id: pulseAnim
         PauseAnimation { duration: Tokens.motion.pulseDelay }
-        SequentialAnimation {
+        NumberAnimation {
+            target: root
+            property: "pulseT"
+            from: 0
+            to: Tokens.motion.pulse
+            duration: Tokens.motion.pulse
             loops: Animation.Infinite
-            NumberAnimation { target: root; property: "pulseLevel"; from: 0; to: 1; duration: Tokens.motion.pulseRise }
-            PauseAnimation { duration: Tokens.motion.pulseTop }
-            NumberAnimation { target: root; property: "pulseLevel"; from: 1; to: 0; duration: Tokens.motion.pulseFall }
-            PauseAnimation { duration: Math.max(0, Tokens.motion.pulse - Tokens.motion.pulseRise - Tokens.motion.pulseTop - Tokens.motion.pulseFall) }
         }
     }
 
@@ -243,6 +248,8 @@ Item {
     component Face: Item {
         id: face
         property color ink
+        property var leader: null                // spec 013: the ScrollingLabel to scroll with
+        readonly property Item scroller: label
         readonly property real labelWidth: label.implicitWidth
         readonly property real trailingWidth: tail.implicitWidth
         readonly property real leadWidth: leadLabel.width
@@ -269,18 +276,20 @@ Item {
             elide: Text.ElideRight
             color: parent.ink
         }
-        Label {
+        // spec 013 (FR-012): a label that doesn't fit scrolls; the light copy follows the dark one.
+        ScrollingLabel {
             id: label
             x: root.pad + Tokens.px(Tokens.space.square, root.cs) + root.gap + (root.lead !== "" ? leadLabel.width + root.gap : 0)
             width: Math.max(0, Math.min(implicitWidth, root.width - x - Math.max(root.pad, root.reserve)
                                                         - (root.tag !== "" ? Math.ceil(tagBox.implicitWidth) + root.gap : 0)
                                                         - (root.trailing !== "" ? root.gap + Math.ceil(tail.implicitWidth) + root.pad : 0)))
+            height: parent.height
             anchors.verticalCenter: parent.verticalCenter
             s: root.cs
             role: "listButton"
             text: root.shownText
-            elide: Text.ElideRight
             color: parent.ink
+            follow: face.leader
         }
         Label {
             id: tail
@@ -383,6 +392,7 @@ Item {
                 Face {
                     opacity: root.bandLevel > 0 ? Math.min(1, root.textLevel / root.bandLevel) : 0
                     ink: Tokens.color.lightYellow
+                    leader: dark.scroller
                 }
             }
         }

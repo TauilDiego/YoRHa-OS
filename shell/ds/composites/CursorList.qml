@@ -63,6 +63,7 @@ Item {
     }
 
     readonly property string motionList: "list"
+    property bool leaving: false                 // nothing to widen here (no clipped window)
     function enter(delay: int, kiteAt: int): var {
         let d = delay, end = 0;
         for (let i = 0; i < rows.count; i++) {

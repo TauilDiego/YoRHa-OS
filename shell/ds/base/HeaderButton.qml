@@ -82,20 +82,22 @@ Item {
 
     // spec 013 (FR-002): the open tab breathes.
     readonly property bool pulsing: pulse && state === "selected" && visible && !Tokens.instant
-    property real pulseLevel: 0
+    property real pulseT: 0
+    readonly property real pulseLevel: pulsing ? Tokens.pulseAt(pulseT) : 0
     onPulsingChanged: {
         pulseAnim.stop();
-        pulseLevel = 0;
+        pulseT = 0;
         if (pulsing)
             pulseAnim.start();
     }
-    SequentialAnimation {
+    NumberAnimation {
         id: pulseAnim
+        target: root
+        property: "pulseT"
+        from: 0
+        to: Tokens.motion.pulse
+        duration: Tokens.motion.pulse
         loops: Animation.Infinite
-        NumberAnimation { target: root; property: "pulseLevel"; from: 0; to: 1; duration: Tokens.motion.pulseRise }
-        PauseAnimation { duration: Tokens.motion.pulseTop }
-        NumberAnimation { target: root; property: "pulseLevel"; from: 1; to: 0; duration: Tokens.motion.pulseFall }
-        PauseAnimation { duration: Math.max(0, Tokens.motion.pulse - Tokens.motion.pulseRise - Tokens.motion.pulseTop - Tokens.motion.pulseFall) }
     }
 
     SequentialAnimation {

@@ -40,10 +40,18 @@ Item {
     property string outSub: ""
     property bool halting: false
     readonly property string subFull: subtitle === "" || subtitle.startsWith("-") ? subtitle : "-" + subtitle
-    readonly property string typedPart: {
-        const tip = typist.tipLetter;
-        return Array.from(typist.text).slice(0, typist.count).join("")
-            + (tip === "&amp;" ? "&" : tip === "&lt;" ? "<" : tip === "&gt;" ? ">" : tip);
+    // The tip: a letter drawn from the text at every step (the typist's own is only drawn once its
+    // animation runs, so the first step would show nothing).
+    property string tip: ""
+    readonly property string typedPart: Array.from(typist.text).slice(0, typist.count).join("") + tip
+    Connections {
+        target: typist
+        function onCountChanged(): void {
+            const letters = Array.from(typist.text).filter(c => c.trim() !== "");
+            root.tip = (root.phase === "title" || root.phase === "sub") && letters.length > 0
+                && typist.count < Array.from(typist.text).length
+                ? letters[Math.floor(Math.random() * letters.length)] : "";
+        }
     }
     readonly property string headText: !animated && phase === "" ? title
         : phase === "" || phase === "sub" ? curTitle : phase === "out" ? outTitle : phase === "title" ? typedPart : ""
@@ -123,6 +131,7 @@ Item {
         curSub = subFull;
         phase = "title";
         typist.text = curTitle;
+        typist.shown = 0;                        // no stale count before the animation's first step
         typist.restartKey = typist.restartKey + 1;
     }
 
@@ -165,6 +174,7 @@ Item {
             if (root.phase === "title" && root.curSub !== "") {
                 root.phase = "sub";
                 text = root.curSub;
+                shown = 0;
                 restartKey = restartKey + 1;
             } else if (root.phase === "title" || root.phase === "sub")
                 root.phase = "";

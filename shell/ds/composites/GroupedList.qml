@@ -324,9 +324,13 @@ Item {
             currentIndex = Math.max(0, Math.min(count - 1, currentIndex + step));
     }
 
-    // spec 013: the cascade over the entries in view (see the header).
+    // spec 013: the cascade over the entries in view (see the header). `leaving` (PopupFrame, an
+    // action that leaves the menu) widens the clipped window to the right, so the leaving row's
+    // stretched ink shows (FR-008).
     readonly property string motionList: "list"
+    property bool leaving: false
     function enter(delay: int, kiteAt: int): var {
+        leaving = false;
         let d = delay, end = 0;
         const top = scrollY, bottom = scrollY + viewHeight;
         for (let i = 0; i < entries.length; i++) {
@@ -551,7 +555,7 @@ Item {
     // A clipped window on the entries, with the kite's room on its left and the shadow's on its right.
     Item {
         x: strips.implicitWidth + root.stripGap
-        width: root.width - x
+        width: root.width - x + (root.leaving ? root.width * Tokens.motion.leaveStretch : 0)
         height: root.viewHeight
         clip: true
 
@@ -559,7 +563,7 @@ Item {
             id: column
             x: root.selectorRoom
             y: root.topRoom - root.scrollY
-            width: parent.width - x - root.shadowRoom
+            width: root.width - root.stripGap - strips.implicitWidth - x - root.shadowRoom
             spacing: Tokens.px(Tokens.space.listItemGap, root.s)
 
             Repeater {
@@ -579,7 +583,7 @@ Item {
         Item {
             x: root.selectorRoom
             y: root.topRoom - root.scrollY
-            width: parent.width - x - root.shadowRoom
+            width: column.width
             visible: root.useLazy
             Repeater {
                 id: lazyRows

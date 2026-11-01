@@ -242,6 +242,8 @@ Item {
                 it.leave();
                 return true;
             }
+            if (it.motionList !== undefined)
+                it.leaving = true;
             return false;
         });
     }

@@ -253,6 +253,17 @@ Singleton {
         // What a pop-up's owner waits for before unloading it: the leaving row, then the triangles.
         readonly property int popupClose: leave + closeTris
     }
+    // spec 013, front A (FR-002): the pulse's light at `t` ms into its cycle, 0–1 (the trapezoid).
+    function pulseAt(t: real): real {
+        const m = motion;
+        if (t < m.pulseRise)
+            return t / Math.max(1, m.pulseRise);
+        if (t < m.pulseRise + m.pulseTop)
+            return 1;
+        if (t < m.pulseRise + m.pulseTop + m.pulseFall)
+            return 1 - (t - m.pulseRise - m.pulseTop) / Math.max(1, m.pulseFall);
+        return 0;
+    }
     // Set by shell.qml while fixtures are active, so screenshots are pixel-identical (SC-002).
     property bool frozen: false
     // spec 003: reduced motion (set by shell.qml from Settings.reduceMotion). Fades and the

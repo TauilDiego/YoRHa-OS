@@ -36,7 +36,9 @@ Item {
 
     // --- spec 013 ------------------------------------------------------------------------------------
     readonly property string motionList: "list"
+    property bool leaving: false                 // as the GroupedList's: the window widens
     function enter(delay: int, kiteAt: int): var {
+        leaving = false;
         let d = delay, end = 0;
         const first = Math.round(scrollY / Math.max(1, pitch)) || 0;
         for (let i = 0; i < rows.count; i++) {
@@ -119,7 +121,8 @@ Item {
 
     // A clipped window on the rows; the column moves up by scrollY (whole rows).
     Item {
-        anchors.fill: parent
+        width: root.width + (root.leaving ? root.width * Tokens.motion.leaveStretch : 0)
+        height: root.height
         clip: true
 
         Column {
