@@ -113,6 +113,18 @@ Singleton {
         ? String(Fixtures.get("activeWindow") ?? "")
         : (backend?.activeTitle ?? "")
 
+    // --- spec 008: a full-screen window in focus (R11) holds transmissions (FR-027) --------------------
+    // The backend reads it (Hyprland: `hyprctl activewindow -j`, re-read on the fullscreen, active
+    // window and workspace events); false when the compositor can't tell (fullscreenKnown = false).
+    // Fixture: notifications.fullscreen.
+    readonly property bool focusedFullscreen: Fixtures.has("notifications")
+        ? (Fixtures.get("notifications")?.fullscreen === true)
+        : (backend?.capabilities?.fullscreenKnown === true && backend.fullscreen === true)
+    function refreshFullscreen(): void {
+        backend?.refresh("fullscreen");
+    }
+    // --- end spec 008 ----------------------------------------------------------------------------------
+
     // --- the bar's workspaces ----------------------------------------------------------------------
     // Tabs for one monitor, in the shape the bar has always read ({ id, exists, focused, monitor },
     // id = the workspace's index): 1..max(5, highest existing, focused), only indexes ≥ 1. With a

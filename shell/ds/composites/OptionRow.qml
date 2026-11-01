@@ -19,6 +19,8 @@ import "../../strings"
 //   option: an option of the settings catalog (data-model); value: its current value.
 // spec 004: `contentScale` draws the label, the square and the value smaller on the same band,
 // rails and kite (the wallpaper picker's Options card).
+// spec 008: `valueWidth` (game px) is the text's width between ◂ and ▸ of a toggle or a choice;
+// Tokens.space.stepperValueW by default (the text log narrows its toggle's).
 Item {
     id: root
 
@@ -28,6 +30,7 @@ Item {
     property bool dimmed: false
     property bool focused: false
     property real contentScale: 1
+    property real valueWidth: Tokens.space.stepperValueW
     readonly property real cs: s * contentScale
     readonly property bool hovered: item.hovered
     readonly property Item valueItem: type === "slider" ? meter : stepper.visible ? stepper : null
@@ -105,7 +108,7 @@ Item {
         // From tokens only: reading the children's sizes here makes a binding loop while a
         // delegate is being set up.
         width: root.type === "slider" ? Tokens.px(Tokens.space.sliderW, root.cs) + Tokens.px(16, root.cs) + root.numberW
-             : root.stepping ? 2 * (Tokens.px(11, root.cs) + Tokens.px(14, root.cs)) + Tokens.px(Tokens.space.stepperValueW, root.cs)
+             : root.stepping ? 2 * (Tokens.px(11, root.cs) + Tokens.px(14, root.cs)) + Tokens.px(root.valueWidth, root.cs)
              : Math.min(Math.ceil(freeMeasure.implicitWidth) + root.arrowRoom, Math.round(root.width * root.textShare))
         height: item.bandH
 
@@ -114,6 +117,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.stepping
             s: root.cs
+            valueWidth: root.valueWidth
             text: root.valueText
             ink: root.ink
             arrows: root.focused
