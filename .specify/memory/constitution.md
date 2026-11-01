@@ -1,18 +1,23 @@
 <!--
 Sync Impact Report
-- Versão: 1.1.0 → 1.1.1 (PATCH: esclarece a lista de ferramentas do ambiente de testes que rodam
-  no host; nenhuma regra muda).
-- Princípio I: a lista passa a citar o ImageMagick (comparação de screenshots, `lab/diffshot`) e o
-  python3 (o amostrador somente-leitura do `lab/perf` e scripts do laboratório), que já eram
-  usados (achado A1 do `/speckit-analyze` da spec 001, aprovado pelo dono em 2026-10-27).
+- Versão: 1.1.1 → 2.0.0 (MAJOR: redefine o princípio II).
+- Princípio II: deixa de ser "Camada sobre um Arch limpo, não imagem", com as camadas base,
+  módulos, hardware e pessoal. Passa a ser "Sistema visual sobre um Arch limpo": o shell, mais um
+  núcleo opcional, nas pastas do próprio produto. É a decisão do dono de 29.10, reafirmada em
+  01.11.
+- Abertura: "personalização do Arch Linux" vira "sistema visual".
+- Fluxo de desenvolvimento: as branches terminam mescladas na principal e apagadas (decisão do
+  dono de 01.11, "quero tudo só na main").
+- Governança: o inventário da camada pessoal sai das fontes complementares.
 - Templates: nenhum muda.
-- Anterior (1.0.1 → 1.1.0): o princípio I passou a aceitar containers no ambiente de testes.
+- Anterior (1.1.0 → 1.1.1): o princípio I passou a citar o ImageMagick e o python3 entre as
+  ferramentas do ambiente de testes.
 -->
 # YoRHa-OS Constitution
 
-Nome provisório. É uma personalização do Arch Linux (Hyprland primeiro, Niri depois) com uma
-UI própria inspirada em NieR:Automata. O roteiro geral está em `PLAN.md`; esta constituição
-fixa as regras que nenhuma spec, plano ou tarefa pode violar.
+Nome provisório. É um sistema visual para o Arch Linux (Hyprland primeiro, Niri depois): uma UI
+própria inspirada em NieR:Automata. O roteiro geral está em `PLAN.md`; esta constituição fixa as
+regras que nenhuma spec, plano ou tarefa pode violar.
 
 ## Core Principles
 
@@ -32,16 +37,24 @@ fixa as regras que nenhuma spec, plano ou tarefa pode violar.
 
 Motivo: a máquina do dono é homologada e funciona; o projeto não pode colocá-la em risco.
 
-### II. Camada sobre um Arch limpo, não imagem
+### II. Sistema visual sobre um Arch limpo
 
-O produto transforma um Arch recém-instalado no ambiente do projeto, rodando um script ou
-pacote por cima dele. Não existe ISO nem imagem própria.
-
-O conteúdo se divide em quatro camadas:
-- **base:** todo mundo recebe;
-- **módulos:** opcionais;
-- **hardware:** instalado quando detectado;
-- **pessoal:** fica num repositório privado separado.
+O produto é um sistema visual, como o Serpantinum. A pessoa instala por cima de um Arch que já
+funciona, e o desktop ganha a cara do projeto. Não existe ISO nem imagem própria.
+- **O que é do produto:**
+  - o shell (a UI);
+  - um núcleo opcional que a experiência completa pede: o tema de boot e de login, o cursor e os
+    sons.
+- **Onde ele fica:** nas pastas do próprio produto (`~/.local/share/`, `~/.config/` e
+  `~/.local/state/`, na pasta com o nome dele).
+- **O que precisa de root** (o boot e o login) só entra com a confirmação da pessoa, com backup
+  e com um comando de desfazer.
+- **O que fica de fora:**
+  - gerenciar pacotes além das dependências do próprio shell;
+  - hardware;
+  - serviços que não sejam da experiência;
+  - as configs pessoais de quem instala. O `hyprland.lua` e os dotfiles são da pessoa; o produto
+    oferece um arquivo pra ela incluir.
 
 ### III. Padrões gerenciados separados dos arquivos do usuário
 
@@ -106,7 +119,8 @@ Toda fase do `PLAN.md` passa por spec → plan → tasks antes de implementar:
 - **Git:**
   - o dono faz os commits na branch principal;
   - agentes commitam só nas branches das worktrees deles;
-  - o merge na principal é do dono.
+  - o merge na principal é do dono;
+  - terminada a spec ou a frente, a branch é mesclada na principal e apagada.
 - **Idioma:** documentação, specs e conversa em português; código e comentários de código em
   inglês.
 - **Ciclo de uma fase:**
@@ -129,7 +143,6 @@ Toda fase do `PLAN.md` passa por spec → plan → tasks antes de implementar:
   - **MINOR:** adiciona um princípio ou seção, ou amplia o que um deles cobre;
   - **PATCH:** muda redação.
 - **Revisão:** toda revisão de entrega confere os princípios I, IV e V explicitamente.
-- **Fontes complementares:** `PLAN.md` (roteiro) e o
-  inventário da camada pessoal (num repositório privado).
+- **Fonte complementar:** `PLAN.md` (roteiro).
 
-**Version**: 1.1.1 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-27
+**Version**: 2.0.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-01

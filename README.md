@@ -20,9 +20,9 @@ efetivamente usado, com a licença de cada coisa, está em [`CREDITS.md`](CREDIT
 - **[NieR:Automata](https://nierautomata.square-enix-games.com/)**, da PlatinumGames e da Square
   Enix: a linguagem visual inteira, do menu de pausa à tela de boot.
 - **[Serpantinum](https://github.com/ilyamiro/serpantinum)**, de ilyamiro: a ideia de um shell
-  completo em Quickshell sobre o Hyprland.
-- **[Omarchy](https://github.com/basecamp/omarchy)**, da Basecamp: o modelo de uma camada pronta,
-  com instalação e atualização simples, por cima do Arch.
+  completo em Quickshell sobre o Hyprland, que vive nas pastas dele e avisa quando sai versão nova.
+- **[Omarchy](https://github.com/basecamp/omarchy)**, da Basecamp: o jeito de atualizar, com um
+  comando e migrations.
 - **[Qylock](https://github.com/Darkkal44/qylock)**, de Darkkal44: o layout da tela de login.
 - **[nierlock](https://github.com/xendak/nierlock)**, de xendak: ideias para a tela de bloqueio.
 - **[Unit-3](https://github.com/samyns/Unit-3)**, de samyns: o seletor de papel de parede em

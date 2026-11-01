@@ -1,116 +1,103 @@
 # YoRHa-OS — plano
 
-> Codinome interno. Documento vivo, atualizado em 2026-10-27.
+> Codinome interno. Documento vivo, atualizado em 2026-11-01.
 
 ## 1. O que é
 
-**A sua personalização do Arch Linux.** Um comando transforma um Arch recém-instalado no
-seu ambiente:
-- Hyprland (Niri depois);
-- os seus apps, atalhos e scripts;
-- tema;
-- uma UI própria inspirada em NieR:Automata.
+**Um sistema visual para o Arch Linux**, inspirado em NieR:Automata. A pessoa instala por cima de
+um Arch que já funciona (Hyprland primeiro, Niri depois), e o desktop ganha a cara do projeto:
+- **o shell:** barra, menu de pausa, notificações do Pod, OSD e papel de parede;
+- **um núcleo opcional:** o tema de boot e de login, o cursor e os sons.
 
-Outras pessoas podem instalar a mesma coisa e escolher o que querem.
+Ele **não** gerencia os pacotes, o hardware nem as configs de quem instala. O nome YoRHa-OS é
+provisório.
 
-**Não é** uma ISO ou imagem (como o Omarchy 4), nem um shell avulso que obriga você a se
-adaptar às regras de outra pessoa (como o Serpantinum).
-
-**Regra de ouro:** o seu sistema é homologado e não roda nada do projeto. A UI, o
-instalador e o build dos pacotes rodam numa VM. A UI só chega na sua máquina quando você
-mesmo decidir trocar, depois de homologar na VM.
+**Regra de ouro:** o seu sistema é homologado e não roda nada do projeto. A UI e o instalador
+rodam numa VM. A UI só chega na sua máquina quando você mesmo decidir trocar, depois de homologar
+na VM.
 
 ## 2. Modelo
 
 | Projeto | O que é | O que a gente tira dele |
 |---|---|---|
-| **Omarchy v2/v3** | *"Turn a fresh Arch installation into a fully-configured… system… by running a single command"* (MIT) | **É o nosso modelo.** `boot.sh` → `install.sh`, pacotes em listas, padrões separados das configs do usuário, migrations, `omarchy-update` |
-| Omarchy v4 | Virou ISO + pacotes, com o desktop em plugins Quickshell | Fica como opção futura: um pacote de plugins NieR pra quem usa Omarchy (S7) |
-| Serpantinum | Só o shell; compositor, atalhos e apps ficam por sua conta | Aqui é o contrário: a camada inteira é sua, e as suas ideias entram como módulos |
+| **Serpantinum** | Um shell em Quickshell que vive nas pastas dele (`~/.local/share/serpantinum`, `~/.config/serpantinum/settings.json`), com um CLI e um aviso de versão nova | **É o nosso modelo:** pastas e config próprias, o aviso de update e o "Update now" |
+| Omarchy v2/v3 | Uma personalização inteira do Arch, com `omarchy update` e migrations | As migrations e o jeito de atualizar. Pacotes, hardware e configs ficam de fora |
+| Omarchy v4 | ISO + pacotes, com o desktop em plugins Quickshell | Opção futura: um pacote de plugins NieR pra quem usa Omarchy (S7) |
 
-## 3. Camadas
+## 3. Partes
 
-É isso que torna distribuível: os outros recebem a base mais os módulos que escolherem, e
-você recebe tudo isso mais o pessoal.
-
-| Camada | Quem recebe | Exemplos |
+| Parte | O que é | Onde fica |
 |---|---|---|
-| **Base** | Todo mundo | Hyprland + uwsm, portais, Quickshell, PipeWire, NetworkManager, Bluetooth, SDDM, kitty, zsh + starship, ferramentas de terminal, captura, clipboard, fontes |
-| **Módulos** | Quem escolher | dev, jogos, comunicação, áudio avançado, atalhos estilo Mac, Niri… |
-| **Hardware** | Detectado automaticamente | NVIDIA, microcode Intel/AMD, áudio de notebook, utilitários de fabricante |
-| **Pessoal** | Só você | Apps de trabalho, atalhos e scripts próprios |
+| **Shell** | A UI em Quickshell (`shell/`) | `~/.local/share/yorha-os/versions/<v>/`, com o link `current` |
+| **Núcleo opcional** | Boot (Plymouth), login (SDDM) e som de boot (`system/boot-login`); o cursor (`system/cursors`); os sons (`system/sounds`) | O que precisa de root vai pro sistema com backup e desfazer; o resto fica nas pastas do usuário |
+| **Config do usuário** | O `shell.json` e o estado que os menus salvam | `~/.config/yorha-os/` e `~/.local/state/yorha-os/` |
 
-A classificação item a item fica no repositório privado da camada pessoal (`inventario.md`).
+O seu `hyprland.lua` continua seu. O projeto traz um arquivo com os atalhos e o autostart, e você
+inclui ele com uma linha.
 
 ## 4. Princípios
 
-1. **Padrões gerenciados separados dos seus arquivos.**
-   - O que é do projeto fica em `~/.local/share/yorha-os/default/` e é substituído a cada update.
-   - O seu `~/.config/hypr/hyprland.lua` só carrega os padrões e depois os seus arquivos, que
-     sobrescrevem o que quiserem.
-   - Update nunca mexe no que é seu. Acaba o "reaplicar patches".
-2. **Idempotente.** Rodar o instalador duas vezes dá o mesmo resultado.
-3. **Nunca sobrescrever sem backup.** Qualquer arquivo existente vai antes pra
-   `~/.local/state/yorha-os/backups/<data>/`.
-4. **Módulos, não monolito.** Cada área (pacotes, áudio, rede, login, shell, compositor) é um
-   script independente.
-5. **O shell é um encaixe.** Começa com o que funciona hoje e é trocado pela UI NieR quando
-   ela estiver pronta.
-6. **Compositor separado do resto.** Atalhos e regras de janela ficam descritos num lugar só,
-   e um gerador escreve o `hyprland.lua` (e, depois, o `config.kdl` do Niri).
-7. **Segredos nunca entram no repositório.** O instalador configura o app; o login fica por
-   conta da pessoa.
+1. **Pastas próprias.** Nada é escrito fora delas sem perguntar.
+2. **Padrões gerenciados separados dos seus arquivos.**
+   - A versão em `versions/<v>` é trocada a cada update.
+   - O `~/.config/yorha-os/` é só seu, e update nunca mexe nele.
+   - Mudança de formato vira migration.
+3. **Idempotente.** Rodar o instalador duas vezes dá o mesmo resultado.
+4. **Nunca sobrescrever sem backup.** O que precisa de root tem um comando de desfazer.
+5. **O compositor fica atrás de um adaptador.** Os atalhos ficam num arquivo que a pessoa inclui.
+6. **Segredos nunca entram no repositório.**
+7. **O nome é provisório.** `yorha`, `yorha-os` e os caminhos ficam num lugar só no instalador e
+   no CLI.
 
-## 5. Estrutura do repositório
+## 5. Estrutura
+
+No repositório:
 
 ```
 YoRHa-OS/
-├── boot.sh            one-liner: instala o git, clona a versão escolhida em ~/.local/share/yorha-os e roda o install.sh
-├── install.sh         preflight → pacotes → hardware → config → login → pós-instalação (com log)
-├── install/
-│   ├── preflight/     é Arch? tem internet? não está rodando como root? tem espaço?
-│   ├── packages/      base.packages, modules/<módulo>.packages, hardware/<item>.packages
-│   ├── hardware/      detecção: nvidia, intel/amd, notebook…
-│   ├── config/        um script por área: áudio, rede, bluetooth, teclado, zram…
-│   ├── login/         SDDM (+ tema)
-│   └── post-install/  primeira inicialização e reboot
-├── default/           configs gerenciadas: hypr/, kitty/, zsh/, starship, btop, fastfetch, gtk…
-├── config/            sementes: o que é copiado pro ~/.config do usuário uma única vez
-├── shell/             a UI NieR (Quickshell)
-├── bin/               CLI `yorha`: update · refresh <app> · module enable/disable · pkg add/remove · doctor
-├── migrations/        scripts com timestamp, rodam uma vez por usuário
+├── shell/        a UI (Quickshell)
+├── system/       o núcleo opcional: boot/, login/, boot-login/ (o módulo com root), cursors/,
+│                 sounds/; e hypr/, o arquivo pra incluir no Hyprland (spec 014)
+├── bin/          o CLI `yorha` (spec 014)
+├── install.sh    instala a versão escolhida (spec 014)
+├── migrations/   scripts com data, rodam uma vez por usuário
+├── specs/
 └── docs/
 ```
 
-O conteúdo pessoal fica num **repositório privado separado**, instalado como um módulo extra
-que só você ativa.
+Na máquina de quem instala (método D do estudo 005):
 
-## 6. Fluxos (da personalização)
+```
+~/.local/share/yorha-os/versions/<v>/   uma pasta por versão (guarda 3)
+~/.local/share/yorha-os/current         link pra versão em uso
+~/.local/bin/yorha                      o CLI
+~/.config/yorha-os/                     só seu
+~/.local/state/yorha-os/                estado, migrations feitas, backups
+```
 
-**Instalar.** Num Arch recém-instalado, logado com um usuário que tem sudo:
-1. `curl -fsSL <url>/boot.sh | bash`;
-2. um menu (feito com `gum`) pergunta quais módulos instalar;
-3. instala tudo;
-4. reinicia no SDDM, e o Hyprland abre já configurado.
+## 6. Fluxos
 
-**Atualizar.** `yorha update`:
-1. pega a versão nova;
-2. roda as migrations pendentes;
-3. instala os pacotes que entraram nas listas;
-4. atualiza o sistema;
-5. reinicia o shell.
+- **Instalar:** `bash <(curl -fsSL <url>/install.sh)`.
+  - Confere as dependências do shell e pergunta antes de instalar o que falta.
+  - Baixa a versão.
+  - Mostra a linha pra incluir no `hyprland.lua`.
+- **Atualizar:** `yorha update`, ou SYSTEM › Updates › "Update now", que o menu mostra quando uma
+  transmissão avisa que saiu versão nova.
+  - Baixa e confere a versão nova.
+  - Copia o estado.
+  - Roda as migrations.
+  - Troca o `current` e reinicia o shell.
+- **Voltar:** `yorha rollback` volta a versão e o estado.
+- **Núcleo opcional:** `yorha boot-login install|uninstall|status`, que pede sudo.
+- **Desinstalar:** `yorha uninstall` deixa a máquina como estava.
 
-**Voltar uma config pro padrão.** `yorha refresh hyprland` restaura o padrão de uma config
-gerenciada, fazendo backup antes.
-
-**Desinstalar.** Fora do escopo inicial. O que existe são os backups de tudo que foi substituído.
-
-O jeito exato de instalar e atualizar **a UI** sai do estudo da seção 8.4.
+O método vem do estudo 005 (`docs/estudo-instalacao.md`, método D). A v0 é só pelo CLI, em texto
+simples. Uma interface mais caprichada pro instalador fica pra depois.
 
 ## 7. A UI
 
-- **O shell é um encaixe.** Na S3 ele usa o Serpantinum, instalado pelo instalador oficial
-  dele, pra VM reproduzir o seu uso de hoje enquanto a UI NieR não fica pronta.
+- **O YoRHa-OS convive com o Serpantinum até a U7.** Dá pra trocar entre os dois, e a tabela da
+  S1 diz o que ainda falta pra troca.
 - **A UI NieR é desenvolvida em `shell/`** e substitui o Serpantinum quando cobrir o mínimo:
   barra, menu de pausa no lugar do launcher, notificações, OSD, lock, polkit, energia e
   workspaces.
@@ -146,7 +133,7 @@ Serpantinum.
 |---|---|---|
 | U0 Laboratório | Ambiente de testes privado (VM + containers), com sync e screenshot | Uma mudança em `shell/` aparece no ambiente de testes em segundos, com screenshot como prova |
 | U1 Base visual | Design system (tokens, componentes, shaders), fixtures e HUD | Screenshot do HUD com dados de teste |
-| U2 Estudo de instalação | Métodos A–D comparados, com o HUD como carga (8.4) | `docs/estudo-instalacao.md` escrito e método escolhido |
+| U2 Estudo de instalação ✅ | Métodos A–D comparados, com o HUD como carga | `docs/estudo-instalacao.md` escrito e método escolhido (D, versões lado a lado) |
 | U3 Menu de pausa ✅ | Launcher, janelas, energia | Screenshot de cada aba |
 | U4 Pod e text log ✅ | Notificações e OSD | Uma notificação de teste vira transmissão do Pod |
 | U5 Lock e polkit | Tela de bloqueio (PAM) e agente de polkit, testados de verdade na VM | Bloquear, desbloquear e autorizar uma ação funcionam na VM |
@@ -155,16 +142,16 @@ Serpantinum.
 | U6 Otimização | Medir o custo por quadro, cortar efeitos caros, opção de reduzir movimento | A UI cabe no orçamento numa GPU integrada |
 | U7 Troca | A UI NieR substitui o Serpantinum na sua máquina, só depois de homologada na VM | Você usa um dia inteiro sem voltar pro Serpantinum |
 
-**Trilha sistema (personalização do Arch)**
+**Trilha sistema (instalar, atualizar e encaixar o shell)**
 
 | Fase | Entrega | Pronto quando |
 |---|---|---|
-| S1 Inventário | Classificação em base/módulo/hardware/pessoal (o rascunho já está pronto) | Você revisou o inventário (repositório privado) |
-| S2 Arch completo na VM ✅ | ISO + archinstall desassistido (8.5) | Um comando entrega um `arch-limpo` instalado pela ISO |
-| S3 Instalador v0 | Arch limpo → o seu uso, com o Serpantinum no encaixe do shell | O checklist bate na VM |
-| S4 Updates | `yorha update` e migrations, usando o que o U2 aprendeu | Atualizar de v0.1 pra v0.2 funciona na VM |
-| S5 Niri | Gerador de atalhos e regras de janela, adaptador de workspaces no shell | O mesmo checklist passa no Niri |
-| S6 Público | Docs, nome público, licença, testes em EndeavourOS/CachyOS | Alguém de fora instala sem ajuda |
+| S1 Serpantinum × YoRHa-OS | O que o Serpantinum faz por você hoje e o que o YoRHa-OS já tem | Você revisou a tabela, e ela diz o que falta pra U7 |
+| S2 Arch completo na VM ✅ | ISO + archinstall desassistido | Um comando entrega um `arch-limpo` instalado pela ISO |
+| S3 Instalação e encaixe (CLI) | `install.sh`, o CLI `yorha`, as dependências do shell e o arquivo de atalhos do Hyprland (spec 014) | Numa VM limpa, um comando instala e o shell sobe pelo Hyprland da pessoa |
+| S4 Updates | `yorha update` e `rollback`, migrations, o aviso no shell e o "Update now" (a v0 entra na spec 014) | Atualizar de v0.1 pra v0.2 funciona na VM, pelo CLI e pelo menu |
+| S5 Niri | O adaptador do shell e um arquivo de atalhos pro Niri | O mesmo checklist passa no Niri |
+| S6 Público | Docs, nome definitivo, release assinada, testes em EndeavourOS/CachyOS | Alguém de fora instala sem ajuda |
 | S7 (opcional) | Pacote de plugins pro Omarchy usando o mesmo código da UI | — |
 
 **Lembrete pra S3 (instalador):** criar `~/.local/share/applications/` antes de subir o shell. O
@@ -176,7 +163,7 @@ não aparece no menu de pausa até o shell reiniciar (spec 007: spike T003, rese
 | Risco | Mitigação |
 |---|---|
 | Escopo (o `bin/` do Omarchy v3 tinha 114 comandos) | Começar só com o que você usa; cada fase entrega algo usável |
-| Hardware dos outros (e o seu, que a VM não tem) | Detecção e módulos de hardware; decidir como testar na S3 |
+| Dependências que mudam (Quickshell, Hyprland) | O instalador confere as versões; o laboratório roda com os pacotes do dia |
 | O Arch é rolling e quebra coisas (o Hyprland 0.55 passar pra Lua quebrou vários projetos) | Migrations; laboratório rodando com os pacotes do dia |
 | `curl \| bash` | Script curto e legível; versões com tag e checksum |
 | Marcas da Square Enix (UI NieR) | Nome público próprio; nada de fontes, sons, logos ou vídeos do jogo |
@@ -184,17 +171,14 @@ não aparece no menu de pausa até o shell reiniciar (spec 007: spike T003, rese
 
 ## 11. Decisões em aberto
 
-1. **Instalar o QEMU** (`qemu-desktop`, `edk2-ovmf`, `libisoburn`) no seu sistema, ou usar a
-   alternativa via Docker (8.1)?
-2. **Nome público e licença.** Sugestão: MIT, igual ao Omarchy.
-3. **Shell provisório na S3:** Serpantinum (reproduz o seu uso de hoje) ou só uma barra básica?
-4. **Revisar o inventário** (repositório privado), principalmente os `?` e a seção "Achados".
-5. **O protótipo NieR** que já existe no repositório vira a semente de `shell/`?
+1. **O nome definitivo do projeto.** O YoRHa-OS é provisório.
+2. **A assinatura das versões.** A v0 sai com o `.sha256`; a assinatura entra antes da S6.
 
 ## Decisões tomadas
 
-- **2026-10-26, camada pessoal:** fica num repositório privado separado. Pode virar público
-  quando a licença for definida.
+- **2026-10-26, camada pessoal:** fica num repositório privado separado. *Superada em 29.10:* o
+  projeto ficou só visual e não tem mais camada pessoal; o repositório privado guarda o lab e as
+  referências.
 - **2026-10-26, nada roda no seu sistema:** a UI, o instalador e os builds rodam em VM. A UI só
   vai pra sua máquina depois de homologada.
 - **2026-10-26, VM e não Docker:** o desenvolvimento da UI acontece numa VM, que também serve
@@ -210,6 +194,12 @@ não aparece no menu de pausa até o shell reiniciar (spec 007: spike T003, rese
   Bar contrast (Normal / High) da spec 004.
 - **2026-10-27, limite do laboratório:** no máximo 4 VMs ligadas ao mesmo tempo, com 2 núcleos e
   4 GB cada.
+- **2026-10-29, sistema visual:** o projeto é só um sistema visual, como o Serpantinum. Não
+  gerencia pacotes, hardware nem configs de quem instala. O núcleo que a experiência pede (boot,
+  login) entra com confirmação, backup e desfazer.
+- **2026-11-01, instalação v0 pelo CLI:** instalar e atualizar só pelo `yorha`, em texto simples.
+  No shell, uma transmissão avisa a versão nova e SYSTEM › Updates tem o "Update now". Uma
+  interface mais caprichada fica pra depois.
 - **2026-11-01, tudo na `main`:** as branches de spec, de frente e de lab terminam mescladas na `main`
   e apagadas. Não ficam branches nem worktrees parados.
 

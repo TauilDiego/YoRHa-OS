@@ -4,6 +4,10 @@ Fase U2 do `PLAN.md`. Spec, plano e desenho dos experimentos em
 [`specs/005-estudo-instalacao/`](../specs/005-estudo-instalacao/). Medido em 2026-10-27 no laboratório
 privado; nada foi publicado (decisão 1 do dono).
 
+> **Desde 01.11:** o projeto é só visual (constituição 2.0.0), então a "camada pessoal" e os pacotes
+> citados aqui saíram do escopo. A escolha continua valendo pro shell: o método D é a base da spec 014
+> (instalação pelo CLI `yorha`).
+
 ## 1. Resumo
 
 **Escolha: método D (versões lado a lado), com a tag do git como origem de cada versão e um tarball

@@ -1,7 +1,8 @@
 # YoRHa-OS
 
-Personalização do Arch Linux (Hyprland, Niri depois) com uma UI própria inspirada em
-NieR:Automata. As regras estão em `.specify/memory/constitution.md` e valem acima de tudo.
+Um sistema visual para o Arch Linux (Hyprland, Niri depois): uma UI própria inspirada em
+NieR:Automata, que vive nas pastas dela e não gerencia pacotes nem configs de quem instala. O nome
+é provisório. As regras estão em `.specify/memory/constitution.md` e valem acima de tudo.
 
 ## Regras que mais importam
 
