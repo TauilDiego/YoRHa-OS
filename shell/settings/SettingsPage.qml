@@ -294,13 +294,18 @@ FocusScope {
     function dumpState(): var {
         const row = column === "options" ? options.rowAt(option) : null;
         const value = row?.valueItem ?? null;
-        const catItemY = categoryList.railRoom + category * options.pitch;
+        const catItemY = categoryList.railRoom + category * categoryList.pitch - categoryList.scrollY;
         return {
             focus: column,
             category: catId,
             option: opt ? opt.id : null,
             keys: keys.map(k => `${k.key} ${k.label}`),
             card: { title: card.title, note: card.note },
+            // spec 014: the columns' scroll (whole rows)
+            scroll: {
+                categories: categoryList.scrollState(),
+                options: { y: Math.round(options.scrollY), overflows: options.overflows }
+            },
             geometry: {
                 s: Math.round(s * 1000) / 1000,
                 panel: rectOf(root, 0, 0, width, height),
@@ -401,6 +406,7 @@ FocusScope {
         x: root.hx(48)
         y: root.listsY - railRoom
         width: itemX + root.hx(Tokens.space.settingsCatsW)
+        height: fitHeight(root.bottomY - y)      // spec 014: whole rows; the rest scrolls
         visible: root.cats.length > 0
         s: root.s
         variant: "opaque"
@@ -410,6 +416,10 @@ FocusScope {
         wrap: true
         keysEnabled: false
         onHoveredIndex: index => root.noteHover("categories", index)
+        onCursorRequested: index => {            // the wheel left the cursor out of view
+            root.column = "categories";
+            root.setCategory(index);
+        }
         onActivated: index => {
             Sounds.play("confirm");              // spec 013, front D
             root.setCategory(index);
@@ -456,6 +466,10 @@ FocusScope {
         currentIndex: root.option
         focused: root.column === "options"
         onHoveredIndex: index => root.noteHover("options", index)
+        onCursorRequested: index => {            // the wheel left the cursor out of view
+            root.column = "options";
+            root.option = index;
+        }
         onActivated: index => {
             root.column = "options";
             root.option = index;

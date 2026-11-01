@@ -5,7 +5,9 @@ import ".."
 
 // Option column (spec 003): OptionRows one under the other, without the vertical strips (as in
 // the mockup). When they don't fit, the column scrolls with `currentIndex` so the current row —
-// its band, rails, shadow and kite — is always in view; the wheel doesn't scroll it.
+// its band, rails, shadow and kite — is always in view. spec 014 (T029): the wheel scrolls it too,
+// one row per notch, while the rows don't fit; the cursor, if left out, comes to the nearest row in
+// view through `cursorRequested(index)` (the parent owns `currentIndex`).
 // The kite hangs in the first selectorRoom px of the list's own width, so nothing is clipped.
 //   options: the category's options; values / dims: maps option id → value / dimmed.
 //   focused: false → no row is highlighted (the options column without the focus).
@@ -26,6 +28,7 @@ Item {
     signal stepped(int index, int dir)
     signal picked(int index, real value)
     signal activated(int index)
+    signal cursorRequested(int index)
 
     readonly property int selectorRoom: Tokens.px(Tokens.space.selectorW + Tokens.space.selectorGap, s)
     readonly property int railRoom: Tokens.px(Tokens.space.railGap, s) + Tokens.line(Tokens.space.rail, s)
@@ -114,6 +117,36 @@ Item {
     }
     onCurrentIndexChanged: follow()
     onHeightChanged: follow()
+
+    // One wheel notch (120) scrolls one row (spec 014).
+    readonly property bool overflows: count > visibleRows
+    property real wheelRest: 0                    // the wheel's turn not yet spent (touchpads)
+    function wheelBy(delta: real): void {
+        if (!overflows)
+            return;
+        wheelRest += delta;
+        let first = Math.round(scrollY / pitch) || 0;
+        while (wheelRest >= 120) {
+            wheelRest -= 120;
+            first--;
+        }
+        while (wheelRest <= -120) {
+            wheelRest += 120;
+            first++;
+        }
+        first = Math.max(0, Math.min(first, count - visibleRows));
+        if (first * pitch === scrollY)
+            return;
+        scrollY = first * pitch;
+        if (currentIndex >= first && currentIndex < first + visibleRows)
+            return;
+        cursorRequested(currentIndex < first ? first : first + visibleRows - 1);
+    }
+    WheelHandler {
+        enabled: root.overflows
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: event => root.wheelBy(event.angleDelta.y)
+    }
     onOptionsChanged: {
         scrollY = 0;
         follow();

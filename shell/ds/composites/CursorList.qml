@@ -20,6 +20,11 @@ import "../base"
 // spec 013 (FR-005, front A): enter(delay, kiteAt) brings the rows in, one every cascadeStep from
 // `delay` ms (ListItem.enter); it returns { next, end }: the delay after its last row, and when the
 // last one is complete (ms from now). A menu's frame (PopupFrame) calls it for every list it shows.
+// spec 014 (T029, owner 01.11: every menu fits where it belongs and scrolls to hold more): a parent
+// that bounds the list sizes it with fitHeight(room) (whole rows only). While the rows don't fit,
+// the column scrolls by whole rows with `currentIndex`, as the OptionList's, and the wheel scrolls
+// it one row per notch (the cursor, if left out, comes to the nearest row in view: `currentIndex`,
+// or `cursorRequested(index)` with keysEnabled: false). A list that fits is drawn as before.
 Item {
     id: root
 
@@ -33,6 +38,7 @@ Item {
 
     signal activated(int index)
     signal hoveredIndex(int index)
+    signal cursorRequested(int index)
 
     readonly property int count: Array.isArray(model) ? model.length : 0
     readonly property int stripGap: Tokens.px(Tokens.space.buttonMargin, s)
@@ -40,6 +46,9 @@ Item {
     readonly property int itemX: strips.implicitWidth + stripGap + selectorRoom
     // Rails stick out above the first and below the last item; keep them inside the strips.
     readonly property int railRoom: Tokens.px(Tokens.space.railGap, s) + Tokens.line(Tokens.space.rail, s)
+    readonly property int shadowRoom: Tokens.px(Tokens.shadow.boxX, s)
+    readonly property int rowH: Tokens.px(Tokens.space.listItemH, s)
+    readonly property int pitch: rowH + Tokens.px(Tokens.space.listItemGap, s)
 
     implicitWidth: itemX + Tokens.px(defaultItemW, s)
     implicitHeight: column.implicitHeight + 2 * railRoom
@@ -63,17 +72,101 @@ Item {
     }
 
     readonly property string motionList: "list"
-    property bool leaving: false                 // nothing to widen here (no clipped window)
+    property bool leaving: false                 // as the OptionList's: the clipped window widens
     function enter(delay: int, kiteAt: int): var {
+        leaving = false;
         let d = delay, end = 0;
+        const first = firstRow();
         for (let i = 0; i < rows.count; i++) {
             const row = rows.itemAt(i) as ListItem;
             if (!row)
                 continue;
+            if (i < first || i >= first + visibleRows) {
+                row.complete();
+                continue;
+            }
             end = Math.max(end, row.enter(d, kiteAt));
             d += Tokens.motion.cascadeStep;
         }
         return { next: d, end: end };
+    }
+
+    // --- scrolling (spec 014) ----------------------------------------------------------------------
+    // How many whole rows fit, and the height that shows `room`'s whole rows (never more than all).
+    readonly property int visibleRows: Math.max(1, Math.floor((height - 2 * railRoom + pitch - rowH) / pitch))
+    readonly property bool overflows: count > visibleRows
+    function fitHeight(room: real): int {
+        const n = Math.max(1, Math.min(count, Math.floor((room - 2 * railRoom + pitch - rowH) / pitch)));
+        return n * pitch - (pitch - rowH) + 2 * railRoom;
+    }
+
+    property real scrollY: 0
+    property real wheelRest: 0                    // the wheel's turn not yet spent (touchpads)
+    function firstRow(): int {
+        return Math.round(scrollY / Math.max(1, pitch)) || 0;
+    }
+    function scrollTo(first: int): void {
+        scrollY = Math.max(0, Math.min(first, count - visibleRows)) * pitch;
+    }
+
+    // Just enough whole rows to show row `currentIndex` with its rails.
+    function follow(): void {
+        if (pitch <= 0)                          // still being built
+            return;
+        let first = firstRow();
+        if (currentIndex < first)
+            first = currentIndex;
+        else if (currentIndex >= first + visibleRows)
+            first = currentIndex - visibleRows + 1;
+        scrollTo(first);
+    }
+    onCurrentIndexChanged: follow()
+    onHeightChanged: follow()
+    onCountChanged: follow()
+
+    // One wheel notch (120) scrolls one row.
+    function wheelBy(delta: real): void {
+        if (!overflows)
+            return;
+        wheelRest += delta;
+        let first = firstRow();
+        while (wheelRest >= 120) {
+            wheelRest -= 120;
+            first--;
+        }
+        while (wheelRest <= -120) {
+            wheelRest += 120;
+            first++;
+        }
+        const before = scrollY;
+        scrollTo(first);
+        if (scrollY === before)
+            return;
+        first = firstRow();
+        if (currentIndex >= first && currentIndex < first + visibleRows)
+            return;
+        const pick = currentIndex < first ? first : first + visibleRows - 1;
+        if (keysEnabled)
+            currentIndex = pick;
+        else
+            cursorRequested(pick);
+    }
+
+    // For a dump: the scroll and the rows in view.
+    function scrollState(): var {
+        const first = firstRow();
+        return {
+            y: Math.round(scrollY),
+            overflows: overflows,
+            first: first,
+            last: Math.min(count, first + visibleRows) - 1
+        };
+    }
+
+    WheelHandler {
+        enabled: root.overflows
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: event => root.wheelBy(event.angleDelta.y)
     }
 
     Keys.enabled: keysEnabled
@@ -89,39 +182,48 @@ Item {
         height: root.height
     }
 
-    Column {
-        id: column
-        x: root.itemX
-        y: root.railRoom
-        width: root.width - root.itemX
-        spacing: Tokens.px(Tokens.space.listItemGap, root.s)
+    // The rows' window: clipped only while they don't fit (the kite's room on its left, the shadow's
+    // on its right); the column moves up by scrollY (whole rows).
+    Item {
+        x: strips.implicitWidth + root.stripGap
+        width: root.width - x + root.shadowRoom + (root.leaving ? root.width * Tokens.motion.leaveStretch : 0)
+        height: root.height
+        clip: root.overflows
 
-        Repeater {
-            id: rows
-            model: root.model
+        Column {
+            id: column
+            x: root.selectorRoom
+            y: root.railRoom - root.scrollY
+            width: root.width - root.itemX
+            spacing: Tokens.px(Tokens.space.listItemGap, root.s)
 
-            ListItem {
-                required property var modelData
-                required property int index
+            Repeater {
+                id: rows
+                model: root.model
 
-                width: column.width
-                s: root.s
-                variant: root.variant
-                text: root.labelOf(modelData)
-                trailing: root.trailingOf(modelData)
-                state: index === root.currentIndex ? (root.focused ? "hovered" : "selected") : "normal"
+                ListItem {
+                    required property var modelData
+                    required property int index
 
-                onHoveredChanged: {
-                    if (!hovered)
-                        return;
-                    root.hoveredIndex(index);
-                    if (root.keysEnabled)
-                        root.currentIndex = index;
-                }
-                onClicked: {
-                    if (root.keysEnabled)
-                        root.currentIndex = index;
-                    root.activated(index);
+                    width: column.width
+                    s: root.s
+                    variant: root.variant
+                    text: root.labelOf(modelData)
+                    trailing: root.trailingOf(modelData)
+                    state: index === root.currentIndex ? (root.focused ? "hovered" : "selected") : "normal"
+
+                    onHoveredChanged: {
+                        if (!hovered)
+                            return;
+                        root.hoveredIndex(index);
+                        if (root.keysEnabled)
+                            root.currentIndex = index;
+                    }
+                    onClicked: {
+                        if (root.keysEnabled)
+                            root.currentIndex = index;
+                        root.activated(index);
+                    }
                 }
             }
         }
