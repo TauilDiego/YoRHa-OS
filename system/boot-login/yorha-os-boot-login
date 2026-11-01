@@ -50,6 +50,12 @@ PLY_DIR=/usr/share/plymouth/themes/$NAME
 PLY_CONF=/etc/plymouth/plymouthd.conf
 SDDM_DROPIN=/etc/sddm.conf.d/$NAME.conf
 UNIT_DIR=/etc/systemd/system
+# spec 013 (contracts/boot-sound.md): the boot sound: a udev rule asks for a unit that runs a script
+# that plays a WAV straight on the card. Optional: without system/sounds/boot in the source it is skipped.
+UDEV_DIR=/etc/udev/rules.d
+UDEV_RULE=$UDEV_DIR/80-yorha-os-boot-sound.rules
+SOUND_UNIT=$UNIT_DIR/yorha-os-boot-sound.service
+SOUND_DIR=$BOOT_DIR/sound
 SDDM_UNIT_D=$UNIT_DIR/sddm.service.d
 MKINIT_CONF=/etc/mkinitcpio.conf
 MKINIT_DROPIN=/etc/mkinitcpio.conf.d/$NAME.conf
@@ -61,7 +67,7 @@ US=$'\x1f'  # field separator of the in-memory records (keeps empty fields, unli
 
 here=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
 
-DRY=0 RC_INITRAMFS=0 RC_CHANGED=0 RC_BOOT=0 RELOAD=0 FINISHED=0
+DRY=0 RC_INITRAMFS=0 RC_CHANGED=0 RC_BOOT=0 RELOAD=0 RELOAD_UDEV=0 FINISHED=0
 declare -A TOUCHED=() MADE=()
 LEFTOVER=()
 
@@ -664,6 +670,33 @@ place_units() {
     if ((RELOAD && !DRY)); then systemctl daemon-reload; RELOAD=0; fi
     return 0
 }
+# spec 013: the boot sound (udev rule, unit, script and the WAVs by volume level). Needs aplay on the
+# target (alsa-utils), or it stays quiet; skipped when the source has no system/sounds/boot.
+place_sound() {
+    local w stage n
+    say "boot sound:"
+    w=("$SOUND_SRC"/boot-start-*.wav)
+    if [[ ! -f $FILES/sound/yorha-boot-sound || ! -f $FILES/udev/80-yorha-os-boot-sound.rules || ! -f $FILES/systemd/yorha-os-boot-sound.service ]] \
+            || ((${#w[@]} == 0)); then
+        item skip "no boot sound in the source ($SOUND_SRC, $FILES/{sound,udev,systemd})"
+        return 0
+    fi
+    command -v aplay >/dev/null || warn "aplay is not installed (pacman -S alsa-utils): the boot sound stays quiet"
+    stage=$(mktemp -d)
+    cp "${w[@]}" "$stage/"
+    install -m 755 "$FILES/sound/yorha-boot-sound" "$stage/"
+    place_tree "$stage" "$SOUND_DIR"
+    rm -rf "$stage"
+    if ((!DRY)); then chmod 755 "$SOUND_DIR/yorha-boot-sound"; fi
+    place_file "$FILES/systemd/yorha-os-boot-sound.service" "$SOUND_UNIT"
+    place_file "$FILES/udev/80-yorha-os-boot-sound.rules" "$UDEV_RULE"
+    if ((!DRY)); then
+        if ((RELOAD)); then systemctl daemon-reload; RELOAD=0; fi
+        udevadm control --reload 2>/dev/null || warn "udevadm control --reload failed"
+    fi
+    n=${#w[@]}
+    item sound "$n levels, played on the first sound card that is not HDMI"
+}
 set_cmdline() {
     local e tmp entries
     case $BOOTLOADER in
@@ -758,6 +791,7 @@ cmd_install() {
     set_plymouth_theme
     set_hook
     place_units
+    place_sound
     say "kernel command line ($BOOTLOADER):"
     set_cmdline
     prune
@@ -804,6 +838,7 @@ remove_created() {
     rm -rf "$p"
     item remove "$p"
     if [[ $p == "$UNIT_DIR"/* ]]; then RELOAD=1; fi
+    if [[ $p == "$UDEV_DIR"/* ]]; then RELOAD_UDEV=1; fi
     return 0
 }
 restore_edited() {
@@ -851,6 +886,7 @@ cmd_uninstall() {
     fi
     if ((!DRY)); then
         if ((RELOAD)); then systemctl daemon-reload; RELOAD=0; fi
+        if ((RELOAD_UDEV)); then udevadm control --reload 2>/dev/null || warn "udevadm control --reload failed"; fi
         fc-cache -f >/dev/null 2>&1 || warn "fc-cache failed"
     fi
     say "initramfs:"
@@ -951,6 +987,16 @@ cmd_status() {
             item "moved" "$p -> $b"
         done
     fi
+    # spec 013: the boot sound
+    if [[ -f $UDEV_RULE && -f $SOUND_UNIT && -x $SOUND_DIR/yorha-boot-sound ]]; then
+        item "boot sound" "installed: $UDEV_RULE, $SOUND_UNIT, $SOUND_DIR ($(find "$SOUND_DIR" -name 'boot-start-*.wav' 2>/dev/null | wc -l) levels)"
+    elif [[ -e $UDEV_RULE || -e $SOUND_UNIT || -e $SOUND_DIR ]]; then
+        item "boot sound" "PARTLY installed (rule $([[ -e $UDEV_RULE ]] && echo yes || echo no), unit $([[ -e $SOUND_UNIT ]] && echo yes || echo no), script $([[ -e $SOUND_DIR ]] && echo yes || echo no))"
+    else
+        item "boot sound" "no"
+    fi
+    if [[ -f /run/yorha-os/sound.state ]]; then item "sound state" "this boot: $(tr -d '\n' </run/yorha-os/sound.state)"; else item "sound state" "none this boot (/run/yorha-os/sound.state)"; fi
+    command -v aplay >/dev/null || item aplay "missing (alsa-utils): the boot sound stays quiet"
     if [[ -e $USER_CONF ]]; then item options "$USER_CONF (yours)"; else item options "no $USER_CONF"; fi
     RC_INITRAMFS=$rc_ir RC_CHANGED=$rc_ed
     finish
@@ -975,6 +1021,7 @@ LOGIN_SRC=$SRC/system/login/sddm/$NAME
 BOOT_SRC=$SRC/system/boot/plymouth/$NAME
 FONT_SRC=$SRC/shell/assets/fonts
 FILES=$SRC/system/boot-login/files
+SOUND_SRC=$SRC/system/sounds/boot
 
 case $CMD in
     install) cmd_install ;;

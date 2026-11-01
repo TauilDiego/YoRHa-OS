@@ -1,0 +1,4 @@
+# YoRHa-OS boot sound (spec 013). When the sound card is complete (the control node's change event
+# with SOUND_INITIALIZED, set by 78-sound-card.rules), ask systemd for the sound. The unit is
+# Type=simple with nothing ordered after it: the boot never waits for it.
+SUBSYSTEM=="sound", KERNEL=="controlC*", ENV{SOUND_INITIALIZED}=="1", TAG+="systemd", ENV{SYSTEMD_WANTS}+="yorha-os-boot-sound.service"

@@ -63,3 +63,13 @@ repositório privado (dry-run, `install` duas vezes, `status`, boot com e sem o 
 
 Pra testar um caminho que a VM não tem: `YORHA_OS_BOOTLOADER=systemd-boot|uki|other` força o
 bootloader, e `YORHA_OS_MKINITCPIO_DROPINS=0` força a edição do `/etc/mkinitcpio.conf`.
+
+## Som de boot (spec 013)
+
+O `install` também põe o som de início (contracts/boot-sound.md): `/etc/udev/rules.d/80-yorha-os-boot-sound.rules`
+(no evento da placa, `SOUND_INITIALIZED=1`), `/etc/systemd/system/yorha-os-boot-sound.service` (`Type=simple`,
+sem `Before=` nem dependentes) e `/usr/share/yorha-os/boot/sound/` com o script `yorha-boot-sound` e os
+`boot-start-<nível>.wav`. O script lê o volume e o mudo do `sound.json` do último usuário, toca com `aplay`
+direto na placa e só então grava `/run/yorha-os/sound.state` (o tema de login espera por ele). Precisa de
+`alsa-utils`; sem ele o módulo avisa e o som fica calado. Sem `system/sounds/boot` na origem, o passo é pulado.
+O `uninstall` tira tudo (e recarrega o udev); o `status` mostra o que há.

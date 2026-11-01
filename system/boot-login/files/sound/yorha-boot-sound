@@ -1,0 +1,71 @@
+#!/bin/bash
+# YoRHa-OS boot sound (spec 013, contracts/boot-sound.md). Run by yorha-os-boot-sound.service when the
+# sound card is ready. Plays boot-start-<level>.wav straight on the card (aplay, plughw), at the
+# volume the last user left, then tells the login theme it may start its own sounds
+# (/run/yorha-os/sound.state). The ORDER matters (sondagem S4): if the greeter's PipeWire opens the
+# card while aplay still holds it, the card's node vanishes until WirePlumber restarts. So the state
+# file is written after aplay, or at once when nothing plays (an EXIT trap covers every way out).
+# Overrides, for the lab: YORHA_BOOT_SOUND_DIR (the WAV folder), YORHA_BOOT_SOUND_RUN (/run/yorha-os).
+set -u
+DIR=${YORHA_BOOT_SOUND_DIR:-$(cd "$(dirname "$(readlink -f "$0")")" && pwd)}
+RUN=${YORHA_BOOT_SOUND_RUN:-/run/yorha-os}
+LEVELS=(10 20 30 40 50 70 100)
+DEFAULT_LEVEL=30
+level=$DEFAULT_LEVEL enabled=true
+
+log() { echo "yorha-boot-sound: $*"; }       # the journal, through the unit's stdout
+
+write_state() {
+    local tmp
+    install -d -m 755 "$RUN" 2>/dev/null || return 0
+    tmp=$(mktemp "$RUN/sound.state.XXXXXX") || return 0
+    printf '{ "level": %s, "enabled": %s }\n' "$level" "$enabled" > "$tmp"
+    chmod 644 "$tmp"
+    mv -f "$tmp" "$RUN/sound.state"
+    : > "$RUN/boot-sound.done"
+}
+trap write_state EXIT
+
+# The last user that logged in (SDDM's state.conf, [Last] User=) and their saved sound state.
+user=$(awk -F= '/^\[/ { s = ($0 == "[Last]") } s && $1 == "User" { print $2; exit }' /var/lib/sddm/state.conf 2>/dev/null)
+json=""
+if [[ $user =~ ^[a-z_][a-z0-9_-]*$ ]]; then
+    home=$(getent passwd "$user" | cut -d: -f6)
+    if [[ -n $home && -r $home/.local/state/yorha-os/sound.json ]]; then
+        json=$(head -c 4096 "$home/.local/state/yorha-os/sound.json")
+    fi
+fi
+if [[ -n $json ]]; then
+    re_vol='"volume": *([0-9.]+)'; re_mute='"muted": *(true|false)'; re_boot='"bootLogin": *(true|false)'
+    [[ $json =~ $re_mute && ${BASH_REMATCH[1]} == true ]] && enabled=false
+    [[ $json =~ $re_boot && ${BASH_REMATCH[1]} == false ]] && enabled=false
+    if [[ $json =~ $re_vol ]]; then
+        want=$(awk -v v="${BASH_REMATCH[1]}" 'BEGIN { printf "%d", v * 100 + 0.5 }')
+        best=$DEFAULT_LEVEL bestd=1000
+        for l in "${LEVELS[@]}"; do
+            d=$((l > want ? l - want : want - l))
+            if ((d < bestd)); then best=$l bestd=$d; fi
+        done
+        level=$best
+    fi
+fi
+if [[ $enabled != true ]]; then log "off for ${user:-?} (muted or boot and login sounds off)"; exit 0; fi
+
+# The card: the first that is not an HDMI/DisplayPort one (a laptop's HDMI shows up as its own card);
+# wait a moment for the main one, then take whatever there is.
+card=""
+for _ in 1 2 3 4 5 6; do
+    card=$(aplay -l 2>/dev/null | awk '/^card [0-9]+:/ && !/HDMI|DisplayPort|DP-/ { sub(":", "", $2); print $2; exit }')
+    [[ -n $card ]] && break
+    sleep 0.5
+done
+if [[ -z $card ]]; then card=$(aplay -l 2>/dev/null | awk '/^card [0-9]+:/ { sub(":", "", $2); print $2; exit }'); fi
+if [[ -z $card ]]; then log "no sound card"; exit 0; fi
+file=$DIR/boot-start-$level.wav
+[[ -r $file ]] || { log "no $file"; exit 0; }
+if aplay -q -D "plughw:$card" "$file" 2>&1; then
+    log "played $file on card $card for ${user:-?}"
+else
+    log "aplay failed on card $card (busy? the session's audio may already hold it): staying quiet"
+fi
+exit 0

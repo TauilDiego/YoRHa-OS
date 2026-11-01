@@ -42,7 +42,16 @@ Rectangle {
     readonly property string introOption: option("intro", ["full", "fade", "none"])
     readonly property string clockOption: option("clock", ["big", "small", "none"])
     readonly property string userListOption: option("userList", ["always", "auto"])
+    // spec 013 (FR-029, FR-032): `sounds` = on | off. The sounds of the login (LoginSounds); reduce motion keeps them.
+    readonly property bool soundsOn: option("sounds", ["on", "off"]) === "on"
     readonly property bool reduceMotion: ["true", "on"].indexOf(option("reduceMotion", ["false", "true", "off", "on"])) >= 0
+
+    // spec 013: the login's sounds, on the primary screen only.
+    LoginSounds {
+        id: sfx
+        wanted: root.soundsOn
+        primary: root.primary
+    }
 
     // --- the SDDM ----------------------------------------------------------------------------------
     SddmLink {
@@ -107,6 +116,7 @@ Rectangle {
         picked = true;
         if (i === sel)
             return;
+        sfx.play("move");
         sel = i;
         auth.clearPassword(true);
         setMessage("", false);
@@ -213,6 +223,8 @@ Rectangle {
             introMode = decideIntro(previous);
             if (primary)
                 console.log("yorha-login: intro=" + introMode);
+            if (introMode === "full")
+                sfx.play("intro");
             focusField();
             startGate.arm();
         } else if (state === "ready") {
@@ -334,6 +346,7 @@ Rectangle {
             return;
         }
         pamInfo = "";
+        sfx.play("confirm");
         greeter.enter("checking");
         link.login(name, auth.password, sessionIndex);
     }
@@ -341,6 +354,7 @@ Rectangle {
         if (greeter.current !== "checking")
             return;
         greeter.enter("ready");
+        sfx.play("error");
         setMessage(pamInfo !== "" ? pamInfo : "Authentication failed.", true);
         auth.clearPassword(true);
         tear.start();
@@ -405,6 +419,7 @@ Rectangle {
     }
     function leave(which: string): void {
         leavingAction = which;
+        sfx.play("close");
         bridgeText = which === "reboot" ? "Rebooting…" : "Shutting down…";
         greeter.enter("leaving");
     }
