@@ -35,6 +35,7 @@ FocusScope {
     readonly property string dialogStart: SettingsModel.choiceId("menu", "confirm-start") || "cancel"
 
     signal closeRequested()
+    signal leaving()                             // spec 013: the close that follows is an action's
 
     property int index: 0
     property string dialogAction: ""         // the action the dialog asks about ("" = closed)
@@ -123,6 +124,7 @@ FocusScope {
             waiting = id;
             Session.run(id);              // the menu closes on accepted (below)
         } else {
+            leaving();
             closeRequested();             // a clean screen first (FR-023)
             Session.run(id);
         }
@@ -147,6 +149,7 @@ FocusScope {
         function onAccepted(id: string): void {
             if (id === root.waiting) {
                 root.waiting = "";
+                root.leaving();
                 root.closeRequested();
             }
         }

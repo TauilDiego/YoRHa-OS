@@ -48,8 +48,10 @@ ShellRoot {
     // so most steps change nothing on screen. Stopped by fixtures, by `wallpaperMotion: false`
     // in shell.json, or over IPC.
     property var wallpaperMotionOverride: null   // IPC: true/false; null = follow Settings
+    // spec 013, front A (FR-011): still while a menu is open, as the game's background.
     readonly property bool wallpaperMoving: !Tokens.frozen
         && (wallpaperMotionOverride ?? Settings.wallpaperMotion)
+        && !(pauseOpen || pickerOpen || logOpen)
     property real wallpaperPhase: 0
     Timer {
         running: shell.wallpaperMoving
@@ -198,7 +200,7 @@ ShellRoot {
     }
     Timer {
         id: pauseUnload
-        interval: 150
+        interval: 150 + Tokens.motion.popupClose     // spec 013, front A: the closing triangles first
         onTriggered: if (!shell.pauseOpen) shell.pauseLoaded = false
     }
     LazyLoader {
@@ -304,7 +306,7 @@ ShellRoot {
     }
     Timer {
         id: pickerUnload
-        interval: 150
+        interval: 150 + Tokens.motion.popupClose     // spec 013, front A: the closing triangles first
         onTriggered: if (!shell.pickerOpen) shell.pickerLoaded = false
     }
     LazyLoader {
@@ -463,7 +465,7 @@ ShellRoot {
     }
     Timer {
         id: logUnload
-        interval: 150
+        interval: 150 + Tokens.motion.popupClose     // spec 013, front A: the closing triangles first
         onTriggered: if (!shell.logOpen) shell.logLoaded = false
     }
     readonly property var logItem: logLoader.item

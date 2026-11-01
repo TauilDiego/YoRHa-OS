@@ -29,6 +29,7 @@ FocusScope {
     property real startY: Tokens.space.pauseBodyY
 
     signal closeRequested()
+    signal leaving()                             // spec 013: the close that follows is an action's
 
     readonly property var ps: Strings.pause
     readonly property var caps: Compositor.capabilities
@@ -182,6 +183,7 @@ FocusScope {
         if (!item)
             return;
         const id = item.id;
+        leaving();
         closeRequested();
         Compositor.focusWindow(id);
     }
