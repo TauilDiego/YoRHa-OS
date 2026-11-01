@@ -176,7 +176,7 @@ hidpi falhou uma vez com 4 VMs na GPU e passou 3 de 3 sozinho.
 - [X] T048 [US7] `system/login/sddm/yorha-os/`: os sons do tema, a chave `sounds` e a leitura de
   `/run/yorha-os/sound.state` (FR-029, S3)
 - [X] T049 [US7] Lab: `check-011 undo` cobrindo o som de boot; `lab/bootcap --audio-capture`
-- [ ] T050 [US7] Validar na `teste-011`: blocos `bootsound`, `boot-timing` e `undo` (SC-012, SC-013)
+- [X] T050 [US7] Validar na `teste-011`: blocos `bootsound`, `boot-timing` e `undo` (SC-012, SC-013)
 
 ## Phase 11: Polish & junção (F3)
 
