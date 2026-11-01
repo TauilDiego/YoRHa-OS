@@ -210,6 +210,8 @@ não aparece no menu de pausa até o shell reiniciar (spec 007: spike T003, rese
   Bar contrast (Normal / High) da spec 004.
 - **2026-10-27, limite do laboratório:** no máximo 4 VMs ligadas ao mesmo tempo, com 2 núcleos e
   4 GB cada.
+- **2026-11-01, tudo na `main`:** as branches de spec, de frente e de lab terminam mescladas na `main`
+  e apagadas. Não ficam branches nem worktrees parados.
 
 ## Histórico
 
@@ -237,6 +239,19 @@ não aparece no menu de pausa até o shell reiniciar (spec 007: spike T003, rese
   o OSD e as opções. Visual aprovado pelo dono. A `main` (007) foi mesclada na 008, com os conflitos
   resolvidos pelas decisões do dono. Os roteiros 003, 004, 007 e 008 passaram (110/0 na 008, nos dois
   perfis).
+- **2026-11-01:** spec 013 concluída (menus do jogo). Ela trouxe:
+  - o movimento medido no jogo;
+  - os triângulos ao abrir e fechar;
+  - o texto que rola;
+  - a escolha entre janela e tela cheia;
+  - a janelinha de escolhas;
+  - os sons nossos, também no boot e no login;
+  - o text log como aba do menu.
+
+  Na VM, os roteiros 003, 004, 007, 008, 011 e 013 passaram. O dono aprovou a tela cheia depois do
+  T058, e as decisões abertas estão no `relatorio.md` da spec. No mesmo dia, todas as branches dos
+  dois repositórios foram mescladas na `main` e apagadas (as specs 005, 009 e 010 entraram na `main`),
+  e o código órfão saiu.
 
 ## Fontes
 

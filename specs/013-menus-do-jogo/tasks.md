@@ -217,8 +217,11 @@ nesta VM, então do ambiente.
     "N/6" viraram "N/7" (o `check-007` agora dá Tab ×4 pra voltar à 1)
 - [X] T054 `docs/design-system.md` (movimento, `ScrollingLabel`, `ChoicePopup`, apresentação, sons) e
   `README.md`
-- [ ] T055 Sessão do dono numa janela da VM: os dois modos, a janelinha e os sons; ajustar os números
+- [X] T055 Sessão do dono numa janela da VM: os dois modos, a janelinha e os sons; ajustar os números
   (SC-007, SC-011)
+  - feita em 01.11 na `teste-011` (boot, login e shell, com som), em vez da `teste-b`. O dono pediu o T058
+    e aprovou a tela cheia com ele ("o que já temos está ótimo"); os detalhes que ainda quer mudar vão
+    pra spec 010 (perf `2026-11-01T080943-vm-teste-011-…`)
 - [X] T057 Acabamento herdado da 008: no log, o ◂ OFF ▸ (coluna estreita de 70) não alinha com o
   valor de Show logo abaixo; alinhar as colunas de valor das opções do log
 - [X] T058 Pedido do dono na sessão (01.11): na tela cheia, SYSTEM e POWER esticam as colunas como as
@@ -228,7 +231,9 @@ nesta VM, então do ambiente.
   Aprovado pelo dono na `teste-011`. Na `t013-modos`: `check-013 --only modes` 44/0 em 1080 e
   hidpi, `check-003` 25/0 nos dois perfis, `check-007` 76/0, qmllint limpo (perf
   `2026-11-01T083120-vm-t013-modos-013-t058-tela-cheia-colunas-alinhadas`)
-- [ ] T056 `relatorio.md` e a página de revisão; atualizar o `PLAN.md`, o mapa do projeto e a Central
+- [X] T056 `relatorio.md` e a página de revisão; atualizar o `PLAN.md`, o mapa do projeto e a Central
+  - `relatorio.md` escrito; `PLAN.md` com a 013 no histórico; o Mapa mostra a 013 concluída; a Central
+    já tinha a página de revisão (01.11)
 
 ## Dependencies & Execution Order
 
