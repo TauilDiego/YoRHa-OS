@@ -119,14 +119,15 @@ Item {
         // The clock starts with the window's first frame (making the menu takes a frame or more).
         firstFrame.restart();
     }
-    // The second tick: the first frame is out (making it can take a while: the shader, the texture),
-    // so no part of the grid is spent before it shows.
+    // The third tick: the first frames are out and shown (making them can take a while: the shader,
+    // the texture, the compositor mapping the surface), so no part of the grid is spent before it
+    // shows. In the lab VM the grid still shows for 60–150 ms (its first frames come irregularly).
     FrameAnimation {
         id: firstFrame
         property int ticks: 0
         onRunningChanged: if (running) ticks = 0
         onTriggered: {
-            if (++ticks < 2)
+            if (++ticks < 3)
                 return;
             stop();
             root.startOpen();
