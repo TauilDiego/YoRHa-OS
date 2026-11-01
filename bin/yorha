@@ -93,6 +93,7 @@ cmd_update() {
         if [[ -n $running && $running != "$(shell_root)" ]]; then
             "$YORHA_HOME/current/bin/$YORHA_CMD" shell restart >/dev/null || true
         fi
+        yorha_prune
         yorha_say "up to date ($cur)"
         return 0
     fi
@@ -179,10 +180,14 @@ cmd_shell_restart() {
     else yorha_say "the shell is not running (start it with: $YORHA_CMD shell start)"; fi
 }
 
-# The shell's IPC, on the same path the supervisor used (so qs finds the instance).
+# The shell's IPC, on the path of the version that is running (the supervisor writes it), so qs finds
+# the instance even between an update's switch and the shell's restart.
 cmd_ipc() {
+    local root
     [[ -L $YORHA_HOME/current ]] || yorha_fail "not installed"
-    exec qs -p "$(shell_root)/shell" ipc call "$@"
+    root=$(cat "$(run_dir)/shell.root" 2>/dev/null || true)
+    [[ -n $root && -d $root ]] || root=$(shell_root)
+    exec qs -p "$root/shell" ipc call "$@"
 }
 
 # The line the person adds at the top of ~/.config/hypr/hyprland.lua (contracts/encaixe.md).
