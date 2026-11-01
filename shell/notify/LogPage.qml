@@ -160,7 +160,8 @@ FocusScope {
         fluid: true
         lazyList: true
         // A narrower ON/OFF than the settings' steppers, so the options' labels show whole.
-        toggleValueW: Tokens.notify.logToggleW
+        toggleValueW: Tokens.notify.logValueW
+        choiceValueW: Tokens.notify.logValueW             // spec 013, T057: OFF and All on one center
         focus: true
         entries: root.rows
         options: root.options

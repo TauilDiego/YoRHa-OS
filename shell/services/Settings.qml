@@ -147,7 +147,6 @@ Singleton {
         "shell.menuPresentation": { type: "choice", values: ["floating", "fullscreen"], fallback: "floating", config: ["menuPresentation"] },
         "sound.ui": { type: "bool", fallback: true, config: ["sound", "ui"] },
         "sound.volume": { type: "int", min: 0, max: 100, fallback: 40, config: ["sound", "volume"] },
-        "sound.typing": { type: "bool", fallback: false, config: ["sound", "typing"] },
         "sound.folder": { type: "string", fallback: "", config: ["sound", "folder"] },
         "sound.bootLogin": { type: "bool", fallback: true, config: ["sound", "bootLogin"] },
         "input.kbLayouts": { type: "layouts", fallback: [], config: ["kbLayouts"] }
@@ -208,7 +207,6 @@ Singleton {
     readonly property string menuPresentation: valueOf("shell.menuPresentation")
     readonly property bool soundUi: valueOf("sound.ui")
     readonly property int soundVolume: valueOf("sound.volume")
-    readonly property bool soundTyping: valueOf("sound.typing")
     readonly property string soundFolder: valueOf("sound.folder")
     readonly property bool soundBootLogin: valueOf("sound.bootLogin")
     readonly property var kbLayouts: valueOf("input.kbLayouts")

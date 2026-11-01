@@ -395,7 +395,9 @@ Singleton {
         readonly property int lines: 4
         readonly property int critLines: 3
         readonly property int previewLines: 9
-        readonly property real logToggleW: 70              // the log's Options: ON/OFF between ◂ ▸ ("Do not disturb" whole)
+        // The log's Options: one value column (game px between ◂ ▸) for its toggle and its choice, so
+        // OFF and All sit on the same center (T057); "Do not disturb" stays whole, "Critical" fits.
+        readonly property real logValueW: 92
         readonly property real lifeH: 3                    // the time line at the bottom
         readonly property real progressGap: 12
         readonly property real progressNumW: 54

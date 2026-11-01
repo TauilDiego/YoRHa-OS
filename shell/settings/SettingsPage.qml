@@ -127,6 +127,7 @@ FocusScope {
         choiceId = catId + "." + o.id;
         choicePopup.open = true;
         choicePopup.forceActiveFocus();
+        Sounds.play("choiceOpen");               // junction: front C's pop-up, front D's sounds
         return "";
     }
 
@@ -481,10 +482,16 @@ FocusScope {
         anchors.fill: parent
         s: root.s
         onPicked: index => {
+            Sounds.play("choicePick");           // junction: front D's sounds on front C's pop-up
             SettingsModel.set(root.choiceCat, root.choiceOptId, index);
             root.closeChoice();
         }
-        onDismissed: root.closeChoice()
+        onToggled: Sounds.play("choicePick")
+        onCurrentChanged: if (open) Sounds.play("move")
+        onDismissed: {
+            Sounds.play("back");
+            root.closeChoice();
+        }
     }
 
     // The pointer's moves, seen by the page itself (an item on top would take the rows' hover).

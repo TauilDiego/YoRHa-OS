@@ -21,13 +21,14 @@ import Quickshell.Io
 // don't come from here (the module installs its own copies).
 //
 // Rules:
-//   - one SoundEffect pool per event (UiSound): 3 instances for move, change, osd and typing, 1 for
-//     the rest; 40 ms debounce per event, typing at most every 45 ms, at most 4 sounds at once;
+//   - one SoundEffect pool per event (UiSound): 3 instances for move, change and osd, 1 for the rest;
+//     40 ms debounce per event, at most 4 sounds at once;
 //   - the user's folder (sound.folder): <folder>/<event>.wav, then .ogg. What is missing, or does not
 //     open, plays ours, with one INFO line in the log;
 //   - volume: sound.volume (0–100) is the SoundEffect's, over the system's (the stream goes through the
 //     default sink, so its volume and its mute apply on their own; muted, nothing starts);
-//   - sound.ui off silences all but the entry sound (sound.bootLogin); sound.typing is off by default;
+//   - sound.ui off silences all but the entry sound (sound.bootLogin);
+//   - no typing sound (the owner's decision, 2026-11-01: none, not even as an option);
 //   - notify obeys do-not-disturb and the held full screen (NotifyStore.held); a critical one shows
 //     through them, so it sounds;
 //   - sound.json (data-model.md) is written 500 ms after the sink's volume or mute, uiVolume or
@@ -50,11 +51,10 @@ Singleton {
         notify: "notify.wav",
         notifyCritical: "notify-critical.wav",
         osd: "move.wav",
-        typing: "typing.wav",
         sessionStart: "session-start.wav"
     })
     // The sounds that repeat fast: three instances, and a new one cuts the last.
-    readonly property var repeated: ["move", "change", "osd", "typing"]
+    readonly property var repeated: ["move", "change", "osd"]
     readonly property int maxAtOnce: 4
 
     property var last: []
@@ -131,7 +131,7 @@ Singleton {
             volume: root.effectVolume
             copies: root.repeated.includes(modelData) ? 3 : 1
             cutting: copies > 1
-            debounceMs: modelData === "typing" ? 45 : 40
+            debounceMs: 40
             onFailed: (n, file) => console.info(`sounds: ${file} does not open as a sound, using ours for ${n}`)
         }
         onObjectAdded: (index, object) => {
@@ -157,8 +157,6 @@ Singleton {
             return Settings.soundBootLogin ? "" : "boot and login sounds off";
         if (!Settings.soundUi)
             return "sounds off";
-        if (event === "typing" && !Settings.soundTyping)
-            return "typing off";
         if (event === "notify" && NotifyStore.held)
             return "do not disturb";
         return "";
@@ -185,7 +183,6 @@ Singleton {
         return {
             enabled: Settings.soundUi,
             volume: Settings.soundVolume,
-            typing: Settings.soundTyping,
             folder: Settings.soundFolder,
             overrides: Object.keys(custom).filter(ev => pools[ev]?.useCustom === true),
             dir: soundsDir,

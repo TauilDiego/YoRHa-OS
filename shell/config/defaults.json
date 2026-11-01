@@ -7,7 +7,7 @@
   "terminal": ["kitty"],
   "barContrast": "normal",
   "menuPresentation": "floating",
-  "sound": { "ui": true, "volume": 40, "typing": false, "folder": "", "bootLogin": true },
+  "sound": { "ui": true, "volume": 40, "folder": "", "bootLogin": true },
   "kbLayouts": [],
   "wallpaperFolder": "~/Pictures/Wallpapers",
   "wallpaperTransition": "camouflage",

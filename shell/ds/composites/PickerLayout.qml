@@ -42,7 +42,8 @@ import "../../strings"
 //                pause-menu tab; the list reaches 24 px short of the preview, as in the log's mockup;
 //   lazyList     the list creates only the rows in view (GroupedList.lazy), for a long log;
 //   toggleValueW the width (game px) of a toggle's ON/OFF between ◂ and ▸; the default is every
-//                stepper's (Tokens.space.stepperValueW), the log narrows it so its labels fit.
+//                stepper's (Tokens.space.stepperValueW), the log narrows it so its labels fit;
+//   choiceValueW (spec 013, T057) the same for a choice's value, so a layout can give both one column.
 // spec 013 (front D §5): `fluid` was two things, now apart (it still sets both):
 //   stretch      the columns come from the layout's own width, in the frame's proportions (the
 //                full-screen menus: APPS, WINDOWS, the picker, the log);
@@ -75,6 +76,7 @@ FocusScope {
     property bool bodyOnly: fluid
     property bool lazyList: false
     property real toggleValueW: Tokens.space.stepperValueW
+    property real choiceValueW: Tokens.space.stepperValueW
 
     signal applied(int index)
     signal picked(int option, int value)
@@ -368,7 +370,7 @@ FocusScope {
                     contentScale: Tokens.space.pickerOptionScale
                     option: Object.assign({ type: "choice" }, modelData)
                     value: modelData?.type === "toggle" ? root.valueOf(index) !== 0 : root.valueOf(index)
-                    valueWidth: modelData?.type === "toggle" ? root.toggleValueW : Tokens.space.stepperValueW
+                    valueWidth: modelData?.type === "toggle" ? root.toggleValueW : root.choiceValueW
                     focused: root.column === "options" && index === root.option
 
                     onHoveredChanged: if (hovered) root.noteHover("options", index)

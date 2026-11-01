@@ -36,7 +36,6 @@ Formato que dá menos problema: WAV PCM 16 bits, 48 kHz, curto (menos de 1,5 s).
 | `choiceOpen`, `choicePick` | abrir, escolher na janelinha de valores |
 | `notify`, `notifyCritical` | notificação normal, crítica |
 | `osd` | um passo do volume ou do brilho |
-| `typing` | uma letra digitada (se "Typing sound" estiver ligado) |
 | `sessionStart` | o desktop aparece depois do login (uma vez por login) |
 
 Só a interface do shell usa a pasta. O som de boot e os sons da tela de login são do módulo de
