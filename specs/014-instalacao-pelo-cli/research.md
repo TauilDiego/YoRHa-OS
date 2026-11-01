@@ -14,7 +14,7 @@ em `127.0.0.1:8714`, e as VMs chegam nele por `http://10.0.2.2:8714`: na rede "u
   cada `N` sai de `git rev-list --first-parent --reverse <ref>`;
 - **atende:**
   - `/latest`, com o número mais novo;
-  - `/yorha-os-0.N.tar.gz`, gerado na hora com `git archive --add-virtual-file=VERSION:0.N <commit>`;
+  - `/yorha-os-0.N.tar.gz`, gerado na hora com `git archive --add-virtual-file=yorha-os-0.N/VERSION:0.N <commit>` (o `--prefix` não vale pro arquivo virtual, então ele leva o caminho completo);
   - `/yorha-os-0.N.tar.gz.sha256`;
   - `/install.sh`, da ref seguida.
 

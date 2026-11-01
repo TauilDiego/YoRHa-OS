@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# yorha: install, update and run the YoRHa-OS shell (spec 014, contracts/cli.md). Method D of spec
+# 005: each version lives in $YORHA_HOME/versions/<v>; "current" is a symlink switched atomically.
+# Runs as the person; root only through sudo, after a yes.
+set -euo pipefail
+YORHA_ROOT=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
+source "$YORHA_ROOT/lib/yorha/name.sh"
+source "$YORHA_ROOT/lib/yorha/common.sh"
+[[ $EUID -ne 0 ]] || yorha_fail "run as your user, not root"
+
+usage() {
+    cat >&2 <<USAGE
+usage: $YORHA_CMD version | status | update [--check [--json]] | rollback | migrate
+       $YORHA_CMD shell start|restart | ipc <args…> | boot-login install|uninstall|status | uninstall
+USAGE
+    exit 2
+}
+
+cmd_status() {
+    local cur prev channel running
+    cur=$(yorha_current)
+    prev=$(cat "$YORHA_HOME/previous" 2>/dev/null || true)
+    channel=$(cat "$YORHA_HOME/channel" 2>/dev/null || true)
+    pgrep -x qs >/dev/null && running=yes || running=no
+    printf '%s %s\n' "$YORHA_PRETTY" "${cur:-not installed}"
+    printf '  previous:  %s\n' "${prev:-none}"
+    printf '  channel:   %s\n' "${channel:-none}"
+    printf '  folder:    %s\n' "$YORHA_HOME"
+    printf '  shell:     %s\n' "$running"
+}
+
+main() {
+    case ${1:-} in
+        version) echo "$YORHA_NAME $(yorha_version_of "$YORHA_ROOT")" ;;
+        status) cmd_status ;;
+        *) usage ;;
+    esac
+}
+main "$@"
