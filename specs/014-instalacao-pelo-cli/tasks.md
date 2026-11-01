@@ -118,12 +118,13 @@ O MVP é a US1 com a US4: sem o encaixe, o shell instalado não sobe no login.
 
 ## Phase 6: User Story 3 - O aviso e o "Update now" (P2) · Frente C
 
-- [ ] T020 [P] [US3] `services/Updater.qml` (contracts/updater.md), com o IPC `updates check|dump`;
+- [X] T020 [P] [US3] `services/Updater.qml` (contracts/updater.md), com o IPC `updates check|dump`;
   o `NotifyStore.system()` ganha uma ação opcional, que abre o menu em SYSTEM › Updates
-- [ ] T021 [US3] A categoria `updates` no catálogo (`shell/fixtures/settings-default.json`), os textos
+- [X] T021 [US3] A categoria `updates` no catálogo (`shell/fixtures/settings-default.json`), os textos
   no `Strings.qml` e a ação `update-now` chamando o `Updater.updateNow()`. Fora da instalação, aparece
   "Not installed with yorha"
-- [ ] T022 [US3] Validar:
+- [X] T022 [US3] Validar (feito em 01.11 na `t014`: notice e updates-menu 14/0; o lab comum e os roteiros
+  003/007 entram na junção, T027):
   - na `t014`, blocos `notice` e `updates-menu`: uma conferência forçada dá uma transmissão por
     versão; clicar abre Updates; "Update now" abre o `kitty` com o update; o shell volta na versão
     nova;
@@ -132,16 +133,16 @@ O MVP é a US1 com a US4: sem o encaixe, o shell instalado não sobe no login.
 
 ## Phase 7: User Story 5 - O boot e o login pelo CLI (P3) · Frente B
 
-- [ ] T023 [US5] `yorha boot-login install|uninstall|status` (research R10)
-- [ ] T024 [US5] Validar na `teste-011`:
+- [X] T023 [US5] `yorha boot-login install|uninstall|status` (research R10)
+- [X] T024 [US5] Validar na `teste-011` (feito em 01.11: boot-login 5/0):
   - instalar o `yorha` pelo canal;
   - `boot-login install` → reboot (`lab/bootcap`);
   - `boot-login uninstall` → reboot, com os hashes de antes (bloco `boot-login`)
 
 ## Phase 8: User Story 6 - Desinstalar (P3) · Frente A
 
-- [ ] T025 [US6] `yorha uninstall` (research R11)
-- [ ] T026 [US6] Validar na `t014`:
+- [X] T025 [US6] `yorha uninstall` (research R11)
+- [X] T026 [US6] Validar na `t014` (feito em 01.11: uninstall 6/0):
   - nenhum arquivo do produto sobra fora da config e do estado;
   - o Hyprland sobe sem o shell, e a linha com `pcall` não quebra nada (bloco `uninstall`)
 
