@@ -101,15 +101,17 @@ O MVP é a US1 com a US4: sem o encaixe, o shell instalado não sobe no login.
 
 ## Phase 5: User Story 2 - Uma correção chega pelo `yorha update` (P1) · Frente A
 
-- [ ] T017 [US2] `yorha update [--check [--json]]`, do protótipo D:
+- [X] T017 [US2] `yorha update [--check [--json]]`, do protótipo D:
   - o download e o sha256, com `.part`;
   - a cópia do estado, a troca e as migrations;
   - o `prune`, que guarda 3;
   - `yorha shell restart`;
   - recusar uma versão mais velha e limpar o que sobrou de um update interrompido
-- [ ] T018 [US2] `yorha rollback` e `yorha migrate`, com as marcas em `state/migrations/`
-- [ ] T019 [US2] Validar na `t014`, com commits no `t014-canal` (uma mudança visível no HUD e uma
-  migration de teste):
+- [X] T018 [US2] `yorha rollback` e `yorha migrate`, com as marcas em `state/migrations/`
+- [X] T019 [US2] Validar na `t014`, com commits no `t014-canal` (uma mudança visível no HUD e uma
+  migration de teste). Feito em 01.11: `check-014` update, migration, rollback e interrupt 27/0 (a
+  correção "APPS -Launcher T014" chegou pelo update; achados: o `yorha ipc` fala com a versão que
+  está rodando, e o update sem novidade termina um update interrompido):
   - blocos `update`, `migration` e `rollback` (o estado igual byte a byte);
   - bloco `interrupt`, em 3 pontos: no download, entre o desempacotar e a troca, e numa migration;
   - checksum errado → 4, sem mudar nada
