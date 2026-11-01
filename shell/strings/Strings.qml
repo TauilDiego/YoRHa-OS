@@ -170,6 +170,20 @@ Singleton {
     }
 
     // --- spec 004: wallpaper (picker, catalog, transitions) --------------------------------------
+    // spec 014: newer versions (services/Updater.qml, SYSTEM › Updates).
+    readonly property UpdateStrings updates: UpdateStrings {}
+    component UpdateStrings: QtObject {
+        readonly property string noticeTitle: "Update available"
+        readonly property string noticeBody: "Version %1 is ready. Open SYSTEM › Updates to install it."
+        readonly property string notInstalled: "Not installed with yorha"
+        readonly property string upToDate: "Up to date"
+        readonly property string checking: "Checking…"
+        readonly property string couldNotCheck: "Could not check"
+        readonly property string noNewer: "No newer version."
+        readonly property string enterCloses: "Enter closes this window."
+        readonly property string noTerminalTitle: "No terminal to update in"
+        readonly property string noTerminalBody: "Run in a terminal: %1 update"
+    }
     readonly property WallpaperStrings wallpaper: WallpaperStrings {}
     component WallpaperStrings: QtObject {
         readonly property string title: "WALLPAPER"

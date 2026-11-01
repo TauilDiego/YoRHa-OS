@@ -62,6 +62,9 @@ Singleton {
     // The option as the page draws it: a notifications option takes its texts from Strings.notify and
     // its values from NotifyPrefs (the Monitor option lists the outputs).
     function resolve(opt: var): var {
+        // spec 014: SYSTEM › Updates' rows come from the Updater.
+        if (opt?.updates === "installed" || opt?.updates === "available")
+            return Object.assign({}, opt, { text: Updater.text(opt.updates) });
         const l = liveOf(opt);
         // spec 013, front D: the sound folder's info row shows the path in use (the catalog's text
         // is "ours", the built-in sounds).
@@ -191,6 +194,8 @@ Singleton {
     // An option that `needs` a toggle which is off (FR-017).
     function isDimmed(catId: string, optId: string): bool {
         const opt = find(catId, optId);
+        if (opt?.updates === "now")                  // spec 014: only with a newer version
+            return !Updater.available;
         if (!opt?.needs)
             return false;
         for (const c of categories)
@@ -202,6 +207,8 @@ Singleton {
 
     function needsText(catId: string, optId: string): string {
         const opt = find(catId, optId);
+        if (opt?.updates === "now")
+            return Updater.installed ? Strings.updates.noNewer : Strings.updates.notInstalled;
         return opt?.needs ? String(needs[opt.needs] ?? "") : "";
     }
 
@@ -263,6 +270,8 @@ Singleton {
             Sounds.play("change");               // spec 013, front D
         } else if (opt.type === "action") {
             Sounds.play("confirm");              // spec 013, front D
+            if (opt.updates === "now")           // spec 014: the terminal runs `yorha update`
+                Updater.updateNow();
             // spec 013, front D: an action with `clears` saves "" for that setting (Sound › Use
             // ours: the sound folder back to the built-in sounds, even over a shell.json folder).
             if (opt.clears && Settings.keyOf(String(opt.clears)))

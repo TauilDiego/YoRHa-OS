@@ -112,6 +112,15 @@
         {"id": "suspend", "label": "Suspend after", "type": "choice", "desc": "Idle time before the computer suspends.", "values": ["10 min", "15 min", "30 min", "Never"], "value": 1, "default": 1},
         {"id": "lid", "label": "Lid closed", "type": "choice", "desc": "What happens when the laptop lid closes.", "values": ["Suspend", "Lock", "Do nothing"], "value": 0, "default": 0}
       ]
+    },
+    {
+      "id": "updates", "label": "Updates",
+      "about": "The version in use and newer ones. YoRHa-OS updates with `yorha update`; a transmission says when a newer version is out.",
+      "options": [
+        {"id": "installed", "label": "Installed", "type": "info", "updates": "installed", "desc": "The version in use. Installed with yorha, it lives in ~/.local/share/yorha-os.", "text": "Not installed with yorha"},
+        {"id": "available", "label": "Available", "type": "info", "updates": "available", "desc": "The newest version, checked every hour. `yorha update --check` checks now.", "text": "Up to date"},
+        {"id": "update-now", "label": "Update now", "type": "action", "updates": "now", "desc": "Opens a terminal running `yorha update`: the new version is checked, the state is kept, and the shell restarts on it. `yorha rollback` goes back.", "text": "Update", "busy": "Opening the terminal."}
+      ]
     }
   ]
 }
