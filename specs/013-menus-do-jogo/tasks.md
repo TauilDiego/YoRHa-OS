@@ -182,6 +182,10 @@ hidpi falhou uma vez com 4 VMs na GPU e passou 3 de 3 sozinho.
 
 - [ ] T051 Mesclar as frentes na `013-menus-do-jogo` e na `lab-013`; resolver o que A e B mexeram no
   `PopupFrame`
+  - decisão do dono (01.11): **sem som de digitação, nem como opção**. Tirar o que a frente D ligou: o
+    evento `typing` no campo de busca de APPS, a opção Sound › Typing sound, a chave `sound.typing` e os
+    casos dela no `sound-opts`. O `typing.wav` fica no repo, sem uso;
+  - ligar `choiceOpen`/`choicePick` na janelinha da frente C (as frentes C e D trabalharam separadas)
 - [ ] T052 `check-013` inteiro nos dois perfis e nos dois modos; `check-003`, `check-004`, `check-007`,
   `check-008` e `check-011` verdes (SC-004)
 - [ ] T053 A lista das diferenças esperadas do modo janela parado (FR-017), com `lab/diffshot` contra as

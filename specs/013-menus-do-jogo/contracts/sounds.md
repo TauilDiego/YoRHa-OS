@@ -26,7 +26,7 @@
 - **Notificações:** `notify` e `notifyCritical` respeitam o "não perturbe" e a tela cheia segurada da
   008.
 - **Repetições:**
-  - `move`, `change` e `typing` não se acumulam: um novo corta o anterior do mesmo evento;
-  - `typing` toca no máximo um a cada 45 ms.
+  - `move` e `change` não se acumulam: um novo corta o anterior do mesmo evento;
+  - não há som de digitação (decisão do dono, 01.11), nem opção pra ele.
 - **Tempo:** o som começa em até 50 ms depois da ação (SC-008).
 - **Reduce motion** não muda os sons.

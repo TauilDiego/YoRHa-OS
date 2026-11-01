@@ -7,7 +7,7 @@
 | `shell.menuPresentation` | `"floating"` \| `"fullscreen"` | `"floating"` | Appearance › Menu presentation | Troca ao vivo (FR-013) |
 | `sound.ui` | bool | `true` | Sound › Interface sounds | Desliga todos os sons da interface, menos os de boot e login |
 | `sound.volume` | int 0–100 | `40` | Sound › Interface volume | Por cima do volume do sistema |
-| `sound.typing` | bool | `false` | Sound › Typing sound | Um tique por letra, no máximo um a cada 45 ms |
+| ~~`sound.typing`~~ | — | — | — | Sai (decisão do dono, 01.11: sem som de digitação, nem como opção) |
 | `sound.folder` | string | `""` (os nossos) | Sound › Sound folder | Arquivo por evento (contracts/sounds.md). O que faltar usa o nosso |
 | `sound.bootLogin` | bool | `true` | Sound › Boot and login sounds | Copiado pro estado de som (abaixo) |
 | `input.kbLayouts` | string[] (≥ 1) | o layout atual | Keyboard › Layouts (janelinha múltipla) | Aplicado no Hyprland (research R6) |
@@ -40,7 +40,7 @@ Lido no boot pelo `yorha-boot-sound`, do último usuário que entrou (`/var/lib/
 | `choiceOpen` / `choicePick` | abrir / escolher na janelinha | `open.wav` / `confirm.wav` | 19 / 06 |
 | `notify` / `notifyCritical` | notificação normal / crítica | `notify.wav` / `notify-critical.wav` | 09 / 10 |
 | `osd` | passo do volume ou do brilho | `move.wav` | 03 |
-| `typing` | uma letra digitada na UI | `typing.wav` | 08 |
+| ~~`typing`~~ | não toca (decisão do dono, 01.11) | `typing.wav` fica no repo, sem uso | 08 |
 | `sessionStart` | o desktop aparece depois do login | `session-start.wav` | 02 |
 | `bootStart` | a placa de som fica pronta no boot | `boot-start.wav` | 01 |
 | `loginIntro`, `loginMove`, `loginConfirm`, `loginError`, `loginPower` | eventos da tela de login | `intro.wav`, `move.wav`, `confirm.wav`, `error.wav`, `close.wav` | 01, 03, 06, inventado, 19 ao contrário |

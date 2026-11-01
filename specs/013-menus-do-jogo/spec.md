@@ -178,7 +178,7 @@ as teclas. Cada evento toca o som certo no tempo certo, e as opções de volume 
 3. **Given** uma notificação normal ou crítica, **When** ela chega, **Then** toca o brilho
    correspondente. Com "não perturbe" ou em tela cheia segurada (regras da 008), ela não toca.
 4. **Given** Configurações › Sound, **When** o usuário desliga os sons da interface ou baixa o volume
-   deles, **Then** isso vale na hora. O som da digitação vem desligado e liga numa opção própria.
+   deles, **Then** isso vale na hora. Não há som de digitação (decisão do dono, 01.11; abaixo).
 5. **Given** uma pasta de sons escolhida, **When** um evento tem um arquivo com o nome dele lá, **Then**
    toca esse arquivo. **When** não tem, **Then** toca o som nosso.
 
@@ -389,7 +389,9 @@ que o dono aprovou no protótipo.
 - **FR-022** (sons, opções): Configurações › Sound MUST ter:
   - "Interface sounds" (ligado por padrão);
   - o volume deles (padrão 40%);
-  - "Typing sound" (desligado por padrão);
+  - ~~"Typing sound" (desligado por padrão)~~: **sem som de digitação** (decisão do dono, 01.11:
+    "acho bom não ter som de digitação de forma alguma"). Nenhuma letra digitada toca som, e não há
+    opção pra ligar. Ele pode voltar depois como opção, se o dono pedir;
   - a pasta de sons (padrão: os nossos).
 
   Tudo MUST valer na hora e ficar salvo.
