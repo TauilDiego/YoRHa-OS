@@ -60,9 +60,9 @@ que o canal segue. Nada dele vai pra `main`.
 
 ## Phase 3: User Story 1 - Instalar com um comando (P1) 🎯 MVP · Frente A
 
-- [ ] T010 [P] [US1] `lib/yorha/deps.sh`: `pacman -T`, a lista do que falta, a pergunta e o
+- [X] T010 [P] [US1] `lib/yorha/deps.sh`: `pacman -T`, a lista do que falta, a pergunta e o
   `sudo pacman -S --needed`. Uma obrigatória recusada sai com 3
-- [ ] T011 [US1] `install.sh` (contracts/cli.md):
+- [X] T011 [US1] `install.sh` (contracts/cli.md):
   - as pré-condições;
   - as dependências;
   - o download e a conferência do sha256;
@@ -70,27 +70,29 @@ que o canal segue. Nada dele vai pra `main`.
   - o `switch`, o link do `yorha` e o canal guardado;
   - a linha do `hyprland.lua` no fim;
   - a saída 2 quando já está instalado
-- [ ] T012 [US1] Validar na `t014`: blocos `install` e `deps` (aceitar; recusar uma obrigatória → 3;
+- [X] T012 [US1] Validar na `t014`: blocos `install` e `deps` (aceitar; recusar uma obrigatória → 3;
   rodar de novo → 2)
 
 ## Phase 4: User Story 4 - O encaixe no Hyprland (P2, parte do MVP) · Frente B
 
 O MVP é a US1 com a US4: sem o encaixe, o shell instalado não sobe no login.
 
-- [ ] T013 [P] [US4] `yorha shell start|restart` e `yorha ipc` (research R4). O supervisor vem do
+- [X] T013 [P] [US4] `yorha shell start|restart` e `yorha ipc` (research R4). O supervisor vem do
   `lab/guest/nier-ui-run` e tem:
   - a espera do portal;
   - o `QT_LOGGING_RULES`;
   - o lock;
   - o laço que resolve o `current`;
   - o `YORHA_OS_ROOT`
-- [ ] T014 [P] [US4] `system/hypr/yorha-os.lua` (contracts/encaixe.md)
-- [ ] T015 [P] [US4] Caminhos e nomes (research R8):
+- [X] T014 [P] [US4] `system/hypr/yorha-os.lua` (contracts/encaixe.md)
+- [X] T015 [P] [US4] Caminhos e nomes (research R8):
   - `services/Sounds.qml` sem `/usr/share`;
   - `YORHA_OS_COMPOSITOR` e `YORHA_OS_FIXTURES` aceitando `NIER_*` (`services/Compositor.qml`,
     `services/Fixtures.qml`);
   - o lab continua funcionando
-- [ ] T016 [US4] Validar na `t014`, com a linha incluída e um novo login:
+- [X] T016 [US4] Validar na `t014`, com a linha incluída e um novo login (feito em 01.11: `check-014`
+  install 10/0, deps 2/0, encaixe 8/0; achados: os shaders compilados no destino (`yorha_prepare`),
+  o `pipewire-pulse` nas dependências e o `yorha` chamado na sessão gráfica):
   - o shell sobe uma vez;
   - os atalhos SUPER (pelo `lab/key`) abrem o menu, as configurações e o seletor;
   - os `dump` do IPC respondem;
