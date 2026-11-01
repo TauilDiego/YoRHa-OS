@@ -85,8 +85,14 @@ cmd_update() {
         return 0
     fi
     if ! is_newer "$latest" "$cur"; then
-        # Nothing newer: finish what an interrupted update left (pending migrations).
+        # Nothing newer: finish what an interrupted update left (pending migrations, and a shell
+        # still running an older version).
         "$YORHA_HOME/current/bin/$YORHA_CMD" migrate
+        local running
+        running=$(cat "$(run_dir)/shell.root" 2>/dev/null || true)
+        if [[ -n $running && $running != "$(shell_root)" ]]; then
+            "$YORHA_HOME/current/bin/$YORHA_CMD" shell restart >/dev/null || true
+        fi
         yorha_say "up to date ($cur)"
         return 0
     fi
@@ -157,8 +163,9 @@ cmd_shell_start() {
         YORHA_OS_ROOT="$root" qs -p "$root/shell" >>"$log" 2>&1 &
         qspid=$!
         echo "$qspid" > "$rd/shell.pid"
+        echo "$root" > "$rd/shell.root"
         wait "$qspid" || true
-        rm -f "$rd/shell.pid"
+        rm -f "$rd/shell.pid" "$rd/shell.root"
         sleep 1
     done
     yorha_say "not installed anymore; the shell stays off"
