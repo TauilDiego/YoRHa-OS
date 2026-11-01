@@ -228,15 +228,15 @@ Item {
                     visible: !root.stepping && root.type !== "slider"
                     spacing: Tokens.px(12, root.cs)
 
-                    Label {
+                    // spec 013 (FR-012): an info or action text that doesn't fit scrolls.
+                    ScrollingLabel {
                         id: free
                         width: Math.min(Math.ceil(freeMeasure.implicitWidth), valueBox.width - root.arrowRoom)
                         anchors.verticalCenter: parent.verticalCenter
                         s: root.cs
                         role: "standard"
-                        font.weight: Font.Medium
-                        font.variableAxes: ({ "wght": Font.Medium })
-                        elide: Text.ElideRight
+                        label.font.weight: Font.Medium
+                        label.font.variableAxes: ({ "wght": Font.Medium })
                         text: root.valueText
                         color: root.type === "info"
                             ? (root.inked ? Qt.rgba(root.light.r, root.light.g, root.light.b, 0.75) : Tokens.color.mediumGray)
