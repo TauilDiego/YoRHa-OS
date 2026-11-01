@@ -178,11 +178,14 @@ O MVP é a US1 com a US4: sem o encaixe, o shell instalado não sobe no login.
     uninstall 7/0);
   - de quebra, o lembrete da S3: o supervisor cria `~/.local/share/applications` (0310b55);
   - no lab, o `GUEST_ENV` pega a instância mais nova do Hyprland depois de um relogin
-- [ ] T030 Fechamento:
+- [X] T030 Fechamento:
   - `relatorio.md` e a página de revisão;
   - Mapa e Central;
   - apagar o `t014-canal`;
   - mesclar a 014 e a `lab-014` na `main`, com o OK do dono
+
+  Feito em 01.11: o relatório, a página "YoRHa-OS Revisão 014", o Mapa e a Central; o canal
+  desligado; o OK do dono pra mesclar e apagar ("sim", 01.11)
 
 ## Dependencies & Execution Order
 
