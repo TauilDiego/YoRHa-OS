@@ -937,8 +937,8 @@ dono.
   `choicePick`, `notify`, `notifyCritical`, `osd` e `sessionStart` (uma vez por login).
   - **Sem som de digitação** (decisão do dono, 01.11), nem como opção.
 - **Os arquivos:** os nossos, em `system/sounds/`, gerados pela receita `system/sounds/gen/synth.py`.
-  O shell acha a pasta por `$YORHA_OS_SOUNDS`, depois `/usr/share/yorha-os/sounds`, depois
-  `<shell>/../system/sounds`.
+  O shell acha a pasta por `$YORHA_OS_SOUNDS`, depois `<shell>/../system/sounds`, que vale no
+  repositório e na pasta da versão instalada (spec 014).
 - **Configurações › Sound:** Interface sounds, Interface volume (por cima do volume do sistema; o
   mudo do sistema cala), Sound folder (a pasta própria, um arquivo por evento;
   [`docs/sons-do-jogo.md`](sons-do-jogo.md)), Use our sounds e Boot and login sounds.
@@ -959,6 +959,42 @@ dono.
   Reduce motion, a digitação com a letra da ponta, a lista e o título se mexendo sozinhos, e a
   janelinha simples e a múltipla.
 <!-- spec 013 (013-menus-do-jogo): fim -->
+
+## 12. Instalação e updates (spec 014)
+
+O shell instalado pelo `yorha` vive em `~/.local/share/yorha-os/versions/<v>/`, e o
+`yorha shell start` sobe o `qs` com `YORHA_OS_ROOT` apontando pra versão. Sem essa variável (no
+lab, com `~/nier/ui`), nada do que está abaixo roda, e os rodapés mostram "0.1", como antes.
+
+### O aviso de versão nova (`services/Updater.qml`)
+
+- **Quando confere:** 30 s depois de subir e a cada hora, com `yorha update --check --json`.
+- **O aviso:** uma versão nova vira uma transmissão do sistema, "Update available", com o corpo
+  "Version 0.N is ready. Open SYSTEM › Updates to install it.". Ela sai uma vez por versão: a
+  versão já avisada fica em `~/.local/state/yorha-os/updates.json`.
+- **O clique:** a transmissão abre o menu em SYSTEM › Updates. `NotifyStore.system()` aceita uma
+  ação (`onOpen`), que vale enquanto a sessão durar.
+- **Os rodapés** (SYSTEM, o log, o seletor de papel de parede) mostram a versão instalada
+  (`Updater.versionLabel`).
+
+### SYSTEM › Updates
+
+A última categoria do catálogo, com três linhas:
+
+| Linha | Tipo | O que mostra |
+|---|---|---|
+| Installed | info | A versão em uso, ou "Not installed with yorha" |
+| Available | info | A versão nova, ou "Up to date" ("Checking…" e "Could not check" enquanto não há resposta) |
+| Update now | action | Abre o terminal da config (`terminal`, hoje `kitty --hold`) rodando o `yorha update`. Apagada sem versão nova ("No newer version.") |
+
+No fim do update, o `yorha` reinicia o shell, que sobe na versão nova.
+
+### Comandos
+
+- **IPC:** `updates check | now | open | dump`.
+- **Teclas:** o arquivo `system/hypr/yorha-os.lua` liga SUPER+Escape, SUPER+I, SUPER+W, SUPER+N e
+  SUPER+CTRL+N ao `yorha ipc …`. O modificador muda com `YORHA_MOD`, definido antes da linha do
+  include.
 
 ## Créditos
 
