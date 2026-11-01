@@ -57,8 +57,26 @@ Item {
     // The floating panel's size (it sets `s` in both presentations), and the panel's.
     readonly property real shareW: Tokens.snap(width * Tokens.space.popupShare, dpr)
     readonly property real shareH: Tokens.snap(height * Tokens.space.popupShare, dpr)
-    readonly property real panelW: fullscreen ? width : shareW
-    readonly property real panelH: fullscreen ? height : shareH
+    // spec 013, front B (FR-013): the panel grows from the floating size to the whole area by `morph`
+    // (0 floating, 1 full screen), which follows `presentation` over Tokens.motion.popupFade (at once
+    // with Tokens.instant). Switching with the menu open is just this number moving.
+    property real morph: fullscreen ? 1 : 0
+    Behavior on morph {
+        NumberAnimation {
+            duration: Tokens.instant ? 0 : Tokens.motion.popupFade
+            easing.type: Easing.OutCubic
+        }
+    }
+    readonly property real panelW: Tokens.snap(shareW + (width - shareW) * morph, dpr)
+    readonly property real panelH: Tokens.snap(shareH + (height - shareH) * morph, dpr)
+    // Wider than 16:9 (the full-screen panel past the width the floating one reaches at 100%), the
+    // content stays in a 16:9 band and the extra room is margin: the header, rules, hints and body
+    // are inset by it (R4, "limite de largura em ultrawide"). Zero in floating and on 16:9 / 16:10.
+    readonly property real fullInset: {
+        const d = (width - Math.round(Tokens.px(Tokens.space.popupW, s) / Tokens.space.popupShare)) / 2;
+        return d > Tokens.px(4, s) ? Tokens.snap(d, dpr) : 0;
+    }
+    readonly property real inset: Tokens.snap(fullInset * morph, dpr)
 
     function u(v: real): int {
         return Tokens.px(v, root.s);
@@ -73,7 +91,8 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        visible: !root.fullscreen
+        visible: root.morph < 1
+        opacity: 1 - root.morph
         color: Tokens.color.dim
     }
 
@@ -95,7 +114,8 @@ Item {
         readonly property int footerY: height - root.u(Tokens.space.popupH - 846)
 
         Rectangle {
-            visible: !root.fullscreen
+            visible: root.morph < 1
+            opacity: 1 - root.morph
             x: root.u(Tokens.shadow.popup)
             y: root.u(Tokens.shadow.popup)
             width: parent.width
@@ -108,6 +128,17 @@ Item {
             color: Tokens.color.darkYellow
         }
 
+        // spec 013, front B: the paper under the full-screen menu, still (phase 0): the arcs and beams
+        // of the desktop's background, at the game's size (H/1080). Not made at all while floating.
+        Loader {
+            anchors.fill: parent
+            active: root.morph > 0
+            opacity: root.morph
+            sourceComponent: PaperDecor {
+                s: panelItem.height / 1080
+            }
+        }
+
         // Clicks on the paper never reach the ink behind it.
         MouseArea {
             anchors.fill: parent
@@ -116,7 +147,7 @@ Item {
 
         PageHeader {
             id: header
-            x: root.u(48)
+            x: root.inset + root.u(48)
             // With tabs, y 127 is the top of the mockup's 42 px line box (CSS line-height): the
             // taller natural line of the 55 px title is centered on it, so its baseline lands where
             // the mockup's does, 17 px over the rule.
@@ -127,7 +158,7 @@ Item {
         }
 
         Rule {
-            x: root.u(48)
+            x: root.inset + root.u(48)
             y: root.u(root.tabbed ? Tokens.space.pauseHRuleY : 112)
             width: parent.width - 2 * x
             s: root.s
@@ -136,7 +167,7 @@ Item {
         // spec 007: the tab bar (the pause menu); no kite on tabs (the owner's call).
         TabBar {
             id: tabBar
-            x: root.u(48)
+            x: root.inset + root.u(48)
             y: root.u(Tokens.space.pauseTabsY)
             width: parent.width - 2 * x
             visible: root.tabbed
@@ -151,7 +182,7 @@ Item {
 
         Label {
             anchors.right: parent.right
-            anchors.rightMargin: root.u(48)
+            anchors.rightMargin: root.inset + root.u(48)
             y: header.y + header.titleText.y + header.titleText.baselineOffset - baselineOffset
             visible: root.tabbed && root.clock
             s: root.s
@@ -161,7 +192,7 @@ Item {
         }
 
         Rule {
-            x: root.u(48)
+            x: root.inset + root.u(48)
             y: panelItem.footerRuleY
             width: parent.width - 2 * x
             s: root.s
@@ -170,14 +201,14 @@ Item {
         KeyHints {
             id: hints
             anchors.right: parent.right
-            anchors.rightMargin: root.u(48)
+            anchors.rightMargin: root.inset + root.u(48)
             y: panelItem.footerY
             s: root.s
             model: root.keys
         }
 
         Label {
-            x: root.u(48)
+            x: root.inset + root.u(48)
             anchors.verticalCenter: hints.verticalCenter
             s: root.s
             role: "small"
@@ -187,7 +218,9 @@ Item {
 
         Item {
             id: body
-            anchors.fill: parent
+            x: root.inset
+            width: parent.width - 2 * root.inset
+            height: parent.height
         }
 
         Vignette {

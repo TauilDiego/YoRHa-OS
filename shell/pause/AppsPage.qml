@@ -25,6 +25,8 @@ FocusScope {
 
     property real s: 1
     property real startY: Tokens.space.pauseBodyY
+    // spec 013, front B: the columns follow the width (the full-screen menu)
+    property bool stretch: false
     // The SYSTEM › Pause menu options, live (FR-034).
     property string iconStyle: SettingsModel.choiceId("menu", "icons") || "ink"
     property string order: SettingsModel.choiceId("menu", "app-order") || "az"
@@ -243,6 +245,7 @@ FocusScope {
         anchors.fill: parent
         focus: true
         s: root.s
+        stretch: root.stretch
         startY: root.startY
         entries: root.entries
         options: root.options

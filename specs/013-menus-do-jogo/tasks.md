@@ -117,24 +117,24 @@ hidpi falhou uma vez com 4 VMs na GPU e passou 3 de 3 sozinho.
 
 ## Phase 6: User Story 4 - Janela ou tela cheia (P2) · Frente B
 
-- [ ] T032 [P] [US4] As páginas na tela cheia:
+- [X] T032 [P] [US4] As páginas na tela cheia:
   - painel sem tinta e sem sombra, com o papel estático;
   - colunas com `stretch` em APPS, WINDOWS, no seletor e no log;
   - SYSTEM centralizado;
   - limite de largura em ultrawide (FR-013, FR-014).
-- [ ] T033 [US4] Appearance › Menu presentation e a troca ao vivo, mantendo aba, seleção e foco (FR-013)
-- [ ] T034 [US4] Toasts críticos e OSD por cima do menu cheio (R5, FR-014)
-- [ ] T035 [US4] Validar na `t013-modos`: blocos `modes` e `perf`, nos dois modos e nos dois perfis
+- [X] T033 [US4] Appearance › Menu presentation e a troca ao vivo, mantendo aba, seleção e foco (FR-013)
+- [X] T034 [US4] Toasts críticos e OSD por cima do menu cheio (R5, FR-014)
+- [X] T035 [US4] Validar na `t013-modos`: blocos `modes` e `perf`, nos dois modos e nos dois perfis
 
 ## Phase 7: User Story 8 - O histórico como aba do menu (P3) · Frente B
 
-- [ ] T036 [US8] `pause/PauseMenu.qml`:
+- [X] T036 [US8] `pause/PauseMenu.qml`:
   - a aba `log` entre WINDOWS e SYSTEM;
   - `notify/LogPage.qml` com o host `pause`;
   - tirar `notify/LogPopup.qml`;
   - SUPER+N, o contador da barra e `notify open` abrindo o menu em LOG;
   - marcar como lido ao fechar (FR-034).
-- [ ] T037 [US8] Validar: bloco `log-tab` e os blocos de log do `check-008` com o host `pause`
+- [X] T037 [US8] Validar: bloco `log-tab` e os blocos de log do `check-008` com o host `pause`
 
 ## Phase 8: User Story 6 - Escolher numa janelinha (P2) · Frente C
 

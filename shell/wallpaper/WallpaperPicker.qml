@@ -199,6 +199,7 @@ PopupWindow {
         id: layout
         anchors.fill: parent
         s: root.s
+        stretch: root.presentation === "fullscreen"      // spec 013, front B
         focus: true
         entries: root.entries
         options: root.options

@@ -142,7 +142,6 @@ ShellRoot {
         if (pauseOpening)
             return;
         closePicker();
-        closeLog();                              // spec 008
         pauseOpening = true;
         Compositor.refreshFocusedMonitor();
         pauseFallback.restart();
@@ -265,7 +264,6 @@ ShellRoot {
         if (pickerOpen || pickerOpening)
             return;
         closePause();
-        closeLog();                              // spec 008
         pickerOpening = true;
         Compositor.refreshFocusedMonitor();
         pickerFallback.restart();
@@ -339,9 +337,27 @@ ShellRoot {
             readonly property bool wanted: NotifyStore.stack.some(t => t.monitor === notifySlot.name)
                 || NotifyStore.critical?.monitor === notifySlot.name
             property bool loaded: false
+            // spec 013, front B (R5): a layer kept from before the full-screen menu opened is below it; a
+            // wanted one that lingers is brought up as a new surface (the last one created is on top).
+            property bool bounce: false
+            property bool behind: false          // loaded before the menu: under it
+            function bringFront(): void {
+                if (!loaded || !behind)
+                    return;
+                behind = false;
+                bounce = true;
+                bounceBack.restart();
+            }
+            Timer {
+                id: bounceBack
+                interval: 60
+                onTriggered: notifySlot.bounce = false
+            }
             onWantedChanged: {
                 if (wanted) {
                     linger.stop();
+                    if (shell.menuCover)
+                        bringFront();
                     loaded = true;
                 } else {
                     linger.restart();
@@ -351,11 +367,14 @@ ShellRoot {
             Timer {
                 id: linger
                 interval: Tokens.notify.fade + 150
-                onTriggered: if (!notifySlot.wanted) notifySlot.loaded = false
+                onTriggered: if (!notifySlot.wanted) {
+                    notifySlot.loaded = false;
+                    notifySlot.behind = false;
+                }
             }
             LazyLoader {
                 id: notifyLoader
-                active: notifySlot.loaded
+                active: notifySlot.loaded && !notifySlot.bounce
                 NotifyLayer {
                     modelData: notifySlot.modelData
                     onOpenLogRequested: shell.openLog()
@@ -365,6 +384,28 @@ ShellRoot {
                 return notifyLoader.item?.dumpBoxes() ?? null;
             }
             readonly property real critBottom: notifyLoader.item?.critBottom ?? 0
+        }
+    }
+    // spec 013, front B (R5, FR-014): over a full-screen menu (the pause menu or the wallpaper picker)
+    // the critical band, the toasts and the OSD stay on top. Overlay surfaces stack in the order they
+    // were created, so when such a menu opens (or the presentation switches to full screen) the ones
+    // already up are recreated after it; the ones that appear later are born on top.
+    readonly property bool menuCover: Settings.menuPresentation === "fullscreen" && (pauseOpen || pickerOpen)
+    onMenuCoverChanged: {
+        if (!menuCover)
+            return;
+        for (const slot of notifyLayers.instances)
+            slot.behind = slot.loaded;
+        osdBehind = osdLoaded;
+        frontTimer.restart();
+    }
+    Timer {
+        id: frontTimer
+        interval: 150
+        onTriggered: {
+            for (const slot of notifyLayers.instances)
+                slot.bringFront();
+            shell.bringOsdFront();
         }
     }
     function critBottomOn(name: string): real {
@@ -378,12 +419,28 @@ ShellRoot {
     // The OSD's window exists while there is an OSD, and a moment after (its fade out).
     property var osdLast: null
     property bool osdLoaded: false
+    property bool osdBounce: false               // spec 013, front B: recreated over a full-screen menu
+    property bool osdBehind: false
+    function bringOsdFront(): void {
+        if (!osdLoaded || !osdBehind)
+            return;
+        osdBehind = false;
+        osdBounce = true;
+        osdBounceBack.restart();
+    }
+    Timer {
+        id: osdBounceBack
+        interval: 60
+        onTriggered: shell.osdBounce = false
+    }
     Connections {
         target: Osd
         function onCurrentChanged(): void {
             if (Osd.current) {
                 shell.osdLast = Osd.current;
                 osdUnload.stop();
+                if (shell.menuCover)
+                    shell.bringOsdFront();
                 shell.osdLoaded = true;
             } else {
                 osdUnload.restart();
@@ -393,12 +450,15 @@ ShellRoot {
     Timer {
         id: osdUnload
         interval: Tokens.notify.fade + 100
-        onTriggered: if (!Osd.current) shell.osdLoaded = false
+        onTriggered: if (!Osd.current) {
+            shell.osdLoaded = false;
+            shell.osdBehind = false;
+        }
     }
     readonly property var osdItem: osdLoader.item      // a var: qmllint types a LazyLoader's item as QObject
     LazyLoader {
         id: osdLoader
-        active: shell.osdLoaded
+        active: shell.osdLoaded && !shell.osdBounce
         OsdWindow {
             modelData: shell.screenNamed(shell.osdLast?.monitor ?? "")
             osd: shell.osdLast
@@ -408,73 +468,22 @@ ShellRoot {
     }
 
     // --- spec 008: log ----------------------------------------------------------------------------
-    // The text log's pop-up, like the pause menu and the picker: it opens on the focused monitor (re-read
-    // first), closes in two steps, and only one of the three is open at a time (opening one closes the
-    // others). While it shows, the store knows (NotifyStore.logOpen: new ones go to its list, and opening
-    // marks everything read).
-    property bool logOpen: false
-    property bool logOpening: false
-    property bool logLoaded: false
-    property string logMonitor: ""
+    // spec 013, front B (US8, FR-034): the text log is the pause menu's LOG tab, its only place. While
+    // the menu shows that tab the store knows (NotifyStore.logOpen: new ones go to its list, opening
+    // marks everything read, and leaving or closing takes the NEW tags off).
+    readonly property bool logOpen: pauseOpen && pauseTab === "log"
+    readonly property bool logOpening: pauseOpening && pauseTab === "log"
     Binding {
         target: NotifyStore
         property: "logOpen"
         value: shell.logOpen
     }
     function openLog(): void {
-        if (logOpen || logOpening)
-            return;
-        closePause();
-        closePicker();
-        logOpening = true;
-        Compositor.refreshFocusedMonitor();
-        logFallback.restart();
-    }
-    function showLog(): void {
-        if (!logOpening)
-            return;
-        logOpening = false;
-        logFallback.stop();
-        logMonitor = Compositor.focusedMonitor;
-        logOpen = true;
+        openPause("log");
     }
     function closeLog(): void {
-        logOpening = false;
-        logOpen = false;
-    }
-    Connections {
-        target: Compositor
-        function onMonitorScalesChanged(): void {
-            shell.showLog();
-        }
-    }
-    Timer {
-        id: logFallback
-        interval: 250
-        onTriggered: shell.showLog()
-    }
-    onLogOpenChanged: {
-        if (logOpen) {
-            logUnload.stop();
-            logLoaded = true;
-        } else {
-            logUnload.restart();
-        }
-    }
-    Timer {
-        id: logUnload
-        interval: 150
-        onTriggered: if (!shell.logOpen) shell.logLoaded = false
-    }
-    readonly property var logItem: logLoader.item
-    LazyLoader {
-        id: logLoader
-        active: shell.logLoaded
-        LogPopup {
-            screen: shell.screenNamed(shell.logMonitor)
-            keyboardActive: shell.logOpen
-            onCloseRequested: shell.closeLog()
-        }
+        if (logOpen || logOpening)
+            closePause();
     }
     // --- end spec 008 -----------------------------------------------------------------------------
 
@@ -558,8 +567,8 @@ ShellRoot {
         function close(): void { shell.closePause(); }
         function toggle(): void { shell.togglePause(); }
         function tab(name: string): string {
-            if (!["apps", "windows", "system", "power"].includes(name))
-                return `error: unknown tab ${name} (apps, windows, system or power)`;
+            if (!["apps", "windows", "log", "system", "power"].includes(name))
+                return `error: unknown tab ${name} (apps, windows, log, system or power)`;
             shell.openPause(name);
             return "ok";
         }
@@ -740,6 +749,7 @@ ShellRoot {
     // --- spec 008 (specs/008-pod-text-log/contracts/ipc.md) -------------------------------------------
     IpcHandler {
         target: "notify"
+        // spec 013 (contracts/ipc.md): shortcuts to the pause menu on its LOG tab.
         function open(): void { shell.openLog(); }
         function close(): void { shell.closeLog(); }
         function toggle(): void {
@@ -797,8 +807,7 @@ ShellRoot {
             if (d.osd && osdWin)
                 d.osd.box = osdWin.box();
             d.osd = d.osd ? Object.assign(d.osd, { position: NotifyPrefs.osdPosition }) : null;
-            const logWin = shell.logOpen ? shell.logItem : null;
-            d.page = logWin ? logWin.dumpState() : null;
+            d.page = shell.logOpen ? (shell.pauseMenu?.logDump() ?? null) : null;
             d.windows = Object.keys(boxes);
             return JSON.stringify(d);
         }
