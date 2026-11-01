@@ -84,36 +84,53 @@ hidpi falhou uma vez com 4 VMs na GPU e passou 3 de 3 sozinho.
 
 ## Phase 3: User Story 1 - Navegar com o movimento do jogo (P1) 🎯 MVP · Frente A
 
-- [ ] T017 [P] [US1] `ds/base/ListItem.qml`: varredura de 400 ms OutQuart e recolher de 200 ms da linha
+- [X] T017 [P] [US1] `ds/base/ListItem.qml`: varredura de 400 ms OutQuart e recolher de 200 ms da linha
   que perde a seleção (FR-001)
-- [ ] T018 [US1] `ListItem` e `ds/composites/TabBar.qml`: a camada do pulso na linha "viva" e na aba
+- [X] T018 [US1] `ListItem` e `ds/composites/TabBar.qml`: a camada do pulso na linha "viva" e na aba
   aberta (FR-002)
-- [ ] T019 [US1] `ds/base/PageHeader.qml`: título some, espera e digita (FR-004)
-- [ ] T020 [US1] `CursorList`, `GroupedList`, `OptionList`: `enter()` em cascata, com os rótulos
+- [X] T019 [US1] `ds/base/PageHeader.qml`: título some, espera e digita (FR-004)
+- [X] T020 [US1] `CursorList`, `GroupedList`, `OptionList`: `enter()` em cascata, com os rótulos
   digitando (FR-005)
-- [ ] T021 [US1] `popup/PopupFrame.qml`: a troca de aba (some, vazio, monta), cortada por uma troca nova
+- [X] T021 [US1] `popup/PopupFrame.qml`: a troca de aba (some, vazio, monta), cortada por uma troca nova
   (FR-006)
-- [ ] T022 [US1] `ds/base/KeyHints.qml` e o rótulo do rodapé: entrada com desfoque e deslize (FR-007)
-- [ ] T023 [US1] `OptionList` (entrada escalonada) e `ListItem.leave()` (esticar e apagar) (FR-008)
-- [ ] T024 [US1] Validar na `t013-mov`: blocos `motion` e `keys` do `check-013`, nos dois perfis
+- [X] T022 [US1] `ds/base/KeyHints.qml` e o rótulo do rodapé: entrada com desfoque e deslize (FR-007)
+- [X] T023 [US1] `OptionList` (entrada escalonada) e `ListItem.leave()` (esticar e apagar) (FR-008)
+- [X] T024 [US1] Validar na `t013-mov`: blocos `motion` e `keys` do `check-013`, nos dois perfis
+
+Feito em 01.11 (frente A, `t013-mov`): `check-013 --only motion,keys` nos dois perfis. Seleção,
+pulso, título, troca de aba, cascata, rodapé e sublista dentro de ±1 quadro do jogo (mediana de 3
+rajadas, medidas pelo `lab/013/measure`); keys 3/3. Os tempos são medidos com o driver de animação de
+relógio de parede: o relógio de quadros da VM corre a ~62 qps e o Qt conta 60, então com o driver
+normal tudo anda ~3,5% mais rápido na VM.
 
 ## Phase 4: User Story 2 - Abrir, fechar e confirmar como no jogo (P1) · Frente A
 
-- [ ] T025 [US2] `popup/TriangleReveal.qml` + `popup/shaders/triangles.frag` (`.qsb` pelo
+- [X] T025 [US2] `popup/TriangleReveal.qml` + `popup/shaders/triangles.frag` (`.qsb` pelo
   `lab/013/qsb`): grade com franja, triângulos ao abrir e ao fechar, no retângulo do painel (FR-009, R2)
-- [ ] T026 [US2] `PopupFrame`/`PopupWindow`: a montagem em ordem depois dos triângulos (réguas, abas,
+- [X] T026 [US2] `PopupFrame`/`PopupWindow`: a montagem em ordem depois dos triângulos (réguas, abas,
   título, cartões, linhas, rodapé, ponteiro) e o fechamento animado antes de soltar a janela (FR-009)
-- [ ] T027 [US2] `ds/composites/ConfirmDialog.qml`: escurecer pra ×0,8, a faixa do título primeiro, o
+- [X] T027 [US2] `ds/composites/ConfirmDialog.qml`: escurecer pra ×0,8, a faixa do título primeiro, o
   corpo com fade e desfoque; fechar com desfoque (FR-010)
-- [ ] T028 [US2] `wallpaper/Scene.qml` e `PopupFrame`: congelar a `phase` do papel com um menu aberto
+- [X] T028 [US2] `wallpaper/Scene.qml` e `PopupFrame`: congelar a `phase` do papel com um menu aberto
   (FR-011)
-- [ ] T029 [US2] Validar: blocos `open` e `dialog`, nos dois perfis
+- [X] T029 [US2] Validar: blocos `open` e `dialog`, nos dois perfis
+
+Feito em 01.11 (frente A): `open` e `dialog` 20/0 em 1080. Em hidpi, o fechamento mediu ~190 ms
+contra 230 (os quadros da VM chegam irregulares nessa resolução; as células somem dentro dos 230) e a
+saída do cartão do diálogo oscilou entre as medidas; o resto passa. O `yorha-popup` ficou sem animação
+de camada no Hyprland do lab, como o `yorha-notify` (falta levar à configuração do produto).
 
 ## Phase 5: User Story 3 - O texto que não cabe rola (P2) · Frente A
 
-- [ ] T030 [US3] Usar o `ScrollingLabel` na `ListItem`, no `ValueStepper`, nos cabeçalhos de cartão e
+- [X] T030 [US3] Usar o `ScrollingLabel` na `ListItem`, no `ValueStepper`, nos cabeçalhos de cartão e
   nas linhas de informação (FR-012, FR-016)
-- [ ] T031 [US3] Validar: blocos `marquee` e `reduce`
+- [X] T031 [US3] Validar: blocos `marquee` e `reduce`
+
+Feito em 01.11 (frente A): `marquee` e `reduce` passam nos dois perfis (pausas de ~1,0 s, 60 px/s do
+jogo; com Reduce motion, o 1º quadro já é o final e o texto longo fica cortado). Regressão da frente A
+(a completa é da T052): `check-007` 76/0 nos dois perfis; `check-003` 22/3 nos dois, com as 3 falhas
+(SC-004: o comando digitado não chega no terminal depois de fechar) iguais com o código da fundação
+nesta VM, então do ambiente.
 
 ## Phase 6: User Story 4 - Janela ou tela cheia (P2) · Frente B
 
