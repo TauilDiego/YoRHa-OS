@@ -119,8 +119,8 @@ Os números ficam em `Tokens.motion` (research R1). Cada efeito mora numa peça:
 - **`PickerLayout`:** o `fluid` da 008 se divide em `stretch` (colunas esticam) e `bodyOnly` (sem
   título e rodapé próprios), conforme a frente D §5. APPS, WINDOWS, o seletor e o log usam `stretch`
   na tela cheia.
-- **SYSTEM:** centralizado num quadro de 1612 de largura. As colunas têm um limite de largura em
-  ultrawide.
+- **SYSTEM e POWER:** esticam as colunas como as outras abas (T058; a primeira versão centralizava
+  um quadro de 1612). As colunas têm um limite de largura em ultrawide.
 - **Opção:** `shell.menuPresentation` no `SettingsState`. A troca ao vivo anima a geometria do painel
   em `popupFade`, e é instantânea com `Tokens.instant`.
 - **Camadas:** os toasts críticos e o OSD sobre o menu cheio. É uma ordem de camadas Overlay a

@@ -30,8 +30,9 @@ FocusScope {
 
     property real s: 1
     property real startY: Tokens.space.pauseBodyY
-    // spec 013, front B: where the 1612 px frame starts (the full-screen menu centers it)
-    property real originX: 0
+    // spec 013: the columns come from the page's own width, in the frame's proportions (the
+    // full-screen menu), as PickerLayout.stretch does on APPS and WINDOWS.
+    property bool stretch: false
     property bool active: false              // the tab is open and the menu has the keyboard
     readonly property string confirmMode: Session.confirmMode
     readonly property string dialogStart: SettingsModel.choiceId("menu", "confirm-start") || "cancel"
@@ -54,6 +55,10 @@ FocusScope {
 
     function u(v: real): int {
         return Tokens.px(v, root.s);
+    }
+    // A horizontal position or width of the 1612 px frame: scaled with `s`, or (stretch) with the width.
+    function hx(v: real): int {
+        return stretch ? Math.round(v * width / Tokens.space.popupW) : u(v);
     }
 
     // 8040 s → "2h 14m"; under an hour "14m"; from a day on "1d 3h".
@@ -195,9 +200,11 @@ FocusScope {
     }
 
     function geometry(): var {
+        // spec 013: the three columns (the full-screen check)
+        const columns = { left: rectOf(list), middle: rectOf(description), right: rectOf(statusCard) };
         if (dialogAction !== "")
-            return { item: dialog.geometry().item, value: null };
-        return { item: rectOf(list.itemAt(index)), value: null };
+            return { item: dialog.geometry().item, value: null, columns: columns };
+        return { item: rectOf(list.itemAt(index)), value: null, columns: columns };
     }
 
     function dumpState(): var {
@@ -284,9 +291,10 @@ FocusScope {
 
     GroupedList {
         id: list
-        x: root.originX + root.u(48)
+        x: root.hx(48)
         y: root.topY
-        width: implicitWidth
+        // stretch: the list reaches 24 px short of the description, as PickerLayout's does
+        width: root.stretch ? root.hx(560 - 48) - root.u(24) : implicitWidth
         height: Math.min(implicitHeight, root.bottomY - y)
         s: root.s
         model: root.actions.map(a => ({ label: a.label, dim: !a.available }))
@@ -309,9 +317,9 @@ FocusScope {
 
     DescriptionCard {
         id: description
-        x: root.originX + root.u(560)
+        x: root.hx(560)
         y: root.topY
-        width: root.u(Tokens.space.pickerPreviewW)
+        width: root.hx(Tokens.space.pickerPreviewW)
         s: root.s
         minHeight: root.u(360)
         maxHeight: root.bottomY - y
@@ -324,9 +332,9 @@ FocusScope {
 
     StatusCard {
         id: statusCard
-        x: root.originX + root.u(1160)
+        x: root.hx(1160)
         y: root.topY
-        width: root.u(Tokens.space.pickerOptionsW)
+        width: root.stretch ? Math.min(root.hx(Tokens.space.pickerOptionsW), root.width - x - root.u(8)) : root.u(Tokens.space.pickerOptionsW)
         s: root.s
         rows: [
             { label: Strings.pause.user, value: root.status.user, meter: null },

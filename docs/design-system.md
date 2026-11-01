@@ -903,9 +903,10 @@ dono.
 - **`PopupFrame.presentation`:** na tela cheia, o painel cresce até a janela (`morph`, em
   `popupFade`), sem tinta em volta e sem sombra, com o papel parado por baixo. O `s` vem do painel
   flutuante de 84% nos dois modos, então as letras têm o mesmo tamanho (research R4).
-- **Layouts:** APPS, WINDOWS e o seletor esticam as colunas (`PickerLayout.stretch`). SYSTEM e
-  POWER ficam centralizados no quadro de 1612. Em ultrawide, o conteúdo fica numa faixa 16:9 no meio
-  (`inset`).
+- **Layouts:** todas as abas e o seletor esticam as colunas na proporção do quadro de 1612
+  (`PickerLayout.stretch`; `stretch` e `hx()` também na `SettingsPage` e na `PowerPage`). A coluna da
+  esquerda fica na margem do título, a do meio no meio e a da direita termina na ponta da régua. Em
+  ultrawide, o conteúdo fica numa faixa 16:9 no meio (`inset`).
 - **`PickerLayout`:** o `fluid` da 008 virou `stretch` (colunas pela largura) e `bodyOnly` (sem
   espaço pra título e rodapé próprios). O `fluid` ainda liga os dois.
 - **Notificações por cima:** a superfície Overlay criada por último fica em cima. O `NotifyLayer` e o

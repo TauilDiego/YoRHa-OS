@@ -280,6 +280,9 @@ navegar pelo log como na 008. Os roteiros da 008 passam com o log dentro do menu
   digitação, cascata, pulso, deslize nem crossfade, e o texto que não cabe volta a ser cortado com
   "…".
 - **Navegar durante a digitação:** a linha termina de aparecer na hora certa e não fica pela metade.
+- **Colunas na tela cheia:** em todas as abas, a coluna da esquerda fica na margem do título, a do
+  meio fica no meio e o card da direita termina na ponta da régua, como nos frames do jogo (na
+  SYSTEM: categorias, opções e descrição).
 - **Tela cheia em telas diferentes de 16:9:**
   - em ultrawide, as colunas têm um limite de largura e o conteúdo fica centralizado;
   - no notebook, 2560×1600 com escala 1,25.

@@ -137,7 +137,7 @@ nesta VM, então do ambiente.
 - [X] T032 [P] [US4] As páginas na tela cheia:
   - painel sem tinta e sem sombra, com o papel estático;
   - colunas com `stretch` em APPS, WINDOWS, no seletor e no log;
-  - SYSTEM centralizado;
+  - ~~SYSTEM centralizado~~ (trocado pelo T058);
   - limite de largura em ultrawide (FR-013, FR-014).
 - [X] T033 [US4] Appearance › Menu presentation e a troca ao vivo, mantendo aba, seleção e foco (FR-013)
 - [X] T034 [US4] Toasts críticos e OSD por cima do menu cheio (R5, FR-014)
@@ -221,6 +221,13 @@ nesta VM, então do ambiente.
   (SC-007, SC-011)
 - [X] T057 Acabamento herdado da 008: no log, o ◂ OFF ▸ (coluna estreita de 70) não alinha com o
   valor de Show logo abaixo; alinhar as colunas de valor das opções do log
+- [X] T058 Pedido do dono na sessão (01.11): na tela cheia, SYSTEM e POWER esticam as colunas como as
+  outras abas, em vez de centralizar o quadro de 1612. A coluna da esquerda fica na margem do título,
+  a do meio no meio e o card da direita termina na ponta da régua, como nos frames do jogo. O
+  `check-013` (bloco `modes`) passa a medir as colunas das 5 abas pelo `geometry.columns` do dump.
+  Aprovado pelo dono na `teste-011`. Na `t013-modos`: `check-013 --only modes` 44/0 em 1080 e
+  hidpi, `check-003` 25/0 nos dois perfis, `check-007` 76/0, qmllint limpo (perf
+  `2026-11-01T083120-vm-t013-modos-013-t058-tela-cheia-colunas-alinhadas`)
 - [ ] T056 `relatorio.md` e a página de revisão; atualizar o `PLAN.md`, o mapa do projeto e a Central
 
 ## Dependencies & Execution Order
