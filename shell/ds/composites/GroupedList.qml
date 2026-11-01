@@ -12,6 +12,8 @@ import "../base"
 //   { label, trailing, dim }     an item: a ListItem with the kite. `trailing` is a mark on its right
 //                                in small text ("● ALL"); a `dim` item is drawn dimmed and still
 //                                takes the cursor (then its text is light at 55% on the band).
+//                                spec 008: also `lead`, `tag` and `markColor` (ListItem), for the
+//                                text log's rows (who speaks, NEW, the critical square).
 // `currentIndex` counts items only. As in the CursorList (spec 003): `focused: false` draws the
 // current item "selected" (its kite light and still); `wrap` makes move() go round; with
 // `keysEnabled: false` the parent drives it: no keys, and hover and clicks only report
@@ -29,6 +31,11 @@ import "../base"
 // spec 007: `search` ({ query, count } or null) puts the SearchHeader on top, where the group
 // titles would be (the model then has no titles); `emptyText`, with no item, is a line in
 // medium-gray in place of the items; `trailingRole` is the role of the items' trailing text.
+// spec 008: `lazy` (the text log, up to 200 entries) creates only the rows in view (and a few
+// around): every row's place comes from its kind (item, title) instead of a Column, so opening a log
+// of 100 costs about the same as one of 10. Notes, the search line and the empty line keep the
+// Column (their height wraps); the default (lazy: false) is the Column list, unchanged. The scroll
+// (stops, wheel, the window's bottom) reads every row's place through rowBox(), in both modes.
 Item {
     id: root
 
@@ -42,6 +49,7 @@ Item {
     property var search: null                    // spec 007
     property string emptyText: ""
     property string trailingRole: "small"
+    property bool lazy: false                    // spec 008
 
     signal activated(int index)
     signal hoveredIndex(int index)
@@ -78,10 +86,168 @@ Item {
     readonly property int groupBottom: Tokens.px(2, s)
     // A first entry that is an item keeps its rails inside.
     readonly property int topRoom: count > 0 && entryOf[0] === 0 ? railRoom : 0
-    readonly property int contentHeight: topRoom + Math.ceil(column.implicitHeight) + railRoom
+    readonly property int contentHeight: topRoom + Math.ceil(useLazy ? tops[entries.length] : column.implicitHeight) + railRoom
+
+    // --- lazy rows (spec 008): each entry's top in the list (and the total at [length]), by its kind --
+    readonly property bool useLazy: lazy && !entries.some(e => e?.note !== undefined || e?.searchLine !== undefined
+        || e?.emptyLine !== undefined)
+    readonly property int itemH: Tokens.px(Tokens.space.listItemH, s)
+    readonly property int rowGap: Tokens.px(Tokens.space.listItemGap, s)
+    readonly property int captionSize: Math.max(1, Tokens.px(Tokens.type.small.size, s))
+    function heightOf(i: int): int {
+        return isItem(entries[i]) ? itemH : (i > 0 ? groupTop : 0) + captionSize + groupBottom;
+    }
+    readonly property var tops: {
+        const out = [];
+        if (!useLazy)
+            return out;
+        let y = 0;
+        for (let i = 0; i < entries.length; i++) {
+            out.push(y);
+            y += heightOf(i) + rowGap;
+        }
+        out.push(entries.length > 0 ? y - rowGap : 0);
+        return out;
+    }
+    // The entries in view, with a margin, in chunks of 8 (the rows are made again only when the
+    // window moves a chunk).
+    readonly property int winLo: {
+        if (!useLazy)
+            return 0;
+        const top = scrollY - topRoom - 2 * itemH;
+        let i = 0;
+        while (i < entries.length && tops[i + 1] < top)
+            i++;
+        return Math.floor(i / 8) * 8;
+    }
+    readonly property int winHi: {
+        if (!useLazy)
+            return 0;
+        const bottom = scrollY - topRoom + height + 2 * itemH;
+        let i = winLo;
+        while (i < entries.length && tops[i] <= bottom)
+            i++;
+        return Math.min(entries.length, Math.ceil(i / 8) * 8);
+    }
+    readonly property var lazyWindow: {
+        const out = [];
+        for (let i = winLo; i < winHi; i++)
+            out.push(i);
+        return out;
+    }
+
+    // Entry `i`'s place in the list ({ y, height }, without topRoom), from its delegate or, with
+    // lazy rows, from `tops`; null when out of range (or not made yet in the Column).
+    function rowBox(i: int): var {
+        if (i < 0 || i >= entries.length)
+            return null;
+        if (useLazy)
+            return { y: tops[i], height: heightOf(i) };
+        return rows.itemAt(i);
+    }
 
     implicitWidth: itemX + Tokens.px(Tokens.space.pickerListW, s) + shadowRoom
     implicitHeight: contentHeight
+
+    // One entry's view: the search line, the empty line, a group title, a note or an item (the
+    // Column's rows and the lazy ones).
+    component EntryView: Item {
+        id: entry
+        property var entryData
+        property int idx: -1
+        readonly property int item: root.itemOf[idx] ?? -1
+        readonly property bool isItem: item >= 0
+        readonly property bool isGroup: !isItem && entryData?.group !== undefined
+        readonly property bool isSearch: entryData?.searchLine === true
+        readonly property bool isEmpty: entryData?.emptyLine !== undefined
+        readonly property bool dim: isItem && entryData?.dim === true
+        readonly property Item row: isItem ? listItem : null
+
+        // A title's line box is its text size, as the mockup's (CSS line-height 1): the
+        // label's taller natural line is centered on it.
+        readonly property int topPad: isGroup && idx > 0 ? root.groupTop : 0
+        height: isItem ? listItem.height
+              : isSearch ? searchHeader.height + root.groupBottom
+              : isEmpty ? emptyLabel.height
+              : isGroup ? topPad + caption.size + root.groupBottom : caption.height
+
+        SearchHeader {
+            id: searchHeader
+            width: parent.width
+            height: entry.isSearch ? implicitHeight : 0
+            visible: entry.isSearch
+            s: root.s
+            query: String(root.search?.query ?? "")
+            count: Number(root.search?.count ?? 0)
+        }
+
+        // "No apps match.": the mockup's 23 px line, 8 px above and below, 16 px in.
+        Label {
+            id: emptyLabel
+            x: Tokens.px(16, root.s)
+            width: parent.width - x
+            height: entry.isEmpty ? implicitHeight + Tokens.px(16, root.s) : 0
+            topPadding: Tokens.px(8, root.s)
+            visible: entry.isEmpty
+            s: root.s
+            role: "standard"
+            font.weight: Font.Medium
+            font.variableAxes: ({ "wght": Font.Medium })
+            wrapMode: Text.Wrap
+            text: String(entry.entryData?.emptyLine ?? "")
+            color: Tokens.color.mediumGray
+        }
+
+        Label {
+            id: caption
+            y: entry.topPad - (entry.isGroup ? Math.round((implicitHeight - size) / 2) : 0)
+            width: parent.width
+            visible: !entry.isItem && !entry.isSearch && !entry.isEmpty
+            s: root.s
+            role: "small"
+            wrapMode: Text.Wrap
+            text: String(entry.entryData?.group ?? entry.entryData?.note ?? "")
+            color: Tokens.color.mediumGray
+        }
+
+        ListItem {
+            id: listItem
+            width: parent.width
+            visible: entry.isItem
+            s: root.s
+            variant: root.variant
+            trailingRole: root.trailingRole
+            text: String(entry.entryData?.label ?? "")
+            trailing: String(entry.entryData?.trailing ?? "")
+            lead: String(entry.entryData?.lead ?? "")
+            tag: String(entry.entryData?.tag ?? "")
+            markColor: entry.entryData?.markColor ?? "transparent"
+            state: entry.item === root.currentIndex ? (root.focused ? "hovered" : "selected")
+                 : entry.dim ? "dimmed" : "normal"
+
+            onHoveredChanged: {
+                if (!hovered || !entry.isItem)
+                    return;
+                root.hoveredIndex(entry.item);
+                if (root.keysEnabled)
+                    root.currentIndex = entry.item;
+            }
+            onClicked: {
+                if (root.keysEnabled)
+                    root.currentIndex = entry.item;
+                root.activated(entry.item);
+            }
+        }
+
+        // A dimmed item with the cursor: an ink veil leaves its light text at 55%, as
+        // the OptionRow does.
+        Rectangle {
+            width: listItem.inkW
+            height: listItem.bandH
+            visible: entry.dim && width > 0
+            color: Qt.rgba(Tokens.color.darkGray.r, Tokens.color.darkGray.g, Tokens.color.darkGray.b, 0.45)
+        }
+    }
 
     function isItem(e: var): bool {
         return e !== null && typeof e === "object" && e.group === undefined && e.note === undefined
@@ -95,7 +261,14 @@ Item {
 
     // Entry `i`'s delegate (typed var, so its own properties can be read).
     function entryAt(i: int): var {
-        return rows.itemAt(i);
+        if (!useLazy)
+            return rows.itemAt(i);
+        for (let k = 0; k < lazyRows.count; k++) {
+            const d = lazyRows.itemAt(k);
+            if (d?.idx === i)
+                return d;
+        }
+        return null;
     }
 
     // Item `index`'s ListItem, e.g. for its geometry; null when out of range.
@@ -125,7 +298,7 @@ Item {
 
     // Entry `i`'s top, in content px.
     function entryTop(i: int): real {
-        const r = rows.itemAt(i);
+        const r = rowBox(i);
         return r ? topRoom + r.y : 0;
     }
 
@@ -163,13 +336,13 @@ Item {
     // notes right above the item) to its bottom rail; null when out of range.
     function spanOf(index: int): var {
         const e = entryOf[index];
-        const row = rows.itemAt(e ?? -1);
+        const row = rowBox(e ?? -1);
         if (!row)
             return null;
         let first = e;
         while (first > 0 && itemOf[first - 1] < 0)
             first--;
-        const above = rows.itemAt(first);
+        const above = rowBox(first);
         return {
             a: topRoom + (first < e && above ? above.y : row.y - railRoom),
             b: topRoom + row.y + row.height + railRoom
@@ -244,7 +417,7 @@ Item {
             return { h: height, hidden: false };
         let last = 0, any = 0;
         for (let i = 0; i < entries.length; i++) {
-            const r = rows.itemAt(i);
+            const r = rowBox(i);
             if (!r)
                 continue;
             const end = topRoom + r.y + r.height - scrollY;
@@ -275,7 +448,7 @@ Item {
         const h = visibleHeight();
         let first = -1, last = -1;
         for (let i = 0; i < entries.length; i++) {
-            const r = rows.itemAt(i);
+            const r = rowBox(i);
             if (!r)
                 continue;
             const top = topRoom + r.y, bottom = top + r.height;
@@ -284,7 +457,7 @@ Item {
             if (top < scrollY + h - 0.5)
                 last = i;
         }
-        const lr = rows.itemAt(last);
+        const lr = rowBox(last);
         return {
             y: Math.round(scrollY),
             overflows: overflows,
@@ -331,102 +504,32 @@ Item {
 
             Repeater {
                 id: rows
-                model: root.entries
-
-                Item {
-                    id: entry
+                model: root.useLazy ? [] : root.entries
+                EntryView {
                     required property var modelData
                     required property int index
-                    readonly property int item: root.itemOf[index] ?? -1
-                    readonly property bool isItem: item >= 0
-                    readonly property bool isGroup: !isItem && modelData?.group !== undefined
-                    readonly property bool isSearch: modelData?.searchLine === true
-                    readonly property bool isEmpty: modelData?.emptyLine !== undefined
-                    readonly property bool dim: isItem && modelData?.dim === true
-                    readonly property Item row: isItem ? listItem : null
-
-                    // A title's line box is its text size, as the mockup's (CSS line-height 1): the
-                    // label's taller natural line is centered on it.
-                    readonly property int topPad: isGroup && index > 0 ? root.groupTop : 0
+                    entryData: modelData
+                    idx: index
                     width: column.width
-                    height: isItem ? listItem.height
-                          : isSearch ? searchHeader.height + root.groupBottom
-                          : isEmpty ? emptyLabel.height
-                          : isGroup ? topPad + caption.size + root.groupBottom : caption.height
+                }
+            }
+        }
 
-                    SearchHeader {
-                        id: searchHeader
-                        width: parent.width
-                        height: entry.isSearch ? implicitHeight : 0
-                        visible: entry.isSearch
-                        s: root.s
-                        query: String(root.search?.query ?? "")
-                        count: Number(root.search?.count ?? 0)
-                    }
-
-                    // "No apps match.": the mockup's 23 px line, 8 px above and below, 16 px in.
-                    Label {
-                        id: emptyLabel
-                        x: Tokens.px(16, root.s)
-                        width: parent.width - x
-                        height: entry.isEmpty ? implicitHeight + Tokens.px(16, root.s) : 0
-                        topPadding: Tokens.px(8, root.s)
-                        visible: entry.isEmpty
-                        s: root.s
-                        role: "standard"
-                        font.weight: Font.Medium
-                        font.variableAxes: ({ "wght": Font.Medium })
-                        wrapMode: Text.Wrap
-                        text: String(entry.modelData?.emptyLine ?? "")
-                        color: Tokens.color.mediumGray
-                    }
-
-                    Label {
-                        id: caption
-                        y: entry.topPad - (entry.isGroup ? Math.round((implicitHeight - size) / 2) : 0)
-                        width: parent.width
-                        visible: !entry.isItem && !entry.isSearch && !entry.isEmpty
-                        s: root.s
-                        role: "small"
-                        wrapMode: Text.Wrap
-                        text: String(entry.modelData?.group ?? entry.modelData?.note ?? "")
-                        color: Tokens.color.mediumGray
-                    }
-
-                    ListItem {
-                        id: listItem
-                        width: parent.width
-                        visible: entry.isItem
-                        s: root.s
-                        variant: root.variant
-                        trailingRole: root.trailingRole
-                        text: String(entry.modelData?.label ?? "")
-                        trailing: String(entry.modelData?.trailing ?? "")
-                        state: entry.item === root.currentIndex ? (root.focused ? "hovered" : "selected")
-                             : entry.dim ? "dimmed" : "normal"
-
-                        onHoveredChanged: {
-                            if (!hovered || !entry.isItem)
-                                return;
-                            root.hoveredIndex(entry.item);
-                            if (root.keysEnabled)
-                                root.currentIndex = entry.item;
-                        }
-                        onClicked: {
-                            if (root.keysEnabled)
-                                root.currentIndex = entry.item;
-                            root.activated(entry.item);
-                        }
-                    }
-
-                    // A dimmed item with the cursor: an ink veil leaves its light text at 55%, as
-                    // the OptionRow does.
-                    Rectangle {
-                        width: listItem.inkW
-                        height: listItem.bandH
-                        visible: entry.dim && width > 0
-                        color: Qt.rgba(Tokens.color.darkGray.r, Tokens.color.darkGray.g, Tokens.color.darkGray.b, 0.45)
-                    }
+        // The lazy rows (spec 008): placed by `tops`, only the window in view.
+        Item {
+            x: root.selectorRoom
+            y: root.topRoom - root.scrollY
+            width: parent.width - x - root.shadowRoom
+            visible: root.useLazy
+            Repeater {
+                id: lazyRows
+                model: root.useLazy ? root.lazyWindow : []
+                EntryView {
+                    required property int modelData
+                    idx: modelData
+                    entryData: root.entries[modelData]
+                    y: root.tops[modelData] ?? 0
+                    width: parent?.width ?? 0
                 }
             }
         }

@@ -51,7 +51,10 @@ Item {
     // { monitor id: name }, from `hyprctl monitors -j` (a client names its monitor by id).
     property var monitorNames: ({})
     readonly property string activeTitle: Hyprland.activeToplevel?.title ?? startupTitle
-    readonly property bool fullscreen: false
+    // spec 008 (R11): is the window in focus full screen? From `hyprctl activewindow -j` (field
+    // `fullscreen`, a mode: 0 none, 1 maximized, 2 full screen, 3 both; only the full-screen bit
+    // counts), re-read on the fullscreen, active window and workspace events.
+    property bool fullscreen: false
 
     signal changed()
 
@@ -67,6 +70,8 @@ Item {
             monitorQuery.running = true;
         if (what === "windows" || what === "all")
             windowsTimer.restart();
+        if (what === "fullscreen" || what === "all")
+            refreshFullscreen();
         if (what === "all")
             activeWindowQuery.running = true;
     }
@@ -183,6 +188,34 @@ Item {
         }
     }
 
+    // --- spec 008: the full-screen window in focus (R11) -------------------------------------------
+    Process {
+        id: fullscreenQuery
+        command: ["hyprctl", "activewindow", "-j"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const fs = JSON.parse(text).fullscreen;
+                    root.fullscreen = fs === true || (Number(fs) & 2) !== 0;
+                } catch (e) {
+                    root.fullscreen = false;      // no window in focus
+                }
+            }
+        }
+    }
+    function refreshFullscreen(): void {
+        if (fullscreenQuery.running)
+            fullscreenAgain.restart();
+        else
+            fullscreenQuery.running = true;
+    }
+    Timer {
+        id: fullscreenAgain
+        interval: 50
+        onTriggered: root.refreshFullscreen()
+    }
+    // --- end spec 008 --------------------------------------------------------------------------------
+
     Component.onCompleted: refresh("all")
 
     // A scale change alone (`hyprctl eval 'hl.monitor(…)'`, as `lab/profile` does) raises no event
@@ -212,6 +245,10 @@ Item {
                 monitorQuery.running = true;
             if (root.windowEvents.includes(event.name))
                 windowsTimer.restart();
+            // spec 008: full screen (R10, R11)
+            if (event.name === "fullscreen" || event.name.startsWith("activewindow") || event.name.startsWith("workspace")
+                    || event.name === "closewindow")
+                root.refreshFullscreen();
         }
     }
 

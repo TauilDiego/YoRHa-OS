@@ -34,6 +34,15 @@ import "../../strings"
 // `optionsVisible` (default true; T043) hides the Options card, e.g. APPS with a search that found
 // nothing. The wheel over a list taller than its column scrolls it by whole entries; a cursor left
 // out of view comes back into it, and the focus goes to the list (as with the pointer).
+// spec 008 (the text log, research R16), compatible additions:
+//   fluid        the columns and the top come from the layout's own width and height, in the
+//                proportions of the 1612×908 frame, and the layout fills its whole rect (no room for
+//                a title or a footer: the host draws those), so the same body fits the pop-up and a
+//                pause-menu tab; the list reaches 24 px short of the preview, as in the log's mockup;
+//   lazyList     the list creates only the rows in view (GroupedList.lazy), for a long log;
+//   toggleValueW the width (game px) of a toggle's ON/OFF between ◂ and ▸; the default is every
+//                stepper's (Tokens.space.stepperValueW), the log narrows it so its labels fit.
+// The default (fluid: false) is the picker of specs 004 and 007, unchanged.
 FocusScope {
     id: root
 
@@ -55,6 +64,10 @@ FocusScope {
     property string trailingRole: "small"
     property bool optionsVisible: true
     readonly property GroupedList groupedList: list
+    // spec 008
+    property bool fluid: false
+    property bool lazyList: false
+    property real toggleValueW: Tokens.space.stepperValueW
 
     signal applied(int index)
     signal picked(int option, int value)
@@ -68,6 +81,10 @@ FocusScope {
 
     function u(v: real): int {
         return Tokens.px(v, root.s);
+    }
+    // A horizontal position or width of the 1612 px frame: scaled with `s`, or (fluid) with the width.
+    function hx(v: real): int {
+        return fluid ? Math.round(v * width / Tokens.space.popupW) : u(v);
     }
 
     function valueOf(i: int): int {
@@ -246,18 +263,21 @@ FocusScope {
     }
 
     // --- layout ----------------------------------------------------------------------------------
-    // The columns start at y 150 and stop 24 px above the footer rule (88 px above the bottom).
-    readonly property int topY: u(startY)
-    readonly property int bottomY: height - u(Tokens.space.popupH - 820) - u(24)
+    // The columns start at `startY` (150) and stop 24 px above the footer rule (88 px above the
+    // bottom); fluid, they take the whole rect.
+    readonly property int topY: fluid ? 0 : u(startY)
+    readonly property int bottomY: fluid ? height : height - u(Tokens.space.popupH - 820) - u(24)
 
     GroupedList {
         id: list
-        x: root.u(48)
+        x: root.hx(48)
         y: root.topY
-        width: implicitWidth
+        // fluid (the text log, as its mockup): the list reaches 24 px short of the preview
+        width: root.fluid ? root.hx(560 - 48) - root.u(24) : implicitWidth
         height: Math.min(implicitHeight, root.bottomY - y)
         s: root.s
         model: root.entries
+        lazy: root.lazyList
         currentIndex: root.index
         focused: root.column === "list"
         keysEnabled: false
@@ -278,18 +298,18 @@ FocusScope {
 
     Item {
         id: previewSlot
-        x: root.u(560)
+        x: root.hx(560)
         y: root.topY
-        width: root.u(Tokens.space.pickerPreviewW)
+        width: root.hx(Tokens.space.pickerPreviewW)
         height: root.bottomY - y
     }
 
     // The Options card: the rows hang their kite into the 40 px gap on the card's left.
     Item {
         id: optionsBox
-        x: root.u(1160)
+        x: root.hx(1160)
         y: root.topY
-        width: root.u(Tokens.space.pickerOptionsW)
+        width: root.fluid ? Math.min(root.hx(Tokens.space.pickerOptionsW), root.width - x - root.u(8)) : root.u(Tokens.space.pickerOptionsW)
         height: infoColumn.y + infoColumn.height + root.u(22)
         visible: root.optionsVisible
 
@@ -322,6 +342,7 @@ FocusScope {
                     contentScale: Tokens.space.pickerOptionScale
                     option: Object.assign({ type: "choice" }, modelData)
                     value: modelData?.type === "toggle" ? root.valueOf(index) !== 0 : root.valueOf(index)
+                    valueWidth: modelData?.type === "toggle" ? root.toggleValueW : Tokens.space.stepperValueW
                     focused: root.column === "options" && index === root.option
 
                     onHoveredChanged: if (hovered) root.noteHover("options", index)

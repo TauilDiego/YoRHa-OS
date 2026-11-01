@@ -8,7 +8,8 @@ import "../primitives"
 // Value stepper (spec 003): "◂ value ▸", the value of a toggle or a choice. The arrows only show
 // with `arrows` (the focused row) but always keep their room; at an end of the list its arrow
 // fades to 30%. A click on an arrow emits stepped(-1 / +1). The text is centered in
-// Tokens.space.stepperValueW and cut with an ellipsis when it is longer.
+// `valueWidth` (game px, Tokens.space.stepperValueW by default) and cut with an ellipsis when it is
+// longer.
 Item {
     id: root
 
@@ -18,13 +19,14 @@ Item {
     property bool arrows: false
     property bool atStart: false
     property bool atEnd: false
+    property real valueWidth: Tokens.space.stepperValueW     // spec 008: the text log's toggle is narrower
 
     signal stepped(int dir)
 
     readonly property int arrowW: Tokens.px(11, s)       // the mockup's triangles: 11 × 16
     readonly property int arrowH: Tokens.px(16, s)
     readonly property int gap: Tokens.px(14, s)
-    readonly property int valueW: Tokens.px(Tokens.space.stepperValueW, s)
+    readonly property int valueW: Tokens.px(valueWidth, s)
 
     implicitWidth: 2 * (arrowW + gap) + valueW
     implicitHeight: Math.max(arrowH, label.implicitHeight)

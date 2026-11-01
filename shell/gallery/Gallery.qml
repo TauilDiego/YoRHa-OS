@@ -11,6 +11,7 @@ import "../popup"
 import "../services"
 import "../strings"
 import "../wallpaper"
+import "notify"
 
 // Design system gallery (US3, FR-016): every piece in every state, each with its name, laid out
 // like a NieR menu page. Full screen on the Overlay layer; opened and closed over IPC
@@ -116,7 +117,7 @@ PanelWindow {
         anchors.fill: parent
         focus: true
         Keys.onEscapePressed: root.closeRequested()
-        Keys.onTabPressed: root.page = (root.page + 1) % 4     // spec 003: page 2; 004: page 3; 007: page 4
+        Keys.onTabPressed: root.page = (root.page + 1) % 6     // spec 003: page 2; 004: page 3; 007: page 4; 008: pages 5 and 6
 
         Rectangle {
             anchors.fill: parent
@@ -676,6 +677,30 @@ PanelWindow {
             anchors.fill: parent
             active: root.page === 3
             sourceComponent: page4
+        }
+
+        // --- spec 008: page 5 (Tab), the band and its pieces (FR-034) ----------------------------------
+        Loader {
+            anchors.fill: parent
+            active: root.page === 4
+            sourceComponent: GalleryNotify {
+                readonly property var window: QsWindow.window
+                // Its three columns need the 1920 game px of width: narrower than 16:9 (2560×1600),
+                // the page scales by the width instead, so the third column stays on screen.
+                s: Math.min(root.s, root.width > 0 ? root.width / 1920 : root.s)
+                dpr: Tokens.scaleOf(window?.screen?.name ?? "")
+            }
+        }
+
+        // --- spec 008: page 6 (Tab), the text log's body in its two hosts (FR-044, SC-016) ----------
+        Loader {
+            anchors.fill: parent
+            active: root.page === 5
+            sourceComponent: GalleryLog {
+                readonly property var window: QsWindow.window
+                s: Math.min(root.s, root.width > 0 ? root.width / 1920 : root.s)
+                dpr: Tokens.scaleOf(window?.screen?.name ?? "")
+            }
         }
     }
 
