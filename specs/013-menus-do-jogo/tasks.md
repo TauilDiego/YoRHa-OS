@@ -197,7 +197,7 @@ nesta VM, então do ambiente.
 
 ## Phase 11: Polish & junção (F3)
 
-- [ ] T051 Mesclar as frentes na `013-menus-do-jogo` e na `lab-013`; resolver o que A e B mexeram no
+- [X] T051 Mesclar as frentes na `013-menus-do-jogo` e na `lab-013`; resolver o que A e B mexeram no
   `PopupFrame`
   - decisão do dono (01.11): **sem som de digitação, nem como opção**. Tirar o que a frente D ligou: o
     evento `typing` no campo de busca de APPS, a opção Sound › Typing sound, a chave `sound.typing` e os
@@ -205,15 +205,15 @@ nesta VM, então do ambiente.
   - ligar `choiceOpen`/`choicePick` na janelinha da frente C (as frentes C e D trabalharam separadas)
 - [ ] T052 `check-013` inteiro nos dois perfis e nos dois modos; `check-003`, `check-004`, `check-007`,
   `check-008` e `check-011` verdes (SC-004)
-- [ ] T053 A lista das diferenças esperadas do modo janela parado (FR-017), com `lab/diffshot` contra as
-  evidências
+- [X] T053 A lista das diferenças esperadas do modo janela parado (FR-017), com `lab/diffshot` contra as
+  evidências: `diferencas-janela.md` (17 telas, antes e depois, na junção)
   - já conhecida: a galeria passou de 6 pra 7 páginas (a 7 é a da fundação), então os subtítulos
     "N/6" viraram "N/7" (o `check-007` agora dá Tab ×4 pra voltar à 1)
-- [ ] T054 `docs/design-system.md` (movimento, `ScrollingLabel`, `ChoicePopup`, apresentação, sons) e
+- [X] T054 `docs/design-system.md` (movimento, `ScrollingLabel`, `ChoicePopup`, apresentação, sons) e
   `README.md`
 - [ ] T055 Sessão do dono numa janela da VM: os dois modos, a janelinha e os sons; ajustar os números
   (SC-007, SC-011)
-- [ ] T057 Acabamento herdado da 008: no log, o ◂ OFF ▸ (coluna estreita de 70) não alinha com o
+- [X] T057 Acabamento herdado da 008: no log, o ◂ OFF ▸ (coluna estreita de 70) não alinha com o
   valor de Show logo abaixo; alinhar as colunas de valor das opções do log
 - [ ] T056 `relatorio.md` e a página de revisão; atualizar o `PLAN.md`, o mapa do projeto e a Central
 
