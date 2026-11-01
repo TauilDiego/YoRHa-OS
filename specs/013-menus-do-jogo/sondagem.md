@@ -152,3 +152,32 @@ O plano B da R5 (o `NotifyLayer` recria a sua superfície quando o menu abre) fu
   - mede o desvio entre os relógios por uma conexão SSH aberta: −4,7 ms, com 2 ms de ida e volta. Uma
     conexão por medida dava 150 ms de ida e volta e um desvio errado;
   - o `lab/key` grava a hora de cada tecla com `NIER_LAB_KEYLOG`.
+
+## Na junção (01.11): o backend de som trocou pra GStreamer
+
+**O que aconteceu:**
+- **Na regressão da 007:** o log do shell numa VM chegou a 1,27 GB, ~15 milhões de linhas de
+  `QSocketNotifier: Invalid socket 88 and type 'Read', disabling...`. O disco da VM encheu, e o
+  `/run/user` também, com o log detalhado do Quickshell. O shell caiu.
+- **No laço:** o `qs` fica em ~160% de CPU. A primeira linha é sempre `QSocketNotifier: Socket
+  notifiers cannot be enabled or disabled from another thread`.
+
+**Medido na `t013-j3`:**
+
+| Teste | FFmpeg (o padrão) | GStreamer |
+|---|---|---|
+| Abrir app pelo menu (Enter numa ação), sons ligados | o laço na 8ª abertura | nenhum em 20 voltas (6 aberturas registradas) |
+| O mesmo com os sons desligados | nenhum em 30 voltas | — |
+| 60 voltas de `sounds play` + um processo comum (`ls` do `Sounds`) ao mesmo tempo | 13,6 milhões de linhas | 0 linhas, nenhum aviso |
+| `play()` → som contra o marcador (20 toques) | mediana −25, máx. −15,6 ms (T006) | mediana −32, máx. −23 ms (teto do marcador 39 ms) |
+
+**Conclusão:** é uma corrida da thread de áudio do backend FFmpeg do Qt 6.12 com qualquer processo que
+o shell abre enquanto um som toca. Não é do nosso código.
+
+**A troca:**
+- `//@ pragma Env QT_MEDIA_BACKEND=gstreamer` no `shell.qml`;
+- `QT_MEDIA_BACKEND=gstreamer` no `GreeterEnvironment` do SDDM;
+- a dependência passa a ser o `qt6-multimedia-gstreamer`, que já puxa `gst-plugins-good`, `gst-libav`
+  e `libpulse`.
+
+Sem o `gst-plugin-pipewire` também toca, pelo `pipewire-pulse`.
