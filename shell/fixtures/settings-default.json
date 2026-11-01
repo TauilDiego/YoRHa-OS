@@ -45,7 +45,7 @@
       "about": "Wi-Fi, cable and VPN.",
       "options": [
         {"id": "wifi", "label": "Wi-Fi", "type": "toggle", "desc": "Turns the wireless adapter on or off.", "key": "wifi", "value": true, "default": true},
-        {"id": "network", "label": "Network", "type": "choice", "desc": "The wireless network in use. Saved networks connect on their own.", "needs": "wifi", "values": ["home-5G", "home-2G", "office"], "value": 0, "default": 0},
+        {"id": "network", "label": "Network", "type": "choice", "desc": "The wireless network in use. Saved networks connect on their own.", "needs": "wifi", "values": ["home-5G", "home-2G", "office", "guest"], "value": 0, "default": 0},
         {"id": "wired", "label": "Wired", "type": "info", "desc": "Ethernet. Plug in a cable and it connects on its own.", "text": "Not connected"},
         {"id": "vpn", "label": "VPN", "type": "action", "desc": "Adds a WireGuard or OpenVPN connection.", "text": "Set up", "busy": "Opening the VPN setup…"},
         {"id": "airplane", "label": "Airplane mode", "type": "toggle", "desc": "Turns off every radio: Wi-Fi and Bluetooth.", "value": false, "default": false}
@@ -91,7 +91,7 @@
       "id": "keyboard", "label": "Keyboard",
       "about": "Layout, repeat and shortcuts.",
       "options": [
-        {"id": "layout", "label": "Layout", "type": "choice", "desc": "The keyboard layout. Accents work with dead keys on US International.", "values": ["US International", "US", "ABNT2"], "value": 0, "default": 0},
+        {"id": "layouts", "label": "Layouts", "type": "multi", "desc": "The keyboard layouts in use, switched by a shortcut. Mark at least one; the first is the one the keyboard starts with.", "setting": "input.kbLayouts", "values": ["English (US)", "Portuguese (Brazil)", "Portuguese (Portugal)", "Spanish", "German", "French"], "ids": ["us", "br", "pt", "es", "de", "fr"]},
         {"id": "caps", "label": "Caps Lock", "type": "choice", "desc": "What the Caps Lock key does.", "values": ["Caps Lock", "Escape", "Control"], "value": 1, "default": 0},
         {"id": "delay", "label": "Repeat delay", "type": "choice", "desc": "How long a key has to be held before it starts repeating.", "values": ["200 ms", "300 ms", "400 ms", "600 ms"], "value": 1, "default": 2},
         {"id": "rate", "label": "Repeat rate", "type": "slider", "desc": "How fast a held key repeats.", "value": 50, "default": 50, "step": 5},

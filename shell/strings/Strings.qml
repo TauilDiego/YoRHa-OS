@@ -127,6 +127,11 @@ Singleton {
         readonly property string longText: "Notifications from an application with a very long name"
         readonly property string typedTip: "Typed text, tip letter"
         readonly property string typedSample: "SETTINGS"
+        // spec 013, front C: the choice pop-up
+        readonly property string choicePopup: "Choice pop-up"
+        readonly property string choiceSingle: "one value"
+        readonly property string choiceMulti: "several, one marked at least"
+        readonly property var choiceSample: ["home-5G", "home-2G", "office", "guest", "A network with a very long name"]
     }
 
     // --- spec 003: settings pop-up ---------------------------------------------------------
@@ -153,6 +158,11 @@ Singleton {
         readonly property string close: "Close"
         readonly property string change: "Change"
         readonly property string back: "Back"
+        // spec 013, front C: the choice pop-up's hints
+        readonly property string choose: "Choose"
+        readonly property string mark: "Mark"
+        readonly property string cancel: "Cancel"
+        readonly property string done: "Done"
     }
 
     // --- spec 004: wallpaper (picker, catalog, transitions) --------------------------------------

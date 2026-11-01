@@ -96,6 +96,12 @@ aplica na hora em todos os teclados.
 **Por quê:** é a primeira configuração "lista" que faz sentido no desktop, e o dono pediu um exemplo
 real.
 
+**Implementação (frente C, 31.10):**
+- `Compositor.applyKeyboardLayouts()` aplica `Settings.kbLayouts` no começo, quando muda e quando o backend vê `configreloaded`; o `HyprlandBackend` roda `hyprctl eval` (config em Lua) ou `hyprctl keyword` (hyprlang). Só nomes XKB (`^[a-z]{2,8}$`) entram no comando. Os outros compositores (Niri, Mango, `none`) não têm `keyboardLayouts` nas capacidades: a opção guarda e o quadro diz que não aplica.
+- Medido: depois de um `hyprctl reload` o layout volta pro do arquivo e o shell o reaplica em ~150 ms.
+- **Fica pro instalador (fora daqui):** o layout padrão e o atalho de troca (`hl.dsp.exec_cmd("hyprctl switchxkblayout all next")`) na configuração gerenciada do Hyprland.
+- Os layouts da opção são nomes sem variante (`us`, `br`, `pt`, `es`, `de`, `fr`): o "US International" da opção antiga precisaria de `kb_variant` por layout (aberto, do dono).
+
 ## R7. A medição de quadros/s na VM (SC-002)
 
 **Decisão:** um contador de debug no shell (`FrameAnimation`, com o tempo de cada quadro da janela do

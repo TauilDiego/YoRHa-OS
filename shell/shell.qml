@@ -627,6 +627,13 @@ ShellRoot {
                 worstMs: n ? r(t[n - 1]) : 0
             });
         }
+        // spec 013 (front C), tests only: the choice pop-up of the option with the focus on SYSTEM.
+        // `open`; `pick <i>` (a single choice); `toggle <i>` (a multiple one); `close`.
+        function choice(cmd: string, arg: string): string {
+            if (!shell.pauseMenu || !shell.pauseOpen)
+                return "error: the menu is closed";
+            return shell.pauseMenu.choiceCommand(cmd, arg);
+        }
         function dump(): string {
             const live = shell.pauseMenu;
             const d = live ? live.dumpState() : (shell.pauseLast ?? {
