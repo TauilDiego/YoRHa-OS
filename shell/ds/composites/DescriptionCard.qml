@@ -53,13 +53,13 @@ Item {
         size: 14
         color: Tokens.color.lightYellow
     }
-    Label {
+    // spec 013 (FR-012): a title that doesn't fit scrolls.
+    ScrollingLabel {
         x: mark.x + mark.width + Tokens.px(14, root.s)
-        width: root.width - x - root.margin
+        width: Math.max(0, Math.min(Math.ceil(implicitWidth), root.width - x - root.margin))
         anchors.verticalCenter: mark.verticalCenter
         s: root.s
         role: "cardHeader"
-        elide: Text.ElideRight
         text: root.title
         color: Tokens.color.lightYellow
     }

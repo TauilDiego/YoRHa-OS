@@ -25,7 +25,7 @@ PopupWindow {
     property int systemCategory: 0               // where SYSTEM opens (shell.qml keeps it)
     // spec 013 (data-model.md, `pause dump`): the animation running, "idle" | "opening" |
     // "assembling" | "tab" | "closing" (front A sets it); the choice pop-up's state or null (front C).
-    property string anim: "idle"
+    property string anim: popupFrame.anim        // front A
     readonly property var choice: systemPage.choiceState
     // spec 013 (research R7): while countFrames, every frame's time (ms) goes out in frame().
     property bool countFrames: false
@@ -141,6 +141,20 @@ PopupWindow {
 
     readonly property var pageKeys: tab === "system" ? systemPage.keys : withTab(page?.keys ?? [])
 
+    // spec 013, front A (FR-006): while the tab changes, the old page stays shown and fades
+    // (PopupFrame's swapFrom, swapLevel), and the new one waits hidden (swapHold) until it mounts.
+    readonly property string fadingTab: tabIds[popupFrame.swapFrom] ?? ""
+    function pageShown(id: string): bool {
+        return tab === id || fadingTab === id;
+    }
+    function pageOpacity(id: string): real {
+        return id === fadingTab ? popupFrame.swapLevel : popupFrame.swapHold ? 0 : 1;
+    }
+    // An action that leaves the menu (FR-008): the next close starts with the leaving row.
+    function leaving(): void {
+        leaveNext = true;
+    }
+
     // spec 013 (research R7): the frame counter of `pause fps`, ticking with this window's frames.
     // The first tick after a start is dropped (its time runs from before the start).
     FrameAnimation {
@@ -231,20 +245,24 @@ PopupWindow {
         AppsPage {
             id: appsPage
             anchors.fill: parent
-            visible: root.tab === "apps"
-            enabled: visible
+            visible: root.pageShown("apps")
+            opacity: root.pageOpacity("apps")
+            enabled: root.tab === "apps"
             s: root.s
             stretch: root.popupFrame.fullscreen
+            onLeaving: root.leaving()
             onCloseRequested: root.closeRequested()
         }
 
         WindowsPage {
             id: windowsPage
             anchors.fill: parent
-            visible: root.tab === "windows"
-            enabled: visible
+            visible: root.pageShown("windows")
+            opacity: root.pageOpacity("windows")
+            enabled: root.tab === "windows"
             s: root.s
             stretch: root.popupFrame.fullscreen
+            onLeaving: root.leaving()
             onCloseRequested: root.closeRequested()
         }
 
@@ -259,8 +277,9 @@ PopupWindow {
             y: bodyY
             width: parent.width
             height: parent.height - root.u(Tokens.space.popupH - 820) - root.u(24) + root.u(8) - bodyY
-            visible: root.tab === "log"
-            enabled: visible
+            visible: root.pageShown("log")              // junction: the tab change of front A
+            opacity: root.pageOpacity("log")
+            enabled: root.tab === "log"
             s: root.s
             dpr: Tokens.scaleOf(hostScreen?.name ?? "")
             host: "pause"
@@ -282,8 +301,9 @@ PopupWindow {
             x: root.popupFrame.fullscreen ? Tokens.snap((parent.width - width) / 2, root.popupFrame.dpr) : 0
             width: root.popupFrame.fullscreen ? Math.min(parent.width, root.u(Tokens.space.popupW)) : parent.width
             height: parent.height
-            visible: root.tab === "system"
-            enabled: visible
+            visible: root.pageShown("system")
+            opacity: root.pageOpacity("system")
+            enabled: root.tab === "system"
             s: root.s
             startY: Tokens.space.pauseBodyY + 34
             extraKeys: [{ key: Strings.pause.keyTab, label: Strings.pause.nextTab }]
@@ -303,11 +323,13 @@ PopupWindow {
         PowerPage {
             id: powerPage
             anchors.fill: parent
-            visible: root.tab === "power"
-            enabled: visible
+            visible: root.pageShown("power")
+            opacity: root.pageOpacity("power")
+            enabled: root.tab === "power"
             s: root.s
             active: root.keyboardActive && root.tab === "power"
             originX: root.popupFrame.fullscreen ? Tokens.snap((width - root.u(Tokens.space.popupW)) / 2, root.popupFrame.dpr) : 0
+            onLeaving: root.leaving()
             onCloseRequested: root.closeRequested()
         }
     }

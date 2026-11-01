@@ -33,6 +33,7 @@ FocusScope {
     property string runningApp: SettingsModel.choiceId("menu", "running-app") || "new"
 
     signal closeRequested()
+    signal leaving()                             // spec 013: the close that follows is an action's
 
     readonly property var ps: Strings.pause
 
@@ -146,6 +147,7 @@ FocusScope {
                 const r = Compositor.focusWindow(w[0].id);
                 if (r !== "ok")
                     console.info(`apps: ${r}`);
+                leaving();
                 closeRequested();
                 return;
             }
@@ -153,6 +155,7 @@ FocusScope {
         const r = Apps.launch(a.id, action, workspace);
         if (r !== "ok")
             console.info(`apps: ${r}`);
+        leaving();
         closeRequested();
     }
 

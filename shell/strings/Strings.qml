@@ -132,6 +132,12 @@ Singleton {
         readonly property string choiceSingle: "one value"
         readonly property string choiceMulti: "several, one marked at least"
         readonly property var choiceSample: ["home-5G", "home-2G", "office", "guest", "A network with a very long name"]
+        // spec 013, front A: the list and the title, moving on their own
+        readonly property string motionList: "Selection, pulse, cascade"
+        readonly property string motionListNote: "the cursor moves every 1.6 s; the list comes in again every 8 s"
+        readonly property string motionTitle: "Title"
+        readonly property var motionItems: ["Display", "Sound", "Notifications", "Network", "Appearance"]
+        readonly property var motionTitles: [["SYSTEM", "-Settings"], ["WINDOWS", "-Open Windows"], ["POWER", "-Session"]]
     }
 
     // --- spec 003: settings pop-up ---------------------------------------------------------

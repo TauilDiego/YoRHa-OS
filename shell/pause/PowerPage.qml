@@ -37,6 +37,7 @@ FocusScope {
     readonly property string dialogStart: SettingsModel.choiceId("menu", "confirm-start") || "cancel"
 
     signal closeRequested()
+    signal leaving()                             // spec 013: the close that follows is an action's
 
     property int index: 0
     property string dialogAction: ""         // the action the dialog asks about ("" = closed)
@@ -46,6 +47,10 @@ FocusScope {
     readonly property var actions: Session.actions
     readonly property var current: actions[index] ?? null
     readonly property var dialogData: dialogAction !== "" ? Session.actionOf(dialogAction) : null
+    // spec 013 (front A): what the dialog shows, kept while it closes (the game's blur out).
+    property string shownAction: ""
+    onDialogActionChanged: if (dialogAction !== "") shownAction = dialogAction
+    readonly property var dialogView: shownAction !== "" ? Session.actionOf(shownAction) : null
 
     function u(v: real): int {
         return Tokens.px(v, root.s);
@@ -127,6 +132,7 @@ FocusScope {
             waiting = id;
             Session.run(id);              // the menu closes on accepted (below)
         } else {
+            leaving();
             closeRequested();             // a clean screen first (FR-023)
             Session.run(id);
         }
@@ -153,6 +159,7 @@ FocusScope {
         function onAccepted(id: string): void {
             if (id === root.waiting) {
                 root.waiting = "";
+                root.leaving();
                 root.closeRequested();
             }
         }
@@ -335,18 +342,18 @@ FocusScope {
     ConfirmDialog {
         id: dialog
         anchors.fill: parent
-        visible: root.dialogAction !== ""
-        enabled: visible
+        shown: root.dialogAction !== ""
+        enabled: shown
         s: root.s
         start: root.dialogStart
-        title: root.dialogData ? Strings.pause.dialogTitle.arg(root.dialogData.label) : ""
-        text: root.dialogData
-            ? (Session.closesSession(root.dialogData.id)
-                ? `${root.dialogData.effect} ${Strings.pause.unsavedMayAsk}` : root.dialogData.effect)
+        title: root.dialogView ? Strings.pause.dialogTitle.arg(root.dialogView.label) : ""
+        text: root.dialogView
+            ? (Session.closesSession(root.dialogView.id)
+                ? `${root.dialogView.effect} ${Strings.pause.unsavedMayAsk}` : root.dialogView.effect)
             : ""
-        note: root.dialogData && root.dialogData.id === root.current?.id && Session.lastError !== "" ? Session.lastError : ""
-        blockers: root.dialogData?.blockers ?? []
-        actionLabel: root.dialogData?.label ?? ""
+        note: root.dialogView && root.dialogView.id === root.current?.id && Session.lastError !== "" ? Session.lastError : ""
+        blockers: root.dialogView?.blockers ?? []
+        actionLabel: root.dialogView?.label ?? ""
         onCurrentChanged: if (root.dialogSettled) Sounds.play("move")      // spec 013, front D
         onConfirmed: {
             const id = root.dialogAction;
