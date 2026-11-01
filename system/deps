@@ -14,5 +14,6 @@ file                      required  wallpaper type checks
 uwsm                      required  logout from the power menu
 curl                      required  yorha update
 wireplumber               required  the volume keys (wpctl)
+pipewire-pulse            required  the shell's sounds play through it (Qt Multimedia's GStreamer backend)
 brightnessctl             optional  the brightness keys
 kitty                     optional  the terminal of "Update now" (any terminal in shell.json works)

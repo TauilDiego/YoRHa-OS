@@ -67,7 +67,8 @@ O que muda:
   - `qt6-declarative`, `qt6-svg`, `qt6-5compat`, `qt6-shadertools`, `qt6-wayland`;
   - `qt6-multimedia`, `qt6-multimedia-gstreamer`, `qt6-multimedia-ffmpeg`;
   - `libnotify`, `file`, `uwsm`, `curl`;
-  - `wireplumber` (o `wpctl` dos atalhos de volume).
+  - `wireplumber` (o `wpctl` dos atalhos de volume) e `pipewire-pulse` (por onde os sons do shell
+    tocam; achado na T016).
 - **Opcionais**, cada uma com o que deixa de funcionar sem ela: `brightnessctl` (atalhos de brilho) e
   `kitty` (o "Update now").
 - **Fora do manifesto:** o Hyprland, que é pré-requisito.
