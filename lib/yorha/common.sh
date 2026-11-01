@@ -80,3 +80,9 @@ yorha_prune() {
     find "$YORHA_HOME/versions" -mindepth 1 -maxdepth 1 -name '.*.part' -exec rm -rf {} +
     rm -rf "$YORHA_HOME/downloads"
 }
+
+# Finish a freshly unpacked version before it goes in use: the shell's shaders are compiled where
+# the UI runs (shell/shaders/build.sh needs qsb, from qt6-shadertools, a required dependency).
+yorha_prepare() {
+    "$1/shell/shaders/build.sh" >/dev/null || yorha_say "the shaders of $(yorha_version_of "$1") did not build; wallpaper transitions fall back to a crossfade"
+}

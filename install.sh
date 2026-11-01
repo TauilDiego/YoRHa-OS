@@ -41,6 +41,7 @@ if [[ -n $(yorha_current) ]]; then
     exit 2
 fi
 yorha_deps_ensure "$YORHA_ROOT/system/deps" || exit 3
+yorha_prepare "$YORHA_ROOT"
 
 mkdir -p "$YORHA_HOME/versions"
 rm -rf "$YORHA_HOME/versions/.$v.part"
