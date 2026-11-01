@@ -648,7 +648,7 @@ PanelWindow {
                                 anchors.fill: parent
                                 title: Strings.settings.title
                                 subtitle: Strings.settings.subtitle
-                                footerLeft: Strings.settings.version
+                                footerLeft: Strings.settings.version.arg(Updater.versionLabel)
                                 keys: page2.keysCategories
                             }
                         }
@@ -916,7 +916,7 @@ PanelWindow {
                         anchors.fill: parent
                         title: p3.ws.title
                         subtitle: p3.ws.subtitle
-                        footerLeft: p3.ws.footer.arg(p3.ws.oneMonitor)
+                        footerLeft: p3.ws.footer.arg(Updater.versionLabel).arg(p3.ws.oneMonitor)
                         keys: miniLayout.keys
 
                         PickerLayout {

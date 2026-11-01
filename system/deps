@@ -1,0 +1,19 @@
+# What the YoRHa-OS shell needs from the system (spec 014, FR-002, research R3).
+# <package> <required|optional> <what it is for>. Hyprland itself is a prerequisite, not listed.
+quickshell                required  the shell runs on it
+qt6-declarative           required  QML
+qt6-svg                   required  icons
+qt6-5compat               required  graphical effects
+qt6-shadertools           required  the menus' shaders
+qt6-wayland               required  Wayland windows
+qt6-multimedia            required  interface sounds
+qt6-multimedia-gstreamer  required  the shell's sound backend (spec 013)
+qt6-multimedia-ffmpeg     required  the login screen's sound backend (spec 013)
+libnotify                 required  notify-send, used by the shell's own notices
+file                      required  wallpaper type checks
+uwsm                      required  logout from the power menu
+curl                      required  yorha update
+wireplumber               required  the volume keys (wpctl)
+pipewire-pulse            required  the shell's sounds play through it (Qt Multimedia's GStreamer backend)
+brightnessctl             optional  the brightness keys
+kitty                     optional  the terminal of "Update now" (any terminal in shell.json works)

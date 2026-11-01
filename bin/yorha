@@ -1,0 +1,318 @@
+#!/usr/bin/env bash
+# yorha: install, update and run the YoRHa-OS shell (spec 014, contracts/cli.md). Method D of spec
+# 005: each version lives in $YORHA_HOME/versions/<v>; "current" is a symlink switched atomically.
+# Runs as the person; root only through sudo, after a yes.
+set -euo pipefail
+YORHA_ROOT=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
+source "$YORHA_ROOT/lib/yorha/name.sh"
+source "$YORHA_ROOT/lib/yorha/common.sh"
+source "$YORHA_ROOT/lib/yorha/deps.sh"
+[[ $EUID -ne 0 ]] || yorha_fail "run as your user, not root"
+
+usage() {
+    cat >&2 <<USAGE
+usage: $YORHA_CMD version | status | update [--check [--json]] | rollback | migrate
+       $YORHA_CMD shell start|restart | ipc <args…> | boot-login install|uninstall|status | uninstall
+USAGE
+    exit 2
+}
+
+cmd_status() {
+    local cur prev channel running
+    cur=$(yorha_current)
+    prev=$(cat "$YORHA_HOME/previous" 2>/dev/null || true)
+    channel=$(cat "$YORHA_HOME/channel" 2>/dev/null || true)
+    [[ -s $(run_dir)/shell.pid ]] && running="yes (pid $(cat "$(run_dir)/shell.pid"))" || running=no
+    printf '%s %s\n' "$YORHA_PRETTY" "${cur:-not installed}"
+    printf '  previous:  %s\n' "${prev:-none}"
+    printf '  channel:   %s\n' "${channel:-none}"
+    printf '  folder:    %s\n' "$YORHA_HOME"
+    printf '  shell:     %s\n' "$running"
+}
+
+# --- versions (US2, research R2) ----------------------------------------------------------------------
+channel() { cat "$YORHA_HOME/channel" 2>/dev/null || true; }
+# Test hook (the lab's check-014, SC-004): YORHA_TEST_STOP_AT=download|unpacked|switched kills the
+# update right there, as a crash or a power cut would.
+test_stop() { [[ ${YORHA_TEST_STOP_AT:-} == "$1" ]] && { yorha_say "test stop at $1"; kill -9 $$; }; return 0; }
+is_newer() { [[ $1 != "$2" && $(printf '%s\n' "$1" "$2" | sort -V | tail -1) == "$1" ]]; }
+
+# Download, check and prepare version $1 into versions/$1 (nothing in use is touched).
+fetch() {
+    local v=$1 ch dl f tmp
+    [[ -d $YORHA_HOME/versions/$v ]] && return 0
+    ch=$(channel); dl="$YORHA_HOME/downloads/$v"   # a leftover of an interrupted update is redone
+    rm -rf "$dl" && mkdir -p "$dl"
+    yorha_say "downloading $v"
+    for f in "$YORHA_NAME-$v.tar.gz" "$YORHA_NAME-$v.tar.gz.sha256"; do
+        curl -fsS -o "$dl/$f" "$ch/$f" || { rm -rf "$dl"; yorha_fail "download of $f failed; nothing changed"; }
+    done
+    (cd "$dl" && sha256sum --quiet -c "$YORHA_NAME-$v.tar.gz.sha256") || { rm -rf "$dl"; yorha_fail "checksum mismatch for $v; refusing, nothing changed" 4; }
+    test_stop download
+    tmp="$YORHA_HOME/versions/.$v.part"
+    rm -rf "$tmp" && mkdir -p "$tmp"
+    tar -xzf "$dl/$YORHA_NAME-$v.tar.gz" -C "$tmp" --strip-components=1
+    yorha_deps_ensure "$tmp/system/deps" >/dev/null || yorha_say "a dependency of $v is missing (see: $YORHA_CMD status)"
+    yorha_prepare "$tmp"
+    test_stop unpacked
+    mv -T "$tmp" "$YORHA_HOME/versions/$v"
+    rm -rf "$dl"
+}
+
+cmd_update() {
+    local check=0 json=0 ch latest cur new
+    while (($#)); do
+        case $1 in --check) check=1 ;; --json) json=1 ;; *) usage ;; esac
+        shift
+    done
+    cur=$(yorha_current)
+    ch=$(channel)
+    err() {   # $1 message, $2 exit code
+        if ((json)); then printf '{"current":"%s","error":"%s"}\n' "$cur" "$1"; exit "$2"; fi
+        yorha_fail "$1" "$2"
+    }
+    [[ -n $cur ]] || err "not installed" 1
+    [[ -n $ch ]] || err "no channel set in $YORHA_HOME/channel" 1
+    latest=$(curl -fsS --max-time 20 "$ch/latest" | tr -d '[:space:]') || err "could not reach $ch; nothing changed" 1
+    [[ $latest =~ ^[0-9]+(\.[0-9]+)+$ ]] || err "bad version '$latest' from $ch" 1
+    if ((check)); then
+        if ((json)); then
+            is_newer "$latest" "$cur" && a=true || a=false
+            printf '{"current":"%s","latest":"%s","available":%s}\n' "$cur" "$latest" "$a"
+        else
+            is_newer "$latest" "$cur" && echo "available $latest" || echo "up-to-date"
+        fi
+        return 0
+    fi
+    if ! is_newer "$latest" "$cur"; then
+        # Nothing newer: finish what an interrupted update left (pending migrations, and a shell
+        # still running an older version).
+        "$YORHA_HOME/current/bin/$YORHA_CMD" migrate
+        local running
+        running=$(cat "$(run_dir)/shell.root" 2>/dev/null || true)
+        if [[ -n $running && $running != "$(shell_root)" ]]; then
+            "$YORHA_HOME/current/bin/$YORHA_CMD" shell restart >/dev/null || true
+        fi
+        yorha_prune
+        yorha_say "up to date ($cur)"
+        return 0
+    fi
+    fetch "$latest"
+    new="$YORHA_HOME/versions/$latest"
+    yorha_backup_state "$cur" >/dev/null
+    yorha_switch "$latest"
+    test_stop switched
+    "$new/bin/$YORHA_CMD" migrate --from "$cur" || yorha_fail "the update to $latest stopped at a migration; $YORHA_CMD rollback goes back to $cur" 5
+    yorha_prune
+    "$new/bin/$YORHA_CMD" shell restart >/dev/null || true
+    yorha_say "updated to $latest (previous: $cur; $YORHA_CMD rollback goes back)"
+}
+
+# Back to the version before the last update, with the state as it was before that update.
+cmd_rollback() {
+    local cur prev state
+    cur=$(yorha_current)
+    prev=$(cat "$YORHA_HOME/previous" 2>/dev/null || true)
+    [[ -n $prev && -d $YORHA_HOME/versions/$prev ]] || yorha_fail "no previous version to go back to" 3
+    yorha_switch "$prev"
+    rm -f "$YORHA_HOME/previous"
+    if [[ -d $YORHA_STATE/backups/$prev ]]; then
+        find "$YORHA_STATE" -mindepth 1 -maxdepth 1 ! -name backups -exec rm -rf {} +
+        cp -a "$YORHA_STATE/backups/$prev/." "$YORHA_STATE/"
+        state="state restored from before the update"
+    else
+        state="no copy of the state from $prev; state left as is"
+    fi
+    "$YORHA_HOME/current/bin/$YORHA_CMD" shell restart >/dev/null || true
+    yorha_say "rolled back from $cur to $prev ($state)"
+}
+
+cmd_migrate() {
+    local from
+    from=$(cat "$YORHA_STATE/last-version" 2>/dev/null || echo unknown)
+    [[ ${1:-} == --from ]] && from=${2:?--from <version>}
+    yorha_migrate "$YORHA_ROOT" "$from"
+}
+
+# --- the shell (research R4) ------------------------------------------------------------------------
+run_dir() { printf '%s/%s' "${XDG_RUNTIME_DIR:-/tmp}" "$YORHA_NAME"; }
+shell_root() { readlink -f "$YORHA_HOME/current"; }
+
+# Supervise qs on the version in use: one instance (a lock), restarted when it exits, so that
+# `shell restart` (and an update) bring up whatever "current" points at. Stops when uninstalled.
+# --relaunch: the same supervisor, re-executed from a newer version (it keeps the lock on fd 9).
+cmd_shell_start() {
+    local rd root qspid log
+    rd=$(run_dir); mkdir -p "$rd" "$YORHA_STATE"
+    # Quickshell only watches the applications folder if it exists when it starts; without it, an app
+    # installed later stays out of the APPS tab until a restart (spec 007, T041; PLAN, S3).
+    mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+    if [[ ${1:-} != --relaunch ]]; then
+        exec 9>"$rd/shell.lock"
+        flock -n 9 || { yorha_say "the shell is already running"; exit 0; }
+        # Qt registers with the portal at start; wait for it (at most 30 s), as the lab's runner does.
+        timeout 30 systemctl --user start xdg-desktop-portal.service >/dev/null 2>&1 || true
+        for _ in $(seq 60); do busctl --user status org.freedesktop.portal.Desktop >/dev/null 2>&1 && break; sleep 0.5; done
+    fi
+    # Two known Qt 6.12 warnings that are not ours (see lab/guest/nier-ui-run).
+    export QT_LOGGING_RULES="qt.qpa.wayland.textinput.warning=false;qt.qpa.services.warning=false"
+    log="$YORHA_STATE/shell.log"
+    while [[ -L $YORHA_HOME/current ]]; do
+        root=$(shell_root)
+        # A newer version took over: run its own supervisor (its code may differ from this one's).
+        if [[ $root != "$YORHA_ROOT" && -x $root/bin/$YORHA_CMD ]]; then
+            exec "$root/bin/$YORHA_CMD" shell start --relaunch
+        fi
+        [[ -s $log ]] && mv -f "$log" "$log.1"     # the previous run, kept once
+        YORHA_OS_ROOT="$root" qs -p "$root/shell" >>"$log" 2>&1 &
+        qspid=$!
+        echo "$qspid" > "$rd/shell.pid"
+        echo "$root" > "$rd/shell.root"
+        wait "$qspid" || true
+        rm -f "$rd/shell.pid" "$rd/shell.root"
+        sleep 1
+    done
+    yorha_say "not installed anymore; the shell stays off"
+}
+
+# Stop the running qs; the supervisor brings the version in use back up.
+cmd_shell_restart() {
+    local pid
+    pid=$(cat "$(run_dir)/shell.pid" 2>/dev/null || true)
+    if [[ -n $pid ]] && kill "$pid" 2>/dev/null; then yorha_say "shell restarting"
+    else yorha_say "the shell is not running (start it with: $YORHA_CMD shell start)"; fi
+}
+
+# The shell's IPC, on the path of the version that is running (the supervisor writes it), so qs finds
+# the instance even between an update's switch and the shell's restart.
+cmd_ipc() {
+    local root
+    [[ -L $YORHA_HOME/current ]] || yorha_fail "not installed"
+    root=$(cat "$(run_dir)/shell.root" 2>/dev/null || true)
+    [[ -n $root && -d $root ]] || root=$(shell_root)
+    exec qs -p "$root/shell" ipc call "$@"
+}
+
+# --- the optional core: boot and login (US5, research R10) ----------------------------------------
+BOOT_LOGIN() { printf '%s/system/boot-login/%s-boot-login' "$(shell_root)" "$YORHA_NAME"; }
+
+cmd_boot_login() {
+    local sub=${1:-} mod
+    mod=$(BOOT_LOGIN)
+    [[ -x $mod ]] || yorha_fail "the boot and login module is not in this version"
+    case $sub in
+        status) exec sudo "$mod" status ;;
+        install)
+            yorha_say "the boot (Plymouth) and login (SDDM) themes change system files, with a backup of each;"
+            yorha_say "this is what would change:"
+            sudo "$mod" install --dry-run --src "$(shell_root)" || true
+            yorha_ask "install them (sudo)?" || { yorha_say "nothing changed"; exit 1; }
+            exec sudo "$mod" install --src "$(shell_root)" ;;
+        uninstall)
+            yorha_say "this is what would go back as it was:"
+            sudo "$mod" uninstall --dry-run || true
+            yorha_ask "undo the boot and login themes (sudo)?" || { yorha_say "nothing changed"; exit 1; }
+            exec sudo "$mod" uninstall ;;
+        *) usage ;;
+    esac
+}
+
+# --- uninstall (US6, research R11) -------------------------------------------------------------------
+cmd_uninstall() {
+    local mod rd pid
+    [[ -n $(yorha_current) ]] || yorha_fail "not installed"
+    yorha_ask "remove $YORHA_PRETTY from $YORHA_HOME (the versions and the $YORHA_CMD command)?" \
+        || { yorha_say "nothing removed"; exit 1; }
+    mod=$(BOOT_LOGIN)
+    if [[ -x $mod ]] && sudo -n true 2>/dev/null && sudo "$mod" status 2>/dev/null | grep -q 'installed.*yes'; then
+        yorha_say "the boot and login themes are installed"
+        if yorha_ask "undo them first (sudo)?"; then sudo "$mod" uninstall || yorha_say "the themes were not fully undone (see: sudo $mod status)"; fi
+    elif [[ -x $mod ]]; then
+        yorha_say "if you installed the boot and login themes, undo them first: $YORHA_CMD boot-login uninstall"
+    fi
+    rd=$(run_dir)
+    pkill -f "[$(printf '%s' "${YORHA_CMD:0:1}")]${YORHA_CMD:1} shell start" 2>/dev/null || true
+    pid=$(cat "$rd/shell.pid" 2>/dev/null || true)
+    [[ -n $pid ]] && kill "$pid" 2>/dev/null || true
+    rm -rf "$rd"
+    rm -f "$YORHA_BIN/$YORHA_CMD"
+    cd / && rm -rf "$YORHA_HOME"
+    if yorha_ask "also remove the saved state ($YORHA_STATE: what the menus saved, the update copies)?"; then
+        rm -rf "$YORHA_STATE"
+    fi
+    yorha_say "$YORHA_PRETTY removed. Kept: $YORHA_CONFIG and the system packages it installed."
+    yorha_say "remove its line from ~/.config/hypr/hyprland.lua (it does nothing now, but it is yours to clean)"
+}
+
+# The line the person adds at the top of ~/.config/hypr/hyprland.lua (contracts/encaixe.md).
+include_line() {
+    local f="$YORHA_HOME/current/system/hypr/$YORHA_NAME.lua"
+    if [[ $f == "$HOME"/* ]]; then
+        printf 'pcall(dofile, os.getenv("HOME") .. "%s")\n' "${f#"$HOME"}"
+    else
+        printf 'pcall(dofile, "%s")\n' "$f"
+    fi
+}
+
+# Whether the person's hyprland.lua already has the include line (not commented out).
+has_include_line() {
+    local cfg=${XDG_CONFIG_HOME:-$HOME/.config}/hypr/hyprland.lua
+    [[ -f $cfg ]] && grep -v '^[[:space:]]*--' "$cfg" | grep -qF "/current/system/hypr/$YORHA_NAME.lua"
+}
+
+# Called by install.sh from the freshly unpacked version: make it the one in use.
+cmd__install() {
+    local v
+    v=$(yorha_version_of "$YORHA_ROOT")
+    yorha_switch "$v"
+    yorha_mark_migrations "$YORHA_ROOT"
+    mkdir -p "$YORHA_STATE"
+    echo "$v" > "$YORHA_STATE/last-version"
+    yorha_say "$YORHA_PRETTY $v installed in $YORHA_HOME"
+    if pgrep -x qs >/dev/null || pgrep -f serpantinumd >/dev/null; then
+        yorha_say "another shell is running now; keep only one of them in your Hyprland autostart"
+    fi
+    case :$PATH: in *":$YORHA_BIN:"*) ;; *) yorha_say "add $YORHA_BIN to your PATH to run $YORHA_CMD" ;; esac
+    # T029: the line may be there already (a reinstall, or added by hand first); it is Lua for
+    # Hyprland, and people pasted it into the terminal, so say where it goes.
+    if has_include_line; then
+        cat <<DONE
+
+Your ~/.config/hypr/hyprland.lua already loads $YORHA_PRETTY: log in again to start it.
+To get newer versions later: $YORHA_CMD update
+DONE
+        return
+    fi
+    cat <<DONE
+
+Last step: open ~/.config/hypr/hyprland.lua in a text editor, add this line at the top, save,
+then log in again. It is Lua for Hyprland, not a terminal command:
+
+    $(include_line)
+
+It starts the shell and adds its keys (SUPER; set YORHA_MOD = "ALT" on the line before to change).
+To get newer versions later: $YORHA_CMD update
+DONE
+}
+
+main() {
+    case ${1:-} in
+        version) echo "$YORHA_NAME $(yorha_version_of "$YORHA_ROOT")" ;;
+        status) cmd_status ;;
+        _install) cmd__install ;;
+        shell)
+            case ${2:-} in
+                start) shift 2; cmd_shell_start "$@" ;;
+                restart) cmd_shell_restart ;;
+                *) usage ;;
+            esac ;;
+        ipc) shift; (($#)) || usage; cmd_ipc "$@" ;;
+        update) shift; cmd_update "$@" ;;
+        rollback) cmd_rollback ;;
+        migrate) shift; cmd_migrate "$@" ;;
+        boot-login) shift; cmd_boot_login "$@" ;;
+        uninstall) cmd_uninstall ;;
+        *) usage ;;
+    esac
+}
+main "$@"

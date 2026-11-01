@@ -36,7 +36,7 @@ FocusScope {
     readonly property var str: Strings.notify
     readonly property string title: str.title
     readonly property string subtitle: str.subtitle
-    readonly property string footerLeft: str.footer
+    readonly property string footerLeft: str.footer.arg(Updater.versionLabel)
 
     property int filter: 0                       // 0 All, 1 Unread (NEW), 2 Critical
     readonly property var filters: ["all", "unread", "critical"]

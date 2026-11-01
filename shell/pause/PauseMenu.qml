@@ -198,7 +198,8 @@ PopupWindow {
                 tabs: tabIds.map((t, i) => popupFrame.tabGeometry(i)),
                 item: geo?.item ?? null,
                 value: geo?.value ?? null,
-                columns: geo?.columns ?? null            // spec 013: the tab's three columns
+                columns: geo?.columns ?? null,           // spec 013: the tab's three columns
+                scroll: geo?.scroll ?? null              // spec 014: SYSTEM's columns, in whole rows
             }
         };
     }
@@ -213,7 +214,7 @@ PopupWindow {
     clock: true
     title: tabText.title
     subtitle: tabText.subtitle
-    footerLeft: tab === "system" ? Strings.settings.version : (page?.footerLeft ?? "")
+    footerLeft: tab === "system" ? Strings.settings.version.arg(Updater.versionLabel) : (page?.footerLeft ?? "")
     keys: pageKeys
     onDismissed: closeRequested()
     onTabClicked: index => setTab(tabIds[index])

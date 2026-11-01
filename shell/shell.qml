@@ -750,6 +750,26 @@ ShellRoot {
         }
     }
 
+    // spec 014 (contracts/updater.md): newer versions, for a shell installed with yorha.
+    IpcHandler {
+        target: "updates"
+        function check(): string { return Updater.check(); }
+        function now(): string { return Updater.updateNow(); }
+        function open(): void { shell.openUpdates(); }
+        function dump(): string { return Updater.dump(); }
+    }
+    Connections {
+        target: Updater
+        function onShowUpdates() { shell.openUpdates(); }
+    }
+    // SYSTEM › Updates (the transmission's click, `updates open`).
+    function openUpdates(): void {
+        const i = SettingsModel.categories.findIndex(c => c.id === "updates");
+        if (i >= 0)
+            settingsCategory = i;
+        openPause("system");
+    }
+
     // spec 013 (contracts/ipc.md): the interface sounds.
     IpcHandler {
         target: "sounds"

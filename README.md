@@ -8,8 +8,27 @@ interface, telas de boot e login e, mais pra frente, a tela de bloqueio. Feita e
 Os sons que vêm com o YoRHa-OS são nossos. Quem tem o jogo no PC pode usar os da própria cópia, por
 uma pasta de sons ([`docs/sons-do-jogo.md`](docs/sons-do-jogo.md)).
 
-> **Estado:** em desenvolvimento. Ainda não tem instalador; tudo é testado num laboratório de
-> máquinas virtuais antes de chegar em uma máquina de verdade.
+> **Estado:** em desenvolvimento. Tudo é testado num laboratório de máquinas virtuais antes de chegar
+> em uma máquina de verdade. O instalador existe, mas ainda não há um endereço público de versões.
+
+## Instalar e atualizar
+
+Num Arch com o Hyprland funcionando, como o seu usuário:
+
+```sh
+YORHA_OS_CHANNEL=<endereço das versões> bash <(curl -fsSL <endereço das versões>/install.sh)
+```
+
+- **O instalador** confere o que o shell precisa e pergunta antes de instalar qualquer pacote.
+- **Onde fica:** tudo vai pra `~/.local/share/yorha-os/`, e o comando `yorha` pra `~/.local/bin/`.
+- **O seu `~/.config/hypr` não é tocado.** No fim, ele mostra uma linha pra você colocar no topo do
+  `hyprland.lua`; ela sobe o shell e liga os atalhos (SUPER; `YORHA_MOD = "ALT"` na linha de cima
+  troca).
+- **`yorha update`** traz a versão nova, e **`yorha rollback`** volta pra anterior, com o estado de
+  antes. Quando sai versão nova, uma transmissão avisa, e SYSTEM › Updates tem o "Update now".
+- **`yorha status`** mostra o que está instalado.
+- **`yorha boot-login install`** põe as telas de boot e de login, com backup; `uninstall` desfaz.
+- **`yorha uninstall`** tira tudo. A sua config em `~/.config/yorha-os` fica.
 
 ## Inspirações
 

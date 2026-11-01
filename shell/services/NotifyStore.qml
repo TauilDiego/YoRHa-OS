@@ -233,13 +233,19 @@ Singleton {
         commit(true);
     }
 
-    // A YoRHa-OS message, spoken with the system's voice (R17): no app to tell.
-    function system(title: string, body: string, urgency: string, quiet: bool): int {
+    // A YoRHa-OS message, spoken with the system's voice (R17): no app to tell. `onOpen` (spec 014),
+    // when given, is what a click does: the entry has a default action while this session lasts.
+    property var systemActions: ({})
+    function system(title: string, body: string, urgency: string, quiet: bool, onOpen: var): int {
         const id = -1000 - (++systemSeq);
+        const act = typeof onOpen === "function";
         const e = makeEntry(id, {
             system: true, title: title, body: NotifyText.sanitize(body),
-            urgency: ["low", "normal", "critical"].includes(urgency) ? urgency : "normal", alive: false
+            urgency: ["low", "normal", "critical"].includes(urgency) ? urgency : "normal", alive: act,
+            hasDefault: act
         }, Date.now());
+        if (act)
+            systemActions[id] = onOpen;
         entries.unshift(e);
         if (!quiet)
             place(e, e.at, Date.now());
@@ -520,6 +526,10 @@ Singleton {
             if (!a)
                 return `error: no action ${actionId}`;
             a.invoke();
+        } else if (actionId === "default" && systemActions[id]) {
+            const open = systemActions[id];
+            delete systemActions[id];
+            open();
         } else if (actionId !== "default" && !e.actions.some(a => a.id === actionId)) {
             return `error: no action ${actionId}`;
         }

@@ -5,7 +5,9 @@ import ".."
 
 // Option column (spec 003): OptionRows one under the other, without the vertical strips (as in
 // the mockup). When they don't fit, the column scrolls with `currentIndex` so the current row —
-// its band, rails, shadow and kite — is always in view; the wheel doesn't scroll it.
+// its band, rails, shadow and kite — is always in view. spec 014 (T029): the wheel scrolls it too,
+// one row per notch, while the rows don't fit; the cursor, if left out, comes to the nearest row in
+// view through `cursorRequested(index)` (the parent owns `currentIndex`).
 // The kite hangs in the first selectorRoom px of the list's own width, so nothing is clipped.
 //   options: the category's options; values / dims: maps option id → value / dimmed.
 //   focused: false → no row is highlighted (the options column without the focus).
@@ -26,6 +28,7 @@ Item {
     signal stepped(int index, int dir)
     signal picked(int index, real value)
     signal activated(int index)
+    signal cursorRequested(int index)
 
     readonly property int selectorRoom: Tokens.px(Tokens.space.selectorW + Tokens.space.selectorGap, s)
     readonly property int railRoom: Tokens.px(Tokens.space.railGap, s) + Tokens.line(Tokens.space.rail, s)
@@ -99,23 +102,55 @@ Item {
         return n * pitch - (pitch - rowH) + 2 * railRoom;
     }
 
-    // Scroll by whole rows, just enough to show row `currentIndex` with its rails.
-    property real scrollY: 0
+    // Scroll by whole rows, just enough to show row `currentIndex` with its rails. spec 014: kept in
+    // rows (as the CursorList's), so a panel that grows never leaves the column scrolled for nothing.
+    property int topRow: 0
+    readonly property int maxTop: Math.max(0, count - visibleRows)
+    readonly property real scrollY: Math.min(topRow, maxTop) * pitch
     function follow(): void {
         if (pitch <= 0)                          // still being built
             return;
-        let first = Math.round(scrollY / pitch) || 0;
+        let first = Math.min(topRow, maxTop);
         if (currentIndex < first)
             first = currentIndex;
         else if (currentIndex >= first + visibleRows)
             first = currentIndex - visibleRows + 1;
-        first = Math.max(0, Math.min(first, count - visibleRows));
-        scrollY = first * pitch;
+        topRow = Math.max(0, Math.min(first, maxTop));
     }
     onCurrentIndexChanged: follow()
-    onHeightChanged: follow()
+    onHeightChanged: Qt.callLater(follow)
+
+    // One wheel notch (120) scrolls one row (spec 014).
+    readonly property bool overflows: count > visibleRows
+    property real wheelRest: 0                    // the wheel's turn not yet spent (touchpads)
+    function wheelBy(delta: real): void {
+        if (!overflows)
+            return;
+        wheelRest += delta;
+        let first = Math.min(topRow, maxTop);
+        while (wheelRest >= 120) {
+            wheelRest -= 120;
+            first--;
+        }
+        while (wheelRest <= -120) {
+            wheelRest += 120;
+            first++;
+        }
+        first = Math.max(0, Math.min(first, maxTop));
+        if (first === Math.min(topRow, maxTop))
+            return;
+        topRow = first;
+        if (currentIndex >= first && currentIndex < first + visibleRows)
+            return;
+        cursorRequested(currentIndex < first ? first : first + visibleRows - 1);
+    }
+    WheelHandler {
+        enabled: root.overflows
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: event => root.wheelBy(event.angleDelta.y)
+    }
     onOptionsChanged: {
-        scrollY = 0;
+        topRow = 0;
         follow();
     }
 
