@@ -144,6 +144,9 @@ shell_root() { readlink -f "$YORHA_HOME/current"; }
 cmd_shell_start() {
     local rd root qspid log
     rd=$(run_dir); mkdir -p "$rd" "$YORHA_STATE"
+    # Quickshell only watches the applications folder if it exists when it starts; without it, an app
+    # installed later stays out of the APPS tab until a restart (spec 007, T041; PLAN, S3).
+    mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/applications"
     if [[ ${1:-} != --relaunch ]]; then
         exec 9>"$rd/shell.lock"
         flock -n 9 || { yorha_say "the shell is already running"; exit 0; }
