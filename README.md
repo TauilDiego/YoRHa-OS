@@ -1,8 +1,12 @@
 # YoRHa-OS
 
-Uma interface para o Linux inspirada em NieR:Automata: barra, papel de parede, menu de pausa,
-notificações no estilo do Pod e, mais pra frente, as telas de boot, login e bloqueio. Feita em
+Uma interface para o Linux inspirada em NieR:Automata: barra, papel de parede, menu de pausa com o
+movimento dos menus do jogo (em janela ou tela cheia), notificações no estilo do Pod, sons da
+interface, telas de boot e login e, mais pra frente, a tela de bloqueio. Feita em
 [Quickshell](https://quickshell.org/) para o Hyprland, no Arch Linux.
+
+Os sons que vêm com o YoRHa-OS são nossos. Quem tem o jogo no PC pode usar os da própria cópia, por
+uma pasta de sons ([`docs/sons-do-jogo.md`](docs/sons-do-jogo.md)).
 
 > **Estado:** em desenvolvimento. Ainda não tem instalador; tudo é testado num laboratório de
 > máquinas virtuais antes de chegar em uma máquina de verdade.
