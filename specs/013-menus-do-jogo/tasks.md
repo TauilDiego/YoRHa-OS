@@ -32,9 +32,9 @@ erro, sempre dentro do `lab/perf begin/end`.
 
 ## Phase 1: Setup (preparação, F0)
 
-- [ ] T001 Mesclar a 008 na `main` (depois do agente da 008), dar push e trazer a `main` pra
+- [X] T001 Mesclar a 008 na `main` (depois do agente da 008), dar push e trazer a `main` pra
   `013-menus-do-jogo`
-- [ ] T002 Criar a `lab-013` a partir da `main` privada (com a `lab-008` mesclada) e a worktree
+- [ ] T002 Criar a `lab-013` a partir da `lab-008` (que já tem a `main` privada e a `lab-007`, com o `check-007`; a `main` privada não tem) e a worktree
   `YoRHa-OS-private-wt/lab-013`
 - [ ] T003 `lab/up --audio-capture`: placa emulada `ich9-intel-hda` + `hda-output` com `-audiodev wav`,
   saída em `out/audio-<vm>-<data>.wav` (research S6); documentar no `lab/README.md`
@@ -185,6 +185,8 @@ erro, sempre dentro do `lab/perf begin/end`.
   `README.md`
 - [ ] T055 Sessão do dono numa janela da VM: os dois modos, a janelinha e os sons; ajustar os números
   (SC-007, SC-011)
+- [ ] T057 Acabamento herdado da 008: no log, o ◂ OFF ▸ (coluna estreita de 70) não alinha com o
+  valor de Show logo abaixo; alinhar as colunas de valor das opções do log
 - [ ] T056 `relatorio.md` e a página de revisão; atualizar o `PLAN.md`, o mapa do projeto e a Central
 
 ## Dependencies & Execution Order
