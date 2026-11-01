@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# yorha-boot-watch: tells the YoRHa-OS boot screen which units failed during the boot (spec 011,
+# research R7). systemd sends Plymouth the name of each unit that starts, but not the failures: this
+# follows the boot's journal for the jobs of the system manager that ended in "failed" (the ones
+# from before it started too) and sends "yorha:fail:<unit>" to Plymouth. It runs until Plymouth is
+# gone: the login screen starts the list's exit, and the screen still shows failures during it.
+#
+# --flush: one pass over the journal, without following, then exit. A followed journal hears of an
+# entry ~0.5 s late (journald posts its changes in batches), and a unit that fails just before the
+# login screen starts would be heard only after the exit. The sddm.service drop-in runs this right
+# before it sends "yorha:exit". Sending a unit twice is harmless.
+#
+# Bash and the system's own tools only.
+set -u
+command -v plymouth >/dev/null && plymouth --ping || exit 0
+query=(journalctl -b --no-pager -q -o cat --output-fields=UNIT _PID=1 JOB_RESULT=failed)
+declare -A sent=()
+
+send() {
+    [[ -n $1 && -z ${sent[$1]:-} ]] || return 0
+    sent[$1]=1
+    plymouth display-message --text="yorha:fail:$1"
+}
+
+if [[ ${1:-} == --flush ]]; then
+    while IFS= read -r unit; do send "$unit"; done < <("${query[@]}")
+    exit 0
+fi
+
+coproc J { exec "${query[@]}" -f -n all; }
+trap 'kill "$J_PID" 2>/dev/null' EXIT
+while :; do
+    if IFS= read -r -t 1 unit <&"${J[0]}"; then
+        send "$unit" || break
+    elif (($? <= 128)); then
+        break                                   # journalctl is gone
+    fi
+    plymouth --ping || break
+done

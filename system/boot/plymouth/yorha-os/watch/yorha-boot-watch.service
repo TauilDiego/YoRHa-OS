@@ -1,0 +1,16 @@
+[Unit]
+Description=YoRHa-OS boot screen: report failed units to Plymouth
+Documentation=file:///usr/share/plymouth/themes/yorha-os/README.md
+DefaultDependencies=no
+After=plymouth-start.service systemd-journald.service
+Conflicts=shutdown.target
+Before=shutdown.target
+ConditionPathExists=/run/plymouth/pid
+
+[Service]
+Type=simple
+ExecStart=/usr/share/yorha-os/boot/watch/yorha-boot-watch
+TimeoutStopSec=2
+
+[Install]
+WantedBy=sysinit.target

@@ -23,16 +23,26 @@ import "../../strings"
 // it. `keys` are the hints of the focus, for the pop-up's footer.
 //   options: [{ id, label, values: [text] }]; values: option id → index of its current value;
 //   info: [{ label, value }].
+// spec 007 (the pause menu's APPS and WINDOWS): `startY` (game px, 150 by default) is where the columns
+// start; `searchHeader` ({ query, count } or null) and `emptyText` go to the GroupedList; an option
+// can have a `type`:
+//   choice  (default) as above;
+//   toggle  ◂ ON ▸ / ◂ OFF ▸ (its value 0/1): ← → and Enter flip it;
+//   action  label + arrow (`text`): Enter or a click emits triggered(option); → does nothing and ←
+//           goes back to the list.
+// Keys it doesn't use (Tab, letters, Backspace) stay unaccepted, for the page around it.
+// `optionsVisible` (default true; T043) hides the Options card, e.g. APPS with a search that found
+// nothing. The wheel over a list taller than its column scrolls it by whole entries; a cursor left
+// out of view comes back into it, and the focus goes to the list (as with the pointer).
 // spec 008 (the text log, research R16), compatible additions:
-//   fluid    the columns and the top come from the layout's own width and height, in the proportions
-//            of the 1612×908 frame, and the layout fills its whole rect (no room for a title or a
-//            footer: the host draws those), so the same body fits the pop-up and a pause-menu tab;
-//   options of type "toggle" ({ id, label, type: "toggle" }; values: id → 0/1; ←→ and Enter flip
-//            it) and "action" ({ id, label, type: "action", text }: the text and ▸; Enter or a click →
-//            triggered(option); ← goes back to the list, → does nothing; the footer says Enter <text>).
-//            The same names as branch 007-menu-de-pausa, which made the same addition in parallel;
-//   lazyList the list creates only the rows in view (GroupedList.lazy), for a long log.
-// The default (fluid: false, choices only) is spec 004's picker, unchanged.
+//   fluid        the columns and the top come from the layout's own width and height, in the
+//                proportions of the 1612×908 frame, and the layout fills its whole rect (no room for
+//                a title or a footer: the host draws those), so the same body fits the pop-up and a
+//                pause-menu tab; the list reaches 24 px short of the preview, as in the log's mockup;
+//   lazyList     the list creates only the rows in view (GroupedList.lazy), for a long log;
+//   toggleValueW the width (game px) of a toggle's ON/OFF between ◂ and ▸; the default is every
+//                stepper's (Tokens.space.stepperValueW), the log narrows it so its labels fit.
+// The default (fluid: false) is the picker of specs 004 and 007, unchanged.
 FocusScope {
     id: root
 
@@ -46,14 +56,23 @@ FocusScope {
     property var info: []
     property string optionsTitle: Strings.wallpaper.options
     property string applyLabel: Strings.wallpaper.keyApply
-    property bool fluid: false
-    property bool lazyList: false               // spec 008: the GroupedList makes only the rows in view
     default property alias preview: previewSlot.data
+    // spec 007
+    property real startY: 150
+    property var searchHeader: null
+    property string emptyText: ""
+    property string trailingRole: "small"
+    property bool optionsVisible: true
+    readonly property GroupedList groupedList: list
+    // spec 008
+    property bool fluid: false
+    property bool lazyList: false
+    property real toggleValueW: Tokens.space.stepperValueW
 
     signal applied(int index)
     signal picked(int option, int value)
-    signal triggered(int option)
     signal closeRequested()
+    signal triggered(int option)
 
     readonly property int count: list.count
     readonly property bool currentDim: list.itemData(index)?.dim === true
@@ -68,15 +87,16 @@ FocusScope {
         return fluid ? Math.round(v * width / Tokens.space.popupW) : u(v);
     }
 
-    function typeOf(i: int): string {
-        return String(options[i]?.type ?? "choice");
-    }
     function valueOf(i: int): int {
         return Number(values[options[i]?.id] ?? 0);
     }
 
     function lengthOf(i: int): int {
-        return options[i]?.values?.length ?? 0;
+        return typeOf(i) === "toggle" ? 2 : (options[i]?.values?.length ?? 0);
+    }
+
+    function typeOf(i: int): string {
+        return String(options[i]?.type ?? "choice");
     }
 
     function enterOptions(): void {
@@ -100,13 +120,14 @@ FocusScope {
 
     // A value changed by ← → or an arrow: no wrapping; `back` (keys only) leaves on ← at the start.
     function step(i: int, dir: int, back: bool): void {
-        if (typeOf(i) === "toggle") {
-            picked(i, valueOf(i) ? 0 : 1);
-            return;
-        }
-        if (typeOf(i) === "action") {
+        const t = typeOf(i);
+        if (t === "action") {
             if (dir < 0 && back)
                 column = "list";
+            return;
+        }
+        if (t === "toggle") {
+            picked(i, valueOf(i) ? 0 : 1);
             return;
         }
         const v = valueOf(i), n = lengthOf(i);
@@ -120,12 +141,8 @@ FocusScope {
         picked(i, v + dir);
     }
 
-    // Enter or a click on a row: the next value, wrapping (a toggle flips, an action runs).
+    // Enter or a click on a row: the next value, wrapping.
     function advance(i: int): void {
-        if (typeOf(i) === "toggle") {
-            picked(i, valueOf(i) ? 0 : 1);
-            return;
-        }
         if (typeOf(i) === "action") {
             triggered(i);
             return;
@@ -206,9 +223,9 @@ FocusScope {
     readonly property var keys: {
         const W = Strings.wallpaper, K = Strings.settings;
         if (column === "options") {
-            if (typeOf(option) === "action")
-                return [{ key: K.keyUpDown, label: W.keySelect }, { key: K.keyEnter, label: String(options[option]?.text ?? "") }, { key: K.keyEsc, label: W.keyBack }];
-            return [{ key: K.keyUpDown, label: W.keySelect }, { key: K.keyLeftRight, label: W.keyChange }, { key: K.keyEsc, label: W.keyBack }];
+            const o = options[option];
+            const mid = o?.type === "action" ? { key: K.keyEnter, label: String(o.text ?? "") } : { key: K.keyLeftRight, label: W.keyChange };
+            return [{ key: K.keyUpDown, label: W.keySelect }, mid, { key: K.keyEsc, label: W.keyBack }];
         }
         const out = [{ key: K.keyUpDown, label: W.keySelect }];
         if (count > 0 && !currentDim)
@@ -241,13 +258,14 @@ FocusScope {
             item: row ? rectOf(row, 0, 0, row.width, row.height) : null,
             value: value ? rectOf(value, 0, 0, value.width, value.height) : null,
             preview: rectOf(previewSlot, 0, 0, previewSlot.width, previewSlot.childrenRect.height),
-            options: rectOf(optionsBox, 0, 0, optionsBox.width, optionsBox.height)
+            options: optionsVisible ? rectOf(optionsBox, 0, 0, optionsBox.width, optionsBox.height) : null
         };
     }
 
     // --- layout ----------------------------------------------------------------------------------
-    // The columns start at y 150 and stop 24 px above the footer rule (88 px above the bottom).
-    readonly property int topY: fluid ? 0 : u(150)
+    // The columns start at `startY` (150) and stop 24 px above the footer rule (88 px above the
+    // bottom); fluid, they take the whole rect.
+    readonly property int topY: fluid ? 0 : u(startY)
     readonly property int bottomY: fluid ? height : height - u(Tokens.space.popupH - 820) - u(24)
 
     GroupedList {
@@ -263,7 +281,14 @@ FocusScope {
         currentIndex: root.index
         focused: root.column === "list"
         keysEnabled: false
+        search: root.searchHeader
+        emptyText: root.emptyText
+        trailingRole: root.trailingRole
         onHoveredIndex: i => root.noteHover("list", i)
+        onCursorRequested: i => {
+            root.column = "list";
+            root.index = i;
+        }
         onActivated: i => {
             root.column = "list";
             root.index = i;
@@ -284,8 +309,9 @@ FocusScope {
         id: optionsBox
         x: root.hx(1160)
         y: root.topY
-        width: Math.min(root.hx(Tokens.space.pickerOptionsW), root.width - x - root.u(8))
+        width: root.fluid ? Math.min(root.hx(Tokens.space.pickerOptionsW), root.width - x - root.u(8)) : root.u(Tokens.space.pickerOptionsW)
         height: infoColumn.y + infoColumn.height + root.u(22)
+        visible: root.optionsVisible
 
         readonly property int railRoom: Tokens.px(Tokens.space.railGap, root.s) + Tokens.line(Tokens.space.rail, root.s)
 
@@ -315,7 +341,8 @@ FocusScope {
                     s: root.s
                     contentScale: Tokens.space.pickerOptionScale
                     option: Object.assign({ type: "choice" }, modelData)
-                    value: root.valueOf(index)
+                    value: modelData?.type === "toggle" ? root.valueOf(index) !== 0 : root.valueOf(index)
+                    valueWidth: modelData?.type === "toggle" ? root.toggleValueW : Tokens.space.stepperValueW
                     focused: root.column === "options" && index === root.option
 
                     onHoveredChanged: if (hovered) root.noteHover("options", index)

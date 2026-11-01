@@ -147,10 +147,10 @@ Serpantinum.
 | U0 Laboratório | Ambiente de testes privado (VM + containers), com sync e screenshot | Uma mudança em `shell/` aparece no ambiente de testes em segundos, com screenshot como prova |
 | U1 Base visual | Design system (tokens, componentes, shaders), fixtures e HUD | Screenshot do HUD com dados de teste |
 | U2 Estudo de instalação | Métodos A–D comparados, com o HUD como carga (8.4) | `docs/estudo-instalacao.md` escrito e método escolhido |
-| U3 Menu de pausa | Launcher, janelas, energia | Screenshot de cada aba |
+| U3 Menu de pausa ✅ | Launcher, janelas, energia | Screenshot de cada aba |
 | U4 Pod e text log | Notificações e OSD | Uma notificação de teste vira transmissão do Pod |
 | U5 Lock e polkit | Tela de bloqueio (PAM) e agente de polkit, testados de verdade na VM | Bloquear, desbloquear e autorizar uma ação funcionam na VM |
-| U5a Boot e login | Splash de boot no Plymouth e tela de login com a UI NieR: tema QML do SDDM ou um greeter em Quickshell (a escolha sai da spec). O bootloader continua o systemd-boot, escolha do dono, então o menu dele não ganha tema | Na VM, um reboot mostra o splash e cai na tela de login nova (screenshots dos dois, do boot até o login); entrar com senha certa abre o Hyprland e com senha errada mostra o erro; o log do boot fica sem erro do tema |
+| U5a Boot e login ✅ | Splash de boot no Plymouth e tela de login com a UI NieR: tema QML do SDDM (spec 011; a escolha ficou com o SDDM). O bootloader continua o systemd-boot, escolha do dono, então o menu dele não ganha tema | Na VM, um reboot mostra o splash e cai na tela de login nova (screenshots dos dois, do boot até o login); entrar com senha certa abre o Hyprland e com senha errada mostra o erro; o log do boot fica sem erro do tema |
 | U5b i18n | Troca de idioma da UI (inglês padrão; português e outros) | A UI inteira muda de idioma por configuração |
 | U6 Otimização | Medir o custo por quadro, cortar efeitos caros, opção de reduzir movimento | A UI cabe no orçamento numa GPU integrada |
 | U7 Troca | A UI NieR substitui o Serpantinum na sua máquina, só depois de homologada na VM | Você usa um dia inteiro sem voltar pro Serpantinum |
@@ -160,12 +160,16 @@ Serpantinum.
 | Fase | Entrega | Pronto quando |
 |---|---|---|
 | S1 Inventário | Classificação em base/módulo/hardware/pessoal (o rascunho já está pronto) | Você revisou o inventário (repositório privado) |
-| S2 Arch completo na VM | ISO + archinstall desassistido (8.5) | Um comando entrega um `arch-limpo` instalado pela ISO |
+| S2 Arch completo na VM ✅ | ISO + archinstall desassistido (8.5) | Um comando entrega um `arch-limpo` instalado pela ISO |
 | S3 Instalador v0 | Arch limpo → o seu uso, com o Serpantinum no encaixe do shell | O checklist bate na VM |
 | S4 Updates | `yorha update` e migrations, usando o que o U2 aprendeu | Atualizar de v0.1 pra v0.2 funciona na VM |
 | S5 Niri | Gerador de atalhos e regras de janela, adaptador de workspaces no shell | O mesmo checklist passa no Niri |
 | S6 Público | Docs, nome público, licença, testes em EndeavourOS/CachyOS | Alguém de fora instala sem ajuda |
 | S7 (opcional) | Pacote de plugins pro Omarchy usando o mesmo código da UI | — |
+
+**Lembrete pra S3 (instalador):** criar `~/.local/share/applications/` antes de subir o shell. O
+Quickshell só observa essa pasta se ela existir quando ele sobe; sem isso, um app instalado depois
+não aparece no menu de pausa até o shell reiniciar (spec 007: spike T003, research R4, e T041).
 
 ## 10. Riscos
 
@@ -215,6 +219,20 @@ Serpantinum.
 - **2026-10-26:** avaliado um "aquário" em Docker (Hyprland sem tela,
   `HYPRLAND_HEADLESS_ONLY=1`). Trocado pela VM, que cobre também instalação, updates e
   serviços do sistema (SDDM, polkit, systemd).
+- **2026-10-28:** S2 concluída (spec 006): o `lab/install-iso` instala o Arch pela ISO oficial sem
+  nenhuma tecla, em cerca de 5,5 min, e congela a camada `arch-iso` (13 de 13 conferências). O dono
+  decidiu que a cadeia do Hyprland passa a ser montada sobre ela, junto com as camadas do Niri e do
+  Mango do estudo 009.
+- **2026-10-29:** U5a concluída (spec 011): o tema de boot do Plymouth (a lista de checagens com as
+  etapas reais, a faixa no desligar e o pedido de senha do disco), o tema de login do SDDM (o
+  protótipo aprovado) e o módulo `yorha-os-boot-login`, que instala com backup e desfaz. Na VM: nenhum
+  console do ligar ao login, o boot +0,80 s (limite de 1 s, aceito pelo dono), 20 de 20 no estresse do
+  login e o journal limpo em 10 ciclos. O dono quase aprovou: a velocidade das linhas do boot (texto
+  na hora, só o glitch) vira a spec 012.
+- **2026-10-30:** spec 012 concluída: as linhas do boot aparecem inteiras na hora (`typing=instant`,
+  o padrão), e a digitação do jogo fica como opção (`typing=game`). Na VM: 32 linhas num boot do
+  zero (eram 2 a 5), 35 quadros/s na rajada e o login +0,90 s em relação ao boot sem tema, com a base
+  remedida no mesmo dia. O limite é 1 s, então a margem é curta.
 
 ## Fontes
 

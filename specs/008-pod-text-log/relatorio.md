@@ -1,6 +1,6 @@
 # Relatório da implementação: Pod e text log (spec 008)
 
-**Data:** 2026-10-27 a 2026-10-29.
+**Data:** 2026-10-27 a 2026-10-29; merge com a `main` em 2026-10-31.
 
 **Onde:**
 - branch `008-pod-text-log` do repositório público;
@@ -12,8 +12,9 @@ uma frente só na `teste-b`, recriada depois do renome rien-OS → YoRHa-OS, com
 (instrução do dono). O `check-008` liga a VM no perfil hidpi (os dois modos existem). Tudo dentro de
 sessões `lab/perf`.
 
-**Status:** as 57 tarefas estão feitas. Faltam a aprovação visual do dono (SC-013), com a imagem de
-revisão `out/008-revisao.png`, e as decisões pendentes do fim deste relatório.
+**Status:** as 57 tarefas estão feitas e o dono aprovou a 008 visualmente (SC-013). Em 2026-10-31 a
+`main` entrou nesta branch (T058, seção "Merge com a main"), com as decisões do dono aplicadas. Falta o
+merge na `main`, que é do dono.
 
 ## O que ficou pronto
 
@@ -122,18 +123,81 @@ ImageMagick, python3, Docker pro Chromium do mockup), e toda tarefa tem evidênc
 | `2026-10-29T115809` US6 | 1002 s | +3,1 pp | 368 s |
 | `2026-10-29T121451` US7 | 1505 s | +5,2 pp | 611 s |
 | `2026-10-29T123957` T054–T057 (o roteiro inteiro, 4 rodadas, e o mockup no container) | 3045 s | +3,2 pp | 1539 s |
+| `2026-10-31T202411` T058, merge com a `main` (`check-008` ×2, `check-007` ×2, `check-004`, `check-003` ×2, shots) | 4107 s | +7,6 pp | 1888 s |
 
 A enxurrada de 100 custa pouco: o CPU do `qs` volta ao repouso em 5 s (4% contra 4%) e o log abre em
 ≈ 60 ms.
 
+## Merge com a main (31.10)
+
+A `main` (`2621cad`: 001–004, 006, 007, 011, 012) entrou na `008-pod-text-log` (merge-base `a3a9120`),
+com as decisões do dono de 2026-10-31. **Conflitos (8 arquivos, ≈ 980 linhas) e como ficaram:**
+- **`PickerLayout` (decisão 1):** o da 007 como base (`startY`, `searchHeader`, `emptyText`,
+  `trailingRole`, `optionsVisible`, `groupedList`, `onCursorRequested`, o toggle de 2 valores, a ordem de
+  `action`/`toggle` em `step()`/`advance()`, o `value:` do toggle); somados `fluid`, `lazyList`, `hx()` e
+  a lista mais larga do modo `fluid`. `topY` = `fluid ? 0 : u(startY)`; `bottomY` mantém o ramo `fluid`
+  da 008; o card Options só encolhe no modo `fluid`.
+- **`GroupedList`:** a da 007 (busca, linha vazia, rolagem em linhas inteiras, roda, `bottomEdge`) com o
+  `lazy` da 008. A geometria das linhas passa por `rowBox(i)` (do delegate ou de `tops`), então a
+  rolagem da 007 vale também nas linhas sob demanda do log; o delegate virou o `EntryView`, com as linhas
+  da busca e do vazio (007) e `lead`/`tag`/`markColor` (008). As duas mudanças eram necessárias.
+- **`Compositor`:** a fachada e os backends da 007. A tela cheia da 008 (FR-027) foi pro
+  `HyprlandBackend` (`fullscreen`, `refresh("fullscreen")`, relida nos mesmos eventos) e a fachada expõe
+  `focusedFullscreen`/`refreshFullscreen()`, como o contrato da 007 (§4–§5) já previa; `false` sem
+  backend que saiba (`fullscreenKnown`).
+- **`shell.qml` (decisão 2):** saem o `SettingsPopup`, `openSettings` e `closeSettings` (nenhuma
+  referência sobrou no `shell/`); `settings` é o alias da aba SYSTEM. O text log continua popup próprio
+  (`ALT + N`, o contador da barra): `openPause`, `openPicker` e `openLog` fecham os outros dois. O
+  `settings dump` é o da main com o `live` da 008.
+- **`Settings`, `Strings`, galeria, `docs/design-system.md`:** união. A galeria tem 6 páginas (a 4 é a da
+  007; a faixa e o log da 008 passam pra 5 e 6, subtítulos `n/6`); o design system tem a 007 em §9 e a
+  008 em §10.
+- **Fora dos conflitos:** a `SettingsPage` só cala o OSD (FR-029) enquanto aparece: no menu de pausa ela
+  fica viva sob as outras abas, e sair de SYSTEM com o foco em Sound › Volume deixava o OSD mudo.
+
+**"Do not dist…" (decisão 3):** `ValueStepper.valueWidth` e `OptionRow.valueWidth` (padrão
+`stepperValueW` 190) e `PickerLayout.toggleValueW`; só a `LogPage` passa `Tokens.notify.logToggleW` (70).
+Medido no `dump` (1080): o toggle do log tem 97 px; SYSTEM › Do not disturb continua 240 e APPS › Pinned
+195 (o mesmo 190 na escala 0,815 dos cards). Shots: `out/merge-008-shots/log-opcoes-1080.png` e
+`log-opcoes-hidpi.png`, com `Do not disturb` inteiro.
+
+**Lab (`lab-008`):** a `main` privada não tinha o `check-007` (está só na `lab-007`): entraram as duas
+(conflitos em `check-003`, `click`, `guest/hyprland.lua` e `up`, todos por união). Roteiros ajustados
+pelo merge: a galeria com 6 páginas (`check-004` Tab ×4 pra voltar à 1, `check-007` Tab ×3, `check-008`
+páginas 5 e 6), o ↓ a mais até `Pause menu` no `check-007` (Notifications depois de Sound), o "um popup
+por vez" do `check-008` também com o menu em APPS e o `osd-quiet` conferindo que o OSD volta na aba
+POWER (os dois dentro das linhas que já existiam: o total continua 110).
+
+**Resultados** (`teste-b`, 4 núcleos, 4 GB, sessão `lab/perf`
+`2026-10-31T202411-vm-teste-b-008-merge-com-a-main-check-008-007-004-0`):
+
+| Roteiro | 1080 | hidpi | Pasta (`~/.local/share/nier-lab/out/`) |
+|---|---|---|---|
+| `check-008` inteiro | **110/0** | **110/0** | `merge-008-check-008-1080`, `merge-008-check-008-hidpi` |
+| `check-007` (os dois perfis num roteiro) | **76/0** | (no mesmo) | `merge-008-check-007b` |
+| `check-004` (1080 e o fundo em hidpi) | **58/0** | | `merge-008-check-004` |
+| `check-003` (1080; o cenário 3 em hidpi) | **25/0** | | `merge-008-check-003b` |
+
+QML: os logs dos roteiros sem erro nem aviso (fora as duas linhas esperadas do outro servidor no bloco
+`edge`) e `qmllint` limpo (`lint` do `check-008`, SC-007 do `check-003`).
+Custo da sessão (relatório em `YoRHa-OS-relatorios`, commit `49e43de`): 4107 s; CPU do host 7,6 pp acima
+da base em média (pico 94%); a VM consumiu 1888 s de CPU, RSS ≈ 3,0 GB; o `qs` no fim com 281 MB e
+6,6%, o log da UI sem erro nem aviso. Os shots e as medidas da decisão 3 estão em
+`out/merge-008-shots/` (`log-popup-*`, `log-opcoes-*`, `pausa-system-notifications-*`,
+`pausa-apps-pinned-1080`, os `.json` com as larguras).
+Tropeços do caminho, nenhum da UI: a primeira rodada do `check-007` deu 74/2 (o SC-013 do POWER descia
+5 em vez de 6 até `Pause menu`; corrigido, o bloco `power` deu 22/0); a primeira do `check-003` deu 22/3
+(SC-004 fechar: o kitty da área 1 tinha ficado no aviso "Close OS window" de um roteiro anterior, então
+o texto digitado não chegava no shell; com um kitty novo, 25/0).
+
 ## Pendências pro dono
 
-1. **Aprovação visual (SC-013):** `out/008-revisao.png`.
-2. **Atalhos** `SUPER + N` / `SUPER + CTRL + N` (na VM, `ALT`): continuam provisórios.
-3. **"Do not dist…" cortado** no quadro de opções do log (a largura do valor é a `stepperValueW` da
-   003/004). Recomendação: uma coluna de valor mais estreita só pro toggle no modo `fluid`.
-4. **Merge do `PickerLayout` com a 007:** mesma interface, texto diferente; recomendação: no merge,
-   ficar com o da 007 e somar `fluid`, `lazyList` e a lista mais larga do modo `fluid`.
+1. ~~**Aprovação visual (SC-013)**~~: aprovada pelo dono.
+2. **Atalhos** `SUPER + N` / `SUPER + CTRL + N` (na VM, `ALT`): continuam provisórios (decisão de
+   2026-10-31: ficam como estão).
+3. ~~**"Do not dist…" cortado**~~: resolvido no merge (coluna do toggle própria do log, decisão 3).
+4. ~~**Merge do `PickerLayout` com a 007**~~: feito no merge (decisão 1).
 5. **Aviso do portal do Qt 6.12** (`qt.qpa.services`) silenciado no `guest/nier-ui-run` do lab;
    recomendação: manter até o Qt corrigir, como o `qt.qpa.wayland.textinput`.
-6. **Brilho real:** só por comando na VM (sem luz de fundo); homologar na máquina do dono (U7).
+6. **Brilho real:** só por comando na VM (sem luz de fundo); fica como nota pra U7.
+7. **Merge na `main`:** do dono. Antes, olhar os shots de `out/merge-008-shots/`.

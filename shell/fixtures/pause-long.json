@@ -1,0 +1,36 @@
+{
+  "clock": "2026-10-26T13:37:00",
+  "cpu": 23,
+  "mem": 41,
+  "volume": {
+    "percent": 64,
+    "muted": false
+  },
+  "battery": {
+    "percent": 87,
+    "charging": false
+  },
+  "workspaces": {
+    "existing": [
+      1,
+      2,
+      3
+    ],
+    "focused": 2
+  },
+  "activeWindow": "kitty — ~/projetos",
+  "wallpaper": {
+    "folder": "fixtures/wallpapers",
+    "all": "scene:menu",
+    "monitors": {},
+    "transition": {
+      "kind": "camouflage",
+      "cell": 24,
+      "trail": 2600,
+      "glitch": 2
+    }
+  },
+  "apps": "fixtures/pause/apps-long.json",
+  "windows": "fixtures/pause/windows-long.json",
+  "session": "fixtures/pause/session.json"
+}

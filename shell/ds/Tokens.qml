@@ -149,6 +149,20 @@ Singleton {
         readonly property real pickerMediaH: 288
         readonly property real pickerOptionScale: 0.815    // option rows' text and values (22/27 px), to fit the card
         // --- end spec 004
+        // --- spec 007: the pause menu, the popup frame with tabs (research R12), same frame
+        readonly property real pauseTabsY: 26              // the tab bar
+        readonly property real pauseRuleY: 83              // its dotted rule (tabH + 10)
+        readonly property real pauseTitleY: 127            // the tab's title, with the date and time
+        readonly property real pauseHRuleY: 189            // the plain rule under the title
+        readonly property real pauseBodyY: 221             // the tab's body starts here
+        readonly property real confirmW: 760               // the confirmation dialog's card
+        readonly property real confirmRowsW: 420           // its two option rows
+        readonly property real appIconSize: 160            // an app's icon in the APPS preview
+        readonly property real mapW: 512                   // the workspace map's area
+        readonly property real mapH: 288
+        readonly property real statusMeterW: 150           // the status card's meter
+        readonly property real statusBox: 22               // the status card's empty squares
+        // --- end spec 007
     }
 
     // --- motion -----------------------------------------------------------------------------
@@ -236,7 +250,7 @@ Singleton {
 
     // --- spec 008 ---------------------------------------------------------------------------------
     // The band (transmissions, the critical band, the OSD): translucent ink with a halftone of dark
-    // dots, light text, like the game's tutorial band (design-system §6, §9). Sizes in game px from
+    // dots, light text, like the game's tutorial band (design-system §6, §10). Sizes in game px from
     // the approved mockup (YoRHa-OS-private/lab/mockups/transmissoes); times in ms. Estimates,
     // calibrated in the VM.
     readonly property Notifies notify: Notifies {}
@@ -294,6 +308,7 @@ Singleton {
         readonly property int lines: 4
         readonly property int critLines: 3
         readonly property int previewLines: 9
+        readonly property real logToggleW: 70              // the log's Options: ON/OFF between ◂ ▸ ("Do not disturb" whole)
         readonly property real lifeH: 3                    // the time line at the bottom
         readonly property real progressGap: 12
         readonly property real progressNumW: 54

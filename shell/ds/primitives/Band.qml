@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Shapes
 import ".."
 
-// The band (spec 008, design-system §9): the material of transmissions, the critical band and the
+// The band (spec 008, design-system §10): the material of transmissions, the critical band and the
 // OSD, after the game's tutorial band (§6). Translucent ink with a halftone of dark dots, a faint
 // light hairline inside its edge (so it still reads over the dark scene), optional thin arcs, the
 // urgency block on the left and a hard shadow down-right. Square corners, no blur; nothing animates:

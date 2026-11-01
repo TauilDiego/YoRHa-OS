@@ -4,6 +4,7 @@
   "vignette": true,
   "wallpaperMotion": true,
   "reduceMotion": false,
+  "terminal": ["kitty"],
   "barContrast": "normal",
   "wallpaperFolder": "~/Pictures/Wallpapers",
   "wallpaperTransition": "camouflage",

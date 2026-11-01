@@ -1,0 +1,8 @@
+singleton Tokens 1.0 Tokens.qml
+Label 1.0 Label.qml
+ListItem 1.0 ListItem.qml
+LoadingRing 1.0 LoadingRing.qml
+PaperDecor 1.0 PaperDecor.qml
+Rule 1.0 Rule.qml
+Selector 1.0 Selector.qml
+Vignette 1.0 Vignette.qml

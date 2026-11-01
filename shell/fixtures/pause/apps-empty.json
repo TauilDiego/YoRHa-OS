@@ -1,0 +1,86 @@
+{
+ "apps": [
+  {
+   "id": "kitty.desktop",
+   "name": "kitty",
+   "genericName": "Terminal emulator",
+   "description": "A fast terminal that draws with the GPU. Tabs, splits and ligatures.",
+   "category": "System",
+   "icon": "fixtures/pause/icons/terminal.svg",
+   "command": [
+    "kitty"
+   ],
+   "keywords": [
+    "shell",
+    "prompt",
+    "command",
+    "console"
+   ],
+   "uses": 412,
+   "windowClass": "kitty",
+   "actions": [
+    {
+     "name": "New OS window",
+     "command": [
+      "kitty",
+      "--single-instance=no"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "firefox.desktop",
+   "name": "Firefox",
+   "genericName": "Web browser",
+   "description": "Browse the web. Bookmarks, tabs and private windows.",
+   "category": "Network",
+   "icon": "fixtures/pause/icons/browser.svg",
+   "command": [
+    "firefox"
+   ],
+   "keywords": [
+    "web",
+    "internet",
+    "www"
+   ],
+   "uses": 230,
+   "windowClass": "firefox",
+   "actions": [
+    {
+     "name": "New window",
+     "command": [
+      "firefox",
+      "--new-window"
+     ]
+    },
+    {
+     "name": "New private window",
+     "command": [
+      "firefox",
+      "--private-window"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mpv.desktop",
+   "name": "mpv",
+   "genericName": "Media player",
+   "description": "Play videos and music from files or links.",
+   "category": "Media",
+   "icon": "fixtures/pause/icons/video.svg",
+   "command": [
+    "mpv",
+    "--player-operation-mode=pseudo-gui",
+    "--"
+   ],
+   "keywords": [
+    "video",
+    "movie",
+    "music"
+   ],
+   "uses": 61,
+   "windowClass": "mpv"
+  }
+ ]
+}

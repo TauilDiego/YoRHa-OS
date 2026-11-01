@@ -1,0 +1,13 @@
+[SddmGreeterTheme]
+Name=YoRHa-OS
+Description=The YoRHa-OS login: the paper of the desktop, the shell's rules and the pause menu's lists
+Author=YoRHa-OS
+License=AGPL-3.0-or-later (components/SddmLink.qml: GPL-3.0, after Qylock by Darkkal44)
+Type=sddm-theme
+Version=0.1
+Website=https://github.com/TauilDiego/YoRHa-OS
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=yorha-os
+Theme-API=2.0
+QtVersion=6

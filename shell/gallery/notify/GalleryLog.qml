@@ -34,7 +34,7 @@ Rectangle {
         y: root.u(Tokens.space.pageMarginV)
         s: root.s
         title: root.gs.title
-        subtitle: root.gs.page5Subtitle
+        subtitle: root.gs.page6Subtitle
     }
     Rule {
         x: root.u(Tokens.space.pageMarginH)

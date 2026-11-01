@@ -9,7 +9,7 @@ import "../strings"
 // shell.json (block "notifications"), the project's defaults (config/defaults.json). With fixtures,
 // the fixture's "notifications.prefs"/"dnd" take the config's place and SettingsState lives in memory
 // only (FR-043), cleared whenever the fixture changes.
-// The settings pop-up's Notifications category drives these through the same live-setting API the
+// The Notifications category of the settings (the pause menu's SYSTEM tab) drives these through the same live-setting API the
 // shell's Settings has (levelsOf / levelOf / setLevel, contracts: specs/004-wallpaper-system/
 // contracts/settings-state.md): an option with "setting": "notify.<key>" in the catalog.
 Singleton {

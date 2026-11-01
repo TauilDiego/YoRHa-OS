@@ -7,13 +7,14 @@ description: "Tarefas da 008: Pod e text log (notificações e OSD)"
 **Input**: `specs/008-pod-text-log/` (plan.md, spec.md, research.md, data-model.md, contracts/,
 quickstart.md)
 
-**Status**: plano aprovado pelo dono. MVP (T001–T027) pronto em 2026-10-28; US2–US7 e o acabamento (T028–T057) prontos em 2026-10-29. Falta a aprovação visual do dono (SC-013, `out/008-revisao.png`).
+**Status**: plano aprovado pelo dono. MVP (T001–T027) pronto em 2026-10-28; US2–US7 e o acabamento (T028–T057) prontos em 2026-10-29. Aprovada visualmente pelo dono (SC-013); a `main` (001–004, 006, 007, 011, 012) mesclada nesta branch em 2026-10-31 (T058), com as decisões abaixo aplicadas. Falta o merge na `main`, que é do dono.
 
-**Decisões pendentes do dono (2026-10-29), com a recomendação aplicada:**
-- "Do not dist…" sai cortado no quadro de opções do log (a coluna de valor é a `stepperValueW` da 003/004). Recomendação: uma coluna de valor mais estreita só pro toggle no modo `fluid`; não aplicada (mexe numa peça da 003).
-- O `PickerLayout` da 008 e o da `007-menu-de-pausa` têm a mesma interface (a 008 adotou os nomes da 007) e textos diferentes. Recomendação: no merge, ficar com o da 007 e somar `fluid`, `lazyList` e a lista mais larga do modo `fluid`.
+**Decisões do dono (pendentes em 2026-10-29, decididas em 2026-10-31 e aplicadas no T058):**
+- "Do not dist…" saía cortado no quadro de opções do log (a coluna de valor é a `stepperValueW` da 003/004). **Decidido:** o log tem a própria coluna de valor, mais estreita, pros toggles (`PickerLayout.toggleValueW` = `Tokens.notify.logToggleW` 70); configurações, APPS, WINDOWS e o seletor continuam com 190.
+- O `PickerLayout` da 008 e o da `007-menu-de-pausa` têm a mesma interface (a 008 adotou os nomes da 007) e textos diferentes. **Decidido:** no merge, o da 007 (main) como base, somando `fluid`, `lazyList`, `hx()` e a lista mais larga do modo `fluid`.
+- **Decidido (2026-10-31):** as configurações são a aba SYSTEM do menu de pausa (main); o `SettingsPopup` da 008 sai. O text log continua popup próprio e convive com o menu de pausa e o seletor: só um dos três aberto, abrir um fecha os outros.
 - O Qt 6.12 às vezes avisa, depois de um reboot da VM, que não registrou o app ID no portal (`qt.qpa.services`). Recomendação aplicada: silenciado no `guest/nier-ui-run` do lab, como o `qt.qpa.wayland.textinput`.
-- Atalhos `SUPER + N` / `SUPER + CTRL + N` continuam provisórios (já pendente).
+- Atalhos `SUPER + N` / `SUPER + CTRL + N` continuam provisórios (decisão de 2026-10-31: ficam como estão). O brilho real fica pra U7.
 
 **Tests**: a spec não pede testes automatizados. A prova de cada tarefa é a evidência da VM
 (princípio IV): `qs ipc call notify dump` (e `hud dump`, `settings dump`), screenshot, `lab/diffshot`,
@@ -343,6 +344,10 @@ congelado.**
 - [x] T055 Imagem de revisão pro dono (`~/.local/share/nier-lab/out/008-revisao.png`): os screenshots de `shots`, `prefs` e `gallery` ao lado do mockup (SC-013) — **feito** (`lab/perf` 2026-10-29T123957, `teste-b`): `out/008-revisao.png`: por linha, o mockup (renderizado no container `nier-lab-chromium`, o palco a 1:1 com o movimento reduzido do próprio mockup) × VM 1080 × VM hidpi, em pilha, faixa crítica, OSD, text log, Top band e Subtitle, mais as páginas 4 e 5 da galeria e o System voice; as peças em `out/008-revisao/`. **Aguarda a aprovação do dono**
 - [x] T056 `specs/008-pod-text-log/relatorio.md`: o que foi feito, as evidências (`lab/perf` de cada bloco), os desvios, o custo da enxurrada, as pendências pro dono (atalhos, homologação do brilho na U7) — **feito**: `specs/008-pod-text-log/relatorio.md`
 - [x] T057 `/speckit-analyze` e as correções que ele apontar — **feito**: a passada de consistência (seção "Análise" do relatório): a spec emendada pela trilha translúcida (FR-028, US5, "Progresso"), o `invoked` → `triggered` anotado no research e na T036, o quickstart e o plano com `provision-step` e a `teste-b`, o filtro do `lint` explicado; nenhum conflito com a constituição
+
+## Phase 11: Merge com a main (2026-10-31)
+
+- [x] T058 Mesclar a `main` (001–004, 006, 007, 011, 012) nesta branch com as decisões do dono de 2026-10-31: `PickerLayout` da 007 + `fluid`/`lazyList`/`hx()`/lista larga; `GroupedList` da 007 + `lazy` (`rowBox`); tela cheia no `HyprlandBackend`; sem `SettingsPopup` (configurações = aba SYSTEM, `settings` é alias), o log como popup próprio, um de pausa/seletor/log por vez; coluna própria do toggle no log (`toggleValueW`, "Do not disturb" inteiro); galeria com 6 páginas; design system §9 (007) e §10 (008). No lab, `main` e `lab-007` mescladas na `lab-008` e os roteiros ajustados — **feito** (`lab/perf` 2026-10-31T202411, `teste-b`, 4 núcleos e 4 GB): `check-008` 110/0 em 1080 e em hidpi, `check-007` 76/0 (os dois perfis), `check-004` 58/0, `check-003` 25/0; shots em `out/merge-008-shots/`; detalhes na seção "Merge com a main" do relatório
 
 ---
 

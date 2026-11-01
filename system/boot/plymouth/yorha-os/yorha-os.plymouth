@@ -1,0 +1,11 @@
+[Plymouth Theme]
+Name=YoRHa-OS
+Description=YoRHa-OS boot screen: the system check list (spec 011)
+ModuleName=script
+# The boot font (assets/font, installed in the system fonts): the mkinitcpio hook copies it into the
+# initramfs as Plymouth.ttf. The script asks for its own sizes.
+Font=YoRHa-OS Boot 18
+
+[script]
+ImageDir=/usr/share/plymouth/themes/yorha-os
+ScriptFile=/usr/share/plymouth/themes/yorha-os/yorha-os.script
