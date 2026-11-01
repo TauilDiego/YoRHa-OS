@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain. Falta 1: o canal de versões da v0 (FR-005).
+- [x] No [NEEDS CLARIFICATION] markers remain (o canal da v0 é o repo local, decisão do dono de 01.11)
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,4 +31,4 @@
 
 ## Notes
 
-- A pergunta do FR-005 vai pro dono antes do `/speckit-plan`.
+- Pronta pro `/speckit-plan` depois da aprovação do dono.

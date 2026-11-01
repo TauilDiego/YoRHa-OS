@@ -59,7 +59,7 @@ A barra aparece, e os atalhos abrem o menu de pausa, as configurações e o sele
 
 ### User Story 2 - Uma correção nova chega pelo `yorha update` (Priority: P1)
 
-Uma correção feita no projeto vira uma versão nova. Na máquina que já tem o YoRHa-OS, o
+Uma correção commitada no projeto vira uma versão nova. Na máquina que já tem o YoRHa-OS, o
 `yorha update`:
 - baixa a versão nova, confere e desempacota ao lado da atual;
 - guarda uma cópia do estado;
@@ -71,14 +71,14 @@ A correção aparece. Se algo der errado, o `yorha rollback` volta a versão e o
 **Why this priority**: É o motivo do dono pra fazer o instalador agora: provar que as próximas
 correções chegam numa máquina instalada.
 
-**Independent Test**: Na VM instalada com a v0.1:
-1. publicar uma v0.2 com uma correção visível e uma migration de teste;
+**Independent Test**: Na VM instalada, que segue a `main` pelo servidor do lab:
+1. commitar uma correção visível e uma migration de teste;
 2. rodar o `yorha update`: o shell volta na v0.2, com a correção e a migration aplicada uma vez só;
 3. rodar o `yorha rollback`: a v0.1 volta com o estado de antes.
 
 **Acceptance Scenarios**:
 
-1. **Given** a v0.1 instalada e a v0.2 publicada, **When** a pessoa roda `yorha update --check`,
+1. **Given** a v0.1 instalada e um commit novo na fonte (a v0.2), **When** a pessoa roda `yorha update --check`,
    **Then** ele responde que a v0.2 está disponível, sem mudar nada.
 2. **Given** o mesmo cenário, **When** a pessoa roda `yorha update`, **Then**:
    - a v0.2 entra em uso;
@@ -106,13 +106,13 @@ fim, o shell reinicia na versão nova.
 já resolve.
 
 **Independent Test**: Com a v0.1 instalada na VM:
-1. publicar a v0.2;
+1. commitar uma mudança na fonte (a v0.2);
 2. esperar a conferência (ou forçar pelo IPC): chega a transmissão;
 3. abrir SYSTEM › Updates › "Update now": o terminal roda o update e o shell volta na v0.2.
 
 **Acceptance Scenarios**:
 
-1. **Given** uma versão nova publicada, **When** o shell confere, **Then** chega uma transmissão com o
+1. **Given** uma versão nova na fonte, **When** o shell confere, **Then** chega uma transmissão com o
    número da versão, uma vez por versão (a mesma versão não avisa de novo a cada conferência).
 2. **Given** a transmissão, **When** a pessoa clica nela, **Then** o menu abre em SYSTEM › Updates.
 3. **Given** SYSTEM › Updates, **When** a pessoa escolhe "Update now", **Then** abre o terminal da
@@ -198,7 +198,7 @@ config e do estado da pessoa, e o Hyprland sobe sem o shell.
 - **Duas versões do shell rodando** (por exemplo, o Serpantinum também no autostart): o `yorha` avisa
   na instalação. A troca entre os dois fica pra U7.
 - **Update com o menu aberto:** o shell reinicia do mesmo jeito; nada do estado se perde.
-- **Versão publicada mais velha que a em uso:** o `update` não volta versão. Pra voltar, é o
+- **Fonte trocada pra uma versão mais velha que a em uso:** o `update` não volta versão. Pra voltar, é o
   `rollback`.
 - **Rollback sem versão anterior:** a mensagem diz que não há pra onde voltar.
 - **Pasta de versão incompleta** (de um update interrompido): é limpa no próximo update.
@@ -220,9 +220,15 @@ config e do estado da pessoa, e o Hyprland sobe sem o shell.
   aponta pro `yorha update`.
 
 **Versões e update**
-- **FR-005**: Cada versão MUST ser um arquivo com número (`0.N`) e um checksum publicados no canal de
-  versões. O canal da v0 é [NEEDS CLARIFICATION: só o servidor do lab, ou também as Releases do GitHub
-  do repo público?].
+- **FR-005**: O canal de versões da v0 MUST ser o próprio repositório local (decisão do dono, 01.11:
+  "tu num pode fazer puxar da worktree local não? melhor eu acho"):
+  - um servidor do lab lê direto do repo, sem passo de publicar;
+  - cada commit vira uma versão, com o número tirado do git (`0.<commits>`) e um checksum;
+  - o que não foi commitado não entra;
+  - por padrão a VM segue a `main`, e dá pra ela seguir o worktree de uma spec, pra testar uma
+    correção antes de mesclar.
+
+  Mais tarde, a mesma fonte aponta pro repo público no GitHub.
 - **FR-006**: O `yorha update --check` MUST dizer se há versão nova, sem mudar nada, e ter uma saída
   que o shell consegue ler.
 - **FR-007**: O `yorha update` MUST:
@@ -238,8 +244,8 @@ config e do estado da pessoa, e o Hyprland sobe sem o shell.
 - **FR-009**: O `yorha rollback` MUST voltar a versão anterior e o estado como estava antes do update.
 - **FR-010**: O `yorha` MUST guardar as 3 versões mais novas e apagar as mais velhas, nunca a que está
   em uso.
-- **FR-011**: Publicar uma versão MUST ser um passo documentado e repetível a partir da `main` (a tag,
-  o arquivo, o checksum, o número mais novo no canal).
+- **FR-011**: Um commit novo na fonte seguida MUST aparecer como versão nova no `yorha update --check`,
+  sem nenhum outro passo. Trocar a fonte seguida (a `main` ou um worktree) MUST ser um comando.
 
 **Shell**
 - **FR-012**: O shell MUST conferir o `yorha update --check` ao subir e a cada hora, e guardar a
@@ -279,7 +285,8 @@ config e do estado da pessoa, e o Hyprland sobe sem o shell.
 
 - **Versão:** um arquivo com o produto inteiro (o shell, o `system/`, o `bin/`, as migrations), com o
   número `0.N` e um checksum.
-- **Canal de versões:** onde o `yorha` acha o número mais novo e baixa as versões.
+- **Canal de versões:** onde o `yorha` acha o número mais novo e baixa as versões. Na v0, o
+  repositório local (a `main` ou o worktree de uma spec), servido pelo lab.
 - **Pasta do produto:** `~/.local/share/yorha-os/`, com `versions/<v>/`, o `current`, a anterior e os
   downloads em andamento.
 - **Estado:** `~/.local/state/yorha-os/`, com o que os menus salvam, as migrations feitas, as cópias
@@ -294,8 +301,8 @@ config e do estado da pessoa, e o Hyprland sobe sem o shell.
 
 - **SC-001**: Numa VM limpa, a instalação leva um comando e uma linha no `hyprland.lua`, e o shell sobe
   no próximo login.
-- **SC-002**: Uma correção publicada como versão nova aparece na VM instalada depois de um `yorha
-  update`, sem nenhum outro passo.
+- **SC-002**: Uma correção commitada aparece na VM instalada depois de um `yorha update`, sem nenhum
+  outro passo (nem publicar, nem copiar).
 - **SC-003**: A migration de teste roda exatamente uma vez, e o rollback devolve o estado de antes,
   byte a byte.
 - **SC-004**: Um update interrompido em qualquer passo deixa a VM com uma versão que sobe; testado em 3
