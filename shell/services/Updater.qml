@@ -22,6 +22,9 @@ Singleton {
     readonly property bool installed: rootDir !== ""
     readonly property string yorha: installed ? rootDir + "/bin/yorha" : ""
     readonly property string current: installed ? String(versionFile.text()).trim() : ""
+    // What the footers show: the installed version, or 0.1 where the shell runs from the repository
+    // (the lab), so the lab's screenshots stay as they were.
+    readonly property string versionLabel: current !== "" ? current : "0.1"
     property string latest: ""
     property bool available: false
     property string state: installed ? "idle" : "not-installed"    // idle | checking | error | not-installed

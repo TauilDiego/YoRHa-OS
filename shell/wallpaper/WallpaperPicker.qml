@@ -188,7 +188,7 @@ PopupWindow {
 
     title: ws.title
     subtitle: ws.subtitle
-    footerLeft: ws.footer.arg(screens.length === 1 ? ws.oneMonitor : ws.manyMonitors.arg(screens.length))
+    footerLeft: ws.footer.arg(Updater.versionLabel).arg(screens.length === 1 ? ws.oneMonitor : ws.manyMonitors.arg(screens.length))
     keys: layout.keys
     onDismissed: closeRequested()
     // Reopened before it was unloaded: start over, as a fresh one does.

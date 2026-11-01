@@ -213,7 +213,7 @@ PopupWindow {
     clock: true
     title: tabText.title
     subtitle: tabText.subtitle
-    footerLeft: tab === "system" ? Strings.settings.version : (page?.footerLeft ?? "")
+    footerLeft: tab === "system" ? Strings.settings.version.arg(Updater.versionLabel) : (page?.footerLeft ?? "")
     keys: pageKeys
     onDismissed: closeRequested()
     onTabClicked: index => setTab(tabIds[index])

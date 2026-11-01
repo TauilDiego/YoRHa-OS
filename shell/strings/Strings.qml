@@ -149,7 +149,7 @@ Singleton {
         readonly property string nowLabel: "NOW"
         readonly property string on: "ON"
         readonly property string off: "OFF"
-        readonly property string version: "YoRHa-OS 0.1 · Hyprland"
+        readonly property string version: "YoRHa-OS %1 · Hyprland"    // %1 = Updater.versionLabel (spec 014)
         readonly property string error: "Settings data unavailable."
         // key hints: the key, then what it does
         readonly property string keyUpDown: "↑↓"
@@ -236,7 +236,7 @@ Singleton {
         readonly property string mark: "●"
         readonly property string separator: " · "
         readonly property string listSeparator: ", "
-        readonly property string footer: "YoRHa-OS 0.1 · %1"        // %1 = how many monitors
+        readonly property string footer: "YoRHa-OS %1 · %2"         // %1 = the version, %2 = how many monitors
         readonly property string oneMonitor: "1 monitor"
         readonly property string manyMonitors: "%1 monitors"
     }
@@ -367,7 +367,7 @@ Singleton {
         // the text log
         readonly property string title: "LOG"
         readonly property string subtitle: "-Transmissions"
-        readonly property string footer: "YoRHa-OS 0.1 · notification server"
+        readonly property string footer: "YoRHa-OS %1 · notification server"   // %1 = the version
         readonly property string now: "NOW"
         readonly property string earlier: "EARLIER"
         readonly property string newTag: "NEW"
