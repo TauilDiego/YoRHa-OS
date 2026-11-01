@@ -6,7 +6,7 @@ Os detalhes e as evidências estão em [research-som.md](../research-som.md), S3
 
 | Caminho | O quê |
 |---|---|
-| `/etc/udev/rules.d/80-yorha-os-boot-sound.rules` | No evento da placa (`SUBSYSTEM=="sound"`, `ENV{SOUND_INITIALIZED}=="1"`), pede ao systemd o `yorha-os-boot-sound.service` |
+| `/etc/udev/rules.d/80-yorha-os-boot-sound.rules` | No evento `change` do `cardN` (`SUBSYSTEM=="sound"`, `KERNEL=="card*"`, `ENV{SOUND_INITIALIZED}=="1"`, que o `78-sound-card.rules` põe no `cardN` e não no `controlC*`), pede ao systemd o `yorha-os-boot-sound.service` |
 | `/etc/systemd/system/yorha-os-boot-sound.service` | `Type=simple`, sem `Before=` nenhum e sem nada que dependa dele. `TimeoutSec` curto |
 | `/usr/share/yorha-os/boot/sound/yorha-boot-sound` | O script: acha o volume e toca, depois termina |
 | `/usr/share/yorha-os/boot/sound/boot-start-<nível>.wav` | O som de início, pré-calculado em alguns volumes (S2) |
