@@ -63,7 +63,7 @@ Item {
     property real morph: fullscreen ? 1 : 0
     Behavior on morph {
         NumberAnimation {
-            duration: Tokens.motion.popupFade
+            duration: Tokens.instant ? 0 : Tokens.motion.popupFade
             easing.type: Easing.OutCubic
         }
     }
