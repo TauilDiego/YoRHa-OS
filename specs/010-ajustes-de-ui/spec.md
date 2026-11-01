@@ -8,7 +8,8 @@
 disparada: quando for, passa pelo fluxo normal do Spec Kit (specify → plan → tasks) a partir desta
 lista.
 
-**Input**: Pedidos do dono em 29.10.2026, na revisão da 007 e nas pendências antigas da 004.
+**Input**: Pedidos do dono em 29.10.2026, na revisão da 007 e nas pendências antigas da 004; o item F
+em 01.11.2026, depois da 013.
 
 ## Itens
 
@@ -56,6 +57,34 @@ conferindo a senha. Entregas:
 
 No OSD de volume (spec 008), o número da porcentagem fica muito perto da barra de volume. O dono pediu
 (29.10) pra afastar os dois. Vale olhar junto o OSD de brilho e o de microfone, que usam a mesma peça.
+
+### F. Transição de papel de parede com os triângulos do menu
+
+O dono pediu (01.11) que o efeito de triângulos que abre e fecha o menu (spec 013,
+`popup/shaders/triangles.frag`) vire mais uma transição do papel de parede (spec 004), ao lado de
+camouflage, wipe, tiles e crossfade.
+
+O dono também pediu um rastro opcional, como o da camouflage: a troca começa numa onda a partir de
+um ponto sorteado perto do meio da tela, e atrás da frente ficam as bordas dos triângulos (claras,
+com as cópias vermelha e ciano) apagando aos poucos.
+
+As duas peças já existem:
+- **os triângulos (013, `TriangleReveal.qml`):** a grade de 240×120 px do jogo com bordas a 45°, as
+  cores e a ordem sorteada por célula;
+- **a onda e o rastro (004, modo camouflage de `shaders/transition.frag`):** a origem sorteada
+  (meio da tela ± 15%) e os contornos que somem em `trail` ms.
+
+Vira um modo novo no `transition.frag` que junta as duas. Ele só roda durante a troca, como os
+outros: parado, não custa nada.
+
+A decidir no `specify`, um ponto por vez:
+- a ordem das células: sorteada como no menu, em onda a partir do ponto, ou as duas como opção;
+- o rastro: ligado ou desligado por padrão, e se usa o ajuste "Trail" da camouflage (400 a
+  4000 ms) ou ganha um próprio;
+- os quadros escuros que algumas células mostram no menu: entram ou não;
+- "Reduce motion": a troca é instantânea, como nas outras transições.
+
+As variações viram opções trocáveis no System Settings, com a recomendada como padrão.
 
 ## Como o dono revisa
 
