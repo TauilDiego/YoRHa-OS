@@ -4,7 +4,7 @@ import "../ds"
 
 // The game's triangles over a menu's panel (spec 013, FR-009, research R2): a ShaderEffect
 // (shaders/triangles.frag, compiled to .qsb by the lab and versioned) on a live texture of
-// `target`, made only while a mode runs (the panel is hidden under it meanwhile).
+// `target`, live only while a mode runs (the panel is hidden under it meanwhile).
 //   mode     "off" | "grid" (the light grid, color-fringed) | "open" (the cells turn to the panel,
 //            some through a dark frame) | "close" (the cells go away);
 //   elapsed  ms into the mode; `duration` its length (the cells start within duration − flip);
@@ -42,11 +42,13 @@ Item {
         }
     }
 
+    // The texture stays made while the panel is there (live only during a mode): making it when the
+    // closing starts (a whole screen at hidpi) cost the first frames of the triangles.
     ShaderEffectSource {
         id: texture
-        sourceItem: root.active && root.ok ? root.target : null
-        hideSource: true
-        live: true
+        sourceItem: root.ok ? root.target : null
+        hideSource: root.active
+        live: root.active
         sourceRect: Qt.rect(0, 0, root.width, root.height)
         textureSize: Qt.size(Math.max(1, Math.round(root.width * root.dpr)), Math.max(1, Math.round(root.height * root.dpr)))
     }
