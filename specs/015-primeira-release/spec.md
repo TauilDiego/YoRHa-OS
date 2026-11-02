@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-01
 
-**Status**: Rascunho; em 02.11 o nome e a assinatura foram resolvidos e a telemetria foi adiada; falta o sinal de update
+**Status**: Pronta pra aprovação do dono (02.11): as 3 perguntas respondidas, a telemetria adiada
 
 **Input**: Em 01.11, depois de fechar a 014, o dono adiou as funcionalidades novas (o clima no HUD
 entre elas) e marcou o próximo marco: "primeiro terminar o instalador e updater depois features
@@ -63,6 +63,11 @@ O ponto de partida é a v0 da 014, que funciona na VM, mas só com o canal local
   a gente adiciona isso". A US7 e os FR-020 a FR-023 saíram da 015. As três respostas acima ficam
   valendo pra quando ela voltar, numa spec própria junto com a VPS (o site, o espelho e a cópia do
   checksum).
+- Q: Como fica o sinal de versão nova que não some? → A: Uma escolha em SYSTEM › Updates, com cinco
+  formas: na barra (`■ UPDATE 0.2.0`, no estilo do contador do LOG, e um clique abre SYSTEM ›
+  Updates), no menu (uma marca de novo na aba SYSTEM e na categoria Updates), **na barra e no menu
+  (o padrão)**, a transmissão de novo a cada login, ou desligado. Foi a proposta do assistente; o dono
+  respondeu "seguindo..." e pode reabrir.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -157,10 +162,13 @@ pasta ou comando usa o nome provisório.
 
 **Acceptance Scenarios**:
 
-1. **Given** o nome decidido, **When** a release é montada, **Then** o comando, as pastas, as
-   variáveis de ambiente e os textos da UI usam o nome novo.
+1. **Given** o nome decidido, **When** a release é montada, **Then** as pastas, os arquivos do
+   sistema e os textos da UI usam YoRHa-Shell, e o comando continua `yorha`.
 2. **Given** a release instalada, **When** se procura o nome provisório nas pastas do produto e nos
    textos da UI, **Then** ele não aparece (fora dos créditos e do histórico).
+3. **Given** uma instalação no lab e uma versão de teste que muda o nome pra um nome de mentira,
+   **When** a máquina atualiza e depois faz o rollback, **Then** as pastas, o comando e a linha do
+   `hyprland.lua` vão pro nome novo e voltam, e o shell sobe nas duas pontas (FR-017).
 
 ---
 
@@ -177,10 +185,13 @@ continua visível; depois do update, ele some.
 
 **Acceptance Scenarios**:
 
-1. **Given** uma versão nova e a transmissão já fechada, **When** a pessoa olha a tela, **Then** o
-   sinal está lá [NEEDS CLARIFICATION: onde e como o sinal aparece: na barra, como marca NEW no
-   menu, ou outra forma?].
-2. **Given** o update feito, **When** o shell volta, **Then** o sinal some.
+1. **Given** uma versão nova, a transmissão já fechada e a forma padrão, **When** a pessoa olha a
+   tela, **Then** a barra mostra `■ UPDATE <versão>` e o menu tem a marca de novo em SYSTEM e em
+   Updates.
+2. **Given** o sinal na barra, **When** a pessoa clica nele, **Then** abre SYSTEM › Updates.
+3. **Given** a forma trocada em SYSTEM › Updates (barra, menu, barra e menu, transmissão a cada login,
+   desligado), **When** a escolha muda, **Then** o sinal muda na hora, sem reiniciar o shell.
+4. **Given** o update feito, **When** o shell volta, **Then** o sinal some, em qualquer forma.
 
 ---
 
@@ -243,8 +254,11 @@ resultado da verificação automática.
   sistema, textos da UI, README e repositório. O comando `yorha` e as variáveis `YORHA_*` ficam. O
   nome provisório só fica nas specs antigas, no histórico e nos créditos. Renomear o repositório no
   GitHub MUST ter o OK do dono (o GitHub redireciona o endereço antigo).
-- **FR-011**: Com uma versão nova disponível, o shell MUST manter um sinal visível até a pessoa
-  atualizar (forma e lugar: ver a US5). O sinal MUST poder ser desligado em SYSTEM › Updates.
+- **FR-011**: Com uma versão nova disponível, o shell MUST manter um sinal até a pessoa atualizar.
+  SYSTEM › Updates MUST oferecer cinco formas, trocadas na hora: na barra (`■ UPDATE <versão>`, no
+  estilo do contador do LOG, abrindo SYSTEM › Updates no clique), no menu (marca de novo na aba
+  SYSTEM e na categoria Updates), na barra e no menu (o padrão), a transmissão de novo a cada login,
+  e desligado.
 - **FR-012**: A conferência do shell MUST continuar como na 014 (30 s depois de subir e a cada
   hora) e MUST caber no limite de acessos anônimos do canal público.
 - **FR-013**: O README MUST dizer o estado do projeto (antes da 1.0, testado em VM), os requisitos
@@ -292,6 +306,11 @@ resultado da verificação automática.
 - **SC-007**: Os roteiros 003, 004, 007, 008, 013 e 014 (adaptado ao canal público) passam, e a
   verificação automática passa na `main` publicada.
 - **SC-008**: O dono aprova a página da release antes de ela ser publicada.
+- **SC-009**: No lab, uma versão de teste que troca o nome pra um nome de mentira vai e volta pelo
+  update e pelo rollback, e o shell sobe nas duas pontas.
+- **SC-010**: Com a origem principal fora do ar e um espelho de teste no lab, a instalação e o update
+  terminam pelo espelho; com a conferência automática desligada, o shell não faz nenhum pedido ao
+  canal em uma hora.
 ## Assumptions
 
 - **Público:** quem instala usa Arch (ou derivado) com Hyprland 0.56+ e config em Lua. Testes em
@@ -305,5 +324,7 @@ resultado da verificação automática.
   nenhum além do pedido. A telemetria vem depois, junto com a VPS (ver Clarifications).
 - **Fora desta spec:** o clima no HUD e as outras funcionalidades da S1 (depois do marco), o Niri
   (S5) e o cursor (FR-017 da 014).
+- **Ko-fi:** o `FUNDING.yml` (o botão "Sponsor" do GitHub) entra quando o dono passar o usuário do
+  Ko-fi; não trava a release.
 - **Máquina do dono:** como sempre, nada roda nela; o teste é em VM, com acesso à internet pra ler
   o canal público.
