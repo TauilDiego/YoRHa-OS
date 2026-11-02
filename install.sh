@@ -48,6 +48,7 @@ yorha_origins() {
             [[ -n $o && $o != '#'* ]] && printf '%s\n' "${o%/}"
         done < "$YORHA_HOME/origins"
     else
+        # shellcheck disable=SC2153  # YORHA_ORIGINS comes from name.sh (or install.sh), set before this runs
         for o in "${YORHA_ORIGINS[@]}"; do printf '%s\n' "${o%/}"; done
     fi
 }
@@ -174,10 +175,14 @@ pkg=$(cut -d' ' -f2 <<<"$got")      # the package the release's manifest names
 say "checksum ok ($pkg, from ${got%% *})"
 tar -xzf "$tmp/$pkg" -C "$tmp/v" --strip-components=1
 
-# From here on the names come from the version itself (lib/yorha/name.sh, FR-019).
+# From here on the names come from the version itself (lib/yorha/name.sh, FR-019). Its lib/ only
+# exists once downloaded, so shellcheck cannot follow it (SC1091).
 YORHA_ROOT="$tmp/v"
+# shellcheck disable=SC1091
 source "$YORHA_ROOT/lib/yorha/name.sh"
+# shellcheck disable=SC1091
 source "$YORHA_ROOT/lib/yorha/common.sh"
+# shellcheck disable=SC1091
 source "$YORHA_ROOT/lib/yorha/deps.sh"
 if [[ -n $(yorha_current) ]]; then
     yorha_say "$YORHA_PRETTY $(yorha_current) is already installed in $YORHA_HOME; to get newer versions: $YORHA_CMD update"

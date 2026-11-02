@@ -24,6 +24,7 @@ yorha_origins() {
             [[ -n $o && $o != '#'* ]] && printf '%s\n' "${o%/}"
         done < "$YORHA_HOME/origins"
     else
+        # shellcheck disable=SC2153  # YORHA_ORIGINS comes from name.sh (or install.sh), set before this runs
         for o in "${YORHA_ORIGINS[@]}"; do printf '%s\n' "${o%/}"; done
     fi
 }
