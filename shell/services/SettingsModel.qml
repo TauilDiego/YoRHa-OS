@@ -383,10 +383,19 @@ Singleton {
         return false;
     }
 
+    // spec 015: the catalog's texts name the product as the repository does (YoRHa-Shell, the
+    // yorha-shell folders, the `yorha` command); the installed product's own names go in their place,
+    // so a renamed product (FR-017) never shows the old name.
+    function named(text: string): string {
+        const esc = v => JSON.stringify(String(v)).slice(1, -1);
+        return text.replaceAll("YoRHa-Shell", esc(Product.pretty)).replaceAll("yorha-shell", esc(Product.name))
+                   .replaceAll("`yorha ", "`" + esc(Product.cmd) + " ");
+    }
+
     function load(text: string): void {
         let data = null;
         try {
-            data = JSON.parse(text);
+            data = JSON.parse(named(text));
         } catch (e) {
             fail(`${catalogPath} is not valid JSON (${e})`);
             return;
