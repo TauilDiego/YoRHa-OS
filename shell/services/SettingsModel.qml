@@ -388,8 +388,9 @@ Singleton {
     // so a renamed product (FR-017) never shows the old name.
     function named(text: string): string {
         const esc = v => JSON.stringify(String(v)).slice(1, -1);
-        return text.replaceAll("YoRHa-Shell", esc(Product.pretty)).replaceAll("yorha-shell", esc(Product.name))
-                   .replaceAll("`yorha ", "`" + esc(Product.cmd) + " ");
+        const swap = (t, from, to) => t.split(from).join(to);          // (no String.replaceAll in QML's JS)
+        return swap(swap(swap(text, "YoRHa-Shell", esc(Product.pretty)), "yorha-shell", esc(Product.name)),
+                    "`yorha ", "`" + esc(Product.cmd) + " ");
     }
 
     function load(text: string): void {
