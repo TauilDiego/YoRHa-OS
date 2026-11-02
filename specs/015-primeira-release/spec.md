@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-01
 
-**Status**: Rascunho, com 3 perguntas pro dono (uma de cada vez)
+**Status**: Rascunho; pergunta 1 respondida em 02.11 (o nome), faltam 2 (uma de cada vez)
 
 **Input**: Em 01.11, depois de fechar a 014, o dono adiou as funcionalidades novas (o clima no HUD
 entre elas) e marcou o próximo marco: "primeiro terminar o instalador e updater depois features
@@ -16,6 +16,24 @@ O ponto de partida é a v0 da 014, que funciona na VM, mas só com o canal local
 - o aviso de versão nova aparece uma vez por versão e some (decisão 1 da página de revisão da 014);
 - a constituição (Restrições, Marcas) diz que o nome público vai ser próprio, e o PLAN deixa em
   aberto o nome definitivo e a assinatura das versões.
+
+## Clarifications
+
+### Session 2026-11-02
+
+- Q: Qual é o nome público? → A: **YoRHa-Shell**, com o comando `yorha`. O dono: "pois a gente
+  migra pra YoRHa-Shell não? melhor aí os comandos continuam yorha no terminal". Ele quer um nome
+  do jogo ("queria um nome mais in game"), e o projeto não vai ser vendido (no máximo um Ko-fi pra
+  doações). Os nomes próprios conferidos (Bunker, Kikai, Orbital e outros) ficaram de lado.
+  - O risco é de marca, não de conteúdo: o pacote não traz nada do jogo (sons sintetizados pela
+    receita da 013, tokens CC BY do tyleo, fonte OFL, cursores com base MIT). A Square Enix tem
+    "4 YoRHa" registrado nos EUA (classes 9, 16 e 41); "YoRHa" sozinho não apareceu numa busca
+    rápida.
+  - "Shell" descreve melhor o produto que "OS": é uma UI que vive nas pastas dela, não um sistema
+    operacional.
+  - O dono aceita o risco com três proteções: a constituição muda (FR-016), o update sabe trocar o
+    nome sozinho se um dia for preciso (FR-017) e o README diz que é um projeto de fã, sem ligação
+    com a Square Enix (FR-013).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -94,14 +112,16 @@ e instalar numa VM; conferir que o checksum do pacote publicado é igual ao test
 
 ---
 
-### User Story 4 - O nome público (Priority: P1)
+### User Story 4 - O nome público: YoRHa-Shell (Priority: P1)
 
-Antes de publicar, o produto ganha o nome público dele, aplicado em tudo o que a pessoa vê e
-digita: o comando, as pastas, os textos da UI, o README e o repositório.
+Antes de publicar, o produto troca o nome provisório YoRHa-OS por **YoRHa-Shell**, em tudo o que a
+pessoa vê: as pastas (`~/.local/share/yorha-shell` e as irmãs em `state` e `config`), os arquivos
+do sistema (o arquivo que o `hyprland.lua` inclui, os temas do Plymouth e do SDDM, os serviços), os
+textos da UI, o README e o repositório. O comando continua `yorha`, e as variáveis `YORHA_*` também.
 
-**Why this priority**: A constituição diz que o nome público vai ser próprio (NieR e YoRHa são marcas
-da Square Enix). Depois de publicado, trocar o nome obriga a migrar as pastas e o comando de todo
-mundo que instalou.
+**Why this priority**: Depois de publicado, trocar o nome obriga a migrar as pastas de todo mundo
+que instalou. Antes, a troca é editar arquivos: o nome está em `lib/yorha/name.sh` e as instalações
+só existem nas VMs do lab.
 
 **Independent Test**: Numa VM, instalar pelo pacote montado e conferir que nenhum texto visível,
 pasta ou comando usa o nome provisório.
@@ -190,19 +210,30 @@ resultado da verificação automática.
   quem escolheu o canal de teste.
 - **FR-009**: A integridade MUST ser conferida sempre pelo checksum; [NEEDS CLARIFICATION: a
   primeira release sai também com assinatura, ou a assinatura fica pra S6, como diz o PLAN?].
-- **FR-010**: O nome público MUST ser decidido e aplicado antes de publicar: comando, pastas,
-  variáveis de ambiente, textos da UI, README e repositório [NEEDS CLARIFICATION: qual é o nome
-  público?].
+- **FR-010**: O nome público YoRHa-Shell MUST ser aplicado antes de publicar: pastas, arquivos do
+  sistema, textos da UI, README e repositório. O comando `yorha` e as variáveis `YORHA_*` ficam. O
+  nome provisório só fica nas specs antigas, no histórico e nos créditos. Renomear o repositório no
+  GitHub MUST ter o OK do dono (o GitHub redireciona o endereço antigo).
 - **FR-011**: Com uma versão nova disponível, o shell MUST manter um sinal visível até a pessoa
   atualizar (forma e lugar: ver a US5). O sinal MUST poder ser desligado em SYSTEM › Updates.
 - **FR-012**: A conferência do shell MUST continuar como na 014 (30 s depois de subir e a cada
   hora) e MUST caber no limite de acessos anônimos do canal público.
 - **FR-013**: O README MUST dizer o estado do projeto (antes da 1.0, testado em VM), os requisitos
-  (Arch, Hyprland 0.56+ com config em Lua), e como instalar, atualizar, voltar e desinstalar.
+  (Arch, Hyprland 0.56+ com config em Lua), e como instalar, atualizar, voltar e desinstalar. Ele
+  MUST dizer também que é um projeto de fã, gratuito, sem ligação com a Square Enix, e que NieR e
+  YoRHa são marcas dela.
 - **FR-014**: Antes de publicar, a `main` MUST ser enviada ao GitHub, as branches velhas apagadas e
   a verificação automática (lint) passando. Cada push e cada exclusão MUST ter o OK do dono.
 - **FR-015**: Nada do jogo (fontes, sons, logos, vídeos) e nada do repositório privado MUST entrar no
   pacote da release.
+- **FR-016**: A constituição (Restrições, Marcas) MUST passar a registrar a decisão do nome: o nome
+  público usa YoRHa (YoRHa-Shell) por escolha do dono, o projeto é gratuito e de fã, e continua
+  valendo que nada do jogo entra no repositório. A emenda segue o processo de emendas da própria
+  constituição.
+- **FR-017**: O update MUST saber trocar o nome do produto numa versão nova: mover as pastas, trocar
+  o comando e a linha do `hyprland.lua` (avisando a pessoa), e manter o rollback funcionando. Assim,
+  se um dia for preciso trocar o nome, isso sai como um update comum. Na 015 a troca é testada no
+  lab com um nome de mentira, de ida e volta.
 
 ### Key Entities
 
