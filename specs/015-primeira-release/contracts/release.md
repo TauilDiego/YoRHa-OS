@@ -26,6 +26,9 @@ python3, só biblioteca padrão. Lê o repositório pelo `git` e nunca executa c
 - A release é `--lab-only`.
 - O commit não está no GitHub (`git branch -r --contains` em `origin/main`).
 - Já existe a tag no GitHub.
+- O `YORHA_ORIGINS[0]` do `name.sh` do commit não é o repositório do remote `origin` (o `install.sh`
+  da release, e o update de quem a instala, pediriam as versões em outro lugar). O `promote` também
+  recusa por isso. Até a T039 (`gh repo rename`) é o caso: a origem já é `TauilDiego/YoRHa-Shell`.
 - O checksum baixado de volta é diferente do montado: a release continua rascunho (ninguém a vê), e
   o comando sai 1 dizendo o que fazer.
 
