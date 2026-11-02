@@ -8,9 +8,9 @@ import "../strings"
 // Newer versions, for a shell installed with yorha (spec 014 US3, contracts/updater.md).
 //   - installed: qs was started by `yorha shell start`, which sets YORHA_ROOT to the version's
 //     folder. Anything else (the lab's ~/nier/ui) is "not-installed": nothing runs, nothing shows.
-//   - check(): `<root>/bin/yorha update --check --json`, 30 s after the start and then every hour;
-//     the last check, the newest version and the one already announced live in
-//     <state>/updates.json.
+//   - check(): `<root>/bin/<cmd> update --check --json` (Product.cmd), 30 s after the start and then
+//     every hour; it answers current, latest, available, channel and origin (spec 015). The last
+//     check, the newest version and the one already announced live in <state>/updates.json.
 //   - a newer version is announced once, as a system transmission whose click opens SYSTEM › Updates
 //     (the showUpdates signal; shell.qml opens the menu).
 //   - updateNow(): the configured terminal (Settings.terminal) runs `yorha update` in the open, as
