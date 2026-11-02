@@ -18,6 +18,11 @@ Item {
     // Repeated sounds cut the one before (a new tick ends the last one) instead of piling up.
     property bool cutting: false
     property real debounceMs: 40
+    // SoundEffect.Status's values (Qt 6: Null 0, Loading 1, Ready 2, Error 3), named here so the code
+    // never reads the enum through the type: the CI's qmllint has no QtMultimedia and reported those
+    // reads as unqualified (spec 015).
+    readonly property int statusReady: 2
+    readonly property int statusError: 3
 
     readonly property bool useCustom: custom.toString() !== "" && !customFailed
     readonly property url source: useCustom ? custom : fallback
@@ -49,7 +54,7 @@ Item {
             return false;
         lastAt = now;
         const e = effects[turn % effects.length];
-        if (e.status === SoundEffect.Ready) {
+        if (e.status === root.statusReady) {
             if (cutting && effects.length > 1)
                 effects[(turn + effects.length - 1) % effects.length].stop();
             e.play();
@@ -61,10 +66,10 @@ Item {
     }
 
     function onState(e: var): void {
-        if (e.status === SoundEffect.Error && useCustom) {
+        if (e.status === root.statusError && useCustom) {
             customFailed = true;
             failed(name, custom.toString().replace("file://", ""));
-        } else if (e.status === SoundEffect.Ready && pendingAt > 0) {
+        } else if (e.status === root.statusReady && pendingAt > 0) {
             if (Date.now() - pendingAt < 600 && e === effects[turn % effects.length])
                 e.play();
             pendingAt = 0;
