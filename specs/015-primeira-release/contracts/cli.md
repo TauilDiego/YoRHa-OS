@@ -11,7 +11,7 @@ bash <(curl -fsSL https://github.com/TauilDiego/YoRHa-Shell/releases/latest/down
 
 | Variável | Efeito | Padrão |
 |---|---|---|
-| `YORHA_ORIGIN` | Uma origem no lugar das padrão (lab, espelho) | As origens do `name.sh` gravadas na release |
+| `YORHA_ORIGIN` | Uma origem no lugar das padrão (lab, espelho), ou várias separadas por espaço (a principal primeiro) | As origens do `name.sh` gravadas na release |
 | `YORHA_CHANNEL` | `stable` ou `testing` | `stable` |
 | `YORHA_YES` | `1` responde "sim" a tudo (automação, lab) | — |
 
@@ -53,7 +53,7 @@ YORHA_ORIGINS=(https://github.com/TauilDiego/YoRHa-Shell)   # 016: + the VPS mir
 | `yorha_origins` | As origens em uso: `YORHA_ORIGIN`, ou `$YORHA_HOME/origins`, ou `YORHA_ORIGINS` |
 | `yorha_channel` | `stable` ou `testing` (`YORHA_CHANNEL`, ou `$YORHA_HOME/channel`, ou `stable`) |
 | `yorha_latest` | Imprime `<v> <origem>` da versão mais nova do canal, tentando as origens em ordem; 1 se nenhuma respondeu |
-| `yorha_fetch_release <v> <pasta>` | Baixa o pacote e o `.sha256` de `<v>` pra `<pasta>`, da primeira origem que tiver os dois, e confere; 1 rede, 4 checksum |
+| `yorha_fetch_release <v> <pasta> [nome] [origem]` | Baixa o pacote e o `.sha256` de `<v>` pra `<pasta>`, da primeira origem que tiver os dois, e confere; 1 rede, 4 checksum. Com `[origem]` (a que respondeu o `yorha_latest`), começa por ela e segue as outras em ordem |
 
 O `install.sh` não tem o `lib/` antes de baixar: ele carrega uma cópia mínima dessas duas funções
 (`yorha_latest` e o download), gravada pelo `release build` a partir do `channel.sh` da mesma ref, pra

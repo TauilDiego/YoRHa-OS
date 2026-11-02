@@ -154,12 +154,12 @@ frentes saem daqui.
 
 **Independent Test**: cenários 1 e 2.
 
-- [ ] T012 [P] [US1] O `install.sh`:
+- [X] T012 [P] [US1] O `install.sh`:
   - as origens pelo bloco gravado (`YORHA_ORIGIN`, ou `YORHA_DEFAULT_ORIGINS`);
   - o canal pelo `YORHA_CHANNEL`;
   - escreve `origins` e `channel` em `$YORHA_HOME`;
   - as saídas 0–4 da 014, com a 1 cobrindo "nenhuma origem respondeu"
-- [ ] T013 [US1] `yorha status` mostra o canal e as origens. O `lab/015/check.d/a-install` cobre os
+- [X] T013 [US1] `yorha status` mostra o canal e as origens. O `lab/015/check.d/a-install` cobre os
   cenários 1 e 2, com o `canal corrupt`
 
 ## Phase 4: US2, uma versão nova publicada chega pelo update (P1) · frente A
@@ -169,15 +169,15 @@ e o update nunca volta versão.
 
 **Independent Test**: cenários 3, 4, 5 e 6.
 
-- [ ] T014 [US2] O `update_check` pelo `yorha_latest`:
+- [X] T014 [US2] O `update_check` pelo `yorha_latest`:
   - o `stable` lê o `latest`, e o `testing` lê o `releases.atom`;
   - a regex `^[0-9]+\.[0-9]+\.[0-9]+$`;
   - o JSON com `channel` e `origin`;
   - nunca oferece versão menor
-- [ ] T015 [US2] `yorha channel` e `yorha channel stable|testing` (contracts/cli.md)
-- [ ] T016 [US2] O espelho (FR-018): o `yorha_fetch_release` tenta as origens em ordem, e os arquivos
+- [X] T015 [US2] `yorha channel` e `yorha channel stable|testing` (contracts/cli.md)
+- [X] T016 [US2] O espelho (FR-018): o `yorha_fetch_release` tenta as origens em ordem, e os arquivos
   de uma versão vêm da mesma origem
-- [ ] T017 [US2] O `lab/015/check.d/a-update` cobre os cenários 3, 4, 5 e 6. No cenário 4, como as
+- [X] T017 [US2] O `lab/015/check.d/a-update` cobre os cenários 3, 4, 5 e 6. No cenário 4, como as
   quatro frentes ocupam as 4 VMs, a mesma VM confere nos dois canais: no `stable`, `up-to-date`; no
   `testing`, a versão de teste, que ela instala e desfaz pelo rollback. O teste com duas VMs de
   verdade é o da T044
@@ -188,14 +188,28 @@ e o update nunca volta versão.
 
 **Independent Test**: cenário 8; o `publish --dry-run`.
 
-- [ ] T018 [US3] O `lab/015/check.d/a-release`, que roda no host e cobre o cenário 8. As quatro
+- [X] T018 [US3] O `lab/015/check.d/a-release`, que roda no host e cobre o cenário 8. As quatro
   recusas, com uma branch de teste descartável (`t015-recusa`) pro arquivo proibido
-- [ ] T019 [US3] `lab/015/release publish` e `promote` (contracts/release.md):
+- [X] T019 [US3] `lab/015/release publish` e `promote` (contracts/release.md):
   - o rascunho primeiro, a conferência por download e só então público;
   - `--dry-run`;
   - as recusas.
 
   Validar só com `--dry-run`: nada vai pro GitHub nesta tarefa
+
+Feito em 02.11 pela frente A (015-a; lab-015-a), na `t015-a`, portas 8721/8722:
+- **Código:** `YORHA_ORIGIN` aceita várias origens separadas por espaço (a principal primeiro), o que
+  dá o cenário 6 sem mudar o `name.sh`. A regra do espelho: o `yorha_fetch_release` ganhou um quarto
+  argumento, a origem que respondeu o `latest`. O download começa por ela e segue as outras na ordem
+  do `origins`, e todos os arquivos de uma versão vêm de uma origem só. Um checksum errado sai 4, sem
+  tentar a próxima. O `update_fetch` lê o `origin` de quem chama, e o `cmd_update` ficou como a
+  fundação deixou. O `yorha status` mostra `channel:` e `origins:` (com a variável, quando é ela que
+  vale), e o `yorha channel [stable|testing]` sai 2 com valor errado. O `shellcheck` do `install.sh`
+  e do `channel.sh` está limpo dentro da VM.
+- **Lab:** o `check-015 --only a-install,a-release,a-update` deu 44 PASS e 0 FAIL (perf
+  `2026-11-02T194031-vm-t015-a-…`, pass, 107 s). O `release publish`/`promote` só foi validado com
+  `--dry-run`: nada foi pro GitHub. Na publicação, a estável sai do rascunho com `--latest`. O
+  `check-014` usa o canal da 015 e as versões `0.0.N` do `release`.
 
 ## Phase 6: US4, o nome público e a troca de nome pelo update (P1) · frente C (Opus 5.5 · médio, `t015-c`, porta 8741)
 
