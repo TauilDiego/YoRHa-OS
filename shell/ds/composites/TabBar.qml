@@ -7,7 +7,8 @@ import "../base"
 
 // The game's tab bar: the double vertical strips, the HeaderButtons side by side, and the
 // dotted rule underneath. The selected tab reaches the rule.
-//   model: [{ label, state }], state = "normal" | "hovered" | "selected" | "dimmed".
+//   model: [{ label, state, tag }], state = "normal" | "hovered" | "selected" | "dimmed"; tag (spec
+//   015, optional): an outline Tag on the tab (NEW), "" or absent = none.
 // The parent owns the states: map `hoveredIndex` into the model to show the hover.
 // The rule spans the bar's whole width; the tabs start at the left.
 // `tone` (spec 004 US6): the top bar's tone, 0 paper → 1 light, handed to strips, tabs and rule.
@@ -58,13 +59,13 @@ Item {
 
     signal activated(int index)
 
-    // Where tab `i` is, in window coordinates (logical px), for tests: { x, w }.
+    // Where tab `i` is, in window coordinates (logical px), for tests: { x, w, tag }.
     function tabGeometry(i: int): var {
-        const tab = tabs.itemAt(i);
+        const tab = tabs.itemAt(i) as HeaderButton;
         if (!tab)
-            return { x: -1, w: 0 };
+            return { x: -1, w: 0, tag: "" };
         const p = tab.mapToItem(null, 0, 0);
-        return { x: Math.round(p.x), w: Math.round(tab.width) };
+        return { x: Math.round(p.x), w: Math.round(tab.width), tag: tab.tag };
     }
 
     readonly property int bandH: Tokens.px(Tokens.space.tabH, s)
@@ -102,6 +103,7 @@ Item {
                 tone: root.tone
                 high: root.high
                 text: entry.label ?? ""
+                tag: entry.tag ?? ""
                 state: entry.state ?? "normal"
                 reachRule: true
                 fixedWidth: root.tabWidth

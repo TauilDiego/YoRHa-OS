@@ -55,7 +55,7 @@ Item {
     property var keys: []
     default property alias content: body.data
     // spec 007
-    property var tabs: []                        // [{ label }]
+    property var tabs: []                        // [{ label, tag }] (tag: spec 015, optional)
     property int tab: 0
     property bool clock: false
     property int hoveredTab: -1                  // the gallery: a tab drawn hovered without the pointer
@@ -400,7 +400,7 @@ Item {
     function tabGeometry(i: int): var {
         const g = tabBar.tabGeometry(i);
         const p = tabBar.mapToItem(null, 0, 0);
-        return { x: g.x, y: Math.round(p.y), w: g.w, h: tabBar.bandH };
+        return { x: g.x, y: Math.round(p.y), w: g.w, h: tabBar.bandH, tag: g.tag };    // tag: spec 015
     }
 
     Rectangle {
@@ -501,6 +501,7 @@ Item {
             buildT: root.buildT
             model: root.tabs.map((t, i) => ({
                 label: t.label,
+                tag: t.tag ?? "",
                 state: i === root.tab ? "selected" : i === tabBar.hoveredIndex || i === root.hoveredTab ? "hovered" : "normal"
             }))
             onActivated: index => root.tabClicked(index)

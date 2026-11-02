@@ -9,6 +9,7 @@
   "menuPresentation": "floating",
   "sound": { "ui": true, "volume": 40, "folder": "", "bootLogin": true },
   "kbLayouts": [],
+  "updates": { "sign": "both", "autoCheck": true },
   "wallpaperFolder": "~/Pictures/Wallpapers",
   "wallpaperTransition": "camouflage",
   "camouflage": { "cell": 24, "trail": 2600, "glitch": 2 },

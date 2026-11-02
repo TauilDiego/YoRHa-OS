@@ -37,6 +37,7 @@ FocusScope {
 
     readonly property var cats: SettingsModel.categories
     readonly property var cat: cats.length > 0 ? cats[Math.max(0, Math.min(category, cats.length - 1))] : null
+    readonly property string categoryId: cat?.id ?? ""          // spec 015 (PauseMenu: SYSTEM › Updates shown)
     readonly property string catId: cat?.id ?? ""
     // spec 008: live notifications options take their texts and values from NotifyPrefs (resolve).
     readonly property var opts: (cat?.options ?? []).map(o => SettingsModel.resolve(o))
@@ -410,7 +411,8 @@ FocusScope {
         visible: root.cats.length > 0
         s: root.s
         variant: "opaque"
-        model: root.cats.map(c => c.label)
+        // spec 015 (contracts/sinal.md): the Updates row carries NEW with the menu form of the sign.
+        model: root.cats.map(c => c.id === "updates" && Updater.signMenu ? { label: c.label, tag: Strings.notify.newTag } : c.label)
         currentIndex: root.category
         focused: root.column === "categories"
         wrap: true

@@ -119,7 +119,9 @@
       "options": [
         {"id": "installed", "label": "Installed", "type": "info", "updates": "installed", "desc": "The version in use. Installed with yorha, it lives in ~/.local/share/yorha-shell.", "text": "Not installed with yorha"},
         {"id": "available", "label": "Available", "type": "info", "updates": "available", "desc": "The newest version, checked every hour. `yorha update --check` checks now.", "text": "Up to date"},
-        {"id": "update-now", "label": "Update now", "type": "action", "updates": "now", "desc": "Opens a terminal running `yorha update`: the new version is checked, the state is kept, and the shell restarts on it. `yorha rollback` goes back.", "text": "Update", "busy": "Opening the terminal."}
+        {"id": "update-now", "label": "Update now", "type": "action", "updates": "now", "desc": "Opens a terminal running `yorha update`: the new version is checked, the state is kept, and the shell restarts on it. `yorha rollback` goes back.", "text": "Update", "busy": "Opening the terminal."},
+        {"id": "sign", "label": "Update sign", "type": "choice", "setting": "updates.sign", "desc": "How a newer version stays on screen until you update. Off shows only the first transmission.", "values": ["Bar", "Menu", "Bar and menu", "Each login", "Off"], "value": 2, "default": 2},
+        {"id": "auto-check", "label": "Check automatically", "type": "toggle", "setting": "updates.autoCheck", "desc": "Checks for a newer version 30 s after the shell starts and then every hour. Off: only `yorha update` checks.", "value": true, "default": true}
       ]
     }
   ]

@@ -16,6 +16,9 @@ import "../primitives"
 // `high` (004 acabamento): the bar's High contrast (Tokens.hudPaperHigh over paper).
 // spec 013 (FR-002): with `pulse`, a selected tab's plate brightens by motion.pulseLight in the
 // game's trapezoid, every motion.pulse (the pause menu's open tab; the top bar never sets it).
+// spec 015 (contracts/sinal.md): `tag`, an outline Tag (NEW) sitting on the tab's top edge at its
+// right end, in the resting ink (a tab's label fills its band, so the tag goes above it); "" = none.
+// It takes no room in the bar's layout.
 Item {
     id: root
 
@@ -27,6 +30,7 @@ Item {
     property real ruleY: 0
     property real fixedWidth: 0                  // game px; 0 = fit the label
     property bool pulse: false                   // spec 013
+    property string tag: ""                      // spec 015
 
     readonly property bool hovered: mouse.containsMouse
 
@@ -153,6 +157,17 @@ Item {
             text: root.text
             color: parent.ink
         }
+    }
+
+    Tag {
+        id: tagBox
+        visible: root.tag !== ""
+        x: root.width - width
+        y: -height - Tokens.px(4, root.s)
+        s: root.s
+        outline: true
+        ink: Tokens.hudColorAt("ink", root.tone, root.high)
+        text: root.tag
     }
 
     // The resting face, hidden once the ink covers it all: the ink is clipped, and at a half

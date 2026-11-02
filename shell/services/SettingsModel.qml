@@ -65,6 +65,9 @@ Singleton {
         // spec 014: SYSTEM › Updates' rows come from the Updater.
         if (opt?.updates === "installed" || opt?.updates === "available")
             return Object.assign({}, opt, { text: Updater.text(opt.updates) });
+        // spec 015: the sign's forms take their labels from Strings.updates.
+        if (opt?.setting === "updates.sign")
+            return Object.assign({}, opt, { values: Strings.updates.signLabels });
         const l = liveOf(opt);
         // spec 013, front D: the sound folder's info row shows the path in use (the catalog's text
         // is "ours", the built-in sounds).
@@ -380,10 +383,20 @@ Singleton {
         return false;
     }
 
+    // spec 015: the catalog's texts name the product as the repository does (YoRHa-Shell, the
+    // yorha-shell folders, the `yorha` command); the installed product's own names go in their place,
+    // so a renamed product (FR-017) never shows the old name.
+    function named(text: string): string {
+        const esc = v => JSON.stringify(String(v)).slice(1, -1);
+        const swap = (t, from, to) => t.split(from).join(to);          // (no String.replaceAll in QML's JS)
+        return swap(swap(swap(text, "YoRHa-Shell", esc(Product.pretty)), "yorha-shell", esc(Product.name)),
+                    "`yorha ", "`" + esc(Product.cmd) + " ");
+    }
+
     function load(text: string): void {
         let data = null;
         try {
-            data = JSON.parse(text);
+            data = JSON.parse(named(text));
         } catch (e) {
             fail(`${catalogPath} is not valid JSON (${e})`);
             return;

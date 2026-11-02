@@ -10,7 +10,8 @@ import "../base"
 // the item at `currentIndex` is drawn "hovered" (ink band + dark selector), and hovering an
 // item with the mouse moves the cursor there. Click or Return emits `activated(index)`;
 // Up/Down move the cursor while the list has focus.
-//   model: a JS array of { label, trailing } (plain strings are accepted as labels).
+//   model: a JS array of { label, trailing, tag } (plain strings are accepted as labels; tag, spec 015:
+//   an outline Tag on the row, as ListItem.tag).
 //   variant: "opaque" | "plain", passed to every ListItem.
 // The parent sets the width; items fill what is left after the strips and the selector room.
 // spec 003: `focused: false` draws the current item "selected" (its kite light and still, the
@@ -60,6 +61,11 @@ Item {
 
     function trailingOf(entry: var): string {
         return typeof entry === "string" ? "" : String(entry?.trailing ?? "");
+    }
+
+    // spec 015: an entry's outline Tag (NEW), "" for none.
+    function tagOf(entry: var): string {
+        return typeof entry === "string" ? "" : String(entry?.tag ?? "");
     }
 
     function move(step: int): void {
@@ -214,6 +220,7 @@ Item {
                     variant: root.variant
                     text: root.labelOf(modelData)
                     trailing: root.trailingOf(modelData)
+                    tag: root.tagOf(modelData)
                     state: index === root.currentIndex ? (root.focused ? "hovered" : "selected") : "normal"
 
                     onHoveredChanged: {
