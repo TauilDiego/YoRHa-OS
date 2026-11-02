@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # YoRHa-Shell installer (specs 014 and 015, contracts/cli.md). Run it as your user:
 #   bash <(curl -fsSL https://github.com/TauilDiego/YoRHa-Shell/releases/latest/download/install.sh)
-# Optional: YORHA_ORIGIN=<address> (the lab, a mirror) in place of the release's own origins;
+# Optional: YORHA_ORIGIN=<address> (the lab, a mirror; several, separated by spaces, are tried in
+# order) in place of the release's own origins;
 # YORHA_CHANNEL=stable|testing (default stable); YORHA_YES=1 answers yes to every question.
 # Gets the newest version of the channel, checks its sha256, unpacks it next to nothing else
 # (method D: ~/.local/share/<name>/versions/<v>), asks before installing the shell's dependencies,
@@ -34,17 +35,20 @@ YORHA_DEFAULT_ORIGINS=(https://github.com/TauilDiego/YoRHa-Shell)
 # which has no lib/ before it downloads: keep it self-contained (bash, curl, coreutils; no other
 # helper of lib/). Uses YORHA_NAME, YORHA_ORIGINS and YORHA_HOME when they are set.
 
-# The origins in use, one per line, the main one first: YORHA_ORIGIN, or $YORHA_HOME/origins, or the
-# release's own YORHA_ORIGINS. Trailing slashes are dropped.
+# The origins in use, one per line, the main one first: YORHA_ORIGIN (one address, or several
+# separated by spaces: a main one and its mirrors), or $YORHA_HOME/origins, or the release's own
+# YORHA_ORIGINS. Trailing slashes are dropped.
 yorha_origins() {
-    local o
+    local o list
     if [[ -n ${YORHA_ORIGIN:-} ]]; then
-        printf '%s\n' "${YORHA_ORIGIN%/}"
+        read -ra list <<<"$YORHA_ORIGIN"
+        for o in "${list[@]}"; do printf '%s\n' "${o%/}"; done
     elif [[ -n ${YORHA_HOME:-} && -s $YORHA_HOME/origins ]]; then
         while read -r o; do
             [[ -n $o && $o != '#'* ]] && printf '%s\n' "${o%/}"
         done < "$YORHA_HOME/origins"
     else
+        # shellcheck disable=SC2153  # YORHA_ORIGINS comes from name.sh (or install.sh), set before this runs
         for o in "${YORHA_ORIGINS[@]}"; do printf '%s\n' "${o%/}"; done
     fi
 }
@@ -92,15 +96,18 @@ yorha_latest() {
 yorha_manifest_get() { sed -n "s/^$2=//p" "$1" | head -n 1; }
 
 # Download version $1 into folder $2 (created): its package and the package's .sha256, both from the
-# first origin that has both, then check the sum. The package is the one the release's manifest
-# names (<origin>/releases/download/v<v>/manifest, a fixed name: an older version finds the package
-# of a newer one even under another product name, research R6); without a manifest (404), it is
+# first origin that has both, then check the sum. With $4 (the origin that answered yorha_latest),
+# that origin is tried first and then the others in order (the mirror rule, FR-018): every file of
+# one version comes from one origin, and an origin that fails midway hands the whole version over to
+# the next one. The package is the one the release's manifest names
+# (<origin>/releases/download/v<v>/manifest, a fixed name: an older version finds the package of a
+# newer one even under another product name, research R6); without a manifest (404), it is
 # <name>-<v>.tar.gz, with $3 or YORHA_NAME as the name.
 # Prints "<origin> <package> <name>": the origin used, the package's file in $2 and the product name
 # of that version. Returns 1 when no origin had the files (or the manifest was unusable), 4 when the
 # sum does not match (the files are removed).
 yorha_fetch_release() {
-    local v=$1 dir=$2 fallback=${3:-${YORHA_NAME:-}} o code name pkg sum want mf
+    local v=$1 dir=$2 fallback=${3:-${YORHA_NAME:-}} first=${4:-} o code name pkg sum want mf
     yorha_valid_version "$v" || return 1
     mkdir -p "$dir" || return 1
     mf="$dir/manifest"
@@ -133,7 +140,7 @@ yorha_fetch_release() {
         fi
         printf '%s %s %s\n' "$o" "$pkg" "$name"
         return 0
-    done < <(yorha_origins)
+    done < <({ [[ -n $first ]] && printf '%s\n' "${first%/}"; yorha_origins; } | awk '!seen[$0]++')
     [[ -n $pkg ]] && rm -f "$dir/$pkg" "$dir/$pkg.sha256"
     rm -f "$mf"
     return 1
@@ -141,6 +148,7 @@ yorha_fetch_release() {
 # @@channel-core-end
 
 YORHA_ORIGINS=("${YORHA_DEFAULT_ORIGINS[@]}")
+unset YORHA_HOME                     # the origins are YORHA_ORIGIN or the release's, never a leftover file
 channel=${YORHA_CHANNEL:-stable}
 [[ $EUID -ne 0 ]] || fail "run as your user, not root (sudo is asked only when needed)"
 [[ -f /etc/arch-release ]] || fail "this installer is for Arch Linux"
@@ -156,7 +164,7 @@ tmp=$(mktemp -d "${TMPDIR:-/tmp}/yorha-install.XXXXXX")
 trap 'rm -rf "$tmp"' EXIT
 say "downloading version $v ($channel) from ${latest#* }"
 rc=0
-got=$(yorha_fetch_release "$v" "$tmp") || rc=$?
+got=$(yorha_fetch_release "$v" "$tmp" "" "${latest#* }") || rc=$?
 case $rc in
     0) ;;
     4) fail "checksum mismatch for $v; refusing" 4 ;;
@@ -164,12 +172,17 @@ case $rc in
 esac
 mkdir "$tmp/v"
 pkg=$(cut -d' ' -f2 <<<"$got")      # the package the release's manifest names
+say "checksum ok ($pkg, from ${got%% *})"
 tar -xzf "$tmp/$pkg" -C "$tmp/v" --strip-components=1
 
-# From here on the names come from the version itself (lib/yorha/name.sh, FR-019).
+# From here on the names come from the version itself (lib/yorha/name.sh, FR-019). Its lib/ only
+# exists once downloaded, so shellcheck cannot follow it (SC1091).
 YORHA_ROOT="$tmp/v"
+# shellcheck disable=SC1091
 source "$YORHA_ROOT/lib/yorha/name.sh"
+# shellcheck disable=SC1091
 source "$YORHA_ROOT/lib/yorha/common.sh"
+# shellcheck disable=SC1091
 source "$YORHA_ROOT/lib/yorha/deps.sh"
 if [[ -n $(yorha_current) ]]; then
     yorha_say "$YORHA_PRETTY $(yorha_current) is already installed in $YORHA_HOME; to get newer versions: $YORHA_CMD update"

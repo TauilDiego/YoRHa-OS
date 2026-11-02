@@ -21,8 +21,10 @@ caminhos (research R1):
   também recebe as versões estáveis.
 - **Sempre `curl -fsSL`**, com `--max-time 20` na conferência e nos downloads pequenos.
 - **O pacote pelo manifesto:** o produto lê o `manifest` da versão e baixa o `package` que ele diz, com o `.sha256` ao lado. Sem manifesto (404), cai em `<YORHA_NAME>-<v>.tar.gz`.
-- **Origens em ordem:** a primeira que responde vence. Os arquivos de uma versão (pacote, `.sha256`)
-  vêm todos da mesma origem; se um falha, a versão inteira é tentada na próxima.
+- **Origens em ordem:** a primeira que responde vence. Os arquivos de uma versão (manifesto, pacote,
+  `.sha256`) vêm todos da mesma origem; se um falha, a versão inteira é tentada na próxima. O
+  download começa pela origem que respondeu o `latest` (ou o feed) e depois segue as outras na ordem
+  do `origins`. Um checksum que não bate não passa pra próxima origem: sai 4.
 - **Nada é mandado além do pedido:** sem identificador, sem a versão instalada, sem dado da máquina.
   O cabeçalho `User-Agent` é o padrão do `curl`.
 
