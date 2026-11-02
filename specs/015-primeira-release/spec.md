@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-01
 
-**Status**: Rascunho; pergunta 1 respondida em 02.11 (o nome), faltam 2 (uma de cada vez)
+**Status**: Rascunho; em 02.11 o nome e a assinatura foram resolvidos e a telemetria entrou; faltam as decisões da telemetria e o sinal de update (uma de cada vez)
 
 **Input**: Em 01.11, depois de fechar a 014, o dono adiou as funcionalidades novas (o clima no HUD
 entre elas) e marcou o próximo marco: "primeiro terminar o instalador e updater depois features
@@ -34,6 +34,18 @@ O ponto de partida é a v0 da 014, que funciona na VM, mas só com o canal local
   - O dono aceita o risco com três proteções: a constituição muda (FR-016), o update sabe trocar o
     nome sozinho se um dia for preciso (FR-017) e o README diz que é um projeto de fã, sem ligação
     com a Square Enix (FR-013).
+- Q: A primeira release sai com assinatura? → A: Não. A 0.1.0 sai só com o checksum, e a assinatura
+  entra antes da 1.0, como diz o PLAN. A 015 deixa o instalador e o update prontos pra uma segunda
+  origem (FR-018) e põe um interruptor pra conferência automática (FR-019). A VPS do dono, onde vai
+  ficar o site, entra numa spec própria (016): o site, o endereço curto de instalação, uma cópia do
+  checksum e o espelho das releases. Foi a proposta do assistente; o dono seguiu pra telemetria sem
+  objetar, e pode reabrir.
+- Q: Telemetria? → A: **Sim**, entra na 015 (US7). O dono, depois de ver a do Serpantinum: "pior que
+  na real adicionar uma telemetria seria bom. pelo mesmo motivo de ele ter feito no dele. só pra
+  medir dados dos sistemas que estão instalando... pode fazer". O Serpantinum manda, no fim de cada
+  instalação, um ID, a versão, o sistema, o kernel, a RAM, a CPU, a GPU, o desktop, o compositor e os
+  pacotes que falharam pra um Cloudflare Worker; vem ligada por padrão e, desligada, ainda manda o
+  ID e a versão. A nossa não repete essa última parte (FR-021).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -172,6 +184,34 @@ resultado da verificação automática.
    15 branches velhas do GitHub são apagadas, cada passo com o OK dele.
 2. **Given** a `main` publicada, **When** a verificação automática roda, **Then** ela passa.
 
+### User Story 7 - Saber em que sistemas o YoRHa-Shell está sendo instalado (Priority: P2)
+
+O dono quer saber em que máquinas o projeto está sendo instalado e onde a instalação falha: a
+distribuição, a versão do Hyprland, a placa de vídeo, os monitores, as dependências que não
+instalaram. No fim de cada instalação e de cada update, quem aceitou manda um resumo anônimo
+desses dados. Quem não aceitou não manda nada.
+
+**Why this priority**: Ajuda a decidir o que testar (a S6 fala em EndeavourOS e CachyOS) e mostra
+falhas que o lab não pega. Não muda o produto pra quem instala, por isso P2.
+
+**Independent Test**: Numa VM, instalar aceitando e conferir que o receptor recebeu exatamente os
+campos da lista do README. Noutra, instalar recusando e conferir, pelo tráfego da VM, que nenhum
+pedido foi pro receptor.
+
+**Acceptance Scenarios**:
+
+1. **Given** uma instalação nova, **When** o instalador chega na pergunta da telemetria, **Then** ele
+   mostra o que vai ser enviado e pede a resposta [NEEDS CLARIFICATION: a telemetria vem desligada
+   até a pessoa aceitar (opt-in) ou ligada até ela recusar (opt-out)?].
+2. **Given** a telemetria aceita, **When** a instalação ou o update termina (com sucesso ou falha),
+   **Then** um resumo vai pro receptor, sem nome de usuário, nome da máquina ou IP guardado.
+3. **Given** a telemetria recusada ou desligada, **When** se instala ou atualiza, **Then** nenhum
+   pedido vai pro receptor.
+4. **Given** a telemetria ligada, **When** a pessoa roda o comando de telemetria, **Then** ela vê o
+   estado, o último resumo enviado, e consegue desligar ou trocar o ID.
+
+---
+
 ### Edge Cases
 
 - **Canal público fora do ar ou com limite de acessos:** instalar falha com uma mensagem clara e sem
@@ -184,6 +224,10 @@ resultado da verificação automática.
 - **Arquivo do jogo ou do lab dentro do pacote:** a montagem recusa (fontes, sons e vídeos do jogo;
   qualquer coisa do repositório privado).
 - **Nome novo e uma instalação com o nome provisório** (só VMs do lab): fica fora; a VM é refeita.
+- **Receptor da telemetria fora do ar:** o envio desiste em poucos segundos, sem repetir e sem
+  atrasar nem quebrar a instalação.
+- **Instalação sem terminal interativo** (por script): a pergunta da telemetria não aparece e vale
+  "não enviar".
 
 ## Requirements *(mandatory)*
 
@@ -208,8 +252,8 @@ resultado da verificação automática.
   mesmos arquivos testados.
 - **FR-008**: Pré-releases (versões de teste) MUST ser ignoradas pelo canal estável e oferecidas só a
   quem escolheu o canal de teste.
-- **FR-009**: A integridade MUST ser conferida sempre pelo checksum; [NEEDS CLARIFICATION: a
-  primeira release sai também com assinatura, ou a assinatura fica pra S6, como diz o PLAN?].
+- **FR-009**: A integridade MUST ser conferida sempre pelo checksum. A assinatura fica pra antes da
+  1.0 (PLAN, decisão em aberto 2).
 - **FR-010**: O nome público YoRHa-Shell MUST ser aplicado antes de publicar: pastas, arquivos do
   sistema, textos da UI, README e repositório. O comando `yorha` e as variáveis `YORHA_*` ficam. O
   nome provisório só fica nas specs antigas, no histórico e nos créditos. Renomear o repositório no
@@ -234,6 +278,23 @@ resultado da verificação automática.
   o comando e a linha do `hyprland.lua` (avisando a pessoa), e manter o rollback funcionando. Assim,
   se um dia for preciso trocar o nome, isso sai como um update comum. Na 015 a troca é testada no
   lab com um nome de mentira, de ida e volta.
+- **FR-018**: O instalador e o update MUST aceitar uma origem principal e um espelho, com o mesmo
+  formato de release, e tentar o espelho quando a principal falha. Na 0.1.0 só existe a principal (o
+  GitHub); o espelho na VPS vem com a 016.
+- **FR-019**: SYSTEM › Updates MUST ter um interruptor pra conferência automática de versão. Desligada,
+  o shell não faz nenhum pedido sozinho, e só o `yorha update` confere.
+- **FR-020**: Com a telemetria aceita, o fim de cada instalação, update e rollback MUST mandar um
+  resumo [NEEDS CLARIFICATION: quais campos? Proposta: um ID aleatório da instalação, a versão nova
+  e a anterior, o resultado, as dependências que falharam, a distribuição, o kernel, a versão do
+  Hyprland, a GPU, o número de monitores e a escala, e a RAM].
+- **FR-021**: Com a telemetria recusada ou desligada, MUST NOT sair nenhum pedido pro receptor, nem
+  um aviso de "desligada". O shell em si MUST NOT mandar telemetria: só o instalador e o `yorha`, no
+  fim das operações.
+- **FR-022**: O receptor [NEEDS CLARIFICATION: na VPS do dono ou num serviço gratuito como o
+  Cloudflare Workers, e se ele entra já na 015 ou com a 016] MUST guardar só os campos do resumo e a
+  data, nunca o IP, e o dono MUST conseguir ver o total por campo.
+- **FR-023**: O README MUST listar os campos enviados, como ligar e desligar e onde os dados ficam. O
+  comando `yorha telemetry` MUST mostrar o estado e o último resumo, ligar, desligar e trocar o ID.
 
 ### Key Entities
 
@@ -242,6 +303,9 @@ resultado da verificação automática.
 - **Canal**: de onde a máquina tira as releases. O público (GitHub), o de teste (pré-releases) e o
   do lab (local).
 - **Sinal de versão nova**: o que fica visível enquanto há uma release mais nova que a instalada.
+- **Resumo de telemetria**: os campos que uma instalação manda no fim de uma operação, com um ID
+  aleatório que a pessoa pode trocar.
+- **Receptor**: o endereço que recebe e guarda os resumos.
 
 ## Success Criteria *(mandatory)*
 
@@ -260,6 +324,10 @@ resultado da verificação automática.
 - **SC-007**: Os roteiros 003, 004, 007, 008, 013 e 014 (adaptado ao canal público) passam, e a
   verificação automática passa na `main` publicada.
 - **SC-008**: O dono aprova a página da release antes de ela ser publicada.
+- **SC-009**: Numa VM com a telemetria recusada, a captura do tráfego durante a instalação, um update
+  e um rollback mostra zero pedidos pro receptor. Numa VM com ela aceita, o receptor tem um resumo por
+  operação, só com os campos da lista.
+- **SC-010**: Com o receptor fora do ar, a instalação leva no máximo 5 s a mais e termina igual.
 
 ## Assumptions
 
@@ -270,7 +338,8 @@ resultado da verificação automática.
   ignora pré-releases.
 - **"Update now" apagado** quando não há versão nova (decisão 2 da página da 014) continua como
   está, a menos que o dono diga outra coisa.
-- **Sem telemetria:** a conferência de versão só lê o canal público.
+- **Telemetria só do instalador e do CLI:** a conferência de versão do shell continua só lendo o
+  canal público, sem mandar dado nenhum além do pedido.
 - **Fora desta spec:** o clima no HUD e as outras funcionalidades da S1 (depois do marco), o Niri
   (S5) e o cursor (FR-017 da 014).
 - **Máquina do dono:** como sempre, nada roda nela; o teste é em VM, com acesso à internet pra ler
