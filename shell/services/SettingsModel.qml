@@ -65,6 +65,9 @@ Singleton {
         // spec 014: SYSTEM › Updates' rows come from the Updater.
         if (opt?.updates === "installed" || opt?.updates === "available")
             return Object.assign({}, opt, { text: Updater.text(opt.updates) });
+        // spec 015: the sign's forms take their labels from Strings.updates.
+        if (opt?.setting === "updates.sign")
+            return Object.assign({}, opt, { values: Strings.updates.signLabels });
         const l = liveOf(opt);
         // spec 013, front D: the sound folder's info row shows the path in use (the catalog's text
         // is "ours", the built-in sounds).

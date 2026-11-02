@@ -146,7 +146,10 @@ Singleton {
         "sound.volume": { type: "int", min: 0, max: 100, fallback: 40, config: ["sound", "volume"] },
         "sound.folder": { type: "string", fallback: "", config: ["sound", "folder"] },
         "sound.bootLogin": { type: "bool", fallback: true, config: ["sound", "bootLogin"] },
-        "input.kbLayouts": { type: "layouts", fallback: [], config: ["kbLayouts"] }
+        "input.kbLayouts": { type: "layouts", fallback: [], config: ["kbLayouts"] },
+        // spec 015 (contracts/sinal.md): how a newer version stays on screen, and the automatic check
+        "updates.sign": { type: "choice", values: ["bar", "menu", "both", "login", "off"], fallback: "both", config: ["updates", "sign"] },
+        "updates.autoCheck": { type: "bool", fallback: true, config: ["updates", "autoCheck"] }
     })
     // The key of the table for `key` or "shell." + `key`, or "".
     function keyOf(key: string): string {
@@ -207,6 +210,8 @@ Singleton {
     readonly property string soundFolder: valueOf("sound.folder")
     readonly property bool soundBootLogin: valueOf("sound.bootLogin")
     readonly property var kbLayouts: valueOf("input.kbLayouts")
+    readonly property string updateSign: valueOf("updates.sign")              // spec 015
+    readonly property bool updateAutoCheck: valueOf("updates.autoCheck")
     // --- end spec 013 --------------------------------------------------------------------------------
 
     // --- spec 007: the terminal that runs terminal apps (APPS, research R4) -----------------------
