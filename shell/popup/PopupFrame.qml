@@ -400,7 +400,7 @@ Item {
     function tabGeometry(i: int): var {
         const g = tabBar.tabGeometry(i);
         const p = tabBar.mapToItem(null, 0, 0);
-        return { x: g.x, y: Math.round(p.y), w: g.w, h: tabBar.bandH };
+        return { x: g.x, y: Math.round(p.y), w: g.w, h: tabBar.bandH, tag: g.tag };    // tag: spec 015
     }
 
     Rectangle {
