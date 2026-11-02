@@ -218,29 +218,36 @@ update futuro (FR-017).
 
 **Independent Test**: cenário 10 (SC-009), e o cenário 9 nas pastas instaladas e nos textos da UI.
 
-- [ ] T020 [P] [US4] `bin/yorha`:
+- [x] T020 [P] [US4] `bin/yorha`:
   - o `update` entrega o fim pra versão nova (`<nova>/bin/<cmd> _finish-update --from <v>
     --from-home <pasta>`);
   - o `_finish-update` faz o que o `update_finish` faz quando os nomes são iguais (research R6)
-- [ ] T021 [US4] `lib/yorha/rename.sh`, a troca nos dois sentidos (data-model.md, "Depois de uma troca
+- [x] T021 [US4] `lib/yorha/rename.sh`, a troca nos dois sentidos (data-model.md, "Depois de uma troca
   de nome"):
   - move `share`, `state` e `config`;
   - deixa links no `state` e no `config`;
   - a pasta de compatibilidade com o `<antigo>.lua` de uma linha;
   - o `renamed-to` e o `renamed-from`;
   - o atalho do comando
-- [ ] T022 [US4] O resto do `bin/yorha` e o aviso:
+- [x] T022 [US4] O resto do `bin/yorha` e o aviso:
   - o supervisor segue o `renamed-to`;
   - o `rollback` desfaz a troca;
   - o `uninstall` limpa o atalho, os links e a pasta antiga;
   - o `status` mostra a linha nova;
   - um singleton pequeno, `shell/services/NameChange.qml`, que manda uma vez a transmissão com a
     linha nova quando existe `renamed-from` sem aviso dado
-- [ ] T023 [US4] A versão de mentira:
+- [x] T023 [US4] A versão de mentira:
   - o worktree descartável `YoRHa-OS-wt/t015-fake` (branch `t015-fake`, saindo da `015-c`), com o
     `name.sh` em `fake-shell`, `fakecmd` e `Fake-Shell`;
   - `release build 0.0.N --lab-only --ref t015-fake`;
   - o `lab/015/check.d/c-rename` cobre o cenário 10, de ida e volta, com screenshots nas duas pontas
+
+Feito em 02.11 (frente C; 015-c a3a1b06, ab79fb1; lab-015-c ac6b495; perf
+`2026-11-02T194921-vm-t015-c-…-3a-roda`, pass, 153 s): o `c-rename` passa com 46 PASS e 0 FAIL. A
+versão de mentira é montada pelo próprio bloco, num `YoRHa-OS-wt/t015-fake` que ele apaga no fim, e
+ele roda de novo sem preparo (`C_REF=<branch>`, padrão `015-primeira-release`). Uma decisão fora do R6:
+o rollback faz a mesma troca no sentido contrário, em vez de só desfazer. A pasta do nome novo vira a
+de compatibilidade, e assim as teclas e uma linha do nome novo continuam valendo até o próximo login.
 
 ## Phase 7: US5, o aviso que fica (P2) · frente B (Opus 5.5 · médio, `t015-b`, porta 8731)
 

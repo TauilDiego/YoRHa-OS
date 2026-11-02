@@ -49,6 +49,7 @@ ShellRoot {
     }
 
     property bool galleryOpen: false
+    readonly property bool nameChangeOn: NameChange.installed     // spec 015 (front C): the notice after a change of name
 
     // spec 013, front D: the entry sound, once per login (Sounds.sessionStart, research S5). A moment
     // after the start so the desktop is up; not with fixtures (frozen screenshots).

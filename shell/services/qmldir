@@ -18,4 +18,5 @@ singleton Osd 1.0 Osd.qml
 singleton Sounds 1.0 Sounds.qml
 singleton Updater 1.0 Updater.qml
 singleton Product 1.0 Product.qml
+singleton NameChange 1.0 NameChange.qml
 UiSound 1.0 UiSound.qml

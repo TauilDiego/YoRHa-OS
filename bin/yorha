@@ -8,6 +8,7 @@ source "$YORHA_ROOT/lib/yorha/name.sh"
 source "$YORHA_ROOT/lib/yorha/common.sh"
 source "$YORHA_ROOT/lib/yorha/deps.sh"
 source "$YORHA_ROOT/lib/yorha/channel.sh"
+source "$YORHA_ROOT/lib/yorha/rename.sh"
 [[ $EUID -ne 0 ]] || yorha_fail "run as your user, not root"
 
 usage() {
@@ -33,6 +34,8 @@ cmd_status() {
     printf '  origins:   %s\n' "${origins:-none}"
     printf '  folder:    %s\n' "$YORHA_HOME"
     printf '  shell:     %s\n' "$running"
+    # spec 015 T022 (front C): after a change of name, the new hyprland.lua line.
+    if has_include_line; then yorha_rename_status 0; else yorha_rename_status 1; fi
 }
 
 # --- versions (US2, research R2; spec 015: the channel core in lib/yorha/channel.sh) --------------
@@ -90,6 +93,7 @@ update_fetch() {
 }
 
 # Put the fetched version $2 in use over $1: copy the state, switch, migrate, prune, restart the shell.
+# Spec 015: only for a fetched version from before 015, which has no _finish-update (see update_handover).
 update_finish() {
     local cur=$1 v=$2 new="$YORHA_HOME/versions/$2"
     yorha_backup_state "$cur" >/dev/null
@@ -99,6 +103,62 @@ update_finish() {
     yorha_prune
     "$new/bin/$YORHA_CMD" shell restart >/dev/null || true
     yorha_say "updated to $v (previous: $cur; $YORHA_CMD rollback goes back)"
+}
+
+# Spec 015 (research R6): the fetched version $2 finishes the update itself (_finish-update), since
+# only it knows its own name; the command is the one its own name.sh says.
+update_handover() {
+    local cur=$1 v=$2 new="$YORHA_HOME/versions/$2" cmd
+    cmd=$(yorha_name_of "$new" | sed -n 2p)
+    if [[ -n $cmd && -x $new/bin/$cmd ]] && grep -q '_finish-update' "$new/bin/$cmd"; then
+        exec "$new/bin/$cmd" _finish-update --from "$cur" --from-home "$YORHA_HOME"
+    fi
+    update_finish "$cur" "$v"
+}
+
+# Stop the qs whose pid is in run folder $1 (default: this name's); the supervisor brings up the
+# version in use, or follows a change of name.
+stop_shell() {
+    local pid
+    pid=$(cat "${1:-$(run_dir)}/shell.pid" 2>/dev/null || true)
+    [[ -n $pid ]] && kill "$pid" 2>/dev/null
+}
+
+# In the new version, called by the update of the version in use ($cur, installed in --from-home):
+# change the name if this version has another one (lib/yorha/rename.sh), copy the state, switch,
+# migrate, prune, restart the shell.
+cmd__finish_update() {
+    local cur="" from_home="" v rd renamed=0 o
+    while (($#)); do
+        case $1 in
+            --from) cur=${2:?--from <version>}; shift ;;
+            --from-home) from_home=${2:?--from-home <folder>}; shift ;;
+            *) usage ;;
+        esac
+        shift
+    done
+    [[ -n $cur && -n $from_home ]] || usage
+    v=$(yorha_version_of "$YORHA_ROOT")
+    rd=$(run_dir)
+    if [[ $from_home != "$YORHA_HOME" ]]; then
+        mapfile -t o < <(yorha_name_of "$from_home/versions/$cur") || true
+        ((${#o[@]} == 6)) || yorha_fail "cannot read the name of $from_home/versions/$cur; nothing changed" 1
+        YORHA_STATE=${o[4]} yorha_backup_state "$cur" >/dev/null     # the state as it was, under the old name
+        rd="${XDG_RUNTIME_DIR:-/tmp}/${o[0]}"                        # where the running shell is
+        yorha_rename_forward "$from_home/versions/$cur"
+        YORHA_ROOT="$YORHA_HOME/versions/$v"
+        renamed=1
+    else
+        yorha_backup_state "$cur" >/dev/null
+    fi
+    yorha_switch "$v"
+    test_stop switched
+    yorha_migrate "$YORHA_ROOT" "$cur" || yorha_fail "the update to $v stopped at a migration; $YORHA_CMD rollback goes back to $cur" 5
+    yorha_prune
+    stop_shell "$rd" || true
+    yorha_say "updated to $v (previous: $cur; $YORHA_CMD rollback goes back)"
+    if ((renamed)); then if has_include_line; then yorha_rename_notes 0; else yorha_rename_notes 1; fi; fi
+    return 0
 }
 
 cmd_update() {
@@ -134,7 +194,7 @@ cmd_update() {
         return 0
     fi
     update_fetch "$latest"
-    update_finish "$cur" "$latest"
+    update_handover "$cur" "$latest"
 }
 
 # The channel (contracts/cli.md): without an argument, print it; with stable or testing, keep it in
@@ -153,11 +213,23 @@ cmd_channel() {
 }
 
 # Back to the version before the last update, with the state as it was before that update.
+# Spec 015: when the previous version has another name, the name changes back first: the same move
+# as an update's (lib/yorha/rename.sh), in the other direction, and the rest runs under that name.
 cmd_rollback() {
-    local cur prev state
+    local cur prev state o rd from="" here
     cur=$(yorha_current)
     prev=$(cat "$YORHA_HOME/previous" 2>/dev/null || true)
     [[ -n $prev && -d $YORHA_HOME/versions/$prev ]] || yorha_fail "no previous version to go back to" 3
+    rd=$(run_dir)
+    mapfile -t o < <(yorha_name_of "$YORHA_HOME/versions/$prev") || true
+    if ((${#o[@]} == 6)) && [[ ${o[0]} != "$YORHA_NAME" ]]; then
+        here="$YORHA_HOME/versions/$cur"
+        # From here on, the previous version's name.
+        # shellcheck source=/dev/null
+        source "$YORHA_HOME/versions/$prev/lib/yorha/name.sh"
+        yorha_rename_forward "$here"
+        from=$(cat "$YORHA_STATE/renamed-from")
+    fi
     yorha_switch "$prev"
     rm -f "$YORHA_HOME/previous"
     if [[ -d $YORHA_STATE/backups/$prev ]]; then
@@ -167,8 +239,12 @@ cmd_rollback() {
     else
         state="no copy of the state from $prev; state left as is"
     fi
-    "$YORHA_HOME/current/bin/$YORHA_CMD" shell restart >/dev/null || true
+    # The restored state is from before the change of name: say again where the name came from.
+    [[ -n $from ]] && printf '%s\n' "$from" > "$YORHA_STATE/renamed-from"
+    stop_shell "$rd" || true
     yorha_say "rolled back from $cur to $prev ($state)"
+    if [[ -n $from ]]; then if has_include_line; then yorha_rename_notes 0; else yorha_rename_notes 1; fi; fi
+    return 0
 }
 
 cmd_migrate() {
@@ -186,12 +262,19 @@ shell_root() { readlink -f "$YORHA_HOME/current"; }
 # `shell restart` (and an update) bring up whatever "current" points at. Stops when uninstalled.
 # --relaunch: the same supervisor, re-executed from a newer version (it keeps the lock on fd 9).
 cmd_shell_start() {
-    local rd root qspid log
+    local rd root qspid log to
     rd=$(run_dir); mkdir -p "$rd" "$YORHA_STATE"
     # Quickshell only watches the applications folder if it exists when it starts; without it, an app
     # installed later stays out of the APPS tab until a restart (spec 007, T041; PLAN, S3).
     mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/applications"
-    if [[ ${1:-} != --relaunch ]]; then
+    if [[ ${1:-} == --relaunch ]]; then
+        # Followed a change of name (spec 015): hold the lock of this name's run folder instead. A
+        # child that inherited the old lock may still hold this one; the relaunch goes on anyway.
+        if [[ $(readlink "/proc/$$/fd/9" 2>/dev/null) != "$rd/shell.lock" ]]; then
+            exec 9>"$rd/shell.lock"
+            flock -n 9 || true
+        fi
+    else
         exec 9>"$rd/shell.lock"
         flock -n 9 || { yorha_say "the shell is already running"; exit 0; }
         # Qt registers with the portal at start; wait for it (at most 30 s), as the lab's runner does.
@@ -201,7 +284,17 @@ cmd_shell_start() {
     # Two known Qt 6.12 warnings that are not ours (see lab/guest/nier-ui-run).
     export QT_LOGGING_RULES="qt.qpa.wayland.textinput.warning=false;qt.qpa.services.warning=false"
     log="$YORHA_STATE/shell.log"
-    while [[ -L $YORHA_HOME/current ]]; do
+    while :; do
+        if [[ ! -L $YORHA_HOME/current ]]; then
+            # A change of name (spec 015, research R6) moves this folder away and leaves renamed-to:
+            # follow it to the new command instead of stopping, so the shell does not drop.
+            for _ in $(seq 10); do [[ -L $YORHA_HOME/current || -s $YORHA_HOME/renamed-to ]] && break; sleep 0.5; done
+            if [[ ! -L $YORHA_HOME/current ]]; then
+                to=$(yorha_kv "$YORHA_HOME/renamed-to" bin || true)
+                [[ -n $to && -x $to ]] && exec "$to" shell start --relaunch
+                break
+            fi
+        fi
         root=$(shell_root)
         # A newer version took over: run its own supervisor (its code may differ from this one's).
         if [[ $root != "$YORHA_ROOT" && -x $root/bin/$YORHA_CMD ]]; then
@@ -282,6 +375,7 @@ cmd_uninstall() {
     rm -rf "$rd"
     rm -f "$YORHA_BIN/$YORHA_CMD"
     cd / && rm -rf "$YORHA_HOME"
+    yorha_rename_forget             # spec 015: the alias, the links and the old name's folder
     if yorha_ask "also remove the saved state ($YORHA_STATE: what the menus saved, the update copies)?"; then
         rm -rf "$YORHA_STATE"
     fi
@@ -346,6 +440,7 @@ main() {
         status) cmd_status ;;
         channel) shift; cmd_channel "$@" ;;
         _install) cmd__install ;;
+        _finish-update) shift; cmd__finish_update "$@" ;;
         shell)
             case ${2:-} in
                 start) shift 2; cmd_shell_start "$@" ;;
