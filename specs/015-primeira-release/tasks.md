@@ -78,13 +78,22 @@ aceitam `--dir`, e assim os números `0.0.N` de uma frente não colidem com os d
 
 ### F1, a troca do nome (agente N · Haiku · baixo)
 
-- [ ] T006 No repo público (branch `015-primeira-release`), aplicar a tabela do contracts/nome.md:
+- [X] T006 No repo público (branch `015-primeira-release`), aplicar a tabela do contracts/nome.md:
   - `git mv` das pastas e dos arquivos com `yorha-os` no nome;
   - a troca no conteúdo, fora da lista de histórico;
   - `YORHA_OS_<X>` vira `YORHA_<X>`, e o `YORHA_OS_CHANNEL` fica pra T009.
 
   Conferir com `git grep -n -i -E 'yorha[-_]?os'`: só sobram arquivos da lista de histórico. Commit
   único
+
+  Feito em 02.11 (f64d048, Haiku): 270 caminhos e 66 arquivos. Um falso positivo foi corrigido na
+  conferência (`yorha-osd`, o OSD, tinha virado `yorha-shelld`; b10960f). Ficaram pra outras tarefas:
+  - a fonte do boot (T008);
+  - o `YORHA_OS_CHANNEL` (T009);
+  - pra frente D: as URLs `TauilDiego/YoRHa-OS` (PLAN, `metadata.desktop`) e as linhas do PLAN que
+    agora dizem "o YoRHa-Shell é provisório".
+
+  O id de voz `yorhaos` é uma chave das opções salvas e fica.
 - [ ] T007 No repo privado (branch `lab-015`), a mesma tabela nos roteiros ativos:
   - `check-003` a `check-014`, `guest/`, `011/`, `014/`, `lib.sh`, `README.md` e `provision`;
   - nunca em `u2/`, `009/` ou `mockups/`.
