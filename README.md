@@ -64,7 +64,8 @@ bash <(curl -fsSL https://github.com/TauilDiego/YoRHa-Shell/releases/latest/down
   transmissão avisa, e um sinal fica na barra e no menu até você atualizar (SYSTEM › Updates escolhe
   onde, ou desliga).
   SYSTEM › Updates também tem o "Update now", que roda o `yorha update`.
-- **Conferência automática:** dá pra desligar em SYSTEM › Updates. Aí só o `yorha update` confere.
+- **Conferência automática:** dá pra desligar em SYSTEM › Updates. Aí o shell só confere quando
+  você abre SYSTEM › Updates ou roda o `yorha update`.
 - **Sem telemetria:** o shell só pergunta qual é a versão mais nova.
 - **Desinstalar:** o `yorha uninstall` pergunta se tira também o estado salvo
   (`~/.local/state/yorha-shell`). Os pacotes do sistema que o instalador pôs ficam, e a linha do

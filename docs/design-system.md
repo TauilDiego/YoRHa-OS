@@ -1002,6 +1002,34 @@ No fim do update, o `yorha` reinicia o shell, que sobe na versão nova.
   SUPER+CTRL+N ao `yorha ipc …`. O modificador muda com `YORHA_MOD`, definido antes da linha do
   include.
 
+## 13. O sinal de versão nova (spec 015)
+
+A transmissão da 014 sai uma vez e some. Enquanto houver versão nova (`Updater.available`), um sinal
+fica na tela até o update. Depois do update, ele some em qualquer forma.
+
+### Na barra (`hud/UpdateTag.qml`)
+
+- **O desenho:** igual ao contador do LOG (§10, `LogCounter`): um quadradinho de 9, `UPDATE` e a
+  versão (`■ UPDATE 0.2.0`), na mesma fonte e no mesmo tom da barra (tinta sobre o papel, claro
+  sobre o fundo escuro).
+- **Onde:** antes do contador do LOG, que continua antes do relógio.
+- **O clique:** abre o menu em SYSTEM › Updates (`Updater.showUpdates()`).
+
+### No menu (a etiqueta `NEW`)
+
+- **O desenho:** a mesma `Tag` `NEW` do text log (§10, "Etiquetas": contorno de 1,5 px, `bandTag`
+  13/600).
+- **Onde:** na aba SYSTEM do `TabBar` e na linha da categoria Updates.
+
+### A escolha (SYSTEM › Updates)
+
+| Linha | Tipo | O que faz |
+|---|---|---|
+| Update sign | choice | **Bar and menu** (o padrão), Bar, Menu, Each login (a transmissão volta uma vez por login) e Off (só a primeira transmissão). Muda na hora, sem reiniciar o shell |
+| Check automatically | toggle | Ligado: confere 30 s depois de subir e a cada hora. Desligado: o shell não faz nenhum pedido sozinho; confere só ao abrir SYSTEM › Updates, pelo IPC `updates check` e no `yorha update` |
+
+O contrato com os ids e o `dump` está em `specs/015-primeira-release/contracts/sinal.md`.
+
 ## Créditos
 
 Componentes, tokens e anatomia baseados em **"NieR: Automata - UI"**, de **tyleo**,

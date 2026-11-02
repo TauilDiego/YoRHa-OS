@@ -1,5 +1,16 @@
 <!--
 Sync Impact Report
+- Versão: 2.0.0 → 2.1.0 (MINOR: amplia a regra de Restrições, Marcas). Spec 015, FR-016; o dono
+  aprovou a emenda junto com o plano da 015, em 02.11.
+- Título: "YoRHa-OS Constitution" vira "YoRHa-Shell Constitution".
+- Abertura: sai o "Nome provisório.". O nome público é YoRHa-Shell, e o comando continua `yorha`.
+- Restrições, Marcas: "O nome público vai ser próprio" vira a decisão do nome. O nome usa YoRHa por
+  escolha do dono; o projeto é gratuito, de fã e sem ligação com a Square Enix, e o README diz isso;
+  continua valendo que nada do jogo entra no repositório, e agora também nos pacotes; o nome pode
+  mudar por um update comum.
+- Templates: nenhum muda.
+
+Anterior (2.0.0, 01.11):
 - Versão: 1.1.1 → 2.0.0 (MAJOR: redefine o princípio II).
 - Princípio II: deixa de ser "Camada sobre um Arch limpo, não imagem", com as camadas base,
   módulos, hardware e pessoal. Passa a ser "Sistema visual sobre um Arch limpo": o shell, mais um
@@ -13,11 +24,11 @@ Sync Impact Report
 - Anterior (1.1.0 → 1.1.1): o princípio I passou a citar o ImageMagick e o python3 entre as
   ferramentas do ambiente de testes.
 -->
-# YoRHa-OS Constitution
+# YoRHa-Shell Constitution
 
-Nome provisório. É um sistema visual para o Arch Linux (Hyprland primeiro, Niri depois): uma UI
-própria inspirada em NieR:Automata. O roteiro geral está em `PLAN.md`; esta constituição fixa as
-regras que nenhuma spec, plano ou tarefa pode violar.
+É um sistema visual para o Arch Linux (Hyprland primeiro, Niri depois): uma UI própria inspirada
+em NieR:Automata. O roteiro geral está em `PLAN.md`; esta constituição fixa as regras que nenhuma
+spec, plano ou tarefa pode violar.
 
 ## Core Principles
 
@@ -106,8 +117,10 @@ Toda fase do `PLAN.md` passa por spec → plan → tasks antes de implementar:
   - Quickshell 0.3.x (QML / Qt 6).
 - **A UI fala com o compositor por um adaptador.** Os dados de sistema chegam por serviços que
   aceitam fixtures, pra os screenshots saírem determinísticos.
-- **Marcas:** NieR e YoRHa são marcas da Square Enix. Nada de fontes (FOT-Rodin), sons, logos
-  ou vídeos do jogo no repositório. O nome público vai ser próprio.
+- **Marcas:** NieR e YoRHa são marcas da Square Enix. O nome público, YoRHa-Shell, usa YoRHa por
+  escolha do dono (02.11.2026): o projeto é gratuito, de fã, sem ligação com a Square Enix, e diz
+  isso no README. Nada de fontes (FOT-Rodin), sons, logos ou vídeos do jogo no repositório nem nos
+  pacotes. Se um dia for preciso, o nome muda por um update comum (o produto sabe trocar de nome).
 - **Segredos:** tokens, chaves, perfis de navegador e configs de VPN nunca entram no repositório.
 - **Licença:** AGPL-3.0-or-later (`LICENSE`).
   - Código de terceiros só entra se a licença for compatível: MIT, BSD, GPL-3.0 ou AGPL-3.0.
@@ -145,4 +158,4 @@ Toda fase do `PLAN.md` passa por spec → plan → tasks antes de implementar:
 - **Revisão:** toda revisão de entrega confere os princípios I, IV e V explicitamente.
 - **Fonte complementar:** `PLAN.md` (roteiro).
 
-**Version**: 2.0.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-01
+**Version**: 2.1.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-02

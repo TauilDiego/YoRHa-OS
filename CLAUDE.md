@@ -1,8 +1,10 @@
-# YoRHa-OS
+# YoRHa-Shell
 
 Um sistema visual para o Arch Linux (Hyprland, Niri depois): uma UI própria inspirada em
 NieR:Automata, que vive nas pastas dela e não gerencia pacotes nem configs de quem instala. O nome
-é provisório. As regras estão em `.specify/memory/constitution.md` e valem acima de tudo.
+público é YoRHa-Shell, e o comando é `yorha` (decisão de 02.11, na constituição). As pastas locais
+do projeto continuam com o nome antigo (`YoRHa-OS/`, `YoRHa-OS-private/`). As regras estão em
+`.specify/memory/constitution.md` e valem acima de tudo.
 
 ## Regras que mais importam
 
