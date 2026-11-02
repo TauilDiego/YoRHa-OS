@@ -1,0 +1,7 @@
+# Left out of the release packages (git archive): the specs, the tooling of the project and the
+# instructions for the agents.
+specs/ export-ignore
+.specify/ export-ignore
+.claude/ export-ignore
+.github/ export-ignore
+CLAUDE.md export-ignore

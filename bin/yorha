@@ -7,6 +7,7 @@ YORHA_ROOT=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
 source "$YORHA_ROOT/lib/yorha/name.sh"
 source "$YORHA_ROOT/lib/yorha/common.sh"
 source "$YORHA_ROOT/lib/yorha/deps.sh"
+source "$YORHA_ROOT/lib/yorha/channel.sh"
 [[ $EUID -ne 0 ]] || yorha_fail "run as your user, not root"
 
 usage() {
@@ -21,7 +22,7 @@ cmd_status() {
     local cur prev channel running
     cur=$(yorha_current)
     prev=$(cat "$YORHA_HOME/previous" 2>/dev/null || true)
-    channel=$(cat "$YORHA_HOME/channel" 2>/dev/null || true)
+    channel=$(yorha_channel)
     [[ -s $(run_dir)/shell.pid ]] && running="yes (pid $(cat "$(run_dir)/shell.pid"))" || running=no
     printf '%s %s\n' "$YORHA_PRETTY" "${cur:-not installed}"
     printf '  previous:  %s\n' "${prev:-none}"
@@ -30,24 +31,45 @@ cmd_status() {
     printf '  shell:     %s\n' "$running"
 }
 
-# --- versions (US2, research R2) ----------------------------------------------------------------------
-channel() { cat "$YORHA_HOME/channel" 2>/dev/null || true; }
+# --- versions (US2, research R2; spec 015: the channel core in lib/yorha/channel.sh) --------------
+# The update is three steps, each its own function (spec 015, T009): update_check asks the channel,
+# update_fetch brings a version into versions/<v>, update_finish puts it in use.
 # Test hook (the lab's check-014, SC-004): YORHA_TEST_STOP_AT=download|unpacked|switched kills the
 # update right there, as a crash or a power cut would.
 test_stop() { [[ ${YORHA_TEST_STOP_AT:-} == "$1" ]] && { yorha_say "test stop at $1"; kill -9 $$; }; return 0; }
 is_newer() { [[ $1 != "$2" && $(printf '%s\n' "$1" "$2" | sort -V | tail -1) == "$1" ]]; }
 
+# An update error: a line on stderr, or a JSON object with --json. $1 message, $2 exit code. Uses the
+# caller's json and cur.
+update_err() {
+    if ((${json:-0})); then
+        printf '{"current":"%s","channel":"%s","error":"%s"}\n' "${cur:-}" "$(yorha_channel)" "$1"
+        exit "$2"
+    fi
+    yorha_fail "$1" "$2"
+}
+
+# The newest version of the channel: sets the caller's latest and origin (the origin that answered).
+update_check() {
+    local out
+    out=$(yorha_latest) || update_err "no origin answered ($(yorha_origins | tr '\n' ' ' | sed 's/ $//')); nothing changed" 1
+    latest=${out%% *}
+    origin=${out#* }
+}
+
 # Download, check and prepare version $1 into versions/$1 (nothing in use is touched).
-fetch() {
-    local v=$1 ch dl f tmp
+update_fetch() {
+    local v=$1 dl tmp rc=0
     [[ -d $YORHA_HOME/versions/$v ]] && return 0
-    ch=$(channel); dl="$YORHA_HOME/downloads/$v"   # a leftover of an interrupted update is redone
+    dl="$YORHA_HOME/downloads/$v"      # a leftover of an interrupted update is redone
     rm -rf "$dl" && mkdir -p "$dl"
     yorha_say "downloading $v"
-    for f in "$YORHA_NAME-$v.tar.gz" "$YORHA_NAME-$v.tar.gz.sha256"; do
-        curl -fsS -o "$dl/$f" "$ch/$f" || { rm -rf "$dl"; yorha_fail "download of $f failed; nothing changed"; }
-    done
-    (cd "$dl" && sha256sum --quiet -c "$YORHA_NAME-$v.tar.gz.sha256") || { rm -rf "$dl"; yorha_fail "checksum mismatch for $v; refusing, nothing changed" 4; }
+    yorha_fetch_release "$v" "$dl" >/dev/null || rc=$?
+    case $rc in
+        0) ;;
+        4) rm -rf "$dl"; yorha_fail "checksum mismatch for $v; refusing, nothing changed" 4 ;;
+        *) rm -rf "$dl"; yorha_fail "download of $v failed; nothing changed" ;;
+    esac
     test_stop download
     tmp="$YORHA_HOME/versions/.$v.part"
     rm -rf "$tmp" && mkdir -p "$tmp"
@@ -59,26 +81,32 @@ fetch() {
     rm -rf "$dl"
 }
 
+# Put the fetched version $2 in use over $1: copy the state, switch, migrate, prune, restart the shell.
+update_finish() {
+    local cur=$1 v=$2 new="$YORHA_HOME/versions/$2"
+    yorha_backup_state "$cur" >/dev/null
+    yorha_switch "$v"
+    test_stop switched
+    "$new/bin/$YORHA_CMD" migrate --from "$cur" || yorha_fail "the update to $v stopped at a migration; $YORHA_CMD rollback goes back to $cur" 5
+    yorha_prune
+    "$new/bin/$YORHA_CMD" shell restart >/dev/null || true
+    yorha_say "updated to $v (previous: $cur; $YORHA_CMD rollback goes back)"
+}
+
 cmd_update() {
-    local check=0 json=0 ch latest cur new
+    local check=0 json=0 latest="" origin="" cur a
     while (($#)); do
         case $1 in --check) check=1 ;; --json) json=1 ;; *) usage ;; esac
         shift
     done
     cur=$(yorha_current)
-    ch=$(channel)
-    err() {   # $1 message, $2 exit code
-        if ((json)); then printf '{"current":"%s","error":"%s"}\n' "$cur" "$1"; exit "$2"; fi
-        yorha_fail "$1" "$2"
-    }
-    [[ -n $cur ]] || err "not installed" 1
-    [[ -n $ch ]] || err "no channel set in $YORHA_HOME/channel" 1
-    latest=$(curl -fsS --max-time 20 "$ch/latest" | tr -d '[:space:]') || err "could not reach $ch; nothing changed" 1
-    [[ $latest =~ ^[0-9]+(\.[0-9]+)+$ ]] || err "bad version '$latest' from $ch" 1
+    [[ -n $cur ]] || update_err "not installed" 1
+    update_check
     if ((check)); then
         if ((json)); then
             is_newer "$latest" "$cur" && a=true || a=false
-            printf '{"current":"%s","latest":"%s","available":%s}\n' "$cur" "$latest" "$a"
+            printf '{"current":"%s","latest":"%s","available":%s,"channel":"%s","origin":"%s"}\n' \
+                "$cur" "$latest" "$a" "$(yorha_channel)" "$origin"
         else
             is_newer "$latest" "$cur" && echo "available $latest" || echo "up-to-date"
         fi
@@ -97,15 +125,8 @@ cmd_update() {
         yorha_say "up to date ($cur)"
         return 0
     fi
-    fetch "$latest"
-    new="$YORHA_HOME/versions/$latest"
-    yorha_backup_state "$cur" >/dev/null
-    yorha_switch "$latest"
-    test_stop switched
-    "$new/bin/$YORHA_CMD" migrate --from "$cur" || yorha_fail "the update to $latest stopped at a migration; $YORHA_CMD rollback goes back to $cur" 5
-    yorha_prune
-    "$new/bin/$YORHA_CMD" shell restart >/dev/null || true
-    yorha_say "updated to $latest (previous: $cur; $YORHA_CMD rollback goes back)"
+    update_fetch "$latest"
+    update_finish "$cur" "$latest"
 }
 
 # Back to the version before the last update, with the state as it was before that update.
@@ -164,7 +185,8 @@ cmd_shell_start() {
             exec "$root/bin/$YORHA_CMD" shell start --relaunch
         fi
         [[ -s $log ]] && mv -f "$log" "$log.1"     # the previous run, kept once
-        YORHA_ROOT="$root" qs -p "$root/shell" >>"$log" 2>&1 &
+        YORHA_ROOT="$root" YORHA_NAME="$YORHA_NAME" YORHA_CMD="$YORHA_CMD" YORHA_PRETTY="$YORHA_PRETTY" \
+            qs -p "$root/shell" >>"$log" 2>&1 &
         qspid=$!
         echo "$qspid" > "$rd/shell.pid"
         echo "$root" > "$rd/shell.root"

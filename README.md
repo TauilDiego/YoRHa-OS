@@ -16,8 +16,11 @@ uma pasta de sons ([`docs/sons-do-jogo.md`](docs/sons-do-jogo.md)).
 Num Arch com o Hyprland funcionando, como o seu usuário:
 
 ```sh
-YORHA_OS_CHANNEL=<endereço das versões> bash <(curl -fsSL <endereço das versões>/install.sh)
+bash <(curl -fsSL https://github.com/TauilDiego/YoRHa-Shell/releases/latest/download/install.sh)
 ```
+
+(Ainda sem release publicada. `YORHA_ORIGIN=<endereço>` troca a origem das versões, e
+`YORHA_CHANNEL=testing` escolhe o canal de teste.)
 
 - **O instalador** confere o que o shell precisa e pergunta antes de instalar qualquer pacote.
 - **Onde fica:** tudo vai pra `~/.local/share/yorha-shell/`, e o comando `yorha` pra `~/.local/bin/`.

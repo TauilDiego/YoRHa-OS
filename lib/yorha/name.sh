@@ -4,6 +4,7 @@
 YORHA_NAME=yorha-shell                  # folders and archive names
 YORHA_CMD=yorha                      # the command in ~/.local/bin
 YORHA_PRETTY=YoRHa-Shell                # what messages call it
+YORHA_ORIGINS=(https://github.com/TauilDiego/YoRHa-Shell)   # where releases come from, main first (016: + the VPS mirror)
 YORHA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/$YORHA_NAME"
 YORHA_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/$YORHA_NAME"
 YORHA_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/$YORHA_NAME"
