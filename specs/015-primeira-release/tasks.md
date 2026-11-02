@@ -98,7 +98,7 @@ redireciona o `latest/download` com 302, como o GitHub; `stop` sem `--port` para
     agora dizem "o YoRHa-Shell é provisório".
 
   O id de voz `yorhaos` é uma chave das opções salvas e fica.
-- [ ] T007 No repo privado (branch `lab-015`), a mesma tabela nos roteiros ativos:
+- [X] T007 No repo privado (branch `lab-015`), a mesma tabela nos roteiros ativos:
   - `check-003` a `check-014`, `guest/`, `011/`, `014/`, `lib.sh`, `README.md` e `provision`;
   - nunca em `u2/`, `009/` ou `mockups/`.
 
@@ -106,13 +106,13 @@ redireciona o `latest/download` com 302, como o GitHub; `stop` sem `--port` para
 
 ### F2, a fonte, a regressão e o núcleo (agente F · Opus 5.5 · médio)
 
-- [ ] T008 Regerar a fonte do boot como "YoRHa-Shell Boot" (`YoRHaShellBoot.ttf`) pelo
+- [X] T008 Regerar a fonte do boot como "YoRHa-Shell Boot" (`YoRHaShellBoot.ttf`) pelo
   `system/boot/plymouth/yorha-shell/gen/assets.py`, **dentro da `t015`**:
   - trocar as referências;
   - atualizar a linha do `CREDITS.md`;
   - conferir que o tema do Plymouth acha a fonte (`plymouth --show-splash` não é preciso: basta a
     conferência de arquivos do `check-011`, sem o boot)
-- [ ] T009 O núcleo do canal (contracts/cli.md):
+- [X] T009 O núcleo do canal (contracts/cli.md):
   - `lib/yorha/name.sh` com `YORHA_ORIGINS`;
   - `lib/yorha/channel.sh` com `yorha_origins`, `yorha_channel`, `yorha_latest` e
     `yorha_fetch_release`, sempre `curl -fsSL`;
@@ -121,13 +121,13 @@ redireciona o `latest/download` com 302, como o GitHub; `stop` sem `--port` para
   - no `bin/yorha`, separar o update em `update_check`, `update_fetch` (pelo `channel.sh`) e
     `update_finish`, sem mudar o comportamento da 014. É pra que a frente A e a frente C mexam em
     funções diferentes
-- [ ] T010 `shell/services/Product.qml`:
+- [X] T010 `shell/services/Product.qml`:
   - o nome, o nome bonito, a pasta de estado e a de runtime, lendo `YORHA_NAME`, com `yorha-shell`
     quando o shell roda direto do repositório;
   - trocar os `yorha-shell` escritos à mão no QML (`Updater`, `Sounds` e os outros que a busca
     mostrar);
   - o supervisor (`yorha shell start`) exporta `YORHA_NAME` e `YORHA_ROOT`
-- [ ] T011 Validar a fundação na `t015`, medido:
+- [X] T011 Validar a fundação na `t015`, medido:
   - `release build 0.0.2 --ref 015-primeira-release --lab-only`, já sem `--allow-old-name`: o
     `check` passa (cenário 9, parte do pacote);
   - instalar com `YORHA_ORIGIN=http://10.0.2.2:8714`;
@@ -135,6 +135,15 @@ redireciona o `latest/download` com 302, como o GitHub; `stop` sem `--port` para
   - `yorha status` responde;
   - o `shell.log` sem erro de QML;
   - `check-003`, `004`, `007`, `008` e `013` passam com o nome novo
+
+Feito em 02.11:
+- **T007:** lab-015 e9924af, pelo Haiku; o resto do nome no lab foi pro 653057e.
+- **T008–T011:** público f293924…b06b08a, e depois o `manifest` (a0c54c9 nos contratos, 810f222 no
+  código, lab ad3d4ba).
+- **Medições:** `…175854…` (a fonte), `…180354…` (instalar, atualizar e voltar pelo canal) e
+  `…192825…` (o manifest), todas pass.
+- **Regressão:** 003, 004, 008 e 013 passaram. O 007 tem 1 FAIL do ambiente: o R9 espera nada apagado
+  no POWER, mas a `t015` não hiberna (só zram). A junção adapta o R9 às respostas do logind.
 
 **Checkpoint:** o contrato (`channel.sh`, as funções do update, o `Product.qml`) fica estável. As
 frentes saem daqui.
