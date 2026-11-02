@@ -69,7 +69,7 @@ def read_widths(theme):
     the switch to the real root) place the letters by these advances (measured in the lab: the
     rendered widths match to 1 %)."""
     from fontTools.ttLib import TTFont
-    f = TTFont(os.path.join(theme, "assets", "font", "YoRHaOSBoot.ttf"))
+    f = TTFont(os.path.join(theme, "assets", "font", "YoRHaShellBoot.ttf"))
     cmap, hmtx = f.getBestCmap(), f["hmtx"]
     widths = {}
     for code in range(0x20, 0x7F):

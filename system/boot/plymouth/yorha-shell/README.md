@@ -22,8 +22,8 @@ de passagem. Plugin `script` do Plymouth.
   (`rings.png`, a tela inteira em 1080p; o script recorta a faixa), as pontas da faixa de passagem
   (`band-cap-l/r.png`, em 4K), os pontinhos dela (`band-dots-<p>.png`), pixels de cor e a fonte.
   `assets/ring/` sai do gerador do cursor (`lab/011/ring-frames`).
-- `assets/font/YoRHaOSBoot.ttf`: a M PLUS 1 (OFL, `OFL.txt` ao lado) como instância estática
-  (peso 600), cortada no latim e renomeada "YoRHa-OS Boot". **Precisa estar instalada nas fontes do
+- `assets/font/YoRHaShellBoot.ttf`: a M PLUS 1 (OFL, `OFL.txt` ao lado) como instância estática
+  (peso 700), cortada no latim e renomeada "YoRHa-Shell Boot". **Precisa estar instalada nas fontes do
   sistema** (`/usr/share/fonts/yorha-shell/`) antes do `mkinitcpio`: o hook acha a fonte pelo `Font=` do
   tema e a copia como `Plymouth.ttf`.
 - `watch/yorha-boot-watch` e `watch/yorha-boot-watch.service`: o ajudante que avisa o tema das

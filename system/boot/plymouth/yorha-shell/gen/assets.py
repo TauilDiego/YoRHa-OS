@@ -16,7 +16,7 @@ half), and the look follows the reproduction the owner approved (artifact f3ee15
   band-cap-r.png    2 diagonals, the right one the point mirror of the left, at 4K.
 - band-dots-<p>.png the band's faint dark dots, period p px (20 px in 4K).
 - px-*.png          one-pixel images the script scales into flat strips (background, black, band).
-- font/             M PLUS 1 as a static instance, cut down to Latin, renamed "YoRHa-OS Boot": the
+- font/             M PLUS 1 as a static instance, cut down to Latin, renamed "YoRHa-Shell Boot": the
                     initramfs label plugin (label-freetype) loads one file and can't pick a weight
                     of a variable font, so the variable file would draw in Thin (its default).
 
@@ -35,8 +35,8 @@ GAP = (12, 7, 4)               # the film's gap
 BAND = (15, 15, 15)            # the passage band
 RING_RGB = (230, 225, 204)     # the rings, as in the reproduction
 FONT_WEIGHT = 700              # Bold (29.10): 600 read thinner and dimmer than the game next to it
-FONT_FAMILY = "YoRHa-OS Boot"
-FONT_FILE = "YoRHaOSBoot.ttf"
+FONT_FAMILY = "YoRHa-Shell Boot"
+FONT_FILE = "YoRHaShellBoot.ttf"
 # What the boot and the shutdown band draw: ASCII (the initramfs draws nothing else), Latin-1 and
 # the punctuation the shutdown band uses ("…", dashes, quotes).
 FONT_CHARS = list(range(0x20, 0x7F)) + list(range(0xA0, 0x100)) + [0x2013, 0x2014, 0x2018, 0x2019,
