@@ -49,6 +49,9 @@ O ponto de partida é a v0 da 014, que funciona na VM, mas só com o canal local
 - Q: A telemetria vem ligada ou desligada? → A: **Ligada por padrão (opt-out), como no Serpantinum**
   ("faz igual o serpantinum"). O instalador mostra que ela está ligada e o que vai, e dá pra
   desligar ali mesmo, antes de qualquer envio.
+- Q: Quais campos? → A: **Todos os do Serpantinum, mais os nossos** (as versões do compositor e do
+  Quickshell, os monitores). O dono: "preciso saber tudo igual ele sabe pois depois vamos adicionar
+  suporte pro niri e mango" (FR-020).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -287,10 +290,16 @@ pedido foi pro receptor.
 - **FR-019**: SYSTEM › Updates MUST ter um interruptor pra conferência automática de versão. Desligada,
   o shell não faz nenhum pedido sozinho, e só o `yorha update` confere.
 - **FR-020**: A telemetria MUST vir ligada por padrão, e o instalador MUST mostrar isso e a lista
-  do que vai antes de qualquer envio, com o jeito de desligar ali. Com ela ligada, o fim de cada instalação, update e rollback MUST mandar um
-  resumo [NEEDS CLARIFICATION: quais campos? Proposta: um ID aleatório da instalação, a versão nova
-  e a anterior, o resultado, as dependências que falharam, a distribuição, o kernel, a versão do
-  Hyprland, a GPU, o número de monitores e a escala, e a RAM].
+  do que vai antes de qualquer envio, com o jeito de desligar ali. Com ela ligada, o fim de cada
+  instalação, update e rollback MUST mandar um resumo com os mesmos campos do Serpantinum, mais os
+  nossos:
+  - os do Serpantinum: um ID aleatório da instalação, a operação, a versão nova e a anterior, o
+    resultado, as dependências que falharam, a distribuição, o kernel, a arquitetura, a CPU, a GPU, a
+    RAM, o compositor, o desktop e o tipo de sessão;
+  - os nossos: a versão do compositor e a do Quickshell, e os monitores (quantos, resolução e escala).
+  O compositor e a versão dele MUST sair de um jeito que sirva pro Niri e pro MangoWC quando eles
+  forem suportados. MUST NOT ir nome de usuário, nome da máquina, caminhos de pasta nem a lista de
+  programas. Os testes do lab MUST mandar pra um receptor local, nunca pro de verdade.
 - **FR-021**: Com a telemetria desligada, MUST NOT sair nenhum pedido pro receptor, nem
   um aviso de "desligada". O shell em si MUST NOT mandar telemetria: só o instalador e o `yorha`, no
   fim das operações.
