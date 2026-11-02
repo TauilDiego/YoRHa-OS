@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-01
 
-**Status**: Pronta pra aprovação do dono (02.11): as 3 perguntas respondidas, a telemetria adiada
+**Status**: Aprovada pelo dono em 02.11 ("sim aprovado manda bala")
 
 **Input**: Em 01.11, depois de fechar a 014, o dono adiou as funcionalidades novas (o clima no HUD
 entre elas) e marcou o próximo marco: "primeiro terminar o instalador e updater depois features
