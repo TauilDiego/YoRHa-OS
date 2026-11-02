@@ -3,7 +3,9 @@
 # the newest version of the channel and the download of a version. Every origin answers the paths of
 # GitHub's releases (<origin>/releases/latest/download/latest, <origin>/releases.atom,
 # <origin>/releases/download/v<v>/<file>), so the same code reads GitHub, the lab and a mirror.
-# Nothing is sent besides the request: no id, no installed version, curl's own User-Agent.
+# Nothing is sent besides the request: no id, no installed version, curl's own User-Agent. curl's
+# own errors stay quiet: an origin that does not answer is normal (a mirror down), and the callers
+# say what failed.
 #
 # Shipped in lib/ and, by the release builder, also between the channel-core markers of install.sh,
 # which has no lib/ before it downloads: keep it self-contained (bash, curl, coreutils; no other
@@ -39,10 +41,10 @@ yorha_valid_version() { [[ $1 =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; }
 yorha_latest_at() {
     local o=$1 body v
     if [[ $2 == testing ]]; then
-        body=$(curl -fsSL --max-time 20 "$o/releases.atom") || return 1
+        body=$(curl -fsSL --max-time 20 "$o/releases.atom" 2>/dev/null) || return 1
         v=$(grep -oE '/releases/tag/v[0-9]+\.[0-9]+\.[0-9]+"' <<<"$body" | sed -E 's|.*/v||; s|"$||' | sort -V | tail -n 1 || true)
     else
-        body=$(curl -fsSL --max-time 20 "$o/releases/latest/download/latest") || return 1
+        body=$(curl -fsSL --max-time 20 "$o/releases/latest/download/latest" 2>/dev/null) || return 1
         v=$(tr -d '[:space:]' <<<"$body")
     fi
     yorha_valid_version "$v" || return 1
@@ -75,8 +77,8 @@ yorha_fetch_release() {
     while read -r o; do
         [[ -n $o ]] || continue
         rm -f "$dir/$pkg" "$dir/$pkg.sha256"
-        curl -fsSL --max-time 20 -o "$dir/$pkg.sha256" "$o/releases/download/v$v/$pkg.sha256" || continue
-        curl -fsSL -o "$dir/$pkg" "$o/releases/download/v$v/$pkg" || continue
+        curl -fsSL --max-time 20 -o "$dir/$pkg.sha256" "$o/releases/download/v$v/$pkg.sha256" 2>/dev/null || continue
+        curl -fsSL -o "$dir/$pkg" "$o/releases/download/v$v/$pkg" 2>/dev/null || continue
         want=$(awk 'NR == 1 { print $1 }' "$dir/$pkg.sha256")
         sum=$(sha256sum "$dir/$pkg" | cut -d' ' -f1)
         if [[ ${#want} -ne 64 || $sum != "$want" ]]; then
