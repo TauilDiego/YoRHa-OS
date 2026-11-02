@@ -4,6 +4,8 @@
 
 **Input**: Feature specification from `specs/015-primeira-release/spec.md` (aprovada pelo dono em 02.11)
 
+**Status**: aprovado pelo dono em 02.11 ("aprovadoooo"), com a emenda 2.1.0 e os três ajustes na spec, já aplicados
+
 ## Summary
 
 A v0 da 014 instala e atualiza, mas só a partir do canal do lab. A 015 leva isso pro público.

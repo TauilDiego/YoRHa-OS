@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-01
 
-**Status**: Aprovada pelo dono em 02.11 ("sim aprovado manda bala")
+**Status**: Aprovada pelo dono em 02.11 ("sim aprovado manda bala"); o plano também ("aprovadoooo"), com os ajustes de FR-002, FR-017 e SC-010 que vieram dele
 
 **Input**: Em 01.11, depois de fechar a 014, o dono adiou as funcionalidades novas (o clima no HUD
 entre elas) e marcou o próximo marco: "primeiro terminar o instalador e updater depois features
@@ -231,9 +231,9 @@ resultado da verificação automática.
 
 - **FR-001**: O README MUST trazer um comando de instalação que funciona sem nenhuma variável de
   ambiente e instala a release estável mais nova.
-- **FR-002**: O canal público MUST ser as releases do repositório público no GitHub. A variável de
-  ambiente do canal (renomeada com o produto) MUST continuar valendo por cima dele, pro canal do lab
-  e pro canal de teste.
+- **FR-002**: O canal público MUST ser as releases do repositório público no GitHub. Duas variáveis de
+  ambiente MUST valer por cima dele: `YORHA_ORIGIN`, o endereço (o canal do lab, um espelho), e
+  `YORHA_CHANNEL`, `stable` ou `testing`. Elas substituem o `YORHA_OS_CHANNEL` da 014.
 - **FR-003**: Toda release MUST ter um número escolhido ao montar, no formato `MAJOR.MINOR.PATCH`
   (a primeira é `0.1.0`). Versões MUST ser comparadas pelo número, nunca pela contagem de commits, e
   o update MUST NOT oferecer uma versão menor que a instalada.
@@ -273,8 +273,13 @@ resultado da verificação automática.
   público usa YoRHa (YoRHa-Shell) por escolha do dono, o projeto é gratuito e de fã, e continua
   valendo que nada do jogo entra no repositório. A emenda segue o processo de emendas da própria
   constituição.
-- **FR-017**: O update MUST saber trocar o nome do produto numa versão nova: mover as pastas, trocar
-  o comando e a linha do `hyprland.lua` (avisando a pessoa), e manter o rollback funcionando. Assim,
+- **FR-017**: O update MUST saber trocar o nome do produto numa versão nova e manter o rollback
+  funcionando:
+  - as pastas vão pro nome novo, com um link no caminho antigo;
+  - o comando antigo vira um atalho pro novo;
+  - a linha antiga do `hyprland.lua` continua funcionando, por um arquivo de compatibilidade;
+  - a pessoa é avisada da linha nova;
+  - o arquivo dela MUST NOT ser editado (princípios II e III). Assim,
   se um dia for preciso trocar o nome, isso sai como um update comum. Na 015 a troca é testada no
   lab com um nome de mentira, de ida e volta.
 - **FR-018**: O instalador e o update MUST aceitar uma origem principal e um espelho, com o mesmo
@@ -310,7 +315,8 @@ resultado da verificação automática.
   update e pelo rollback, e o shell sobe nas duas pontas.
 - **SC-010**: Com a origem principal fora do ar e um espelho de teste no lab, a instalação e o update
   terminam pelo espelho; com a conferência automática desligada, o shell não faz nenhum pedido ao
-  canal em uma hora.
+  canal em 3 minutos (o primeiro sairia aos 30 s), e o `updates dump` mostra os dois timers parados.
+
 ## Assumptions
 
 - **Público:** quem instala usa Arch (ou derivado) com Hyprland 0.56+ e config em Lua. Testes em
