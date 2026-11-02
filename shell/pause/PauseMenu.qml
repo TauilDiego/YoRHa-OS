@@ -209,7 +209,15 @@ PopupWindow {
         return { x: Math.round(p.x), y: Math.round(p.y), w: Math.round(item.width), h: Math.round(item.height) };
     }
 
-    tabs: tabList.map(t => ({ label: Strings.pause.tabs[t.id].label }))
+    // spec 015 (contracts/sinal.md): SYSTEM carries the NEW tag while the menu form of the update sign
+    // is on (Updater.signMenu).
+    tabs: tabList.map(t => ({
+        label: Strings.pause.tabs[t.id].label,
+        tag: t.id === "system" && Updater.signMenu ? Strings.notify.newTag : ""
+    }))
+    // spec 015 (FR-019): with the automatic check off, opening SYSTEM › Updates checks.
+    readonly property bool updatesShown: keyboardActive && tab === "system" && systemPage.categoryId === "updates"
+    onUpdatesShownChanged: if (updatesShown) Updater.opened()
     currentTab: tabIndex
     clock: true
     title: tabText.title

@@ -16,6 +16,8 @@ import "../primitives"
 // `high` (004 acabamento): the bar's High contrast (Tokens.hudPaperHigh over paper).
 // spec 013 (FR-002): with `pulse`, a selected tab's plate brightens by motion.pulseLight in the
 // game's trapezoid, every motion.pulse (the pause menu's open tab; the top bar never sets it).
+// spec 015 (contracts/sinal.md): `tag`, an outline Tag (NEW) at the band's right end, in the face's
+// ink, like the one a ListItem carries; "" = none.
 Item {
     id: root
 
@@ -27,6 +29,7 @@ Item {
     property real ruleY: 0
     property real fixedWidth: 0                  // game px; 0 = fit the label
     property bool pulse: false                   // spec 013
+    property string tag: ""                      // spec 015
 
     readonly property bool hovered: mouse.containsMouse
 
@@ -47,7 +50,8 @@ Item {
 
     implicitHeight: bandH
     implicitWidth: fixedWidth > 0 ? Tokens.px(fixedWidth, s)
-                                  : pad + Tokens.px(Tokens.space.square, s) + gap + Math.ceil(dark.labelWidth) + pad
+                                  : pad + Tokens.px(Tokens.space.square, s) + gap + Math.ceil(dark.labelWidth)
+                                    + (tag !== "" ? gap + Math.ceil(dark.tagWidth) : 0) + pad
 
     // Ink sweep: 0 → 1 when entering an inked state, instant on the way out, when frozen or with
     // reduced motion (Tokens.instant; spec 007 FR-030).
@@ -135,6 +139,8 @@ Item {
     component Face: Item {
         property color ink
         readonly property real labelWidth: label.implicitWidth
+        readonly property real tagWidth: tagBox.implicitWidth
+        readonly property bool tagShown: tagBox.visible
         width: root.width
         height: root.bandH
         Square {
@@ -152,6 +158,17 @@ Item {
             upper: true
             text: root.text
             color: parent.ink
+        }
+        Tag {
+            id: tagBox
+            visible: root.tag !== ""
+            anchors.right: parent.right
+            anchors.rightMargin: root.pad
+            anchors.verticalCenter: parent.verticalCenter
+            s: root.s
+            outline: true
+            ink: parent.ink
+            text: root.tag
         }
     }
 
