@@ -48,13 +48,13 @@ aceitam `--dir`, e assim os números `0.0.N` de uma frente não colidem com os d
 
 ## Phase 1: Setup (agente S · Opus 5.5 · médio)
 
-- [ ] T001 Criar a `lab-015` a partir da `main` privada e o worktree `YoRHa-OS-private-wt/lab-015`
-- [ ] T002 `lab/015/canal`, em python só com a biblioteca padrão (contracts/canal-publico.md):
+- [X] T001 Criar a `lab-015` a partir da `main` privada e o worktree `YoRHa-OS-private-wt/lab-015`
+- [X] T002 `lab/015/canal`, em python só com a biblioteca padrão (contracts/canal-publico.md):
   - `start [--port N] [--dir D]`, `stop [--port N]`, `status`, `log [--port N]` e `corrupt <v>|off`;
   - os caminhos do GitHub: `releases/latest/download/<arquivo>`, `releases/download/v<v>/<arquivo>`
     e `releases.atom`, gerado do `index.json`;
   - um log JSON por porta
-- [ ] T003 `lab/015/release`: `build`, `list` e `check` (contracts/release.md e contracts/nome.md),
+- [X] T003 `lab/015/release`: `build`, `list` e `check` (contracts/release.md e contracts/nome.md),
   com `--dir`:
   - o pacote pelo `git archive --add-virtual-file` (prefixo `<YORHA_NAME>-<v>/`, lido do `name.sh` da
     ref);
@@ -65,14 +65,18 @@ aceitam `--dir`, e assim os números `0.0.N` de uma frente não colidem com os d
   - as quatro recusas e as regras de arquivo proibido e de nome provisório;
   - `--allow-old-name`, que só vale junto com `--lab-only` e serve pra montar antes da troca do nome
     (T006)
-- [ ] T004 A camada `t015` (`lab/new t015 --from hypr-iso`) e o `lab/015/prep`, levado do
+- [X] T004 A camada `t015` (`lab/new t015 --from hypr-iso`) e o `lab/015/prep`, levado do
   `lab/014/prep`, com o `hyprland-limpo.lua` (sem o `nier-ui-run` nem o `~/nier/ui`)
-- [ ] T005 O `lab/check-015`, que roda os blocos de `lab/015/check.d/` em ordem, no padrão do
+- [X] T005 O `lab/check-015`, que roda os blocos de `lab/015/check.d/` em ordem, no padrão do
   `check-013`, e a seção da 015 no `lab/README.md`. Validar, medido:
   - `release build 0.0.1 --ref 015-primeira-release --lab-only --allow-old-name`;
   - `canal start`;
   - de dentro da `t015`, `curl -fsSL 10.0.2.2:8714/releases/latest/download/latest` responde `0.0.1`,
     e o `releases.atom` lista a versão
+
+Feito em 02.11 (lab-015 36d0b62…adb01f1; perf `2026-11-02T175317-vm-t015-…`, pass, 61 s): da `t015`,
+o `latest`, o feed, o pacote e o checksum respondem pelo canal, e o `check-015` deu 4 PASS. O canal
+redireciona o `latest/download` com 302, como o GitHub; `stop` sem `--port` para só a 8714.
 
 ## Phase 2: Foundational (sequencial; bloqueia as frentes)
 
