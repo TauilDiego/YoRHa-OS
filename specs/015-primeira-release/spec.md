@@ -46,6 +46,9 @@ O ponto de partida é a v0 da 014, que funciona na VM, mas só com o canal local
   instalação, um ID, a versão, o sistema, o kernel, a RAM, a CPU, a GPU, o desktop, o compositor e os
   pacotes que falharam pra um Cloudflare Worker; vem ligada por padrão e, desligada, ainda manda o
   ID e a versão. A nossa não repete essa última parte (FR-021).
+- Q: A telemetria vem ligada ou desligada? → A: **Ligada por padrão (opt-out), como no Serpantinum**
+  ("faz igual o serpantinum"). O instalador mostra que ela está ligada e o que vai, e dá pra
+  desligar ali mesmo, antes de qualquer envio.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -188,24 +191,24 @@ resultado da verificação automática.
 
 O dono quer saber em que máquinas o projeto está sendo instalado e onde a instalação falha: a
 distribuição, a versão do Hyprland, a placa de vídeo, os monitores, as dependências que não
-instalaram. No fim de cada instalação e de cada update, quem aceitou manda um resumo anônimo
-desses dados. Quem não aceitou não manda nada.
+instalaram. A telemetria vem ligada, como no Serpantinum: no fim de cada instalação e de cada
+update, a máquina manda um resumo anônimo desses dados. Quem desliga não manda nada.
 
 **Why this priority**: Ajuda a decidir o que testar (a S6 fala em EndeavourOS e CachyOS) e mostra
 falhas que o lab não pega. Não muda o produto pra quem instala, por isso P2.
 
-**Independent Test**: Numa VM, instalar aceitando e conferir que o receptor recebeu exatamente os
-campos da lista do README. Noutra, instalar recusando e conferir, pelo tráfego da VM, que nenhum
+**Independent Test**: Numa VM, instalar com a telemetria ligada e conferir que o receptor recebeu exatamente os
+campos da lista do README. Noutra, desligar no instalador e conferir, pelo tráfego da VM, que nenhum
 pedido foi pro receptor.
 
 **Acceptance Scenarios**:
 
-1. **Given** uma instalação nova, **When** o instalador chega na pergunta da telemetria, **Then** ele
-   mostra o que vai ser enviado e pede a resposta [NEEDS CLARIFICATION: a telemetria vem desligada
-   até a pessoa aceitar (opt-in) ou ligada até ela recusar (opt-out)?].
-2. **Given** a telemetria aceita, **When** a instalação ou o update termina (com sucesso ou falha),
+1. **Given** uma instalação nova, **When** o instalador mostra o resumo do que vai fazer, **Then** a
+   telemetria aparece ligada, com a lista do que vai ser enviado, e a pessoa consegue desligar ali,
+   antes de qualquer envio.
+2. **Given** a telemetria ligada, **When** a instalação ou o update termina (com sucesso ou falha),
    **Then** um resumo vai pro receptor, sem nome de usuário, nome da máquina ou IP guardado.
-3. **Given** a telemetria recusada ou desligada, **When** se instala ou atualiza, **Then** nenhum
+3. **Given** a telemetria desligada, **When** se instala ou atualiza, **Then** nenhum
    pedido vai pro receptor.
 4. **Given** a telemetria ligada, **When** a pessoa roda o comando de telemetria, **Then** ela vê o
    estado, o último resumo enviado, e consegue desligar ou trocar o ID.
@@ -226,8 +229,8 @@ pedido foi pro receptor.
 - **Nome novo e uma instalação com o nome provisório** (só VMs do lab): fica fora; a VM é refeita.
 - **Receptor da telemetria fora do ar:** o envio desiste em poucos segundos, sem repetir e sem
   atrasar nem quebrar a instalação.
-- **Instalação sem terminal interativo** (por script): a pergunta da telemetria não aparece e vale
-  "não enviar".
+- **Instalação sem terminal interativo** (por script): vale o padrão (ligada), e uma variável de
+  ambiente desliga, pra quem automatiza.
 
 ## Requirements *(mandatory)*
 
@@ -283,11 +286,12 @@ pedido foi pro receptor.
   GitHub); o espelho na VPS vem com a 016.
 - **FR-019**: SYSTEM › Updates MUST ter um interruptor pra conferência automática de versão. Desligada,
   o shell não faz nenhum pedido sozinho, e só o `yorha update` confere.
-- **FR-020**: Com a telemetria aceita, o fim de cada instalação, update e rollback MUST mandar um
+- **FR-020**: A telemetria MUST vir ligada por padrão, e o instalador MUST mostrar isso e a lista
+  do que vai antes de qualquer envio, com o jeito de desligar ali. Com ela ligada, o fim de cada instalação, update e rollback MUST mandar um
   resumo [NEEDS CLARIFICATION: quais campos? Proposta: um ID aleatório da instalação, a versão nova
   e a anterior, o resultado, as dependências que falharam, a distribuição, o kernel, a versão do
   Hyprland, a GPU, o número de monitores e a escala, e a RAM].
-- **FR-021**: Com a telemetria recusada ou desligada, MUST NOT sair nenhum pedido pro receptor, nem
+- **FR-021**: Com a telemetria desligada, MUST NOT sair nenhum pedido pro receptor, nem
   um aviso de "desligada". O shell em si MUST NOT mandar telemetria: só o instalador e o `yorha`, no
   fim das operações.
 - **FR-022**: O receptor [NEEDS CLARIFICATION: na VPS do dono ou num serviço gratuito como o
@@ -324,8 +328,8 @@ pedido foi pro receptor.
 - **SC-007**: Os roteiros 003, 004, 007, 008, 013 e 014 (adaptado ao canal público) passam, e a
   verificação automática passa na `main` publicada.
 - **SC-008**: O dono aprova a página da release antes de ela ser publicada.
-- **SC-009**: Numa VM com a telemetria recusada, a captura do tráfego durante a instalação, um update
-  e um rollback mostra zero pedidos pro receptor. Numa VM com ela aceita, o receptor tem um resumo por
+- **SC-009**: Numa VM com a telemetria desligada no instalador, a captura do tráfego durante a instalação, um update
+  e um rollback mostra zero pedidos pro receptor. Numa VM com ela ligada, o receptor tem um resumo por
   operação, só com os campos da lista.
 - **SC-010**: Com o receptor fora do ar, a instalação leva no máximo 5 s a mais e termina igual.
 
