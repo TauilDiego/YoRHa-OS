@@ -1,6 +1,6 @@
 # YoRHa-Shell — plano
 
-> Codinome interno. Documento vivo, atualizado em 2026-11-01.
+> Documento vivo, atualizado em 2026-11-02.
 
 ## 1. O que é
 
@@ -9,8 +9,8 @@ um Arch que já funciona (Hyprland primeiro, Niri depois), e o desktop ganha a c
 - **o shell:** barra, menu de pausa, notificações do Pod, OSD e papel de parede;
 - **um núcleo opcional:** o tema de boot e de login, o cursor e os sons.
 
-Ele **não** gerencia os pacotes, o hardware nem as configs de quem instala. O nome YoRHa-Shell é
-provisório.
+Ele **não** gerencia os pacotes, o hardware nem as configs de quem instala. O nome público é
+YoRHa-Shell, e o comando é `yorha` (decidido em 02.11).
 
 **Regra de ouro:** o seu sistema é homologado e não roda nada do projeto. A UI e o instalador
 rodam numa VM. A UI só chega na sua máquina quando você mesmo decidir trocar, depois de homologar
@@ -46,8 +46,8 @@ inclui ele com uma linha.
 4. **Nunca sobrescrever sem backup.** O que precisa de root tem um comando de desfazer.
 5. **O compositor fica atrás de um adaptador.** Os atalhos ficam num arquivo que a pessoa inclui.
 6. **Segredos nunca entram no repositório.**
-7. **O nome é provisório.** `yorha`, `yorha-shell` e os caminhos ficam num lugar só no instalador e
-   no CLI.
+7. **O nome fica num lugar só.** `yorha`, `yorha-shell` e os caminhos estão no `lib/yorha/name.sh`,
+   e o update sabe trocar o nome, se um dia for preciso (spec 015).
 
 ## 5. Estrutura
 
@@ -70,16 +70,16 @@ Na máquina de quem instala (método D do estudo 005):
 ```
 ~/.local/share/yorha-shell/versions/<v>/   uma pasta por versão (guarda 3)
 ~/.local/share/yorha-shell/current         link pra versão em uso
-~/.local/bin/yorha                      o CLI
+~/.local/bin/yorha                         o CLI
 ~/.config/yorha-shell/                     só seu
 ~/.local/state/yorha-shell/                estado, migrations feitas, backups
 ```
 
 ## 6. Fluxos
 
-- **Instalar:** `bash <(curl -fsSL <url>/install.sh)`.
+- **Instalar:** `bash <(curl -fsSL https://github.com/TauilDiego/YoRHa-Shell/releases/latest/download/install.sh)`.
   - Confere as dependências do shell e pergunta antes de instalar o que falta.
-  - Baixa a versão.
+  - Baixa a versão estável mais nova das releases do GitHub e confere o checksum.
   - Mostra a linha pra incluir no `hyprland.lua`.
 - **Atualizar:** `yorha update`, ou SYSTEM › Updates › "Update now", que o menu mostra quando uma
   transmissão avisa que saiu versão nova.
@@ -148,10 +148,10 @@ Serpantinum.
 |---|---|---|
 | S1 Serpantinum × YoRHa-Shell | O que o Serpantinum faz por você hoje e o que o YoRHa-Shell já tem | Você revisou a tabela, e ela diz o que falta pra U7 |
 | S2 Arch completo na VM ✅ | ISO + archinstall desassistido | Um comando entrega um `arch-limpo` instalado pela ISO |
-| S3 Instalação e encaixe (CLI) ✅ | `install.sh`, o CLI `yorha`, as dependências do shell e o arquivo de atalhos do Hyprland (spec 014) | Numa VM limpa, um comando instala e o shell sobe pelo Hyprland da pessoa |
-| S4 Updates ✅ (v0) | `yorha update` e `rollback`, migrations, o aviso no shell e o "Update now" (a v0 veio na spec 014; o canal público e a assinatura ficam pra S6) | Atualizar de v0.1 pra v0.2 funciona na VM, pelo CLI e pelo menu |
+| S3 Instalação e encaixe (CLI) ✅ | `install.sh`, o CLI `yorha`, as dependências do shell e o arquivo de atalhos do Hyprland (spec 014). Desde a 015, o comando de instalação é o público, pelas releases do GitHub | Numa VM limpa, um comando instala e o shell sobe pelo Hyprland da pessoa |
+| S4 Updates ✅ (v0) | `yorha update` e `rollback`, migrations, o aviso no shell e o "Update now" (a v0 veio na spec 014). O canal público veio na 015: as releases do GitHub, com os canais `stable` e `testing`, o sinal de versão nova que fica e a origem pronta pra um espelho. A assinatura fica pra S6 | Atualizar de v0.1 pra v0.2 funciona na VM, pelo CLI e pelo menu |
 | S5 Niri | O adaptador do shell e um arquivo de atalhos pro Niri | O mesmo checklist passa no Niri |
-| S6 Público | Docs, nome definitivo, release assinada, testes em EndeavourOS/CachyOS | Alguém de fora instala sem ajuda |
+| S6 Público | Docs, release assinada (a assinatura entra antes da 1.0), testes em EndeavourOS/CachyOS | Alguém de fora instala sem ajuda |
 | S7 (opcional) | Pacote de plugins pro Omarchy usando o mesmo código da UI | — |
 
 **Lembrete da S3, feito na 014:** o supervisor (`yorha shell start`) cria `~/.local/share/applications/`
@@ -166,13 +166,14 @@ spike T003, research R4, e T041).
 | Dependências que mudam (Quickshell, Hyprland) | O instalador confere as versões; o laboratório roda com os pacotes do dia |
 | O Arch é rolling e quebra coisas (o Hyprland 0.55 passar pra Lua quebrou vários projetos) | Migrations; laboratório rodando com os pacotes do dia |
 | `curl \| bash` | Script curto e legível; versões com tag e checksum |
-| Marcas da Square Enix (UI NieR) | Nome público próprio; nada de fontes, sons, logos ou vídeos do jogo |
+| Marcas da Square Enix (UI NieR e o nome YoRHa-Shell) | Projeto de fã, gratuito, sem ligação com a Square Enix, e o README diz isso; nada de fontes, sons, logos ou vídeos do jogo; o nome muda por um update comum, se um dia for preciso |
 | A UI na VM pode ficar lenta com renderização 3D virtualizada | Medir no U0; os efeitos da UI podem ser desligados |
 
 ## 11. Decisões em aberto
 
-1. **O nome definitivo do projeto.** O YoRHa-Shell é provisório.
-2. **A assinatura das versões.** A v0 sai com o `.sha256`; a assinatura entra antes da S6.
+1. **O nome definitivo do projeto.** *Resolvida em 02.11:* YoRHa-Shell, com o comando `yorha` (ver
+   "Decisões tomadas").
+2. **A assinatura das versões.** A 0.1.0 sai só com o `.sha256`; a assinatura entra antes da 1.0.
 
 ## Decisões tomadas
 
@@ -202,6 +203,19 @@ spike T003, research R4, e T041).
   interface mais caprichada fica pra depois.
 - **2026-11-01, tudo na `main`:** as branches de spec, de frente e de lab terminam mescladas na `main`
   e apagadas. Não ficam branches nem worktrees parados.
+- **2026-11-02, o nome público:** YoRHa-Shell, e o comando continua `yorha`. O dono quis um nome do
+  jogo, e o projeto não vai ser vendido. O risco é de marca, e ele aceita com três proteções:
+  - a constituição registra a decisão (2.1.0, Restrições, Marcas);
+  - o update sabe trocar o nome sozinho, se um dia for preciso;
+  - o README diz que é um projeto de fã, gratuito e sem ligação com a Square Enix.
+- **2026-11-02, assinatura:** a 0.1.0 sai sem assinatura, só com o checksum. A assinatura entra antes
+  da 1.0.
+- **2026-11-02, telemetria:** decidida (ligada por padrão e desligável no instalador, como no
+  Serpantinum, com os campos dele e os nossos), mas adiada pra spec 016, porque depende da VPS. Até
+  lá, o shell só pergunta qual é a versão mais nova.
+- **2026-11-02, a VPS na spec 016:** o site, o endereço curto de instalação, uma cópia do checksum, o
+  espelho das releases e o receptor da telemetria. A 015 já deixa o instalador e o update prontos pra
+  uma segunda origem.
 
 ## Histórico
 

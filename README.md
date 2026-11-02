@@ -8,30 +8,68 @@ interface, telas de boot e login e, mais pra frente, a tela de bloqueio. Feita e
 Os sons que vêm com o YoRHa-Shell são nossos. Quem tem o jogo no PC pode usar os da própria cópia, por
 uma pasta de sons ([`docs/sons-do-jogo.md`](docs/sons-do-jogo.md)).
 
-> **Estado:** em desenvolvimento. Tudo é testado num laboratório de máquinas virtuais antes de chegar
-> em uma máquina de verdade. O instalador existe, mas ainda não há um endereço público de versões.
+> **Estado:** prévia, antes da 1.0. Cada versão é testada em máquinas virtuais antes de sair, mas
+> ainda pode quebrar coisas de uma versão pra outra.
 
-## Instalar e atualizar
+> **Projeto de fã.** O YoRHa-Shell é gratuito e não tem ligação com a Square Enix. NieR e YoRHa são
+> marcas da Square Enix. Nada do jogo vem junto: nem fontes, nem sons, nem imagens, nem vídeos.
 
-Num Arch com o Hyprland funcionando, como o seu usuário:
+## Requisitos
+
+- Arch Linux ou um derivado.
+- Hyprland 0.56 ou mais novo, com a config em Lua (`~/.config/hypr/hyprland.lua`).
+
+O instalador confere o resto (o Quickshell, o Qt e as outras dependências do shell) e pergunta antes
+de instalar qualquer pacote.
+
+## Instalar
+
+Num Arch com o Hyprland funcionando, como o seu usuário (sem `sudo`):
 
 ```sh
 bash <(curl -fsSL https://github.com/TauilDiego/YoRHa-Shell/releases/latest/download/install.sh)
 ```
 
-(Ainda sem release publicada. `YORHA_ORIGIN=<endereço>` troca a origem das versões, e
-`YORHA_CHANNEL=testing` escolhe o canal de teste.)
-
-- **O instalador** confere o que o shell precisa e pergunta antes de instalar qualquer pacote.
+- **O que ele baixa:** a versão estável mais nova, das
+  [releases](https://github.com/TauilDiego/YoRHa-Shell/releases). Antes de instalar, ele confere o
+  pacote pelo checksum; se não bater, não instala nada.
 - **Onde fica:** tudo vai pra `~/.local/share/yorha-shell/`, e o comando `yorha` pra `~/.local/bin/`.
-- **O seu `~/.config/hypr` não é tocado.** No fim, ele mostra uma linha pra você colocar no topo do
-  `hyprland.lua`; ela sobe o shell e liga os atalhos (SUPER; `YORHA_MOD = "ALT"` na linha de cima
-  troca).
-- **`yorha update`** traz a versão nova, e **`yorha rollback`** volta pra anterior, com o estado de
-  antes. Quando sai versão nova, uma transmissão avisa, e SYSTEM › Updates tem o "Update now".
-- **`yorha status`** mostra o que está instalado.
-- **`yorha boot-login install`** põe as telas de boot e de login, com backup; `uninstall` desfaz.
-- **`yorha uninstall`** tira tudo. A sua config em `~/.config/yorha-shell` fica.
+- **O seu `~/.config/hypr` não é tocado.** No fim, o instalador mostra uma linha pra você colocar no
+  topo do `hyprland.lua`:
+
+  ```lua
+  pcall(dofile, os.getenv("HOME") .. "/.local/share/yorha-shell/current/system/hypr/yorha-shell.lua")
+  ```
+
+  - É Lua pro Hyprland, não um comando de terminal: abra o arquivo num editor, cole a linha no topo,
+    salve e entre de novo na sessão.
+  - Ela sobe o shell e liga os atalhos, com SUPER. Pra usar ALT, ponha `YORHA_MOD = "ALT"` na linha
+    de cima.
+  - O `pcall` faz o Hyprland seguir normal se o YoRHa-Shell não estiver instalado.
+
+## Usar
+
+| Comando | O que faz |
+|---|---|
+| `yorha status` | Mostra a versão instalada, o canal e de onde vêm as versões |
+| `yorha update` | Traz a versão nova, se houver |
+| `yorha rollback` | Volta pra versão anterior, com o estado de antes |
+| `yorha channel` | Mostra o canal: `stable` (o padrão) ou `testing` |
+| `yorha channel stable\|testing` | Troca o canal. No `testing` chegam também as versões de teste (pré-releases), que podem ter mais problemas |
+| `yorha boot-login install` | Põe as telas de boot (Plymouth) e de login (SDDM). Pede `sudo` e faz backup do que troca |
+| `yorha boot-login uninstall` | Tira as telas de boot e de login e volta o backup |
+| `yorha uninstall` | Tira o YoRHa-Shell. A sua config em `~/.config/yorha-shell` fica |
+
+- **Versão nova:** o shell confere 30 s depois de subir e depois a cada hora. Quando sai uma, uma
+  transmissão avisa, e um sinal fica na barra e no menu até você atualizar (SYSTEM › Updates escolhe
+  onde, ou desliga).
+  SYSTEM › Updates também tem o "Update now", que roda o `yorha update`.
+- **Conferência automática:** dá pra desligar em SYSTEM › Updates. Aí o shell só confere quando
+  você abre SYSTEM › Updates ou roda o `yorha update`.
+- **Sem telemetria:** o shell só pergunta qual é a versão mais nova.
+- **Desinstalar:** o `yorha uninstall` pergunta se tira também o estado salvo
+  (`~/.local/state/yorha-shell`). Os pacotes do sistema que o instalador pôs ficam, e a linha do
+  `hyprland.lua` é sua: tire ela à mão.
 
 ## Inspirações
 
