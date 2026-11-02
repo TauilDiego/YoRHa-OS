@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-01
 
-**Status**: Rascunho; em 02.11 o nome e a assinatura foram resolvidos e a telemetria entrou; faltam as decisões da telemetria e o sinal de update (uma de cada vez)
+**Status**: Rascunho; em 02.11 o nome e a assinatura foram resolvidos e a telemetria foi adiada; falta o sinal de update
 
 **Input**: Em 01.11, depois de fechar a 014, o dono adiou as funcionalidades novas (o clima no HUD
 entre elas) e marcou o próximo marco: "primeiro terminar o instalador e updater depois features
@@ -38,23 +38,31 @@ O ponto de partida é a v0 da 014, que funciona na VM, mas só com o canal local
   entra antes da 1.0, como diz o PLAN. A 015 deixa o instalador e o update prontos pra uma segunda
   origem (FR-018) e põe um interruptor pra conferência automática (FR-019). A VPS do dono, onde vai
   ficar o site, entra numa spec própria (016): o site, o endereço curto de instalação, uma cópia do
-  checksum e o espelho das releases. Foi a proposta do assistente; o dono seguiu pra telemetria sem
-  objetar, e pode reabrir.
-- Q: Telemetria? → A: **Sim**, entra na 015 (US7). O dono, depois de ver a do Serpantinum: "pior que
-  na real adicionar uma telemetria seria bom. pelo mesmo motivo de ele ter feito no dele. só pra
-  medir dados dos sistemas que estão instalando... pode fazer". O Serpantinum manda, no fim de cada
-  instalação, um ID, a versão, o sistema, o kernel, a RAM, a CPU, a GPU, o desktop, o compositor e os
-  pacotes que falharam pra um Cloudflare Worker; vem ligada por padrão e, desligada, ainda manda o
-  ID e a versão. A nossa não repete essa última parte (FR-021).
+  checksum e o espelho das releases. Foi a proposta do assistente; o dono seguiu sem objetar, e pode
+  reabrir.
+- Q: Telemetria? → A: Sim, mas depois (ver "Telemetria adiada", abaixo). O dono, depois de ver a do
+  Serpantinum: "pior que na real adicionar uma telemetria seria bom. pelo mesmo motivo de ele ter
+  feito no dele. só pra medir dados dos sistemas que estão instalando... pode fazer". O Serpantinum
+  manda, no fim de cada instalação, um ID, a versão, o sistema, o kernel, a RAM, a CPU, a GPU, o
+  desktop, o compositor e os pacotes que falharam pra um Cloudflare Worker; vem ligada por padrão e,
+  desligada, ainda manda o ID e a versão. A nossa não repete essa última parte: desligada, não manda
+  nada.
 - Q: A telemetria vem ligada ou desligada? → A: **Ligada por padrão (opt-out), como no Serpantinum**
   ("faz igual o serpantinum"). O instalador mostra que ela está ligada e o que vai, e dá pra
   desligar ali mesmo, antes de qualquer envio.
 - Q: Quais campos? → A: **Todos os do Serpantinum, mais os nossos** (as versões do compositor e do
   Quickshell, os monitores). O dono: "preciso saber tudo igual ele sabe pois depois vamos adicionar
-  suporte pro niri e mango" (FR-020).
-- Q: Onde fica o receptor? → A: **Na VPS do dono, já na 015** (FR-022). A VPS ainda não tem nada; o
-  dono: "eu n tenho nada pra salvar isso ainda lá na VPS né. tu consegue debugar qualquer coisa ai se
-  precisar". Montar o receptor faz parte da 015; o site continua na 016.
+  suporte pro niri e mango". O compositor e a versão dele saem de um jeito que sirva pros três; nada
+  de usuário, nome da máquina, caminhos ou lista de programas; os testes do lab mandam pra um
+  receptor local.
+- Q: Onde fica o receptor? → A: **Na VPS do dono**, com HTTPS, sem guardar o IP. A VPS ainda não tem
+  nada; o dono: "eu n tenho nada pra salvar isso ainda lá na VPS né. tu consegue debugar qualquer
+  coisa ai se precisar".
+- **Telemetria adiada (02.11):** quando a VPS virou um pré-requisito (domínio, acesso), o dono: "eu
+  tenho que fazer isso agora agora pra gente seguir??? [...] deixa sem telemetria no momento depois
+  a gente adiciona isso". A US7 e os FR-020 a FR-023 saíram da 015. As três respostas acima ficam
+  valendo pra quando ela voltar, numa spec própria junto com a VPS (o site, o espelho e a cópia do
+  checksum).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -193,34 +201,6 @@ resultado da verificação automática.
    15 branches velhas do GitHub são apagadas, cada passo com o OK dele.
 2. **Given** a `main` publicada, **When** a verificação automática roda, **Then** ela passa.
 
-### User Story 7 - Saber em que sistemas o YoRHa-Shell está sendo instalado (Priority: P2)
-
-O dono quer saber em que máquinas o projeto está sendo instalado e onde a instalação falha: a
-distribuição, a versão do Hyprland, a placa de vídeo, os monitores, as dependências que não
-instalaram. A telemetria vem ligada, como no Serpantinum: no fim de cada instalação e de cada
-update, a máquina manda um resumo anônimo desses dados. Quem desliga não manda nada.
-
-**Why this priority**: Ajuda a decidir o que testar (a S6 fala em EndeavourOS e CachyOS) e mostra
-falhas que o lab não pega. Não muda o produto pra quem instala, por isso P2.
-
-**Independent Test**: Numa VM, instalar com a telemetria ligada e conferir que o receptor recebeu exatamente os
-campos da lista do README. Noutra, desligar no instalador e conferir, pelo tráfego da VM, que nenhum
-pedido foi pro receptor.
-
-**Acceptance Scenarios**:
-
-1. **Given** uma instalação nova, **When** o instalador mostra o resumo do que vai fazer, **Then** a
-   telemetria aparece ligada, com a lista do que vai ser enviado, e a pessoa consegue desligar ali,
-   antes de qualquer envio.
-2. **Given** a telemetria ligada, **When** a instalação ou o update termina (com sucesso ou falha),
-   **Then** um resumo vai pro receptor, sem nome de usuário, nome da máquina ou IP guardado.
-3. **Given** a telemetria desligada, **When** se instala ou atualiza, **Then** nenhum
-   pedido vai pro receptor.
-4. **Given** a telemetria ligada, **When** a pessoa roda o comando de telemetria, **Then** ela vê o
-   estado, o último resumo enviado, e consegue desligar ou trocar o ID.
-
----
-
 ### Edge Cases
 
 - **Canal público fora do ar ou com limite de acessos:** instalar falha com uma mensagem clara e sem
@@ -233,10 +213,6 @@ pedido foi pro receptor.
 - **Arquivo do jogo ou do lab dentro do pacote:** a montagem recusa (fontes, sons e vídeos do jogo;
   qualquer coisa do repositório privado).
 - **Nome novo e uma instalação com o nome provisório** (só VMs do lab): fica fora; a VM é refeita.
-- **Receptor da telemetria fora do ar:** o envio desiste em poucos segundos, sem repetir e sem
-  atrasar nem quebrar a instalação.
-- **Instalação sem terminal interativo** (por script): vale o padrão (ligada), e uma variável de
-  ambiente desliga, pra quem automatiza.
 
 ## Requirements *(mandatory)*
 
@@ -292,27 +268,6 @@ pedido foi pro receptor.
   GitHub); o espelho na VPS vem com a 016.
 - **FR-019**: SYSTEM › Updates MUST ter um interruptor pra conferência automática de versão. Desligada,
   o shell não faz nenhum pedido sozinho, e só o `yorha update` confere.
-- **FR-020**: A telemetria MUST vir ligada por padrão, e o instalador MUST mostrar isso e a lista
-  do que vai antes de qualquer envio, com o jeito de desligar ali. Com ela ligada, o fim de cada
-  instalação, update e rollback MUST mandar um resumo com os mesmos campos do Serpantinum, mais os
-  nossos:
-  - os do Serpantinum: um ID aleatório da instalação, a operação, a versão nova e a anterior, o
-    resultado, as dependências que falharam, a distribuição, o kernel, a arquitetura, a CPU, a GPU, a
-    RAM, o compositor, o desktop e o tipo de sessão;
-  - os nossos: a versão do compositor e a do Quickshell, e os monitores (quantos, resolução e escala).
-  O compositor e a versão dele MUST sair de um jeito que sirva pro Niri e pro MangoWC quando eles
-  forem suportados. MUST NOT ir nome de usuário, nome da máquina, caminhos de pasta nem a lista de
-  programas. Os testes do lab MUST mandar pra um receptor local, nunca pro de verdade.
-- **FR-021**: Com a telemetria desligada, MUST NOT sair nenhum pedido pro receptor, nem
-  um aviso de "desligada". O shell em si MUST NOT mandar telemetria: só o instalador e o `yorha`, no
-  fim das operações.
-- **FR-022**: O receptor MUST rodar na VPS do dono, com HTTPS e um domínio [NEEDS CLARIFICATION:
-  qual domínio?], e MUST estar no ar antes de publicar a 0.1.0. Ele MUST guardar só os campos do
-  resumo e a data, nunca o IP (log de acesso desligado), e o dono MUST conseguir ver o total por
-  campo. Cada mudança na VPS MUST ter o OK do dono, como um push.
-- **FR-023**: O README MUST listar os campos enviados, como ligar e desligar e onde os dados ficam. O
-  comando `yorha telemetry` MUST mostrar o estado e o último resumo, ligar, desligar e trocar o ID.
-
 ### Key Entities
 
 - **Release**: um número de versão, o pacote, o checksum, o script de instalação e as notas;
@@ -320,10 +275,6 @@ pedido foi pro receptor.
 - **Canal**: de onde a máquina tira as releases. O público (GitHub), o de teste (pré-releases) e o
   do lab (local).
 - **Sinal de versão nova**: o que fica visível enquanto há uma release mais nova que a instalada.
-- **Resumo de telemetria**: os campos que uma instalação manda no fim de uma operação, com um ID
-  aleatório que a pessoa pode trocar.
-- **Receptor**: o endereço que recebe e guarda os resumos.
-
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
@@ -341,11 +292,6 @@ pedido foi pro receptor.
 - **SC-007**: Os roteiros 003, 004, 007, 008, 013 e 014 (adaptado ao canal público) passam, e a
   verificação automática passa na `main` publicada.
 - **SC-008**: O dono aprova a página da release antes de ela ser publicada.
-- **SC-009**: Numa VM com a telemetria desligada no instalador, a captura do tráfego durante a instalação, um update
-  e um rollback mostra zero pedidos pro receptor. Numa VM com ela ligada, o receptor tem um resumo por
-  operação, só com os campos da lista.
-- **SC-010**: Com o receptor fora do ar, a instalação leva no máximo 5 s a mais e termina igual.
-
 ## Assumptions
 
 - **Público:** quem instala usa Arch (ou derivado) com Hyprland 0.56+ e config em Lua. Testes em
@@ -355,8 +301,8 @@ pedido foi pro receptor.
   ignora pré-releases.
 - **"Update now" apagado** quando não há versão nova (decisão 2 da página da 014) continua como
   está, a menos que o dono diga outra coisa.
-- **Telemetria só do instalador e do CLI:** a conferência de versão do shell continua só lendo o
-  canal público, sem mandar dado nenhum além do pedido.
+- **Sem telemetria na 015:** a conferência de versão do shell só lê o canal público, sem mandar dado
+  nenhum além do pedido. A telemetria vem depois, junto com a VPS (ver Clarifications).
 - **Fora desta spec:** o clima no HUD e as outras funcionalidades da S1 (depois do marco), o Niri
   (S5) e o cursor (FR-017 da 014).
 - **Máquina do dono:** como sempre, nada roda nela; o teste é em VM, com acesso à internet pra ler
