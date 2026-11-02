@@ -1,7 +1,8 @@
 # shellcheck shell=bash
 # An update that changes the product's name (spec 015, FR-017, research R6, data-model.md "Depois de
-# uma troca de nome"). Always run by the NEWER version, the only one that knows both names: forward by
-# its `_finish-update`, back by its `rollback`. Sourced by bin/yorha after name.sh, common.sh and
+# uma troca de nome"). Always run by the NEWER version, the only one that knows both names: by its
+# `_finish-update`, and by its `rollback`, which makes the same move in the other direction (B to A,
+# with A's variables), so a hyprland.lua line or keys of either name keep working. Sourced by bin/yorha after name.sh, common.sh and
 # channel.sh; the YORHA_* variables are the ones of the version that runs.
 #
 # After a change from A to B:
@@ -80,42 +81,20 @@ yorha_rename_forward() {
     sync -f "$YORHA_HOME" 2>/dev/null || true
 }
 
-# What the person reads at the end of an update that changed the name (A's values from renamed-from).
+# What the person reads at the end of an update (or a rollback) that changed the name (A's values from
+# renamed-from). $1 = whether their hyprland.lua already has the new line (0) or not (1).
 yorha_rename_notes() {
     local f="$YORHA_STATE/renamed-from" oname ocmd
     oname=$(yorha_kv "$f" name) ocmd=$(yorha_kv "$f" cmd)
     [[ $ocmd != "$YORHA_CMD" ]] && yorha_say "the command is now $YORHA_CMD ($ocmd still works)"
-    yorha_say "your hyprland.lua line keeps working; when you can, replace it with:"
-    printf '\n    %s\n\n' "$(yorha_dofile_line "$YORHA_HOME/current/system/hypr/$YORHA_NAME.lua")"
+    if [[ $1 != 0 ]]; then
+        yorha_say "your hyprland.lua line keeps working; when you can, replace it with:"
+        printf '\n    %s\n\n' "$(yorha_dofile_line "$YORHA_HOME/current/system/hypr/$YORHA_NAME.lua")"
+    fi
     # Out of scope (R6): the optional boot and login module is not moved.
     if [[ -e /etc/sddm.conf.d/$oname.conf || -e /usr/share/plymouth/themes/$oname ]]; then
         yorha_say "the boot and login themes keep the name $oname and still work; to move them: $YORHA_CMD boot-login install"
     fi
-}
-
-# B back to A, before a rollback to a version of A: $1 = that version's folder (in B's home). Puts
-# every folder back, removes the links, the alias and renamed-from, and leaves only a marker at B's
-# home (renamed-to pointing at A) for the running supervisor to follow; the caller removes it.
-yorha_rename_back() {
-    local o oname ocmd ohome ostate oconfig from
-    mapfile -t o < <(yorha_name_of "$1") || true
-    ((${#o[@]} == 6)) || yorha_fail "cannot read the name of $1; nothing changed" 3
-    oname=${o[0]} ocmd=${o[1]} ohome=${o[3]} ostate=${o[4]} oconfig=${o[5]}
-    from=$(yorha_kv "$YORHA_STATE/renamed-from" name)
-    [[ $from == "$oname" ]] || yorha_fail "$YORHA_PRETTY was not renamed from $oname (no $YORHA_STATE/renamed-from); nothing changed" 3
-    if yorha_is_compat "$ohome"; then rm -rf "$ohome"
-    elif [[ -e $ohome || -L $ohome ]]; then yorha_fail "$ohome is in the way; nothing changed" 3; fi
-    yorha_say "going back to the name $oname: moving $YORHA_HOME to $ohome"
-    rm -f "$YORHA_STATE/renamed-from" "$YORHA_STATE/renamed-announced"
-    mv -T "$YORHA_HOME" "$ohome"
-    [[ -L $ostate ]] && rm -f "$ostate"
-    [[ -L $oconfig ]] && rm -f "$oconfig"
-    yorha_move_linked "$YORHA_STATE" "$ostate" && rm -f "$YORHA_STATE"
-    yorha_move_linked "$YORHA_CONFIG" "$oconfig" && rm -f "$YORHA_CONFIG"
-    [[ $ocmd != "$YORHA_CMD" && -L $YORHA_BIN/$YORHA_CMD ]] && rm -f "$YORHA_BIN/$YORHA_CMD"
-    mkdir -p "$YORHA_HOME"
-    printf 'name=%s\ncmd=%s\nbin=%s\nhome=%s\n' "$oname" "$ocmd" "$YORHA_BIN/$ocmd" "$ohome" > "$YORHA_HOME/renamed-to"
-    sync -f "$ohome" 2>/dev/null || true
 }
 
 # Uninstall: what a change of name left under the old name (the alias, the links, the compatibility

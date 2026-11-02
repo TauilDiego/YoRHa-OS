@@ -6,8 +6,10 @@ import Quickshell.Io
 
 // After an update that changed the product's name (spec 015, FR-017, research R6): one transmission
 // with the new line for hyprland.lua. The update leaves <state>/renamed-from (name=, pretty=, date=
-// of the old name); the notice is given once per change, marked in <state>/renamed-announced. The
-// person's old line keeps working (a compatibility file), so this only says what to put instead.
+// of the old name); the notice is given once per change, marked in <state>/renamed-announced (the
+// change's name and date on the first line, then what was said). The person's old line keeps working
+// (a compatibility file), so this only says what to put instead, and nothing when their hyprland.lua
+// already has the new line (a rollback to the name they still use).
 // The texts live here and not in Strings.qml while front B owns it (spec 015); the junction may move them.
 Singleton {
     id: root
@@ -37,16 +39,20 @@ Singleton {
         if (from === "")
             return;
         const key = from + " " + value(t, "date");
-        if (String(markFile.text() ?? "").trim() === key) {
+        if (String(markFile.text() ?? "").split("\n")[0].trim() === key) {
             announced = true;
             return;
         }
+        hyprFile.reload();
+        const needle = "/current/system/hypr/" + Product.name + ".lua";
+        const hasLine = String(hyprFile.text() ?? "").split("\n").some(l => !l.trim().startsWith("--") && l.includes(needle));
         const old = value(t, "pretty") || from;
-        NotifyStore.system(`${old} is now ${Product.pretty}`,
-            `Your hyprland.lua line still works. When you can, replace it with:\n${includeLine}`
-            + (value(t, "cmd") !== "" && value(t, "cmd") !== Product.cmd ? `\nThe command is now ${Product.cmd} (${value(t, "cmd")} still works).` : ""),
-            "normal", false);
-        markFile.setText(key + "\n");
+        const title = `${old} is now ${Product.pretty}`;
+        const body = `Your hyprland.lua line still works. When you can, replace it with:\n${includeLine}`
+            + (value(t, "cmd") !== "" && value(t, "cmd") !== Product.cmd ? `\nThe command is now ${Product.cmd} (${value(t, "cmd")} still works).` : "");
+        if (!hasLine)
+            NotifyStore.system(title, body, "normal", false);
+        markFile.setText(key + "\n" + (hasLine ? "(not shown: hyprland.lua already has the line)" : title + "\n" + body) + "\n");
         announced = true;
     }
 
@@ -55,6 +61,12 @@ Singleton {
         path: root.installed ? Product.statePath("renamed-from") : ""
         blockLoading: true
         printErrors: false          // no file: no change of name, the normal case
+    }
+    FileView {
+        id: hyprFile
+        path: (Quickshell.env("XDG_CONFIG_HOME") || Product.home + "/.config") + "/hypr/hyprland.lua"
+        blockLoading: true
+        printErrors: false
     }
     FileView {
         id: markFile

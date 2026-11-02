@@ -152,7 +152,7 @@ cmd__finish_update() {
     yorha_prune
     stop_shell "$rd" || true
     yorha_say "updated to $v (previous: $cur; $YORHA_CMD rollback goes back)"
-    ((renamed)) && yorha_rename_notes
+    if ((renamed)); then if has_include_line; then yorha_rename_notes 0; else yorha_rename_notes 1; fi; fi
     return 0
 }
 
@@ -193,21 +193,22 @@ cmd_update() {
 }
 
 # Back to the version before the last update, with the state as it was before that update.
-# Spec 015: when the previous version has another name, the change of name is undone first
-# (lib/yorha/rename.sh) and the rest runs under that name.
+# Spec 015: when the previous version has another name, the name changes back first: the same move
+# as an update's (lib/yorha/rename.sh), in the other direction, and the rest runs under that name.
 cmd_rollback() {
-    local cur prev state o rd marker="" i
+    local cur prev state o rd from="" here
     cur=$(yorha_current)
     prev=$(cat "$YORHA_HOME/previous" 2>/dev/null || true)
     [[ -n $prev && -d $YORHA_HOME/versions/$prev ]] || yorha_fail "no previous version to go back to" 3
     rd=$(run_dir)
     mapfile -t o < <(yorha_name_of "$YORHA_HOME/versions/$prev") || true
     if ((${#o[@]} == 6)) && [[ ${o[0]} != "$YORHA_NAME" ]]; then
-        marker=$YORHA_HOME
-        yorha_rename_back "$YORHA_HOME/versions/$prev"
-        # From here on, the previous version's name (its home now holds every version).
+        here="$YORHA_HOME/versions/$cur"
+        # From here on, the previous version's name.
         # shellcheck source=/dev/null
-        source "${o[3]}/versions/$prev/lib/yorha/name.sh"
+        source "$YORHA_HOME/versions/$prev/lib/yorha/name.sh"
+        yorha_rename_forward "$here"
+        from=$(cat "$YORHA_STATE/renamed-from")
     fi
     yorha_switch "$prev"
     rm -f "$YORHA_HOME/previous"
@@ -218,13 +219,11 @@ cmd_rollback() {
     else
         state="no copy of the state from $prev; state left as is"
     fi
-    if stop_shell "$rd" && [[ -n $marker ]]; then
-        # The supervisor follows the marker to the old name (at most 15 s); then the marker goes.
-        for ((i = 0; i < 30; i++)); do [[ -s $(run_dir)/shell.pid ]] && break; sleep 0.5; done
-    fi
-    [[ -n $marker ]] && rm -rf "$marker" "$rd"
+    # The restored state is from before the change of name: say again where the name came from.
+    [[ -n $from ]] && printf '%s\n' "$from" > "$YORHA_STATE/renamed-from"
+    stop_shell "$rd" || true
     yorha_say "rolled back from $cur to $prev ($state)"
-    [[ -n $marker ]] && yorha_say "the name is $YORHA_PRETTY again; the command is $YORHA_CMD"
+    if [[ -n $from ]]; then if has_include_line; then yorha_rename_notes 0; else yorha_rename_notes 1; fi; fi
     return 0
 }
 
