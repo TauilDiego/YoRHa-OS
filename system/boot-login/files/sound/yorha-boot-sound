@@ -15,6 +15,7 @@ level=$DEFAULT_LEVEL enabled=true
 
 log() { echo "yorha-boot-sound: $*"; }       # the journal, through the unit's stdout
 
+# shellcheck disable=SC2329  # called by the EXIT trap below
 write_state() {
     local tmp
     install -d -m 755 "$RUN" 2>/dev/null || return 0

@@ -1,9 +1,11 @@
-# F0: lint on every push and pull request. Nothing here runs the UI; it only reads the sources.
+# F0: lint on every push and pull request, and by hand (workflow_dispatch). Nothing here runs the
+# UI; it only reads the sources.
 name: lint
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   lint:
