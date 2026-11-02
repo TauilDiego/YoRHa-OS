@@ -12,21 +12,25 @@ source "$YORHA_ROOT/lib/yorha/channel.sh"
 
 usage() {
     cat >&2 <<USAGE
-usage: $YORHA_CMD version | status | update [--check [--json]] | rollback | migrate
+usage: $YORHA_CMD version | status | channel [stable|testing] | update [--check [--json]] | rollback | migrate
        $YORHA_CMD shell start|restart | ipc <args…> | boot-login install|uninstall|status | uninstall
 USAGE
     exit 2
 }
 
 cmd_status() {
-    local cur prev channel running
+    local cur prev channel origins running
     cur=$(yorha_current)
     prev=$(cat "$YORHA_HOME/previous" 2>/dev/null || true)
     channel=$(yorha_channel)
+    [[ -n ${YORHA_CHANNEL:-} ]] && channel+=" (YORHA_CHANNEL)"
+    origins=$(yorha_origins | paste -sd' ' | sed 's/ /, /g')
+    [[ -n ${YORHA_ORIGIN:-} ]] && origins+=" (YORHA_ORIGIN)"
     [[ -s $(run_dir)/shell.pid ]] && running="yes (pid $(cat "$(run_dir)/shell.pid"))" || running=no
     printf '%s %s\n' "$YORHA_PRETTY" "${cur:-not installed}"
     printf '  previous:  %s\n' "${prev:-none}"
-    printf '  channel:   %s\n' "${channel:-none}"
+    printf '  channel:   %s\n' "$channel"
+    printf '  origins:   %s\n' "${origins:-none}"
     printf '  folder:    %s\n' "$YORHA_HOME"
     printf '  shell:     %s\n' "$running"
 }
@@ -57,14 +61,15 @@ update_check() {
     origin=${out#* }
 }
 
-# Download, check and prepare version $1 into versions/$1 (nothing in use is touched).
+# Download, check and prepare version $1 into versions/$1 (nothing in use is touched). The download
+# starts at the caller's origin (the one that answered update_check), then the other origins.
 update_fetch() {
     local v=$1 dl tmp got pkg rc=0
     [[ -d $YORHA_HOME/versions/$v ]] && return 0
     dl="$YORHA_HOME/downloads/$v"      # a leftover of an interrupted update is redone
     rm -rf "$dl" && mkdir -p "$dl"
     yorha_say "downloading $v"
-    got=$(yorha_fetch_release "$v" "$dl") || rc=$?
+    got=$(yorha_fetch_release "$v" "$dl" "" "${origin:-}") || rc=$?
     case $rc in
         0) ;;
         4) rm -rf "$dl"; yorha_fail "checksum mismatch for $v; refusing, nothing changed" 4 ;;
@@ -130,6 +135,21 @@ cmd_update() {
     fi
     update_fetch "$latest"
     update_finish "$cur" "$latest"
+}
+
+# The channel (contracts/cli.md): without an argument, print it; with stable or testing, keep it in
+# $YORHA_HOME/channel, where the next check (the shell's or `update`) reads it.
+cmd_channel() {
+    local c=${1:-}
+    if [[ -z $c ]]; then
+        yorha_channel
+        return 0
+    fi
+    (($# == 1)) && [[ $c == stable || $c == testing ]] || yorha_fail "the channel is stable or testing, not '$*'" 2
+    [[ -n $(yorha_current) ]] || yorha_fail "not installed"
+    echo "$c" > "$YORHA_HOME/channel.tmp" && mv -f "$YORHA_HOME/channel.tmp" "$YORHA_HOME/channel"
+    yorha_say "channel $c; the next check uses it ($YORHA_CMD update --check)"
+    [[ -z ${YORHA_CHANNEL:-} ]] || yorha_say "YORHA_CHANNEL=$YORHA_CHANNEL is set and wins while it is"
 }
 
 # Back to the version before the last update, with the state as it was before that update.
@@ -324,6 +344,7 @@ main() {
     case ${1:-} in
         version) echo "$YORHA_NAME $(yorha_version_of "$YORHA_ROOT")" ;;
         status) cmd_status ;;
+        channel) shift; cmd_channel "$@" ;;
         _install) cmd__install ;;
         shell)
             case ${2:-} in
