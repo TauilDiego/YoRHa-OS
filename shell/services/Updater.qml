@@ -6,7 +6,7 @@ import Quickshell.Io
 import "../strings"
 
 // Newer versions, for a shell installed with yorha (spec 014 US3, contracts/updater.md).
-//   - installed: qs was started by `yorha shell start`, which sets YORHA_OS_ROOT to the version's
+//   - installed: qs was started by `yorha shell start`, which sets YORHA_ROOT to the version's
 //     folder. Anything else (the lab's ~/nier/ui) is "not-installed": nothing runs, nothing shows.
 //   - check(): `<root>/bin/yorha update --check --json`, 30 s after the start and then every hour;
 //     the last check, the newest version and the one already announced live in
@@ -18,7 +18,7 @@ import "../strings"
 Singleton {
     id: root
 
-    readonly property string rootDir: Quickshell.env("YORHA_OS_ROOT") ?? ""
+    readonly property string rootDir: Quickshell.env("YORHA_ROOT") ?? ""
     readonly property bool installed: rootDir !== ""
     readonly property string yorha: installed ? rootDir + "/bin/yorha" : ""
     readonly property string current: installed ? String(versionFile.text()).trim() : ""
@@ -36,7 +36,7 @@ Singleton {
 
     readonly property string statePath: {
         const xdg = Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state");
-        return xdg + "/yorha-os/updates.json";
+        return xdg + "/yorha-shell/updates.json";
     }
 
     // "" when it started; else why not.

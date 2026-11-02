@@ -1,6 +1,6 @@
-# Tema de login (SDDM): `yorha-os`
+# Tema de login (SDDM): `yorha-shell`
 
-A tela de login do YoRHa-OS (spec 011), do protótipo aprovado (artefato "YoRHa-OS Login: proposta",
+A tela de login do YoRHa-Shell (spec 011), do protótipo aprovado (artefato "YoRHa-Shell Login: proposta",
 v3.2): o papel da cena "Menu" com as réguas do shell, a lista de usuários, o relógio, o cartão de
 autenticação, Session, Reboot e Shut down, e a entrada depois do boot. Qt 6, greeter em X11.
 
@@ -17,13 +17,13 @@ autenticação, Session, Reboot e Shut down, e a entrada depois do boot. Qt 6, g
 
 No `theme.conf` (o padrão primeiro): `intro` = `full` | `fade` | `none`, `clock` = `big` | `small` |
 `none`, `userList` = `always` | `auto`, `reduceMotion` = `false` | `true`, `sounds` = `on` | `off` (spec 013). As do usuário ficam em
-`/etc/yorha-os/login.conf`, que o instalador liga como `theme.conf.user`. Um valor inválido vale o padrão
+`/etc/yorha-shell/login.conf`, que o instalador liga como `theme.conf.user`. Um valor inválido vale o padrão
 e gera um aviso no log, uma vez.
 
 ## A entrada depois do boot
 
 A entrada completa (faixa, nome com glitch, papel) só toca no primeiro greeter depois do boot: quando
-`/run/yorha-os/handoff` (o `/proc/uptime` da passagem, gravado pelo drop-in do `sddm.service`) tem menos
+`/run/yorha-shell/handoff` (o `/proc/uptime` da passagem, gravado pelo drop-in do `sddm.service`) tem menos
 de 30 s. Senão, e depois de um logout, é o fade. Pra ler esses dois arquivos, o greeter precisa de
 `QML_XHR_ALLOW_FILE_READ=1` no `GreeterEnvironment` do SDDM (o drop-in `sddm.conf.d` do módulo).
 
@@ -44,7 +44,7 @@ theme" e mostra o tema padrão dele.
 
 `components/LoginSounds.qml` toca `intro` (só na entrada completa), `move` (a lista), `confirm` (entrar),
 `error` (senha errada) e `close` (Reboot e Shut down), com `assets/sounds/*.wav`, cópias dos sons nossos
-de `system/sounds/`. O volume vem de `/run/yorha-os/sound.state` (o `level` em %, ganho = nível²), que o
+de `system/sounds/`. O volume vem de `/run/yorha-shell/sound.state` (o `level` em %, ganho = nível²), que o
 script do som de boot grava **depois** de tocar: o tema só cria os `SoundEffect` quando o arquivo existe,
 esperando no máximo 2 s (depois toca a 30%), porque um PipeWire que abre a placa durante o `aplay` faz o
 nó da placa sumir. `enabled: false` no arquivo (mudo, ou "Boot and login sounds" desligado) deixa o login

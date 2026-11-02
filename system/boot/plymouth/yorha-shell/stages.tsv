@@ -1,4 +1,4 @@
-# The boot stages of the YoRHa-OS boot screen (spec 011, data-model.md): systemd unit -> our line.
+# The boot stages of the YoRHa-Shell boot screen (spec 011, data-model.md): systemd unit -> our line.
 # Columns, separated by one tab:
 #   pattern  the raw unit name systemd sends (systemd-journald.service, dev-zram0.swap). At most one
 #            "*": exact, prefix*, *suffix or prefix*suffix. The first pattern that matches wins.
@@ -7,7 +7,7 @@
 #            unit is only counted in its group.
 #   group    services, volumes, devices, network or session (the generic line, "Starting system
 #            services (12)"); "-" = not shown at all (targets, slices, sockets...).
-# gen/embed-stages.py puts this table into yorha-os.script; run it after every change.
+# gen/embed-stages.py puts this table into yorha-shell.script; run it after every change.
 
 # --- devices and kernel
 systemd-udevd.service	Starting the device manager	devices

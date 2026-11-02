@@ -1,4 +1,4 @@
-"""YoRHa-OS cursor style: every value the owner approved on the default arrow (2026-10-27), and
+"""YoRHa-Shell cursor style: every value the owner approved on the default arrow (2026-10-27), and
 the primitives that draw with them. All cursor generators build on this module, so every
 shape shares the same palette, line weights, bevel and depth.
 

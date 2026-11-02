@@ -4,14 +4,14 @@ import QtQuick
 import "../ds"
 
 // The system's name entering with the glitch (spec 011 FR-017, research R4; mockup v3.2 ".title"):
-// "YoRHa-OS" scrambled on the dark, settling from the left in 16 steps of 50 ms. Each step shifts it
+// "YoRHa-Shell" scrambled on the dark, settling from the left in 16 steps of 50 ms. Each step shifts it
 // sideways, skews it and sometimes dims it; a red and a cyan copy sit beside it (the color split).
 // `dark` switches it to ink over the paper. start() plays it, stop() freezes it settled.
 Item {
     id: root
 
     property real s: 1
-    property string word: "YoRHa-OS"
+    property string word: "YoRHa-Shell"
     property bool dark: false
 
     readonly property string glyphs: "ЯИƎ#%&@$Ɐ∀ʁ01<>/|=+"

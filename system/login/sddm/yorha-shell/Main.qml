@@ -5,7 +5,7 @@ import QtQuick
 import "ds"
 import "components"
 
-// The YoRHa-OS login (spec 011, US1 and US3): the approved mockup ("YoRHa-OS Login: proposta", v3.2,
+// The YoRHa-Shell login (spec 011, US1 and US3): the approved mockup ("YoRHa-Shell Login: proposta", v3.2,
 // lab/mockups/login) as an SDDM theme. The SDDM loads this file once per screen; the panels go on the
 // primary one and the others show only the paper and the rules (FR-036). Everything is laid out in
 // the game's 1920×1080 px and scaled by the screen's height (`s`, FR-037).
@@ -25,7 +25,7 @@ Rectangle {
         return Tokens.px(v, root.s);
     }
 
-    // --- options (theme.conf, with theme.conf.user = /etc/yorha-os/login.conf over it; FR-031) -------
+    // --- options (theme.conf, with theme.conf.user = /etc/yorha-shell/login.conf over it; FR-031) -------
     function option(key: string, allowed: var): string {
         let v = "";
         if (typeof config !== "undefined" && config !== null)
@@ -287,7 +287,7 @@ Rectangle {
     // switch gets the fade (FR-019). The used mark is kept in the sddm user's cache.
     Settings {
         id: memory
-        location: StandardPaths.writableLocation(StandardPaths.GenericCacheLocation) + "/yorha-os/greeter.conf"
+        location: StandardPaths.writableLocation(StandardPaths.GenericCacheLocation) + "/yorha-shell/greeter.conf"
         property string handoffUsed: ""
     }
     function readFile(path: string): string {
@@ -305,7 +305,7 @@ Rectangle {
             return "fade";
         if (introOption === "fade" || reduceMotion || previous === "leaving")
             return "fade";
-        const mark = readFile("/run/yorha-os/handoff").trim();
+        const mark = readFile("/run/yorha-shell/handoff").trim();
         const handoff = parseFloat(mark);
         const uptime = parseFloat(readFile("/proc/uptime"));
         if (!isFinite(handoff) || !isFinite(uptime) || uptime < handoff || uptime - handoff >= 30 || mark === memory.handoffUsed)

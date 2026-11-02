@@ -34,7 +34,7 @@ PanelWindow {
     }
     implicitHeight: Settings.barHeight
     exclusiveZone: implicitHeight
-    WlrLayershell.namespace: "yorha-os-hud"
+    WlrLayershell.namespace: "yorha-shell-hud"
     color: "transparent"
 
     // Layout, top to bottom: a little room, the tabs, a visible gap, then the dotted rule.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""YoRHa-OS UI sounds (spec 013): original recipes, numpy + wave only, 48 kHz mono 16-bit WAV.
+"""YoRHa-Shell UI sounds (spec 013): original recipes, numpy + wave only, 48 kHz mono 16-bit WAV.
 
 Usage: synth.py <outdir> [--freq-scale 0.5]
 

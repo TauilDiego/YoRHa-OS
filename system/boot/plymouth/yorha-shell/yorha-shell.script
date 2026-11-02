@@ -1,4 +1,4 @@
-# YoRHa-OS boot screen (spec 011): the system check list of the game's boot screen, written with
+# YoRHa-Shell boot screen (spec 011): the system check list of the game's boot screen, written with
 # the real boot stages and our own text. Numbers from the 4K analysis of the game's boot
 # (YoRHa-OS-private/pessoal/referencias/jogo/boot-analise.md), in 1080p px, scaled by the screen's
 # height. Layers, bottom to top:
@@ -315,7 +315,7 @@ overlay_op = 1;
 WM_ALPHA = 0.12;
 wm1 = item_new(4, 0);
 wm2 = item_new(4, 0);
-wm1_img = Image.Text("YoRHa-OS", TXT_R, TXT_G, TXT_B, 1, font(156));
+wm1_img = Image.Text("YoRHa-Shell", TXT_R, TXT_G, TXT_B, 1, font(156));
 wm2_img = Image.Text("SYSTEM INTERFACE", TXT_R, TXT_G, TXT_B, 1, font(30));
 items[wm1].op = WM_ALPHA;
 items[wm2].op = WM_ALPHA;

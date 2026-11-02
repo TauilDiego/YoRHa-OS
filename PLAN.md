@@ -1,4 +1,4 @@
-# YoRHa-OS — plano
+# YoRHa-Shell — plano
 
 > Codinome interno. Documento vivo, atualizado em 2026-11-01.
 
@@ -9,7 +9,7 @@ um Arch que já funciona (Hyprland primeiro, Niri depois), e o desktop ganha a c
 - **o shell:** barra, menu de pausa, notificações do Pod, OSD e papel de parede;
 - **um núcleo opcional:** o tema de boot e de login, o cursor e os sons.
 
-Ele **não** gerencia os pacotes, o hardware nem as configs de quem instala. O nome YoRHa-OS é
+Ele **não** gerencia os pacotes, o hardware nem as configs de quem instala. O nome YoRHa-Shell é
 provisório.
 
 **Regra de ouro:** o seu sistema é homologado e não roda nada do projeto. A UI e o instalador
@@ -28,9 +28,9 @@ na VM.
 
 | Parte | O que é | Onde fica |
 |---|---|---|
-| **Shell** | A UI em Quickshell (`shell/`) | `~/.local/share/yorha-os/versions/<v>/`, com o link `current` |
+| **Shell** | A UI em Quickshell (`shell/`) | `~/.local/share/yorha-shell/versions/<v>/`, com o link `current` |
 | **Núcleo opcional** | Boot (Plymouth), login (SDDM) e som de boot (`system/boot-login`); o cursor (`system/cursors`); os sons (`system/sounds`) | O que precisa de root vai pro sistema com backup e desfazer; o resto fica nas pastas do usuário |
-| **Config do usuário** | O `shell.json` e o estado que os menus salvam | `~/.config/yorha-os/` e `~/.local/state/yorha-os/` |
+| **Config do usuário** | O `shell.json` e o estado que os menus salvam | `~/.config/yorha-shell/` e `~/.local/state/yorha-shell/` |
 
 O seu `hyprland.lua` continua seu. O projeto traz um arquivo com os atalhos e o autostart, e você
 inclui ele com uma linha.
@@ -40,13 +40,13 @@ inclui ele com uma linha.
 1. **Pastas próprias.** Nada é escrito fora delas sem perguntar.
 2. **Padrões gerenciados separados dos seus arquivos.**
    - A versão em `versions/<v>` é trocada a cada update.
-   - O `~/.config/yorha-os/` é só seu, e update nunca mexe nele.
+   - O `~/.config/yorha-shell/` é só seu, e update nunca mexe nele.
    - Mudança de formato vira migration.
 3. **Idempotente.** Rodar o instalador duas vezes dá o mesmo resultado.
 4. **Nunca sobrescrever sem backup.** O que precisa de root tem um comando de desfazer.
 5. **O compositor fica atrás de um adaptador.** Os atalhos ficam num arquivo que a pessoa inclui.
 6. **Segredos nunca entram no repositório.**
-7. **O nome é provisório.** `yorha`, `yorha-os` e os caminhos ficam num lugar só no instalador e
+7. **O nome é provisório.** `yorha`, `yorha-shell` e os caminhos ficam num lugar só no instalador e
    no CLI.
 
 ## 5. Estrutura
@@ -54,7 +54,7 @@ inclui ele com uma linha.
 No repositório:
 
 ```
-YoRHa-OS/
+YoRHa-Shell/
 ├── shell/        a UI (Quickshell)
 ├── system/       o núcleo opcional: boot/, login/, boot-login/ (o módulo com root), cursors/,
 │                 sounds/; e hypr/, o arquivo pra incluir no Hyprland (spec 014)
@@ -68,11 +68,11 @@ YoRHa-OS/
 Na máquina de quem instala (método D do estudo 005):
 
 ```
-~/.local/share/yorha-os/versions/<v>/   uma pasta por versão (guarda 3)
-~/.local/share/yorha-os/current         link pra versão em uso
+~/.local/share/yorha-shell/versions/<v>/   uma pasta por versão (guarda 3)
+~/.local/share/yorha-shell/current         link pra versão em uso
 ~/.local/bin/yorha                      o CLI
-~/.config/yorha-os/                     só seu
-~/.local/state/yorha-os/                estado, migrations feitas, backups
+~/.config/yorha-shell/                     só seu
+~/.local/state/yorha-shell/                estado, migrations feitas, backups
 ```
 
 ## 6. Fluxos
@@ -96,7 +96,7 @@ simples. Uma interface mais caprichada pro instalador fica pra depois.
 
 ## 7. A UI
 
-- **O YoRHa-OS convive com o Serpantinum até a U7.** Dá pra trocar entre os dois, e a tabela da
+- **O YoRHa-Shell convive com o Serpantinum até a U7.** Dá pra trocar entre os dois, e a tabela da
   S1 diz o que ainda falta pra troca.
 - **A UI NieR é desenvolvida em `shell/`** e substitui o Serpantinum quando cobrir o mínimo:
   barra, menu de pausa no lugar do launcher, notificações, OSD, lock, polkit, energia e
@@ -146,7 +146,7 @@ Serpantinum.
 
 | Fase | Entrega | Pronto quando |
 |---|---|---|
-| S1 Serpantinum × YoRHa-OS | O que o Serpantinum faz por você hoje e o que o YoRHa-OS já tem | Você revisou a tabela, e ela diz o que falta pra U7 |
+| S1 Serpantinum × YoRHa-Shell | O que o Serpantinum faz por você hoje e o que o YoRHa-Shell já tem | Você revisou a tabela, e ela diz o que falta pra U7 |
 | S2 Arch completo na VM ✅ | ISO + archinstall desassistido | Um comando entrega um `arch-limpo` instalado pela ISO |
 | S3 Instalação e encaixe (CLI) ✅ | `install.sh`, o CLI `yorha`, as dependências do shell e o arquivo de atalhos do Hyprland (spec 014) | Numa VM limpa, um comando instala e o shell sobe pelo Hyprland da pessoa |
 | S4 Updates ✅ (v0) | `yorha update` e `rollback`, migrations, o aviso no shell e o "Update now" (a v0 veio na spec 014; o canal público e a assinatura ficam pra S6) | Atualizar de v0.1 pra v0.2 funciona na VM, pelo CLI e pelo menu |
@@ -171,7 +171,7 @@ spike T003, research R4, e T041).
 
 ## 11. Decisões em aberto
 
-1. **O nome definitivo do projeto.** O YoRHa-OS é provisório.
+1. **O nome definitivo do projeto.** O YoRHa-Shell é provisório.
 2. **A assinatura das versões.** A v0 sai com o `.sha256`; a assinatura entra antes da S6.
 
 ## Decisões tomadas
@@ -217,7 +217,7 @@ spike T003, research R4, e T041).
   Mango do estudo 009.
 - **2026-10-29:** U5a concluída (spec 011): o tema de boot do Plymouth (a lista de checagens com as
   etapas reais, a faixa no desligar e o pedido de senha do disco), o tema de login do SDDM (o
-  protótipo aprovado) e o módulo `yorha-os-boot-login`, que instala com backup e desfaz. Na VM: nenhum
+  protótipo aprovado) e o módulo `yorha-shell-boot-login`, que instala com backup e desfaz. Na VM: nenhum
   console do ligar ao login, o boot +0,80 s (limite de 1 s, aceito pelo dono), 20 de 20 no estresse do
   login e o journal limpo em 10 ciclos. O dono quase aprovou: a velocidade das linhas do boot (texto
   na hora, só o glitch) vira a spec 012.
@@ -242,8 +242,8 @@ spike T003, research R4, e T041).
   T058, e as decisões abertas estão no `relatorio.md` da spec. No mesmo dia, todas as branches dos
   dois repositórios foram mescladas na `main` e apagadas (as specs 005, 009 e 010 entraram na `main`),
   e o código órfão saiu.
-- **2026-11-01:** S3 e S4 concluídas na v0 (spec 014): um comando instala o YoRHa-OS na pasta dele
-  (`~/.local/share/yorha-os`, versões lado a lado), uma linha no `hyprland.lua` encaixa o shell e os
+- **2026-11-01:** S3 e S4 concluídas na v0 (spec 014): um comando instala o YoRHa-Shell na pasta dele
+  (`~/.local/share/yorha-shell`, versões lado a lado), uma linha no `hyprland.lua` encaixa o shell e os
   atalhos, e o `yorha` atualiza, volta, migra, liga o boot e o login e desinstala. O canal da v0 é o
   repositório local. Na VM, o `check-014` passou inteiro, e os roteiros 003, 004, 007, 008 e 013
   também. Na sessão do dono, uma instalação do zero recebeu uma correção pelo aviso e pelo "Update

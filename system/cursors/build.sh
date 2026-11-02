@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the YoRHa-OS cursor theme from the generators: a hyprcursor theme (vector, drawn at the
+# Build the YoRHa-Shell cursor theme from the generators: a hyprcursor theme (vector, drawn at the
 # exact size by Hyprland) plus an XCursor fallback rendered from the same SVGs. Animated shapes
 # keep their frames and delays in both.
 # The loading cursors are NieR Cursors' own frames, recolored: their release is fetched per
@@ -69,6 +69,6 @@ for shape in "$src"/shapes/*/; do
         ln -sf "$name" "$theme/cursors/$alias"
     done
 done
-printf '[Icon Theme]\nName=YoRHa-OS Cursors\nComment=NieR-style cursors in the YoRHa-OS palette\nInherits=Adwaita\n' > "$theme/index.theme"
+printf '[Icon Theme]\nName=YoRHa-Shell Cursors\nComment=NieR-style cursors in the YoRHa-Shell palette\nInherits=Adwaita\n' > "$theme/index.theme"
 cp "$src/NOTICE" "$theme/"
 echo "$theme"

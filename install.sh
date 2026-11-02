@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# YoRHa-OS installer (spec 014, contracts/cli.md). Run it as your user:
+# YoRHa-Shell installer (spec 014, contracts/cli.md). Run it as your user:
 #   YORHA_OS_CHANNEL=<url> bash <(curl -fsSL <url>/install.sh)
 # Downloads the newest version from the channel, checks its sha256, unpacks it next to nothing else
 # (method D: ~/.local/share/<name>/versions/<v>), asks before installing the shell's dependencies,
@@ -24,12 +24,12 @@ v=$(curl -fsS "$channel/latest" | tr -d '[:space:]') || fail "could not reach $c
 tmp=$(mktemp -d "${TMPDIR:-/tmp}/yorha-install.XXXXXX")
 trap 'rm -rf "$tmp"' EXIT
 say "downloading version $v from $channel"
-for f in "yorha-os-$v.tar.gz" "yorha-os-$v.tar.gz.sha256"; do
+for f in "yorha-shell-$v.tar.gz" "yorha-shell-$v.tar.gz.sha256"; do
     curl -fsS -o "$tmp/$f" "$channel/$f" || fail "download of $f failed; nothing installed"
 done
-(cd "$tmp" && sha256sum --quiet -c "yorha-os-$v.tar.gz.sha256") || fail "checksum mismatch for $v; refusing" 4
+(cd "$tmp" && sha256sum --quiet -c "yorha-shell-$v.tar.gz.sha256") || fail "checksum mismatch for $v; refusing" 4
 mkdir "$tmp/v"
-tar -xzf "$tmp/yorha-os-$v.tar.gz" -C "$tmp/v" --strip-components=1
+tar -xzf "$tmp/yorha-shell-$v.tar.gz" -C "$tmp/v" --strip-components=1
 
 # From here on the names come from the version itself (lib/yorha/name.sh, FR-019).
 YORHA_ROOT="$tmp/v"

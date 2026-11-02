@@ -1,4 +1,4 @@
-"""Images and font of the YoRHa-OS boot screen (spec 011, T023), made once in the lab and committed.
+"""Images and font of the YoRHa-Shell boot screen (spec 011, T023), made once in the lab and committed.
 
 The Plymouth script can't process pixels, so everything that would need it comes out of here as an
 image. Numbers come from the 4K analysis of the game's boot (values in 4K px unless noted; 1080p is
@@ -169,7 +169,7 @@ def font(out, variable):
     f["OS/2"].usWeightClass = 400       # one face of its own family: fontconfig sees it as the regular
     f["head"].macStyle = 0
     note = (f"Derived from M PLUS 1 (The M+ FONTS Project Authors, SIL OFL 1.1): static instance "
-            f"wght={FONT_WEIGHT}, Latin subset, renamed for the YoRHa-OS boot screen.")
+            f"wght={FONT_WEIGHT}, Latin subset, renamed for the YoRHa-Shell boot screen.")
     f["name"].setName(note, 10, 3, 1, 0x409)
     os.makedirs(out, exist_ok=True)
     path = os.path.join(out, FONT_FILE)

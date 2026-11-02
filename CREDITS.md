@@ -18,14 +18,14 @@
   - uso: fonte padrão da UI, no lugar das fontes comerciais do jogo. Também é a fonte da tela de
     login e da tela de boot (spec 011), instalada no sistema pelo módulo de boot e login;
   - a tela de boot usa uma versão derivada, "YoRHa-OS Boot"
-    (`system/boot/plymouth/yorha-os/assets/font/YoRHaOSBoot.ttf`, com o `OFL.txt` ao lado): a
+    (`system/boot/plymouth/yorha-shell/assets/font/YoRHaOSBoot.ttf`, com o `OFL.txt` ao lado): a
     instância estática de peso 600, cortada no latim e renomeada, porque o Plymouth do initramfs
     carrega um arquivo só e não escolhe peso de fonte variável. Gerada por `gen/assets.py`, sob a
     mesma OFL 1.1 (a M PLUS 1 não tem nome reservado).
 
 ## Cursores
 
-- **YoRHa-OS Cursors** (`system/cursors/`): desenho próprio, vetorial, com os 39 formatos e a
+- **YoRHa-Shell Cursors** (`system/cursors/`): desenho próprio, vetorial, com os 39 formatos e a
   composição do **NieR Cursors**, de **Beinsezii**
   ([github.com/Beinsezii/NieR-Cursors](https://github.com/Beinsezii/NieR-Cursors)), licença MIT
   (Copyright (c) 2020 Beinsezii). Os dois cursores de carregamento usam os quadros renderizados
@@ -54,11 +54,11 @@ próprio arquivo.
 
 - **Qylock**, de **Darkkal44** ([github.com/Darkkal44/qylock](https://github.com/Darkkal44/qylock)),
   licença GPL-3.0: a forma de conversar com o SDDM (lista de usuários, sessões, envio da senha) no
-  tema de login (`system/login/sddm/yorha-os/`, spec 011). Os arquivos que espelham o código dele
+  tema de login (`system/login/sddm/yorha-shell/`, spec 011). Os arquivos que espelham o código dele
   levam o aviso de autoria e a GPL-3.0 no cabeçalho. O desenho da tela é nosso; o layout dele está
   em "Inspirações", no `README.md`.
 
 ## Marcas
 
-NieR:Automata e YoRHa são marcas da Square Enix. O YoRHa-OS é um projeto de fã, sem afiliação. Não
+NieR:Automata e YoRHa são marcas da Square Enix. O YoRHa-Shell é um projeto de fã, sem afiliação. Não
 distribuímos fontes, sons, imagens nem vídeos do jogo.

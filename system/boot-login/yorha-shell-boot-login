@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# yorha-os-boot-login: install, check and undo the YoRHa-OS boot and login themes (spec 011,
+# yorha-shell-boot-login: install, check and undo the YoRHa-Shell boot and login themes (spec 011,
 # specs/011-boot-e-login/contracts/install-cli.md). Runs as root, on the target system.
 #
-# Usage: yorha-os-boot-login install [--dry-run] [--src <root>]
-#        yorha-os-boot-login uninstall [--dry-run]
-#        yorha-os-boot-login status
+# Usage: yorha-shell-boot-login install [--dry-run] [--src <root>]
+#        yorha-shell-boot-login uninstall [--dry-run]
+#        yorha-shell-boot-login status
 #   --dry-run     only list what would be done; nothing changes
 #   --src <root>  where the themes, the font and the drop-ins come from: a tree laid out like the
-#                 YoRHa-OS repository (default: YORHA_OS_SRC, else the repository holding this file)
+#                 YoRHa-Shell repository (default: YORHA_SRC, else the repository holding this file)
 #
 # Exit codes (status uses the same meanings):
 #   0  done, or nothing to do
@@ -19,33 +19,33 @@
 #   4  uninstall without a manifest, or an edited file changed after the install: that file is
 #      left alone and the difference is shown
 #
-# Managed (replaced on every install, removed by uninstall): /usr/share/yorha-os/{login,boot},
-# /usr/share/fonts/yorha-os, the yorha-os link in the SDDM theme folder and the yorha-os copy in
-# the Plymouth one, the drop-ins named yorha-os.conf, the sddm.service drop-ins and the boot watch
-# unit (system/boot/plymouth/yorha-os/watch/*.service; its script stays in /usr/share/yorha-os/boot/watch).
+# Managed (replaced on every install, removed by uninstall): /usr/share/yorha-shell/{login,boot},
+# /usr/share/fonts/yorha-shell, the yorha-shell link in the SDDM theme folder and the yorha-shell copy in
+# the Plymouth one, the drop-ins named yorha-shell.conf, the sddm.service drop-ins and the boot watch
+# unit (system/boot/plymouth/yorha-shell/watch/*.service; its script stays in /usr/share/yorha-shell/boot/watch).
 # Edited, with a backup and both hashes in the manifest: the systemd-boot entries (or
 # /etc/kernel/cmdline with UKI), /etc/plymouth/plymouthd.conf (the theme) and, only with a
 # mkinitcpio that reads no drop-ins, /etc/mkinitcpio.conf. Anything already sitting on a managed
-# path is moved into the backup, and uninstall puts it back. /etc/yorha-os/login.conf belongs to
+# path is moved into the backup, and uninstall puts it back. /etc/yorha-shell/login.conf belongs to
 # the user: written once when missing, never overwritten nor removed.
 #
-# Lab overrides: YORHA_OS_BOOTLOADER=systemd-boot|uki|other forces the bootloader detection;
-# YORHA_OS_MKINITCPIO_DROPINS=0 forces the fallback that edits /etc/mkinitcpio.conf.
+# Lab overrides: YORHA_BOOTLOADER=systemd-boot|uki|other forces the bootloader detection;
+# YORHA_MKINITCPIO_DROPINS=0 forces the fallback that edits /etc/mkinitcpio.conf.
 set -euo pipefail
 shopt -s nullglob
 
 VERSION=0.1.0
-NAME=yorha-os
-STATE_DIR=/var/lib/yorha-os
+NAME=yorha-shell
+STATE_DIR=/var/lib/yorha-shell
 MANIFEST=$STATE_DIR/boot-login.json
-SHARE=/usr/share/yorha-os
+SHARE=/usr/share/yorha-shell
 LOGIN_DIR=$SHARE/login
 BOOT_DIR=$SHARE/boot
-FONT_DIR=/usr/share/fonts/yorha-os
+FONT_DIR=/usr/share/fonts/yorha-shell
 SDDM_LINK=/usr/share/sddm/themes/$NAME
 # The Plymouth theme folder is a managed copy of $BOOT_DIR, not a link: the plymouth hook of
 # mkinitcpio 42 adds the theme with add_full_dir, and add_file moves every file whose parent is a
-# link to the real path, so the image would lack themes/yorha-os/yorha-os.plymouth (seen in the lab)
+# link to the real path, so the image would lack themes/yorha-shell/yorha-shell.plymouth (seen in the lab)
 PLY_DIR=/usr/share/plymouth/themes/$NAME
 PLY_CONF=/etc/plymouth/plymouthd.conf
 SDDM_DROPIN=/etc/sddm.conf.d/$NAME.conf
@@ -53,15 +53,15 @@ UNIT_DIR=/etc/systemd/system
 # spec 013 (contracts/boot-sound.md): the boot sound: a udev rule asks for a unit that runs a script
 # that plays a WAV straight on the card. Optional: without system/sounds/boot in the source it is skipped.
 UDEV_DIR=/etc/udev/rules.d
-UDEV_RULE=$UDEV_DIR/80-yorha-os-boot-sound.rules
-SOUND_UNIT=$UNIT_DIR/yorha-os-boot-sound.service
+UDEV_RULE=$UDEV_DIR/80-yorha-shell-boot-sound.rules
+SOUND_UNIT=$UNIT_DIR/yorha-shell-boot-sound.service
 SOUND_DIR=$BOOT_DIR/sound
 SDDM_UNIT_D=$UNIT_DIR/sddm.service.d
 MKINIT_CONF=/etc/mkinitcpio.conf
 MKINIT_DROPIN=/etc/mkinitcpio.conf.d/$NAME.conf
 PRESET_DIR=/etc/mkinitcpio.d
 KERNEL_CMDLINE=/etc/kernel/cmdline
-USER_CONF=/etc/yorha-os/login.conf
+USER_CONF=/etc/yorha-shell/login.conf
 CMDLINE_WORDS=(quiet splash)
 US=$'\x1f'  # field separator of the in-memory records (keeps empty fields, unlike a tab)
 
@@ -105,7 +105,7 @@ show_diff() {
     fi
 }
 
-# --- Manifest (/var/lib/yorha-os/boot-login.json, data-model.md "Instalação"). Written by this
+# --- Manifest (/var/lib/yorha-shell/boot-login.json, data-model.md "Instalação"). Written by this
 # file only, one item per line, so plain bash reads it back without jq.
 M_VERSION="" M_INSTALLED_AT="" M_UPDATED_AT="" M_SRC="" M_BACKUP="" M_BOOTLOADER=""
 M_IR_REBUILT=false M_IR_VERIFIED=false
@@ -544,13 +544,13 @@ linux_entries() {
     return 0
 }
 detect_bootloader() {
-    if [[ -n ${YORHA_OS_BOOTLOADER:-} ]]; then echo "$YORHA_OS_BOOTLOADER"
+    if [[ -n ${YORHA_BOOTLOADER:-} ]]; then echo "$YORHA_BOOTLOADER"
     elif [[ -n $(preset_values uki) ]]; then echo uki
     elif bootctl is-installed >/dev/null 2>&1 && [[ -n $(linux_entries) ]]; then echo systemd-boot
     else echo other; fi
 }
 mkinitcpio_reads_dropins() {
-    case ${YORHA_OS_MKINITCPIO_DROPINS:-} in 0) return 1 ;; 1) return 0 ;; esac
+    case ${YORHA_MKINITCPIO_DROPINS:-} in 0) return 1 ;; 1) return 0 ;; esac
     grep -Eq 'mkinitcpio\.conf\.d|_f_config\}\.d' "$(command -v mkinitcpio)"
 }
 # The [Theme] Current= SDDM ends up with, and the file it comes from (later files win)
@@ -620,7 +620,7 @@ need_src() {
 header() {
     local what=$1
     ((DRY)) && what+=" --dry-run (nothing changes)"
-    say "yorha-os-boot-login $VERSION: $what"
+    say "yorha-shell-boot-login $VERSION: $what"
 }
 
 # --- install
@@ -676,7 +676,7 @@ place_sound() {
     local w stage n
     say "boot sound:"
     w=("$SOUND_SRC"/boot-start-*.wav)
-    if [[ ! -f $FILES/sound/yorha-boot-sound || ! -f $FILES/udev/80-yorha-os-boot-sound.rules || ! -f $FILES/systemd/yorha-os-boot-sound.service ]] \
+    if [[ ! -f $FILES/sound/yorha-boot-sound || ! -f $FILES/udev/80-yorha-shell-boot-sound.rules || ! -f $FILES/systemd/yorha-shell-boot-sound.service ]] \
             || ((${#w[@]} == 0)); then
         item skip "no boot sound in the source ($SOUND_SRC, $FILES/{sound,udev,systemd})"
         return 0
@@ -688,8 +688,8 @@ place_sound() {
     place_tree "$stage" "$SOUND_DIR"
     rm -rf "$stage"
     if ((!DRY)); then chmod 755 "$SOUND_DIR/yorha-boot-sound"; fi
-    place_file "$FILES/systemd/yorha-os-boot-sound.service" "$SOUND_UNIT"
-    place_file "$FILES/udev/80-yorha-os-boot-sound.rules" "$UDEV_RULE"
+    place_file "$FILES/systemd/yorha-shell-boot-sound.service" "$SOUND_UNIT"
+    place_file "$FILES/udev/80-yorha-shell-boot-sound.rules" "$UDEV_RULE"
     if ((!DRY)); then
         if ((RELOAD)); then systemctl daemon-reload; RELOAD=0; fi
         udevadm control --reload 2>/dev/null || warn "udevadm control --reload failed"
@@ -800,7 +800,7 @@ cmd_install() {
     if ((RC_BOOT)); then manual_step; fi
     if ((RC_INITRAMFS)); then
         say "failed: the initramfs did not come out right. The backups are in $M_BACKUP;"
-        say "  'yorha-os-boot-login uninstall' undoes the install."
+        say "  'yorha-shell-boot-login uninstall' undoes the install."
     elif ((DRY)); then
         say "dry run: nothing was changed"
     elif ((RC_BOOT)); then
@@ -995,7 +995,7 @@ cmd_status() {
     else
         item "boot sound" "no"
     fi
-    if [[ -f /run/yorha-os/sound.state ]]; then item "sound state" "this boot: $(tr -d '\n' </run/yorha-os/sound.state)"; else item "sound state" "none this boot (/run/yorha-os/sound.state)"; fi
+    if [[ -f /run/yorha-shell/sound.state ]]; then item "sound state" "this boot: $(tr -d '\n' </run/yorha-shell/sound.state)"; else item "sound state" "none this boot (/run/yorha-shell/sound.state)"; fi
     command -v aplay >/dev/null || item aplay "missing (alsa-utils): the boot sound stays quiet"
     if [[ -e $USER_CONF ]]; then item options "$USER_CONF (yours)"; else item options "no $USER_CONF"; fi
     RC_INITRAMFS=$rc_ir RC_CHANGED=$rc_ed
@@ -1006,7 +1006,7 @@ cmd_status() {
 
 CMD=${1:-}
 [[ -n $CMD ]] && shift
-SRC=${YORHA_OS_SRC:-$(cd "$here/../.." && pwd)}
+SRC=${YORHA_SRC:-$(cd "$here/../.." && pwd)}
 while (($#)); do
     case $1 in
         --dry-run) DRY=1 ;;

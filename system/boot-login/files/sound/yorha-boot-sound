@@ -1,14 +1,14 @@
 #!/bin/bash
-# YoRHa-OS boot sound (spec 013, contracts/boot-sound.md). Run by yorha-os-boot-sound.service when the
+# YoRHa-Shell boot sound (spec 013, contracts/boot-sound.md). Run by yorha-shell-boot-sound.service when the
 # sound card is ready. Plays boot-start-<level>.wav straight on the card (aplay, plughw), at the
 # volume the last user left, then tells the login theme it may start its own sounds
-# (/run/yorha-os/sound.state). The ORDER matters (sondagem S4): if the greeter's PipeWire opens the
+# (/run/yorha-shell/sound.state). The ORDER matters (sondagem S4): if the greeter's PipeWire opens the
 # card while aplay still holds it, the card's node vanishes until WirePlumber restarts. So the state
 # file is written after aplay, or at once when nothing plays (an EXIT trap covers every way out).
-# Overrides, for the lab: YORHA_BOOT_SOUND_DIR (the WAV folder), YORHA_BOOT_SOUND_RUN (/run/yorha-os).
+# Overrides, for the lab: YORHA_BOOT_SOUND_DIR (the WAV folder), YORHA_BOOT_SOUND_RUN (/run/yorha-shell).
 set -u
 DIR=${YORHA_BOOT_SOUND_DIR:-$(cd "$(dirname "$(readlink -f "$0")")" && pwd)}
-RUN=${YORHA_BOOT_SOUND_RUN:-/run/yorha-os}
+RUN=${YORHA_BOOT_SOUND_RUN:-/run/yorha-shell}
 LEVELS=(10 20 30 40 50 70 100)
 DEFAULT_LEVEL=30
 level=$DEFAULT_LEVEL enabled=true
@@ -31,8 +31,8 @@ user=$(awk -F= '/^\[/ { s = ($0 == "[Last]") } s && $1 == "User" { print $2; exi
 json=""
 if [[ $user =~ ^[a-z_][a-z0-9_-]*$ ]]; then
     home=$(getent passwd "$user" | cut -d: -f6)
-    if [[ -n $home && -r $home/.local/state/yorha-os/sound.json ]]; then
-        json=$(head -c 4096 "$home/.local/state/yorha-os/sound.json")
+    if [[ -n $home && -r $home/.local/state/yorha-shell/sound.json ]]; then
+        json=$(head -c 4096 "$home/.local/state/yorha-shell/sound.json")
     fi
 fi
 if [[ -n $json ]]; then

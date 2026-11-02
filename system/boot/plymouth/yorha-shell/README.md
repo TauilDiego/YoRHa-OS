@@ -1,13 +1,13 @@
-# Tema de boot (Plymouth): `yorha-os`
+# Tema de boot (Plymouth): `yorha-shell`
 
-A tela de boot do YoRHa-OS (spec 011): a lista de checagens com as etapas reais do boot, a película,
+A tela de boot do YoRHa-Shell (spec 011): a lista de checagens com as etapas reais do boot, a película,
 a lente, as faixas de interferência e o anel de carregamento. No desligar e no reiniciar, só a faixa
 de passagem. Plugin `script` do Plymouth.
 
 ## Arquivos
 
-- `yorha-os.plymouth` e `yorha-os.script`: o tema. `ImageDir` e `ScriptFile` apontam pra
-  `/usr/share/plymouth/themes/yorha-os` (o instalador copia o tema pra lá; o hook do mkinitcpio não
+- `yorha-shell.plymouth` e `yorha-shell.script`: o tema. `ImageDir` e `ScriptFile` apontam pra
+  `/usr/share/plymouth/themes/yorha-shell` (o instalador copia o tema pra lá; o hook do mkinitcpio não
   segue pasta ligada).
 - `stages.tsv`: o catálogo das etapas (nome da unidade → texto nosso, grupo). As regras estão no
   cabeçalho do arquivo.
@@ -24,10 +24,10 @@ de passagem. Plugin `script` do Plymouth.
   `assets/ring/` sai do gerador do cursor (`lab/011/ring-frames`).
 - `assets/font/YoRHaOSBoot.ttf`: a M PLUS 1 (OFL, `OFL.txt` ao lado) como instância estática
   (peso 600), cortada no latim e renomeada "YoRHa-OS Boot". **Precisa estar instalada nas fontes do
-  sistema** (`/usr/share/fonts/yorha-os/`) antes do `mkinitcpio`: o hook acha a fonte pelo `Font=` do
+  sistema** (`/usr/share/fonts/yorha-shell/`) antes do `mkinitcpio`: o hook acha a fonte pelo `Font=` do
   tema e a copia como `Plymouth.ttf`.
 - `watch/yorha-boot-watch` e `watch/yorha-boot-watch.service`: o ajudante que avisa o tema das
-  unidades que falharam (fica em `/usr/share/yorha-os/boot/watch/`, fora do initramfs).
+  unidades que falharam (fica em `/usr/share/yorha-shell/boot/watch/`, fora do initramfs).
 
 ## Como funciona
 
@@ -70,7 +70,7 @@ Feitas pela regra "a mais próxima da análise 4K"; cada uma é fácil de trocar
 
 - **Cabeçalho:** "STARTUP" (60 px em 1080p) e "-System check" (24 px) com os pontinhos, no lugar e
   tamanho do "LOADING - BOOTING SYSTEM" da reprodução aprovada. Texto nosso.
-- **Marca d'água:** "YoRHa-OS" e "SYSTEM INTERFACE" bem fracos (12 %) no centro, com as quedas
+- **Marca d'água:** "YoRHa-Shell" e "SYSTEM INTERFACE" bem fracos (12 %) no centro, com as quedas
   próprias da análise, como na reprodução aprovada (artefato f3ee156f). O spec não cita a marca.
 - **Fonte:** uma instância estática SemiBold (600), entre o 500 do cabeçalho e o 700 das linhas da
   reprodução, porque o initramfs só carrega um arquivo de fonte. Na tela, o texto sai mais fino e
@@ -88,7 +88,7 @@ Feitas pela regra "a mais próxima da análise 4K"; cada uma é fácil de trocar
 No lab (nunca na máquina do dono):
 
 ```sh
-lab/011/install-dev <vm> --no-login --boot <repo>/system/boot/plymouth/yorha-os
+lab/011/install-dev <vm> --no-login --boot <repo>/system/boot/plymouth/yorha-shell
 lab/bootcap <vm> --reboot --until login          # o boot, uma captura a cada 0,25 s
 lab/011/slow-unit <vm> --boot 5                  # um boot lento; --shutdown 3 segura o desligar
 lab/011/fail-unit <vm>                           # uma unidade do catálogo e uma genérica que falham

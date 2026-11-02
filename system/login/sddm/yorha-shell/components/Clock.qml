@@ -64,7 +64,7 @@ Column {
             weight: Font.Bold
             height: Tokens.px(30.72 * 1.55, root.s)
             verticalAlignment: Text.AlignVCenter
-            text: "YoRHa-OS"
+            text: "YoRHa-Shell"
         }
         Label {
             anchors.horizontalCenter: parent.horizontalCenter

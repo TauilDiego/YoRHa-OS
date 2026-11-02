@@ -1,7 +1,7 @@
 import QtQuick
 
 // The login's sounds (spec 013, FR-029, contracts/boot-sound.md): play("intro" | "move" | "confirm" |
-// "error" | "close"). Nothing is created until /run/yorha-os/sound.state exists: the boot sound's
+// "error" | "close"). Nothing is created until /run/yorha-shell/sound.state exists: the boot sound's
 // script writes it AFTER the sound ends, and an audio server opened by the greeter while the card is
 // still held makes the card's node vanish (sondagem S4). It waits for it at most 2 s, then plays at
 // 30%. The file also says the volume (level, in %; the sound's gain follows the level squared, like
@@ -22,7 +22,7 @@ Item {
     function readState(): string {
         try {
             const x = new XMLHttpRequest();
-            x.open("GET", "file:///run/yorha-os/sound.state", false);
+            x.open("GET", "file:///run/yorha-shell/sound.state", false);
             x.send(null);
             return x.responseText ?? "";
         } catch (e) {

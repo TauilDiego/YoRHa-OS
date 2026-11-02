@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# yorha-boot-watch: tells the YoRHa-OS boot screen which units failed during the boot (spec 011,
+# yorha-boot-watch: tells the YoRHa-Shell boot screen which units failed during the boot (spec 011,
 # research R7). systemd sends Plymouth the name of each unit that starts, but not the failures: this
 # follows the boot's journal for the jobs of the system manager that ended in "failed" (the ones
 # from before it started too) and sends "yorha:fail:<unit>" to Plymouth. It runs until Plymouth is

@@ -1,6 +1,6 @@
 # Usar os sons da sua cópia do jogo
 
-O YoRHa-OS vem com sons próprios, sintetizados por receita (`system/sounds/`). Se você tem o NieR:Automata
+O YoRHa-Shell vem com sons próprios, sintetizados por receita (`system/sounds/`). Se você tem o NieR:Automata
 no PC, pode fazer a interface tocar os sons de menu **da sua própria cópia**, apontando uma pasta.
 
 **Nada do jogo vem neste repositório e nunca virá.** Este guia não linka arquivos prontos, só guias e
@@ -12,7 +12,7 @@ ferramentas da comunidade pra você extrair o que é seu, da cópia que você co
 2. Ponha nela um arquivo por evento, com o **nome do evento** (tabela abaixo), em `.wav` ou `.ogg`.
    Primeiro vale o `.wav`, depois o `.ogg`.
 3. Aponte a pasta:
-   - em `~/.config/yorha-os/shell.json`: `{ "sound": { "folder": "~/sons-yorha" } }`; ou
+   - em `~/.config/yorha-shell/shell.json`: `{ "sound": { "folder": "~/sons-yorha" } }`; ou
    - `qs -p <shell> ipc call settings set sound.folder ~/sons-yorha`.
 
    Configurações › Sound › Sound folder mostra o caminho em uso. A ação "Use our sounds" volta aos nossos.
@@ -60,4 +60,4 @@ WAV e renomear pelo evento.
 ## Licença e uso
 
 Os arquivos que você extrai são do jogo e ficam só na sua máquina, na sua pasta. Não os mande
-pra repositórios, issues nem pacotes do YoRHa-OS.
+pra repositórios, issues nem pacotes do YoRHa-Shell.

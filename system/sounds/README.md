@@ -1,6 +1,6 @@
 # Sons da interface (spec 013)
 
-Os sons do YoRHa-OS, todos nossos: gerados por receita em [`gen/synth.py`](gen/synth.py) (numpy e
+Os sons do YoRHa-Shell, todos nossos: gerados por receita em [`gen/synth.py`](gen/synth.py) (numpy e
 `wave`, semente fixa por som). Nenhum arquivo, trecho ou amostra do jogo entra aqui. Os números das
 receitas (brilho, duração, ordem de volume) descrevem só o caráter, medido no estudo de som da spec.
 Ficam sob a licença do repositório.

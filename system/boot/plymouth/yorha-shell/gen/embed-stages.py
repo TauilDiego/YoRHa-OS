@@ -1,4 +1,4 @@
-"""Put the stage catalog (stages.tsv), the options (config) and the letter widths into yorha-os.script
+"""Put the stage catalog (stages.tsv), the options (config) and the letter widths into yorha-shell.script
 (spec 011, T024).
 
 The Plymouth script can't read files at run time, so both go into the script, between the
@@ -102,7 +102,7 @@ def block(rows, cfg, widths):
 
 def main():
     theme = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    script = os.path.join(theme, "yorha-os.script")
+    script = os.path.join(theme, "yorha-shell.script")
     rows = read_stages(os.path.join(theme, "stages.tsv"))
     cfg = read_config(os.path.join(theme, "config"))
     widths = read_widths(theme)

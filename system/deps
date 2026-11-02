@@ -1,4 +1,4 @@
-# What the YoRHa-OS shell needs from the system (spec 014, FR-002, research R3).
+# What the YoRHa-Shell shell needs from the system (spec 014, FR-002, research R3).
 # <package> <required|optional> <what it is for>. Hyprland itself is a prerequisite, not listed.
 quickshell                required  the shell runs on it
 qt6-declarative           required  QML

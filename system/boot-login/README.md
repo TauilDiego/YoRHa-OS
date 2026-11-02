@@ -1,19 +1,19 @@
-# Módulo de boot e login: `yorha-os-boot-login`
+# Módulo de boot e login: `yorha-shell-boot-login`
 
 Instala, confere e desfaz o tema de boot (Plymouth) e o tema de login (SDDM) da spec 011, seguindo
 `specs/011-boot-e-login/contracts/install-cli.md`. Roda como root. O instalador da camada visual
 (futuro) chama este módulo.
 
 ```sh
-sudo system/boot-login/yorha-os-boot-login install [--dry-run] [--src <raiz>]
-sudo system/boot-login/yorha-os-boot-login uninstall [--dry-run]
-sudo system/boot-login/yorha-os-boot-login status
+sudo system/boot-login/yorha-shell-boot-login install [--dry-run] [--src <raiz>]
+sudo system/boot-login/yorha-shell-boot-login uninstall [--dry-run]
+sudo system/boot-login/yorha-shell-boot-login status
 ```
 
 - `--dry-run`: só lista o que faria, com o diff de cada arquivo que seria editado.
 - `--src <raiz>`: de onde vêm os temas, a fonte e os drop-ins, numa árvore com o mesmo desenho do
-  repositório (`system/login/sddm/yorha-os`, `system/boot/plymouth/yorha-os`, `shell/assets/fonts`,
-  `system/boot-login/files`). O padrão é `YORHA_OS_SRC` ou o próprio repositório onde o módulo está.
+  repositório (`system/login/sddm/yorha-shell`, `system/boot/plymouth/yorha-shell`, `shell/assets/fonts`,
+  `system/boot-login/files`). O padrão é `YORHA_SRC` ou o próprio repositório onde o módulo está.
 
 **Saídas:** 0 deu certo (ou nada a fazer); 1 pré-condição (não é root; falta SDDM, Plymouth ou
 mkinitcpio; falta um tema na origem) ou erro inesperado; 2 o initramfs não foi refeito ou não tem o
@@ -23,21 +23,21 @@ passo manual aparece); 4 `uninstall` sem manifesto, ou um arquivo editado mudou 
 
 ## O que ele cria (gerenciado: trocado a cada `install`, apagado no `uninstall`)
 
-- `/usr/share/yorha-os/login/`, com o link `/usr/share/sddm/themes/yorha-os` apontando pra ela, e
-  `/usr/share/yorha-os/boot/`;
-- `/usr/share/plymouth/themes/yorha-os/`: **uma cópia** de `/usr/share/yorha-os/boot`, não um link.
+- `/usr/share/yorha-shell/login/`, com o link `/usr/share/sddm/themes/yorha-shell` apontando pra ela, e
+  `/usr/share/yorha-shell/boot/`;
+- `/usr/share/plymouth/themes/yorha-shell/`: **uma cópia** de `/usr/share/yorha-shell/boot`, não um link.
   O hook `plymouth` do mkinitcpio 42 copia o tema com `add_full_dir`, e o `add_file` muda pro caminho
   real todo arquivo cuja pasta-mãe é um link: com o link, a imagem fica sem
-  `themes/yorha-os/yorha-os.plymouth` e o tema não sobe (visto no lab);
-- `/usr/share/fonts/yorha-os/` (M PLUS 1, OFL), com `fc-cache`;
-- os drop-ins de `files/`: `/etc/sddm.conf.d/yorha-os.conf` (`Current=yorha-os`),
-  `/etc/mkinitcpio.conf.d/yorha-os.conf` (o hook `plymouth` depois do `kms`, ou do `udev`/`systemd`) e,
+  `themes/yorha-shell/yorha-shell.plymouth` e o tema não sobe (visto no lab);
+- `/usr/share/fonts/yorha-shell/` (M PLUS 1, OFL), com `fc-cache`;
+- os drop-ins de `files/`: `/etc/sddm.conf.d/yorha-shell.conf` (`Current=yorha-shell`),
+  `/etc/mkinitcpio.conf.d/yorha-shell.conf` (o hook `plymouth` depois do `kms`, ou do `udev`/`systemd`) e,
   se existirem, os `files/sddm.service.d/*.conf` em `/etc/systemd/system/sddm.service.d/`;
-- as unidades `system/boot/plymouth/yorha-os/watch/*.service` em `/etc/systemd/system/`, habilitadas.
-  O script delas fica em `/usr/share/yorha-os/boot/watch/` (o `ExecStart` aponta pra lá);
-- `/etc/yorha-os/login.conf`, a partir de `files/login.conf`, **só se ainda não existir**, ligado
+- as unidades `system/boot/plymouth/yorha-shell/watch/*.service` em `/etc/systemd/system/`, habilitadas.
+  O script delas fica em `/usr/share/yorha-shell/boot/watch/` (o `ExecStart` aponta pra lá);
+- `/etc/yorha-shell/login.conf`, a partir de `files/login.conf`, **só se ainda não existir**, ligado
   como `theme.conf.user` do tema. É do usuário: o módulo nunca sobrescreve nem apaga;
-- `/var/lib/yorha-os/boot-login.json` (o manifesto) e `/var/lib/yorha-os/backup/<data>/`.
+- `/var/lib/yorha-shell/boot-login.json` (o manifesto) e `/var/lib/yorha-shell/backup/<data>/`.
 
 Um arquivo que já estava num caminho gerenciado e não é do módulo vai pro backup (`displaced/`) e
 volta no `uninstall`.
@@ -61,15 +61,15 @@ Numa VM do lab, nunca na máquina do dono (constituição, princípio I): `lab/c
 repositório privado (dry-run, `install` duas vezes, `status`, boot com e sem o tema pelo
 `lab/bootcap`, `uninstall` com os hashes de antes, e as saídas 1 a 4).
 
-Pra testar um caminho que a VM não tem: `YORHA_OS_BOOTLOADER=systemd-boot|uki|other` força o
-bootloader, e `YORHA_OS_MKINITCPIO_DROPINS=0` força a edição do `/etc/mkinitcpio.conf`.
+Pra testar um caminho que a VM não tem: `YORHA_BOOTLOADER=systemd-boot|uki|other` força o
+bootloader, e `YORHA_MKINITCPIO_DROPINS=0` força a edição do `/etc/mkinitcpio.conf`.
 
 ## Som de boot (spec 013)
 
-O `install` também põe o som de início (contracts/boot-sound.md): `/etc/udev/rules.d/80-yorha-os-boot-sound.rules`
-(no evento da placa, `SOUND_INITIALIZED=1`), `/etc/systemd/system/yorha-os-boot-sound.service` (`Type=simple`,
-sem `Before=` nem dependentes) e `/usr/share/yorha-os/boot/sound/` com o script `yorha-boot-sound` e os
+O `install` também põe o som de início (contracts/boot-sound.md): `/etc/udev/rules.d/80-yorha-shell-boot-sound.rules`
+(no evento da placa, `SOUND_INITIALIZED=1`), `/etc/systemd/system/yorha-shell-boot-sound.service` (`Type=simple`,
+sem `Before=` nem dependentes) e `/usr/share/yorha-shell/boot/sound/` com o script `yorha-boot-sound` e os
 `boot-start-<nível>.wav`. O script lê o volume e o mudo do `sound.json` do último usuário, toca com `aplay`
-direto na placa e só então grava `/run/yorha-os/sound.state` (o tema de login espera por ele). Precisa de
+direto na placa e só então grava `/run/yorha-shell/sound.state` (o tema de login espera por ele). Precisa de
 `alsa-utils`; sem ele o módulo avisa e o som fica calado. Sem `system/sounds/boot` na origem, o passo é pulado.
 O `uninstall` tira tudo (e recarrega o udev); o `status` mostra o que há.

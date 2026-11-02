@@ -26,8 +26,8 @@ Singleton {
 
     // --- the backend -------------------------------------------------------------------------------
     readonly property var backendFiles: ({ hyprland: "HyprlandBackend.qml", none: "NullBackend.qml" })
-    // YORHA_OS_COMPOSITOR forces a backend (tests); the lab's older NIER_COMPOSITOR still works (spec 014).
-    readonly property string forcedCompositor: String(Quickshell.env("YORHA_OS_COMPOSITOR") || Quickshell.env("NIER_COMPOSITOR") || "")
+    // YORHA_COMPOSITOR forces a backend (tests); the lab's older NIER_COMPOSITOR still works (spec 014).
+    readonly property string forcedCompositor: String(Quickshell.env("YORHA_COMPOSITOR") || Quickshell.env("NIER_COMPOSITOR") || "")
     readonly property string backendWanted: {
         const forced = root.forcedCompositor.toLowerCase();
         if (forced !== "")

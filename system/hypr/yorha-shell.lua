@@ -1,4 +1,4 @@
--- YoRHa-OS in Hyprland: the keys, layer rules and autostart the shell needs (spec 014,
+-- YoRHa-Shell in Hyprland: the keys, layer rules and autostart the shell needs (spec 014,
 -- contracts/encaixe.md). Include it with the one line `yorha` prints, at the top of
 -- ~/.config/hypr/hyprland.lua; it is read through ".../current/", so it follows every update.
 -- It writes nothing and sets no window rules of the person's.
@@ -8,7 +8,7 @@
 -- so the keys work even when ~/.local/bin is not in Hyprland's PATH.
 local here = (debug and debug.getinfo(1, "S").source or ""):gsub("^@", ""):match("^(.*)/[^/]*$")
 local yorha = here and (here .. "/../../bin/yorha")
-    or (os.getenv("HOME") .. "/.local/share/yorha-os/current/bin/yorha")
+    or (os.getenv("HOME") .. "/.local/share/yorha-shell/current/bin/yorha")
 local mod = YORHA_MOD or "SUPER"
 local function ipc(args)
   return hl.dsp.exec_cmd(yorha .. " ipc " .. args)
@@ -36,5 +36,5 @@ hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"), { loc
 
 -- The shell draws its own fades and sweeps (008) and the menus' grid and triangles (013).
 hl.layer_rule({ name = "yorha-notify-noanim", match = { namespace = "^yorha-notify$" }, no_anim = true })
-hl.layer_rule({ name = "yorha-osd-noanim", match = { namespace = "^yorha-osd$" }, no_anim = true })
+hl.layer_rule({ name = "yorha-shelld-noanim", match = { namespace = "^yorha-shelld$" }, no_anim = true })
 hl.layer_rule({ name = "yorha-popup-noanim", match = { namespace = "^yorha-popup$" }, no_anim = true })

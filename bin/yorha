@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# yorha: install, update and run the YoRHa-OS shell (spec 014, contracts/cli.md). Method D of spec
+# yorha: install, update and run the YoRHa-Shell shell (spec 014, contracts/cli.md). Method D of spec
 # 005: each version lives in $YORHA_HOME/versions/<v>; "current" is a symlink switched atomically.
 # Runs as the person; root only through sudo, after a yes.
 set -euo pipefail
@@ -164,7 +164,7 @@ cmd_shell_start() {
             exec "$root/bin/$YORHA_CMD" shell start --relaunch
         fi
         [[ -s $log ]] && mv -f "$log" "$log.1"     # the previous run, kept once
-        YORHA_OS_ROOT="$root" qs -p "$root/shell" >>"$log" 2>&1 &
+        YORHA_ROOT="$root" qs -p "$root/shell" >>"$log" 2>&1 &
         qspid=$!
         echo "$qspid" > "$rd/shell.pid"
         echo "$root" > "$rd/shell.root"
