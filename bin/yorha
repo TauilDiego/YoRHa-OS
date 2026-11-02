@@ -4,10 +4,15 @@
 # Runs as the person; root only through sudo, after a yes.
 set -euo pipefail
 YORHA_ROOT=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
+# shellcheck source=lib/yorha/name.sh
 source "$YORHA_ROOT/lib/yorha/name.sh"
+# shellcheck source=lib/yorha/common.sh
 source "$YORHA_ROOT/lib/yorha/common.sh"
+# shellcheck source=lib/yorha/deps.sh
 source "$YORHA_ROOT/lib/yorha/deps.sh"
+# shellcheck source=lib/yorha/channel.sh
 source "$YORHA_ROOT/lib/yorha/channel.sh"
+# shellcheck source=lib/yorha/rename.sh
 source "$YORHA_ROOT/lib/yorha/rename.sh"
 [[ $EUID -ne 0 ]] || yorha_fail "run as your user, not root"
 
