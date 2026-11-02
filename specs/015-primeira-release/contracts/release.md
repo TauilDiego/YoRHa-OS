@@ -8,7 +8,7 @@ python3, só biblioteca padrão. Lê o repositório pelo `git` e nunca executa c
 | `build <v> [--ref <ref>] [--pre] [--lab-only] [--notes <arquivo>]` | Monta `releases/v<v>/` (data-model.md). `--ref` padrão: `main` do repositório público. Sem `--notes`, gera o rascunho com os assuntos dos commits de primeiro pai desde a última tag `v*` |
 | `list` | As releases montadas: versão, ref, commit, pré/estável, só-lab, publicada ou não, sha256 |
 | `check <v>` | Repassa as conferências de arquivo proibido e de nome provisório sobre o pacote montado |
-| `publish <v>` | Pede confirmação no terminal. Cria a release como rascunho (`gh release create v<v> --draft --target <commit> --title "YoRHa-Shell <v>" --notes-file NOTES.md [--prerelease]`, com os 5 arquivos), baixa cada arquivo de volta (`gh release download`) e compara o sha256; só então tira o rascunho (`gh release edit v<v> --draft=false`). Grava `published` |
+| `publish <v>` | Pede confirmação no terminal. Cria a release como rascunho (`gh release create v<v> --draft --target <commit> --title "YoRHa-Shell <v>" --notes-file NOTES.md [--prerelease]`, com os 6 arquivos), baixa cada arquivo de volta (`gh release download`) e compara o sha256; só então tira o rascunho (`gh release edit v<v> --draft=false`). Grava `published` |
 | `promote <v>` | Pede confirmação. `gh release edit v<v> --prerelease=false --latest`. Grava `pre: false` |
 
 ## As recusas do `build` (FR-005, SC-004)

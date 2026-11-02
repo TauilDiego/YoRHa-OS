@@ -9,6 +9,7 @@ caminhos (research R1):
 | `GET <origem>/releases/latest/download/latest` | `<v>` da estável mais nova (pode redirecionar) |
 | `GET <origem>/releases/latest/download/install.sh` | O instalador da estável mais nova |
 | `GET <origem>/releases.atom` | Feed Atom com uma `<entry>` por release (estável e pré-release), mais nova primeiro, cada uma com um link `…/releases/tag/v<v>` |
+| `GET <origem>/releases/download/v<v>/manifest` | O manifesto da release: o nome do produto e o arquivo do pacote (data-model.md) |
 | `GET <origem>/releases/download/v<v>/<arquivo>` | Um arquivo da release `<v>` (data-model.md) |
 | outro | 404 |
 
@@ -19,6 +20,7 @@ caminhos (research R1):
   outras tags são ignoradas), comparado por `sort -V`. Inclui as estáveis: quem está no canal de teste
   também recebe as versões estáveis.
 - **Sempre `curl -fsSL`**, com `--max-time 20` na conferência e nos downloads pequenos.
+- **O pacote pelo manifesto:** o produto lê o `manifest` da versão e baixa o `package` que ele diz, com o `.sha256` ao lado. Sem manifesto (404), cai em `<YORHA_NAME>-<v>.tar.gz`.
 - **Origens em ordem:** a primeira que responde vence. Os arquivos de uma versão (pacote, `.sha256`)
   vêm todos da mesma origem; se um falha, a versão inteira é tentada na próxima.
 - **Nada é mandado além do pedido:** sem identificador, sem a versão instalada, sem dado da máquina.

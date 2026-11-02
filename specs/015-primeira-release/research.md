@@ -201,6 +201,10 @@ Quando os nomes diferem, a versão nova:
 **Fora:** com o boot e o login instalados, a troca avisa pra reinstalar o módulo pelo comando novo.
 Os temas antigos continuam funcionando até lá.
 
+**Como a versão antiga acha o pacote da nova:** cada release leva um `manifest` de nome fixo, com o
+nome do produto e o arquivo do pacote. A 0.1.0 lê o manifesto antes de baixar, e assim acha
+`fake-shell-<v>.tar.gz` sem saber o nome novo. A lacuna apareceu na fundação (02.11).
+
 **O teste:** uma versão `--lab-only` montada de uma branch de teste, com `name.sh` dizendo
 `fake-shell` e `fakecmd`. A VM vai da `yorha-shell` pra `fake-shell` pelo update e volta pelo
 rollback. Nas duas pontas confere-se:

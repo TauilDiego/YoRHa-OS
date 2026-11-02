@@ -54,6 +54,7 @@ No GitHub, como `v<versão>`, e na pasta do lab, como `releases/v<versão>/`, co
 | `yorha-shell-<v>.tar.gz` | O `git archive` da ref, com o prefixo `yorha-shell-<v>/` e o `VERSION` virtual; sem o que é `export-ignore` |
 | `yorha-shell-<v>.tar.gz.sha256` | `<sha256>  yorha-shell-<v>.tar.gz` |
 | `latest` | `<v>` e uma quebra de linha |
+| `manifest` | `chave=valor`, uma por linha: `name=<YORHA_NAME>`, `version=<v>`, `package=<name>-<v>.tar.gz`, `sha256=<hex>`. Nome fixo: é por ele que uma versão antiga acha o pacote de uma versão nova, mesmo que o nome do produto tenha mudado (research R6) |
 | `install.sh` | O `install.sh` da ref, com a origem padrão gravada a partir do `name.sh` da mesma ref |
 | `NOTES.md` | As notas: o que mudou e como atualizar. É também o corpo da release no GitHub |
 
