@@ -11,7 +11,7 @@
 # 3 a required dependency missing · 4 checksum mismatch.
 set -euo pipefail
 say() { printf 'yorha: %s\n' "$*"; }
-fail() { printf 'yorha: %s\n' "$*" >&2; exit "${2:-1}"; }
+fail() { printf 'yorha: %s\n' "$1" >&2; exit "${2:-1}"; }
 
 # The release builder stamps these two from the release's lib/yorha/name.sh; the values here serve an
 # unstamped copy (straight from the repository).

@@ -4,7 +4,7 @@
 # Sourced by bin/yorha after lib/yorha/name.sh; YORHA_ROOT (the version's folder) is set by the caller.
 
 yorha_say() { printf '%s: %s\n' "$YORHA_CMD" "$*"; }
-yorha_fail() { printf '%s: %s\n' "$YORHA_CMD" "$*" >&2; exit "${2:-1}"; }
+yorha_fail() { printf '%s: %s\n' "$YORHA_CMD" "$1" >&2; exit "${2:-1}"; }
 
 # "y"/"s" is yes; anything else, or no terminal to ask on, is no. YORHA_YES=1 answers yes to all
 # (automation and the lab's checks).
