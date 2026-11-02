@@ -52,6 +52,9 @@ O ponto de partida é a v0 da 014, que funciona na VM, mas só com o canal local
 - Q: Quais campos? → A: **Todos os do Serpantinum, mais os nossos** (as versões do compositor e do
   Quickshell, os monitores). O dono: "preciso saber tudo igual ele sabe pois depois vamos adicionar
   suporte pro niri e mango" (FR-020).
+- Q: Onde fica o receptor? → A: **Na VPS do dono, já na 015** (FR-022). A VPS ainda não tem nada; o
+  dono: "eu n tenho nada pra salvar isso ainda lá na VPS né. tu consegue debugar qualquer coisa ai se
+  precisar". Montar o receptor faz parte da 015; o site continua na 016.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -303,9 +306,10 @@ pedido foi pro receptor.
 - **FR-021**: Com a telemetria desligada, MUST NOT sair nenhum pedido pro receptor, nem
   um aviso de "desligada". O shell em si MUST NOT mandar telemetria: só o instalador e o `yorha`, no
   fim das operações.
-- **FR-022**: O receptor [NEEDS CLARIFICATION: na VPS do dono ou num serviço gratuito como o
-  Cloudflare Workers, e se ele entra já na 015 ou com a 016] MUST guardar só os campos do resumo e a
-  data, nunca o IP, e o dono MUST conseguir ver o total por campo.
+- **FR-022**: O receptor MUST rodar na VPS do dono, com HTTPS e um domínio [NEEDS CLARIFICATION:
+  qual domínio?], e MUST estar no ar antes de publicar a 0.1.0. Ele MUST guardar só os campos do
+  resumo e a data, nunca o IP (log de acesso desligado), e o dono MUST conseguir ver o total por
+  campo. Cada mudança na VPS MUST ter o OK do dono, como um push.
 - **FR-023**: O README MUST listar os campos enviados, como ligar e desligar e onde os dados ficam. O
   comando `yorha telemetry` MUST mostrar o estado e o último resumo, ligar, desligar e trocar o ID.
 
