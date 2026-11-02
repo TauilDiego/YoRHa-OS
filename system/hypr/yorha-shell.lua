@@ -36,5 +36,5 @@ hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"), { loc
 
 -- The shell draws its own fades and sweeps (008) and the menus' grid and triangles (013).
 hl.layer_rule({ name = "yorha-notify-noanim", match = { namespace = "^yorha-notify$" }, no_anim = true })
-hl.layer_rule({ name = "yorha-shelld-noanim", match = { namespace = "^yorha-shelld$" }, no_anim = true })
+hl.layer_rule({ name = "yorha-osd-noanim", match = { namespace = "^yorha-osd$" }, no_anim = true })
 hl.layer_rule({ name = "yorha-popup-noanim", match = { namespace = "^yorha-popup$" }, no_anim = true })
