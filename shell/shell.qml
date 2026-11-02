@@ -756,7 +756,19 @@ ShellRoot {
         function check(): string { return Updater.check(); }
         function now(): string { return Updater.updateNow(); }
         function open(): void { shell.openUpdates(); }
-        function dump(): string { return Updater.dump(); }
+        // spec 015: signVisible.bar is what the bars really show (any monitor's UpdateTag).
+        function dump(): string {
+            const d = JSON.parse(Updater.dump());
+            let bar = false;
+            for (const hud of huds.instances)
+                bar = bar || hud.dumpEntry().update.visible === true;
+            d.signVisible.bar = bar;
+            // and, with the pause menu loaded, the tag its SYSTEM tab really carries
+            const pm = shell.pauseMenu;
+            if (pm)
+                d.signVisible.menuTab = String(pm.tabs[pm.tabIds.indexOf("system")]?.tag ?? "") !== "";
+            return JSON.stringify(d);
+        }
     }
     Connections {
         target: Updater

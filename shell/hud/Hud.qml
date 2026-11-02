@@ -100,6 +100,15 @@ PanelWindow {
                     const p = logCounter.mapToItem(null, 0, 0);
                     return { x: Math.round(p.x), y: Math.round(p.y), w: Math.round(logCounter.width), h: Math.round(logCounter.height) };
                 })() : null
+            },
+            // spec 015 (contracts/sinal.md): the update sign before the LOG counter
+            update: {
+                visible: updateTag.visible,
+                text: updateTag.visible ? `${updateTag.labelText.text} ${updateTag.valueText.text}` : "",
+                box: updateTag.visible ? (() => {
+                    const p = updateTag.mapToItem(null, 0, 0);
+                    return { x: Math.round(p.x), y: Math.round(p.y), w: Math.round(updateTag.width), h: Math.round(updateTag.height) };
+                })() : null
             }
         };
     }
@@ -147,6 +156,8 @@ PanelWindow {
                 continue;
             out.push(textBox("label", v.labelText), textBox("value", v.valueText));
         }
+        if (updateTag.visible)
+            out.push(textBox("update", updateTag.labelText), textBox("update", updateTag.valueText));
         if (logCounter.visible)
             out.push(textBox("log", logCounter.labelText), textBox("log", logCounter.valueText));
         out.push(textBox("date", dateText), textBox("time", timeText));
@@ -226,6 +237,20 @@ PanelWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     reading: root.readings[index]
                 }
+            }
+
+            // spec 015: ■ UPDATE <version> (contracts/sinal.md), the forms Bar and Bar and menu
+            UpdateTag {
+                id: updateTag
+                anchors.verticalCenter: parent.verticalCenter
+                s: root.s
+                tone: root.tone
+                ink: root.ink("ink")
+                shown: Updater.signBar
+                version: Updater.latest
+                plate: root.plate
+                plated: root.plated
+                onClicked: Updater.showUpdates()
             }
 
             // spec 008: LOG 3 / DND 3 (FR-025)
