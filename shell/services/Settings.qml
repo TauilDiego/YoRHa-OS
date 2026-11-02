@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Io
 
 // User settings: managed defaults (config/defaults.json) overridden key by key by the user's
-// $XDG_CONFIG_HOME/yorha-shell/shell.json. Updates never touch the user file (constitution III).
+// $XDG_CONFIG_HOME/<name>/shell.json. Updates never touch the user file (constitution III).
 Singleton {
     id: root
 
@@ -20,10 +20,7 @@ Singleton {
     readonly property var user: userFile.loaded ? (parse(userFile.text(), userFile.path) ?? ({})) : ({})
     readonly property var merged: Object.assign({}, defaults, user)
 
-    readonly property string userPath: {
-        const xdg = Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config");
-        return xdg + "/yorha-shell/shell.json";
-    }
+    readonly property string userPath: Product.configPath("shell.json")
 
     function parse(text, name) {
         if (!text)

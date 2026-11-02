@@ -20,7 +20,7 @@ Singleton {
 
     readonly property string rootDir: Quickshell.env("YORHA_ROOT") ?? ""
     readonly property bool installed: rootDir !== ""
-    readonly property string yorha: installed ? rootDir + "/bin/yorha" : ""
+    readonly property string yorha: installed ? rootDir + "/bin/" + Product.cmd : ""
     readonly property string current: installed ? String(versionFile.text()).trim() : ""
     // What the footers show: the installed version, or 0.1 where the shell runs from the repository
     // (the lab), so the lab's screenshots stay as they were.
@@ -34,10 +34,7 @@ Singleton {
 
     signal showUpdates()
 
-    readonly property string statePath: {
-        const xdg = Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state");
-        return xdg + "/yorha-shell/updates.json";
-    }
+    readonly property string statePath: Product.statePath("updates.json")
 
     // "" when it started; else why not.
     function check(): string {

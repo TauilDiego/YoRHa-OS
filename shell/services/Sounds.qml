@@ -15,7 +15,7 @@ import Quickshell.Io
 // Where the sounds are (decision of T042): `soundsDir`, the first of
 //   1. $YORHA_SOUNDS                     the lab, a test, an unusual install
 //   2. <shell>/../system/sounds             the installed version (spec 014: shell/ and system/ side by
-//                                           side in ~/.local/share/yorha-shell/versions/<v>), or the repo
+//                                           side in ~/.local/share/<name>/versions/<v>), or the repo
 // that has move.wav. lab/sync sends system/sounds/*.wav to ~/nier/system/sounds, so the second rule
 // finds them on the lab's VMs (~/nier/ui is shell/) with no environment. The boot and login sounds
 // don't come from here (the module installs its own copies).
@@ -201,7 +201,7 @@ Singleton {
     property bool started: false
     Process {
         id: lock
-        command: ["sh", "-c", "d=\"${XDG_RUNTIME_DIR:-/tmp}/yorha-shell\"; mkdir -p \"$d\" && mkdir \"$d/session-start-played\" 2>/dev/null"]
+        command: ["sh", "-c", "mkdir -p \"$1\" && mkdir \"$1/session-start-played\" 2>/dev/null", "sh", Product.runtimeDir]
         onExited: (code, status) => {
             if (code === 0)
                 root.play("sessionStart");
@@ -209,10 +209,7 @@ Singleton {
     }
 
     // --- sound.json (data-model.md) --------------------------------------------------------------
-    readonly property string statePath: {
-        const xdg = Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state");
-        return xdg + "/yorha-shell/sound.json";
-    }
+    readonly property string statePath: Product.statePath("sound.json")
     readonly property var sinkAudio: Audio.sink?.audio ?? null
     readonly property bool stateKnown: sinkAudio !== null && isFinite(sinkAudio.volume)
     readonly property string stateKey: stateKnown

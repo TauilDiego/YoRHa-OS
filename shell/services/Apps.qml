@@ -14,7 +14,7 @@ import "appsearch.js" as AppSearch
 //     command (argv), keywords, terminal, workingDirectory, windowClass, actions: [{ name,
 //     command }], pinned, uses }
 // Real apps (US5, research R4): the freedesktop entries Quickshell watches (DesktopEntries), one
-// per id; pins and uses are user state in $XDG_STATE_HOME/yorha-shell/apps.json (research R11),
+// per id; pins and uses are user state in $XDG_STATE_HOME/<name>/apps.json (research R11),
 // written at once on every pin and every use, never in ~/.config.
 // Fixture "apps": the path of a file (pause-fixtures.schema.json, appsFile); its pins and uses
 // live in memory and nothing is written.
@@ -280,10 +280,7 @@ Singleton {
     }
 
     // --- the state file (research R11) ---------------------------------------------------------------
-    readonly property string statePath: {
-        const xdg = Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state");
-        return xdg + "/yorha-shell/apps.json";
-    }
+    readonly property string statePath: Product.statePath("apps.json")
 
     // Missing: start empty. Unreadable: start empty, with a line in the log. Ids of apps that are
     // gone stay (the app may come back) and are only left out of the list.

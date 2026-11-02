@@ -6,7 +6,7 @@ import Quickshell.Io
 
 // Saved settings ("salvar sempre", the owner's decision of 2026-10-27): one keyed store for every
 // value a menu lets the user change: System Settings now, the pause menu (spec 007) and the
-// notifications (spec 008) later. It lives in $XDG_STATE_HOME/yorha-shell/settings.json, never in
+// notifications (spec 008) later. It lives in $XDG_STATE_HOME/<name>/settings.json, never in
 // ~/.config (constitution III): read once at start, written 250 ms after the last change, in one
 // atomic write. It sits on top of the base (config/defaults.json overridden by shell.json).
 //   Keys are "<owner>.<id>": "settings.<category>.<option>" for the settings pop-up's catalog,
@@ -19,10 +19,7 @@ Singleton {
     id: root
 
     readonly property bool persisted: !Fixtures.active
-    readonly property string path: {
-        const xdg = Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state");
-        return xdg + "/yorha-shell/settings.json";
-    }
+    readonly property string path: Product.statePath("settings.json")
 
     property var values: ({})                  // key → value
 

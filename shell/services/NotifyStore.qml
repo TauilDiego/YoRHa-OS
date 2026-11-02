@@ -23,7 +23,7 @@ import "../strings"
 // stack and the critical band come from the file, frozen: nothing types, nothing expires, nothing is
 // written. Notifications that still arrive over D-Bus show whole, without a time.
 //   The session's log survives a reload of the shell (PersistentProperties, R15); with Text log:
-// Saved it is also written to $XDG_STATE_HOME/yorha-shell/text-log.json, mode 600 (R14).
+// Saved it is also written to $XDG_STATE_HOME/<name>/text-log.json, mode 600 (R14).
 Singleton {
     id: root
 
@@ -51,10 +51,7 @@ Singleton {
     }
     property int revision: 0                   // bumped on every change (views that cache)
 
-    readonly property string statePath: {
-        const xdg = Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state");
-        return xdg + "/yorha-shell/text-log.json";
-    }
+    readonly property string statePath: Product.statePath("text-log.json")
     readonly property bool saving: NotifyPrefs.log === "saved" && !fixed
 
     // --- lookups -------------------------------------------------------------------------------------
