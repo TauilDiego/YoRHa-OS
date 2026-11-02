@@ -59,12 +59,12 @@ update_check() {
 
 # Download, check and prepare version $1 into versions/$1 (nothing in use is touched).
 update_fetch() {
-    local v=$1 dl tmp rc=0
+    local v=$1 dl tmp got pkg rc=0
     [[ -d $YORHA_HOME/versions/$v ]] && return 0
     dl="$YORHA_HOME/downloads/$v"      # a leftover of an interrupted update is redone
     rm -rf "$dl" && mkdir -p "$dl"
     yorha_say "downloading $v"
-    yorha_fetch_release "$v" "$dl" >/dev/null || rc=$?
+    got=$(yorha_fetch_release "$v" "$dl") || rc=$?
     case $rc in
         0) ;;
         4) rm -rf "$dl"; yorha_fail "checksum mismatch for $v; refusing, nothing changed" 4 ;;
@@ -73,7 +73,10 @@ update_fetch() {
     test_stop download
     tmp="$YORHA_HOME/versions/.$v.part"
     rm -rf "$tmp" && mkdir -p "$tmp"
-    tar -xzf "$dl/$YORHA_NAME-$v.tar.gz" -C "$tmp" --strip-components=1
+    # The package the release's manifest names: it may carry another product name (then the
+    # version's own lib/yorha/name.sh, and the third field of $got, say which).
+    pkg=$(cut -d' ' -f2 <<<"$got")
+    tar -xzf "$dl/$pkg" -C "$tmp" --strip-components=1
     yorha_deps_ensure "$tmp/system/deps" >/dev/null || yorha_say "a dependency of $v is missing (see: $YORHA_CMD status)"
     yorha_prepare "$tmp"
     test_stop unpacked

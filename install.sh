@@ -88,30 +88,54 @@ yorha_latest() {
     return 1
 }
 
-# Download version $1 into folder $2 (created): <name>-<v>.tar.gz and its .sha256, both from the
-# first origin that has both, then check the sum. Prints the origin used. Returns 1 when no origin
-# had both files, 4 when the sum does not match (the files are removed). $3: the package name, when
-# it is not YORHA_NAME.
+# One value of a release manifest ($1, key=value lines) by its key ($2).
+yorha_manifest_get() { sed -n "s/^$2=//p" "$1" | head -n 1; }
+
+# Download version $1 into folder $2 (created): its package and the package's .sha256, both from the
+# first origin that has both, then check the sum. The package is the one the release's manifest
+# names (<origin>/releases/download/v<v>/manifest, a fixed name: an older version finds the package
+# of a newer one even under another product name, research R6); without a manifest (404), it is
+# <name>-<v>.tar.gz, with $3 or YORHA_NAME as the name.
+# Prints "<origin> <package> <name>": the origin used, the package's file in $2 and the product name
+# of that version. Returns 1 when no origin had the files (or the manifest was unusable), 4 when the
+# sum does not match (the files are removed).
 yorha_fetch_release() {
-    local v=$1 dir=$2 name=${3:-${YORHA_NAME:-}} o pkg sum want
-    [[ -n $name ]] && yorha_valid_version "$v" || return 1
-    pkg="$name-$v.tar.gz"
+    local v=$1 dir=$2 fallback=${3:-${YORHA_NAME:-}} o code name pkg sum want mf
+    yorha_valid_version "$v" || return 1
     mkdir -p "$dir" || return 1
+    mf="$dir/manifest"
     while read -r o; do
         [[ -n $o ]] || continue
+        rm -f "$mf"
+        name=$fallback pkg="" want=""
+        code=$(curl -fsSL --max-time 20 -o "$mf" -w '%{http_code}' "$o/releases/download/v$v/manifest" 2>/dev/null) || true
+        if [[ $code == 200 && -s $mf ]]; then
+            name=$(yorha_manifest_get "$mf" name)
+            pkg=$(yorha_manifest_get "$mf" package)
+            want=$(yorha_manifest_get "$mf" sha256)
+            # A plain product name, and the package named after it (no path can come in).
+            [[ $name =~ ^[a-z0-9][a-z0-9-]*$ && $pkg == "$name-$v.tar.gz" ]] || continue
+            [[ $(yorha_manifest_get "$mf" version) == "$v" ]] || continue
+        elif [[ $code == 404 && -n $fallback ]]; then
+            pkg="$fallback-$v.tar.gz"
+        else
+            continue                    # the origin did not answer: the whole version from the next one
+        fi
         rm -f "$dir/$pkg" "$dir/$pkg.sha256"
         curl -fsSL --max-time 20 -o "$dir/$pkg.sha256" "$o/releases/download/v$v/$pkg.sha256" 2>/dev/null || continue
         curl -fsSL -o "$dir/$pkg" "$o/releases/download/v$v/$pkg" 2>/dev/null || continue
-        want=$(awk 'NR == 1 { print $1 }' "$dir/$pkg.sha256")
         sum=$(sha256sum "$dir/$pkg" | cut -d' ' -f1)
-        if [[ ${#want} -ne 64 || $sum != "$want" ]]; then
-            rm -f "$dir/$pkg" "$dir/$pkg.sha256"
+        # The .sha256 decides; the manifest's sum, when there is one, has to agree with it.
+        if [[ $sum != "$(awk 'NR == 1 { print $1 }' "$dir/$pkg.sha256")" || ${#sum} -ne 64 \
+              || ( -n $want && $want != "$sum" ) ]]; then
+            rm -f "$dir/$pkg" "$dir/$pkg.sha256" "$mf"
             return 4
         fi
-        printf '%s\n' "$o"
+        printf '%s %s %s\n' "$o" "$pkg" "$name"
         return 0
     done < <(yorha_origins)
-    rm -f "$dir/$pkg" "$dir/$pkg.sha256"
+    [[ -n $pkg ]] && rm -f "$dir/$pkg" "$dir/$pkg.sha256"
+    rm -f "$mf"
     return 1
 }
 # @@channel-core-end
@@ -132,14 +156,15 @@ tmp=$(mktemp -d "${TMPDIR:-/tmp}/yorha-install.XXXXXX")
 trap 'rm -rf "$tmp"' EXIT
 say "downloading version $v ($channel) from ${latest#* }"
 rc=0
-yorha_fetch_release "$v" "$tmp" >/dev/null || rc=$?
+got=$(yorha_fetch_release "$v" "$tmp") || rc=$?
 case $rc in
     0) ;;
     4) fail "checksum mismatch for $v; refusing" 4 ;;
     *) fail "download of $v failed; nothing installed" ;;
 esac
 mkdir "$tmp/v"
-tar -xzf "$tmp/$YORHA_NAME-$v.tar.gz" -C "$tmp/v" --strip-components=1
+pkg=$(cut -d' ' -f2 <<<"$got")      # the package the release's manifest names
+tar -xzf "$tmp/$pkg" -C "$tmp/v" --strip-components=1
 
 # From here on the names come from the version itself (lib/yorha/name.sh, FR-019).
 YORHA_ROOT="$tmp/v"
