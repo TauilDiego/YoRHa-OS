@@ -104,9 +104,10 @@ host (contracts/release.md):
 - **`--lab-only`** exige um número `0.0.N` e marca a release como impublicável. É o que os testes usam
   antes da `main` existir, e é o que permite montar a versão com o nome de mentira (R6).
 - **`publish <versão>`** cria a release no GitHub:
-  - roda `gh release create v<versão> --target <commit>`, com as notas, a marca de pré-release, se
-    houver, e os arquivos montados;
-  - depois baixa de novo cada arquivo do GitHub e compara os checksums (SC-003);
+  - cria a release como rascunho (`gh release create v<versão> --draft --target <commit>`), com as
+    notas, a marca de pré-release, se houver, e os arquivos montados;
+  - baixa de volta cada arquivo e compara os checksums (SC-003); só com tudo igual a release sai do
+    rascunho e fica pública;
   - recusa uma release `--lab-only`, e recusa se o commit ainda não estiver no GitHub.
 - **`promote <versão>`** tira a marca de pré-release e marca a versão como a mais nova
   (`gh release edit`).
