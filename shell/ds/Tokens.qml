@@ -338,8 +338,8 @@ Singleton {
     // --- spec 008 ---------------------------------------------------------------------------------
     // The band (transmissions, the critical band, the OSD): translucent ink with a halftone of dark
     // dots, light text, like the game's tutorial band (design-system §6, §10). Sizes in game px from
-    // the approved mockup (YoRHa-OS-private/lab/mockups/transmissoes); times in ms. Estimates,
-    // calibrated in the VM.
+    // the approved mockup of the transmissions (spec 008); times in ms. Estimates, calibrated in the
+    // VM.
     readonly property Notifies notify: Notifies {}
     component Notifies: QtObject {
         readonly property color band: Qt.rgba(0x1E / 255, 0x1D / 255, 0x19 / 255, 0.84)

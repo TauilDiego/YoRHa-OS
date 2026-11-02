@@ -1,7 +1,6 @@
 # YoRHa-Shell boot screen (spec 011): the system check list of the game's boot screen, written with
-# the real boot stages and our own text. Numbers from the 4K analysis of the game's boot
-# (YoRHa-OS-private/pessoal/referencias/jogo/boot-analise.md), in 1080p px, scaled by the screen's
-# height. Layers, bottom to top:
+# the real boot stages and our own text. Numbers from a 4K analysis of the game's boot (spec 011,
+# kept outside this repository), in 1080p px, scaled by the screen's height. Layers, bottom to top:
 #   content    the watermark, the header, the lines, the cursor and the loading ring (the only layer
 #              the interference bands tear)
 #   bands      interference bands: a patch of background, the torn content moved 3.5 px to the left,
