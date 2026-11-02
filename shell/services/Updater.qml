@@ -15,6 +15,16 @@ import "../strings"
 //     (the showUpdates signal; shell.qml opens the menu).
 //   - updateNow(): the configured terminal (Settings.terminal) runs `yorha update` in the open, as
 //     Serpantinum does; yorha restarts the shell at the end.
+// spec 015 (contracts/sinal.md):
+//   - sign (Settings "updates.sign"): how a newer version stays on screen until the update. bar: the
+//     top bar's ■ UPDATE <latest> (hud/UpdateTag); menu: NEW on the SYSTEM tab and on the Updates
+//     row; both (default); login: the transmission again once per login (the lock
+//     update-reminded-<latest> in Product.runtimeDir, by mkdir, as Sounds.sessionStart); off: only the
+//     first transmission. Everything follows `available`, so it all goes away after the update.
+//   - autoCheck (Settings "updates.autoCheck"): the 30 s and hourly timers run only with it on; off,
+//     check() runs when SYSTEM › Updates opens (opened()) and from the IPC.
+//   - updates.json also keeps `available` and the `current` it was found against, so a restarted
+//     shell keeps the sign before its first check (or with the check off); a new version starts clean.
 Singleton {
     id: root
 
@@ -31,6 +41,13 @@ Singleton {
     property string error: ""
     property string notified: ""
     property real lastCheck: 0
+
+    // spec 015: the sign's form and the automatic check, live from the options.
+    readonly property string sign: Settings.updateSign
+    readonly property bool autoCheck: Settings.updateAutoCheck
+    readonly property bool signBar: available && (sign === "bar" || sign === "both")
+    readonly property bool signMenu: available && (sign === "menu" || sign === "both")
+    onSignChanged: remind()
 
     signal showUpdates()
 
@@ -66,10 +83,34 @@ Singleton {
         available = d.available === true;
         if (available && latest !== notified) {
             notified = latest;
-            NotifyStore.system(Strings.updates.noticeTitle, Strings.updates.noticeBody.arg(latest), "normal", false,
-                () => root.showUpdates());
-        }
+            announce();
+            mark(latest);                // the first transmission counts as this login's reminder
+        } else
+            remind();
         save();
+    }
+
+    function announce(): void {
+        NotifyStore.system(Strings.updates.noticeTitle, Strings.updates.noticeBody.arg(latest), "normal", false,
+            () => root.showUpdates());
+    }
+
+    // spec 015, the `login` form: the transmission again, once per login, while a newer version exists.
+    function remind(): void {
+        if (!installed || !available || sign !== "login" || latest === "" || reminder.running)
+            return;
+        reminder.command = ["sh", "-c", 'mkdir -p "$1" && mkdir "$1/update-reminded-$2" 2>/dev/null', "sh", Product.runtimeDir, latest];
+        reminder.running = true;
+    }
+    function mark(version: string): void {
+        marker.command = ["sh", "-c", 'mkdir -p "$1/update-reminded-$2"', "sh", Product.runtimeDir, version];
+        marker.running = true;
+    }
+
+    // spec 015 (FR-019): SYSTEM › Updates was opened (PauseMenu); with the automatic check off, check now.
+    function opened(): void {
+        if (installed && !autoCheck)
+            check();
     }
 
     // The configured terminal runs `yorha update`; without one, a transmission says what to run.
@@ -103,13 +144,18 @@ Singleton {
         return JSON.stringify({
             installed: installed, root: rootDir, current: current, latest: latest, available: available,
             state: state, error: error, notified: notified, lastCheck: lastCheck,
-            installedText: text("installed"), availableText: text("available")
+            installedText: text("installed"), availableText: text("available"),
+            // spec 015 (contracts/sinal.md); shell.qml puts in what the bars really show
+            sign: sign, autoCheck: autoCheck,
+            timers: { first: firstTimer.running, hourly: hourlyTimer.running },
+            signVisible: { bar: signBar, menuTab: signMenu, menuRow: signMenu }
         });
     }
 
     function save(): void {
         if (installed)
-            stateFile.setText(JSON.stringify({ lastCheck: lastCheck, latest: latest, notified: notified }, null, 2) + "\n");
+            stateFile.setText(JSON.stringify({ lastCheck: lastCheck, latest: latest, notified: notified,
+                                               available: available, current: current }, null, 2) + "\n");
     }
 
     FileView {
@@ -154,21 +200,34 @@ Singleton {
         }
     }
     Process {
+        id: reminder
+        onExited: code => {
+            if (code === 0 && root.available && root.sign === "login")
+                root.announce();
+        }
+    }
+    Process {
+        id: marker
+    }
+    Process {
         id: runner
         onExited: code => {
             if (code === 127)
                 NotifyStore.system(Strings.updates.noTerminalTitle, Strings.updates.noTerminalBody.arg(root.yorha), "normal", false);
         }
     }
+    // spec 015 (FR-019): only with the automatic check on.
     Timer {
+        id: firstTimer
         interval: 30000
-        running: root.installed
+        running: root.installed && root.autoCheck
         onTriggered: root.check()
     }
     Timer {
+        id: hourlyTimer
         interval: 3600000
         repeat: true
-        running: root.installed
+        running: root.installed && root.autoCheck
         onTriggered: root.check()
     }
 
@@ -179,7 +238,13 @@ Singleton {
             const d = JSON.parse(stateFile.text() || "{}");
             notified = String(d.notified ?? "");
             lastCheck = Number(d.lastCheck ?? 0);
+            // spec 015: the newer version found by the last check, while this is still the same version
+            if (d.available === true && String(d.current ?? "") === current && String(d.latest ?? "") !== "") {
+                latest = String(d.latest);
+                available = true;
+            }
         } catch (e) {
         }
+        remind();
     }
 }
