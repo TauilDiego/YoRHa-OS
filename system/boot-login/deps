@@ -1,0 +1,4 @@
+# What the boot and login module needs from the system, beyond SDDM, Plymouth and mkinitcpio (which it
+# checks itself). Same format as system/deps: <package> <required|optional> <what it is for>.
+# "yorha boot-login install" offers the missing ones with a yes, before the module runs.
+alsa-utils                optional  the boot sound (aplay plays it straight on the sound card)

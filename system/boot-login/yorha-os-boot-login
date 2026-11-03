@@ -996,7 +996,8 @@ cmd_status() {
         item "boot sound" "no"
     fi
     if [[ -f /run/yorha-os/sound.state ]]; then item "sound state" "this boot: $(tr -d '\n' </run/yorha-os/sound.state)"; else item "sound state" "none this boot (/run/yorha-os/sound.state)"; fi
-    command -v aplay >/dev/null || item aplay "missing (alsa-utils): the boot sound stays quiet"
+    if command -v aplay >/dev/null; then item "can play" "yes ($(command -v aplay))"
+    else item "can play" "no: aplay is missing (pacman -S alsa-utils), the boot sound stays quiet"; fi
     if [[ -e $USER_CONF ]]; then item options "$USER_CONF (yours)"; else item options "no $USER_CONF"; fi
     RC_INITRAMFS=$rc_ir RC_CHANGED=$rc_ed
     finish
