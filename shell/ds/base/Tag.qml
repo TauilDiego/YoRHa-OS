@@ -33,11 +33,12 @@ Item {
     readonly property real d: dpr > 0 ? dpr : 1
     readonly property int line: outline ? Math.round(Tokens.vline(1.5 * s, d) * d) : 0
     // The ink's tight bounds in physical px, relative to the pen origin on the baseline (y < 0
-    // above it). Measured on the font at its physical size (the bounds come in whole pixels, and at
-    // the logical size a fractional scale would multiply that rounding). QFont's pixel size is
-    // whole, so the metrics use the nearest one and scale back (exact at whole scales).
+    // above it). Qt gives them in whole pixels, rounded outwards. At scale 1 the glyphs are hinted
+    // and those whole pixels are what is drawn, so the font is measured as it is; scaled, Qt draws
+    // them unhinted, so they are measured on the font at 8× the physical size and scaled back (the
+    // rounding stays under 1/8 px).
     readonly property real physSize: label.font.pixelSize * d
-    readonly property int metricsSize: Math.max(1, Math.round(physSize))
+    readonly property int metricsSize: Math.max(1, Math.round((d === 1 ? 1 : 8) * physSize))
     readonly property real k: physSize / metricsSize
     readonly property rect inkRect: Qt.rect(metrics.tightBoundingRect.x * k, metrics.tightBoundingRect.y * k,
                                             metrics.tightBoundingRect.width * k, metrics.tightBoundingRect.height * k)
@@ -51,9 +52,9 @@ Item {
     readonly property int gapY: Math.max(1, Math.round((lineBoxH - inkH) / 2) - line)
     readonly property int boxW: inkW + 2 * (gapX + line)
     readonly property int boxH: inkH + 2 * (gapY + line)
-    // The pen origin, from the box's top-left corner.
-    readonly property int penX: Math.round(line + gapX - inkRect.x)
-    readonly property int baseY: Math.round(line + gapY - inkRect.y)
+    // The pen origin, from the box's top-left corner: the ink's center on the box's center.
+    readonly property int penX: Math.round(boxW / 2 - inkRect.x - inkRect.width / 2)
+    readonly property int baseY: Math.round(boxH / 2 - inkRect.y - inkRect.height / 2)
 
     implicitWidth: boxW / d
     implicitHeight: boxH / d
