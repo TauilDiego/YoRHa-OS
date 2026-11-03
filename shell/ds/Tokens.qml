@@ -444,6 +444,8 @@ Singleton {
     //   ink: main text, time, a normal tab's ink, readings' labels · ink2: title, date, values, a
     //   dimmed tab's ink · rest: tab plate, vertical strips · sel / selInk: the selected (and
     //   hovered) tab's plate and ink · track / fill: meter · rule: the dotted rule · alert: critical
+    //   barTrack: the bar's meter track, translucent ink, so it stays darker than any paper under it
+    //   (an opaque lightGray track vanished over the vignette at the bar's right end)
     component HudTone: QtObject {
         property color ink
         property color ink2
@@ -451,6 +453,7 @@ Singleton {
         property color sel
         property color selInk
         property color track
+        property color barTrack
         property color fill
         property color rule
         property color alert
@@ -462,6 +465,7 @@ Singleton {
         sel: root.color.darkGray
         selInk: root.color.lightYellow
         track: root.color.lightGray
+        barTrack: Qt.rgba(78 / 255, 75 / 255, 66 / 255, 0.19)    // darkGray over paper ≈ lightGray
         fill: root.color.darkGray
         rule: root.color.darkGray
         alert: root.color.alert
@@ -474,6 +478,7 @@ Singleton {
         sel: Qt.rgba(215 / 255, 209 / 255, 179 / 255, 1)
         selInk: Qt.rgba(78 / 255, 75 / 255, 66 / 255, 1)
         track: Qt.rgba(215 / 255, 209 / 255, 179 / 255, 0.22)
+        barTrack: Qt.rgba(215 / 255, 209 / 255, 179 / 255, 0.22)
         fill: Qt.rgba(215 / 255, 209 / 255, 179 / 255, 1)
         rule: Qt.rgba(150 / 255, 148 / 255, 140 / 255, 0.75)
         alert: "#C0574A"
@@ -490,6 +495,7 @@ Singleton {
         sel: root.hudHighInk
         selInk: root.color.lightYellow
         track: root.color.lightGray
+        barTrack: Qt.rgba(78 / 255, 75 / 255, 66 / 255, 0.19)
         fill: root.color.darkGray
         rule: root.color.darkGray
         alert: root.color.alert

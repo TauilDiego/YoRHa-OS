@@ -346,6 +346,7 @@ PanelWindow {
             anchors.verticalCenter: parent.verticalCenter
             s: root.s
             tone: root.tone
+            track: root.ink("barTrack")
             w: 82
             value: view.reading.value ?? 0
             critical: view.reading.critical === true
