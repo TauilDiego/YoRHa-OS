@@ -349,8 +349,12 @@ privados no que vai subir, todas só nomes e caminhos. O lint ficou verde na jun
     (`…202041…`, 58/9) usou a pasta do `check-015`, onde a release falsa do `c-rename` (`fake-shell`)
     fica como a mais nova; a 2ª (`…202915…`, 65/2) achou o `hyprland.lua` com a linha que as rodadas
     anteriores deixaram. Com a `t015-a` refeita pelo `prep` e uma pasta própria, passou.
-- [ ] T034 O Central (comandos novos: `yorha channel`, `lab/015/canal`, `release` e `audit`) e o Mapa
+- [X] T034 O Central (comandos novos: `yorha channel`, `lab/015/canal`, `release` e `audit`) e o Mapa
   do projeto (015 em junção)
+
+  Feito em 02.11: o Central (v1793664304, com o `ver`, o publish, a auditoria e a página do aviso) e o
+  Mapa (v1793664313, a 015 com a junção feita). Também entrou o `lab/ver` (lab-015 55a6f81), pedido do
+  dono pra ensaiar a migração: o atalho `~/.local/bin/ver`, e a sessão do dono (T035) usa ele.
 - [ ] T035 A sessão do dono numa janela da VM:
   - instalar;
   - ver o `UPDATE` de uma versão nova e atualizar por ele;
