@@ -317,8 +317,28 @@ pra Phase 10.
 
 ## Phase 9: Junção (agente J · Opus 5.5 · médio, até 2 VMs)
 
-- [ ] T033 Mesclar as frentes na `015-primeira-release` e as `lab-015-<x>` na `lab-015`, resolvendo os
+- [X] T033 Mesclar as frentes na `015-primeira-release` e as `lab-015-<x>` na `lab-015`, resolvendo os
   conflitos (`Strings.qml`, `bin/yorha`). O `check-015` inteiro e a regressão (cenário 12), medidos
+
+  Feito em 02.11 (agente J):
+  - **Merges** (D, A, C, B, nos dois repositórios), sem conflito de texto. Conferido à mão: o
+    `cmd_status` tem as linhas da A (canal, origens) e a linha separada da C; o `cmd_update` termina
+    no `update_handover`; o `shell.qml` tem o `NameChange`.
+  - **Pontas soltas:** o `name.sh` (nome decidido, SC2034); os `# shellcheck source=` do `bin/yorha`;
+    o lint também nos 5 scripts sem extensão (pelo shebang, com `-x`) e com o `qt6-multimedia`, e o
+    `UiSound` de volta no `SoundEffect.Ready/Error`. O R9 do `check-007` compara o apagado com o
+    logind. O `publish` e o `promote` recusam um `YORHA_ORIGINS[0]` diferente do remote (hoje recusam:
+    `TauilDiego/YoRHa-Shell` ≠ `TauilDiego/YoRHa-OS`, até a T039).
+  - **Lint** na `t015-d`, com o `qt6-multimedia` (`…200606…`): shellcheck 0 achados em 13 arquivos;
+    qmllint só com os falsos positivos do filtro.
+  - **`release build 0.0.1 --ref 015-primeira-release --lab-only` + `check --strict`** (`…201118…`): ok.
+  - **`check-015` inteiro** na `t015-a` (`…201153…`): 115 PASS, 0 FAIL.
+  - **Regressão:** 003 25/0 e 004 63/0 (`…204735…`), 007 76/0 (`…201213…`, o R9 novo: só o
+    hibernate apagado, `na` no logind), 008 110/0 (`…202356…`), 013 173/0 (`…203414…`), 014 67/0
+    (`…203547…`, 3ª rodada). As duas primeiras do 014 falharam pelo ambiente, não pelo merge: a 1ª
+    (`…202041…`, 58/9) usou a pasta do `check-015`, onde a release falsa do `c-rename` (`fake-shell`)
+    fica como a mais nova; a 2ª (`…202915…`, 65/2) achou o `hyprland.lua` com a linha que as rodadas
+    anteriores deixaram. Com a `t015-a` refeita pelo `prep` e uma pasta própria, passou.
 - [ ] T034 O Central (comandos novos: `yorha channel`, `lab/015/canal`, `release` e `audit`) e o Mapa
   do projeto (015 em junção)
 - [ ] T035 A sessão do dono numa janela da VM:
