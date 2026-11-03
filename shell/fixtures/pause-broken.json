@@ -32,5 +32,6 @@
   },
   "apps": "fixtures/does-not-exist-apps.json",
   "windows": "fixtures/does-not-exist-windows.json",
-  "session": "fixtures/does-not-exist-session.json"
+  "session": "fixtures/does-not-exist-session.json",
+  "settings": "fixtures/settings-showroom.json"
 }

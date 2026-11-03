@@ -95,7 +95,7 @@
       "id": "keyboard", "label": "Keyboard",
       "about": "Layout, repeat and shortcuts.",
       "options": [
-        {"id": "layouts", "label": "Layouts", "type": "multi", "desc": "The keyboard layouts in use, switched by a shortcut. Mark at least one; the first is the one the keyboard starts with.", "setting": "input.kbLayouts", "values": ["English (US)", "Portuguese (Brazil)", "Portuguese (Portugal)", "Spanish", "German", "French"], "ids": ["us", "br", "pt", "es", "de", "fr"]},
+        {"id": "layouts", "label": "Layouts", "type": "multi", "requires": "keyboardLayouts", "desc": "The keyboard layouts in use, switched by a shortcut. Mark at least one; the first is the one the keyboard starts with.", "setting": "input.kbLayouts", "values": ["English (US)", "Portuguese (Brazil)", "Portuguese (Portugal)", "Spanish", "German", "French"], "ids": ["us", "br", "pt", "es", "de", "fr"]},
         {"id": "caps", "label": "Caps Lock", "type": "choice", "desc": "What the Caps Lock key does.", "values": ["Caps Lock", "Escape", "Control"], "value": 1, "default": 0},
         {"id": "delay", "label": "Repeat delay", "type": "choice", "desc": "How long a key has to be held before it starts repeating.", "values": ["200 ms", "300 ms", "400 ms", "600 ms"], "value": 1, "default": 2},
         {"id": "rate", "label": "Repeat rate", "type": "slider", "desc": "How fast a held key repeats.", "value": 50, "default": 50, "step": 5},

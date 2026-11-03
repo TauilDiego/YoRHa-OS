@@ -21,5 +21,6 @@
       "glitch": 2
     }
   },
-  "apps": "fixtures/pause/apps.json"
+  "apps": "fixtures/pause/apps.json",
+  "settings": "fixtures/settings-showroom.json"
 }

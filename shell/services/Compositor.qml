@@ -62,6 +62,63 @@ Singleton {
         }
     }
 
+    // --- spec 019: the SYSTEM rows that depend on the compositor (contracts/compositor-adapter.md) ------
+    // Can this compositor do `cap`? A row that `requires` it disappears otherwise (FR-045). The real
+    // backend's answer: the fixtures' fixed capabilities below are about the windows. Under the "input"
+    // fixture the keyboard ones are true, under "monitors" the screen's.
+    readonly property var keyboardCapabilities: ["keyboardLayouts", "keyboardOptions", "shortcutsList"]
+    function supports(cap: string): bool {
+        if (cap === "monitorInfo" && Fixtures.has("monitors"))
+            return true;
+        if (keyboardCapabilities.includes(cap) && Fixtures.has("input"))
+            return true;
+        return backend?.capabilities?.[cap] === true;
+    }
+    readonly property string sessionId: backend?.sessionId ?? ""
+    // { repeatDelay, repeatRate, kbOptions, kbLayout }: the fixture's, or the last read (null before it)
+    readonly property var configValues: {
+        if (!Fixtures.has("input"))
+            return backend?.configValues ?? null;
+        const f = Fixtures.get("input") ?? {};
+        return { repeatDelay: f.repeatDelay, repeatRate: f.repeatRate, kbOptions: String(f.kbOptions ?? ""), kbLayout: String(f.kbLayout ?? "") };
+    }
+    // A read of the file's values just ended: `errors` is what the compositor says about the file.
+    signal configRead(var values, string trigger, var errors)
+    // A setConfigValues ended; a refused one says why, for the row's card (FR-002).
+    signal configWriteDone(bool ok, string error)
+    function readConfig(trigger: string): void {
+        backend?.readConfig(trigger);
+    }
+    // "ok", or "error: …" when nothing was sent. With fixtures nothing reaches the system (FR-009).
+    function setConfigValues(map: var): string {
+        if (Fixtures.active)
+            return "error: fixtures are active";
+        return backend ? backend.setConfigValues(map) : "error: no compositor";
+    }
+    // The product's shortcuts: [{ id, keys, usesMod }]; the modifier, "" if the compositor didn't say.
+    // Under the fixture, its `modifier` (null = didn't say); etapa 1C reads them through here.
+    readonly property var shortcuts: backend?.shortcuts ?? []
+    readonly property string shortcutModifier: Fixtures.has("input")
+        ? String(Fixtures.get("input")?.modifier ?? "")
+        : (backend?.shortcutModifier ?? "")
+    // The monitor in focus (D5): { name, width, height (physical px), refreshRate, scale }, or null.
+    readonly property var focusedMonitorInfo: {
+        const list = Fixtures.has("monitors") ? (Fixtures.get("monitors") ?? []) : (backend?.monitors ?? []);
+        const m = (Array.isArray(list) ? list : []).find(x => x.focused === true);
+        return m ? { name: String(m.name), width: Number(m.width), height: Number(m.height), refreshRate: Number(m.refreshRate), scale: Number(m.scale) } : null;
+    }
+    Connections {
+        target: root.backend
+        ignoreUnknownSignals: true
+        function onConfigRead(values: var, trigger: string, errors: var): void {
+            root.configRead(values, trigger, errors);
+        }
+        function onConfigWriteDone(ok: bool, error: string): void {
+            root.configWriteDone(ok, error);
+        }
+    }
+    // --- end spec 019 ---------------------------------------------------------------------------------
+
     // What the compositor can do (contracts/compositor.md §3). Under the "windows" fixture,
     // Hyprland's, so the reference images don't depend on the session the tests run in.
     readonly property var hyprlandCapabilities: ({
@@ -86,19 +143,17 @@ Singleton {
                 console.warn("compositor: no known compositor (Hyprland, Niri, Mango), using \"none\" (empty lists, no actions)");
             else
                 console.info(`compositor: backend ${item.name}`);
-            root.applyKeyboardLayouts();
         }
     }
 
     // --- spec 013, front C: the keyboard layouts (Keyboard › Layouts, research R6) ------------------
     // What the compositor has now, whether this one can set it, and a note for the settings card when
-    // it can't. Settings.kbLayouts (what the option saved) goes to the compositor at start, when it
-    // changes and after the compositor reloads its config (a reload returns to the file). [] = leave
-    // the compositor's own layout. The fixtures' capabilities don't apply here: the real backend's do.
+    // it can't. Settings.kbLayouts (what the option saved) goes to the compositor when it changes;
+    // at start, FileWins sets it (spec 019). A reload returns to the file: the backend sets it back
+    // until etapa 1C moves that to FileWins too. [] = leave the compositor's own layout. The fixtures'
+    // capabilities don't apply here: the real backend's do.
     readonly property var keyboardLayouts: backend?.keyboardLayouts ?? []
     readonly property bool canSetKeyboardLayouts: backend?.capabilities?.keyboardLayouts === true
-    readonly property string keyboardLayoutsNote: canSetKeyboardLayouts || backend === null ? ""
-        : `The layouts are saved, but ${backendName === "none" ? "no known compositor is running" : backendName + " can't apply them yet"}.`
     function applyKeyboardLayouts(): string {
         const want = Settings.kbLayouts;
         if (!want || want.length === 0)

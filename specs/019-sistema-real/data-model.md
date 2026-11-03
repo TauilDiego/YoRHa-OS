@@ -54,7 +54,7 @@ objeto: nada acontece. `FileNotFound`: todas as chaves viram ausentes, o que é 
 | `brightness` | `null` (sem luz de tela), ou `{ percent, device, tool }`; `tool: false` = sem `brightnessctl` |
 | `monitors` | `[{ name, width, height, refreshRate, scale, focused }]` |
 | `input` | `{ repeatDelay, repeatRate, kbOptions, kbLayout, modifier }`; `modifier: null` = o compositor não disse |
-| `sysProof` | `{ level, list, available, reason, failWrites }`, só pro catálogo de prova |
+| `sysProof` | `{ level: { choice, slider, toggle, info }, list: [{ id, label }], available, reason, failWrites }`, só pro catálogo de prova |
 
 ## Catálogos
 

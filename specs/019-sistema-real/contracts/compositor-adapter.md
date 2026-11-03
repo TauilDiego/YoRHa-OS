@@ -24,17 +24,21 @@ Etapas 2 e 3 acrescentam `monitorSet`, `cursorSize` e `lidSwitch`.
 | `configValues` | Última leitura: `{ repeatDelay, repeatRate, kbOptions, kbLayout }` |
 | `readConfig(trigger)` | Pede uma leitura; `trigger` é `start`, `reload` ou `poll` |
 | `setConfigValues(map): string` | `"ok"` ou `"error: …"`; só as chaves do mapa |
-| `signal configRead(values, trigger, errors)` | Uma por leitura terminada; `errors` é o `configerrors` |
+| `signal configRead(values, trigger, errors)` | Uma por leitura terminada; `errors` é o `configerrors`, sem as linhas vazias. Leitura que não veio inteira não emite nada (nada é comparado) |
+| `signal configWriteDone(ok, error)` | Uma por `setConfigValues` terminado; `error` é o que o compositor disse. A 1C usa pra voltar ao real e dizer no card (FR-002) |
 | `shortcuts` / `shortcutModifier` | Lista `{ id, keys, usesMod }`; o modificador, ou `""` se o compositor não disse |
 | `keyboardLayoutsNote` | **Sai.** A linha some, no lugar da nota (FR-045) |
 
 ## `HyprlandBackend.qml`
 
 - `monitors` guarda `width`, `height` e `refreshRate`, em px físicos e Hz (FR-023).
-- `readConfig`: `getoption -j` das 4 opções e `configerrors`, numa rodada só, e uma leitura pedida no meio roda depois (P4).
-- `configreloaded` chama `readConfig("reload")`; `Component.onCompleted`, `readConfig("start")`.
+- `readConfig`: `hyprctl --batch` com `j/getoption` das 4 opções e `j/configerrors`, um pedido só, e uma leitura pedida no meio roda
+  depois, com o gatilho mais forte (P4). `[[EMPTY]]` vira `""`; o `configerrors -j` sem erro é `[""]` (P9, `sondagem.md`).
+- `configreloaded` chama `readConfig("reload")`, que espera 300 ms antes de ler (`sondagem.md`, a trava da 0.56.2); `Component.onCompleted`,
+  `readConfig("start")`.
 - `setConfigValues`: um `eval` de `hl.config({ input = { … } })`. Inteiros validados; `kb_options` e `kb_layout` só com
-  `^[a-z0-9_:,]*$`, porque entram no comando, como `setKeyboardLayouts` já faz. Saída que não começa com `ok` é erro.
+  `^[a-z0-9_:,]*$`, porque entram no comando, como `setKeyboardLayouts` já faz. Saída que não começa com `ok` é erro. Vale o último pedido,
+  e nunca roda no meio de uma leitura que compara: o que ela acha tem que ser o valor do arquivo.
 - A leitura `mismatch → reaplica` dentro de `layoutQuery` **sai** (1C): quem decide reaplicar é o `FileWins`.
 
 ## `NullBackend.qml`

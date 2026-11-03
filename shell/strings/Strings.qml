@@ -168,6 +168,51 @@ Singleton {
         readonly property string mark: "Mark"
         readonly property string cancel: "Cancel"
         readonly property string done: "Done"
+        // spec 019: the texts of the SYSTEM rows the system answers (Sys* providers, FileWins)
+        readonly property SysStrings sys: SysStrings {}
+    }
+    component SysStrings: QtObject {
+        // why a row is dimmed (FR-004): what this machine lacks
+        readonly property string noOutput: "No sound output found."
+        readonly property string noMic: "No microphone found."
+        readonly property string noBacklight: "No backlight on this screen."
+        readonly property string noBrightnessctl: "brightnessctl is not installed, so this can't change here."
+        readonly property string noBattery: "No battery on this machine."
+        readonly property string noUpower: "UPower is not installed."
+        // a write the system refused: the row goes back to the real value and the card says so (FR-002)
+        readonly property string writeFailed: "That didn't work. This is the value in use."
+        readonly property string soundWriteFailed: "The sound system didn't accept that. This is the value in use."
+        readonly property string brightnessWriteFailed: "brightnessctl couldn't change the backlight. This is the value in use."
+        readonly property string compositorWriteFailed: "The compositor didn't accept that. This is the value in use."
+        // state notes
+        readonly property string micMuted: "The microphone is muted."
+        readonly property string custom: "Custom"                      // a Caps Lock rule of the person's
+        readonly property string charging: "charging"                  // "87% · charging"
+        readonly property string scaleUnit: "%1%"                      // Interface scale: "110%"
+        readonly property string pxUnit: "%1 px"                       // Top bar height: "68 px"
+        readonly property string msUnit: "%1 ms"                       // Repeat delay: "300 ms"
+        readonly property string empty: "—"                            // a list with nothing in it
+        // Caps Lock's values
+        readonly property string capsLock: "Caps Lock"
+        readonly property string capsEscape: "Escape"
+        readonly property string capsControl: "Control"
+        // Keyboard › Shortcuts (FR-030): what each key of yorha-shell.lua does, by the backend's id
+        readonly property string modifierUnknown: "The compositor didn't say which key is the modifier, so this list shows SUPER."
+        readonly property var shortcutNames: ({
+            pause: "Pause menu",
+            settings: "System settings",
+            wallpaper: "Wallpaper picker",
+            log: "Text log",
+            dnd: "Do not disturb",
+            volumeUp: "Volume up",
+            volumeDown: "Volume down",
+            mute: "Mute",
+            micMute: "Microphone mute",
+            brightnessUp: "Brightness up",
+            brightnessDown: "Brightness down"
+        })
+        // the catalog of proof (shell/fixtures/settings-proof.json)
+        readonly property string proofWriteFailed: "The proof provider refused that write."
     }
 
     // --- spec 004: wallpaper (picker, catalog, transitions) --------------------------------------

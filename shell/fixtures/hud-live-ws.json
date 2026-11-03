@@ -4,5 +4,6 @@
   "mem": 41,
   "volume": { "percent": 64, "muted": false },
   "battery": { "percent": 87, "charging": false },
-  "activeWindow": "kitty — ~/projetos"
+  "activeWindow": "kitty — ~/projetos",
+  "settings": "fixtures/settings-showroom.json"
 }

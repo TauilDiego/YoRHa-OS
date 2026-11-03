@@ -116,5 +116,6 @@
       "value": 66,
       "muted": false
     }
-  }
+  },
+  "settings": "fixtures/settings-showroom.json"
 }

@@ -19,4 +19,11 @@ singleton Sounds 1.0 Sounds.qml
 singleton Updater 1.0 Updater.qml
 singleton Product 1.0 Product.qml
 singleton NameChange 1.0 NameChange.qml
+singleton FileWins 1.0 FileWins.qml
+singleton SysProviders 1.0 SysProviders.qml
+singleton SysAudio 1.0 SysAudio.qml
+singleton SysPower 1.0 SysPower.qml
+singleton SysDisplay 1.0 SysDisplay.qml
+singleton SysInput 1.0 SysInput.qml
+singleton SysProof 1.0 SysProof.qml
 UiSound 1.0 UiSound.qml

@@ -1,0 +1,15 @@
+{
+  "categories": [
+    {
+      "id": "proof", "label": "Proof",
+      "about": "The rows of a provider, for the checks (spec 019).",
+      "options": [
+        {"id": "choice", "label": "Choice", "type": "choice", "desc": "A list that comes from the provider.", "setting": "sys.proof.choice"},
+        {"id": "slider", "label": "Slider", "type": "slider", "desc": "A level that comes from the provider.", "setting": "sys.proof.slider", "step": 5},
+        {"id": "toggle", "label": "Toggle", "type": "toggle", "desc": "A state that comes from the provider.", "setting": "sys.proof.toggle"},
+        {"id": "info", "label": "Info", "type": "info", "desc": "A text that comes from the provider.", "setting": "sys.proof.info"},
+        {"id": "list", "label": "List", "type": "action", "desc": "A list only to read.", "opens": "sys.proof.list", "text": "Open", "busy": ""}
+      ]
+    }
+  ]
+}

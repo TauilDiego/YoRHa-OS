@@ -214,7 +214,7 @@ PopupWindow {
             log: tab === "log" ? logPage.dumpState() : null,
             system: (() => {
                 const d = systemPage.dumpState();
-                return { focus: d.focus, category: d.category, option: d.option };
+                return { focus: d.focus, category: d.category, option: d.option, choice: choice };
             })(),
             power: powerPage.dumpState(),
             geometry: {

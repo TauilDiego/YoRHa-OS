@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../strings"
 
 // User settings: managed defaults (config/defaults.json) overridden key by key by the user's
 // $XDG_CONFIG_HOME/<name>/shell.json. Updates never touch the user file (constitution III).
@@ -19,7 +20,28 @@ Singleton {
     readonly property bool reduceMotion: valueOf("shell.reduceMotion")
 
     readonly property var defaults: parse(defaultsFile.text(), "defaults.json") ?? ({ uiScale: 1.0, barHeight: 68, vignette: true, wallpaperMotion: true, reduceMotion: false, barContrast: "normal", terminal: ["kitty"] })
-    readonly property var user: userFile.loaded ? (parse(userFile.text(), userFile.path) ?? ({})) : ({})
+    // spec 019 (FR-041): the user's file as it is, before the merge. FileWins compares only this.
+    // Set when a read ends, with userFileRead: "ok", "missing" (FileNotFound: no keys, which counts
+    // as an edit) or "unreadable" (no permission, invalid JSON, JSON that isn't an object: nothing
+    // is compared, FR-042). `user` is {} when there's nothing usable, as before.
+    property var user: ({})
+    signal userFileRead(string state)
+    function readUser(): void {
+        const text = userFile.text();
+        const d = parse(text, userFile.path);
+        const usable = d !== null && typeof d === "object" && !Array.isArray(d);
+        if (d !== null && !usable)
+            console.warn(`settings: ${userFile.path} is not a JSON object, ignoring it`);
+        user = usable ? d : {};
+        userFileRead(usable ? "ok" : "unreadable");
+    }
+    function rereadUser(): void {
+        userFile.reload();
+    }
+    function userReadFailed(error: int): void {
+        user = {};
+        userFileRead(error === FileViewError.FileNotFound ? "missing" : "unreadable");
+    }
     readonly property var merged: Object.assign({}, defaults, user)
 
     readonly property string userPath: Product.configPath("shell.json")
@@ -116,7 +138,25 @@ Singleton {
             return keys[k].values;
         if (k && keys[k].type === "bool")
             return [true, false];
+        if (k && keys[k].type === "levels")
+            return levelsWithCurrent(k);
         return [];
+    }
+    // spec 019 (FR-033): a "levels" key takes any number in its range, and a value off the menu's
+    // list (shell.json's 1.2) joins the list, in order, while it is the one in use.
+    function levelsWithCurrent(key: string): var {
+        const t = keys[key];
+        const v = valueOf(key);
+        return t.levels.includes(v) ? t.levels : t.levels.concat([v]).sort((a, b) => a - b);
+    }
+    // The texts of a "levels" key's levels, in the same order ("110%", "68 px").
+    function labelsOf(key: string): var {
+        const k = keyOf(key);
+        return k && keys[k].type === "levels" ? levelsOf(k).map(v => levelLabel(k, v)) : [];
+    }
+    function levelLabel(key: string, v: var): string {
+        const S = Strings.settings.sys;
+        return keys[key].unit === "%" ? S.scaleUnit.arg(Math.round(v * 100)) : S.pxUnit.arg(v);
     }
     function levelOf(key: string): var {
         if (key === "barContrast")
@@ -148,6 +188,11 @@ Singleton {
         "shell.vignette": { type: "bool", fallback: true, config: ["vignette"] },
         "shell.wallpaperMotion": { type: "bool", fallback: true, config: ["wallpaperMotion"] },
         "shell.reduceMotion": { type: "bool", fallback: false, config: ["reduceMotion"] },
+        // spec 019 (FR-032, FR-033): a number in a range, with the menu's levels; a value of shell.json
+        // off the list still counts and shows (levelsOf). `uiScale` and `barHeight`, above, read these
+        // from etapa 1D on.
+        "shell.uiScale": { type: "levels", levels: [0.9, 1, 1.1, 1.25], min: 0.5, max: 3, unit: "%", fallback: 1, config: ["uiScale"] },
+        "shell.barHeight": { type: "levels", levels: [40, 50, 68, 80], min: 28, max: 96, integer: true, unit: "px", fallback: 68, config: ["barHeight"] },
         "sound.ui": { type: "bool", fallback: true, config: ["sound", "ui"] },
         "sound.volume": { type: "int", min: 0, max: 100, fallback: 40, config: ["sound", "volume"] },
         "sound.folder": { type: "string", fallback: "", config: ["sound", "folder"] },
@@ -175,6 +220,8 @@ Singleton {
             return typeof v === "string";
         case "layouts":
             return Array.isArray(v) && v.length > 0 && v.every(x => typeof x === "string" && /^[a-z]{2,8}$/.test(x));
+        case "levels":
+            return typeof v === "number" && v >= t.min && v <= t.max && (!t.integer || Number.isInteger(v));
         }
         return false;
     }
@@ -295,5 +342,7 @@ Singleton {
         printErrors: false          // a missing user file is the normal case
         watchChanges: true
         onFileChanged: reload()
+        onLoaded: root.readUser()
+        onLoadFailed: error => root.userReadFailed(error)
     }
 }

@@ -21,6 +21,8 @@ import "../base"
 // outside emit dismissed(). A single choice emits picked(index) and the parent closes it; a multi one
 // keeps its marks in `marked` and the parent stores them when it closes (FR-026). The pointer moves the
 // cursor only after it really moved, so a pointer resting where the pop-up opens picks nothing.
+// spec 019: `readOnly` is a list only to read (Keyboard › Shortcuts, FR-030): the cursor moves and Enter
+// does nothing. With more values than fit, the wheel scrolls one whole row per notch (FR-036).
 FocusScope {
     id: root
 
@@ -29,6 +31,7 @@ FocusScope {
     property var values: []
     property int current: 0
     property bool multi: false
+    property bool readOnly: false
     property var marked: []
     property real anchorX: 0
     property real anchorY: 0
@@ -83,7 +86,7 @@ FocusScope {
 
     // Enter on value `i`: picks it, or marks / unmarks it.
     function activate(i: int): void {
-        if (i < 0 || i >= count)
+        if (i < 0 || i >= count || readOnly)
             return;
         current = i;
         if (multi)
@@ -107,10 +110,40 @@ FocusScope {
     }
     onCurrentChanged: follow()
     onVisibleRowsChanged: follow()
+    onCountChanged: follow()
+    // spec 019 (FR-036): one notch (120) is one row; the cursor comes along when it would leave the view.
+    readonly property bool overflows: count > visibleRows
+    property real wheelRest: 0
+    function wheelBy(delta: real): void {
+        if (!overflows || pitch <= 0)
+            return;
+        wheelRest += delta;
+        let first = Math.round(scrollY / pitch);
+        while (wheelRest >= 120) {
+            wheelRest -= 120;
+            first--;
+        }
+        while (wheelRest <= -120) {
+            wheelRest += 120;
+            first++;
+        }
+        first = Math.max(0, Math.min(first, count - visibleRows));
+        scrollY = first * pitch;
+        if (current < first)
+            current = first;
+        else if (current >= first + visibleRows)
+            current = first + visibleRows - 1;
+    }
+    WheelHandler {
+        enabled: root.overflows && root.open
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: event => root.wheelBy(event.angleDelta.y)
+    }
     onOpenChanged: {
         if (open) {
             pointerMoved = false;
             pointer.last = Qt.point(NaN, NaN);
+            wheelRest = 0;
             scrollY = 0;
             follow();
         }
@@ -125,7 +158,7 @@ FocusScope {
 
     // Where the plate and the row with the cursor are on the screen (logical px), for tests' clicks.
     function geometry(): var {
-        return { plate: rectOf(plate), item: rectOf(rows.itemAt(current)), rows: visibleRows };
+        return { plate: rectOf(plate), item: rectOf(rows.itemAt(current)), rows: visibleRows, first: pitch > 0 ? scrollY / pitch : 0, overflows: overflows };
     }
 
     // --- the dim and the plate's fade -----------------------------------------------------------------

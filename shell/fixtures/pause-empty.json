@@ -32,5 +32,6 @@
   },
   "apps": "fixtures/pause/apps-empty.json",
   "windows": "fixtures/pause/windows-empty.json",
-  "session": "fixtures/pause/session.json"
+  "session": "fixtures/pause/session.json",
+  "settings": "fixtures/settings-showroom.json"
 }

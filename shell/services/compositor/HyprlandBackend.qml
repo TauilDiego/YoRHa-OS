@@ -25,10 +25,16 @@ Item {
         actsOnAnyWindow: true,
         hasGeometry: "rect",
         fullscreenKnown: true,
-        keyboardLayouts: true       // spec 013 (front C)
+        keyboardLayouts: true,      // spec 013 (front C)
+        // spec 019 (contracts/compositor-adapter.md)
+        keyboardOptions: true,
+        monitorInfo: true,
+        shortcutsList: true,
+        configFile: true
     })
 
-    // [Monitor] { name, x, y, w, h (logical), scale, focused }; replaced on every successful read.
+    // [Monitor] { name, x, y, w, h (logical), width, height (physical px), refreshRate (Hz), scale,
+    // focused }; replaced on every successful read.
     property var monitors: []
     // [Workspace] { key, index, label, monitor, focused, exists, windows: [id] }. The list and the
     // focus come from Quickshell's Hyprland.workspaces (live, what the bar has always read); the
@@ -224,6 +230,9 @@ Item {
                         y: Number(m.y) || 0,
                         w: Math.round(m.width / (m.scale || 1)),
                         h: Math.round(m.height / (m.scale || 1)),
+                        width: Number(m.width) || 0,
+                        height: Number(m.height) || 0,
+                        refreshRate: Number(m.refreshRate) || 0,
                         scale: m.scale,
                         focused: m.focused === true
                     }));
@@ -347,9 +356,159 @@ Item {
     }
     // --- end front C ---------------------------------------------------------------------------------
 
+    // --- spec 019: the config file's values (contracts/compositor-adapter.md, research R1) ------------
+    // The session's id: the same while the compositor lives, new on a new login (proved, T003 P7).
+    readonly property string sessionId: String(Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE") ?? "")
+    // The last read: { repeatDelay, repeatRate, kbOptions, kbLayout }, null before the first one.
+    property var configValues: null
+    // Etapa 1C fills these (HyprlandBackend.shortcuts, R2).
+    property var shortcuts: []
+    property string shortcutModifier: ""
+    signal configRead(var values, string trigger, var errors)
+    signal configWriteDone(bool ok, string error)
+
+    // One batch request is one read, with no reload in the middle. Asked during a read, a read runs
+    // after it, keeping the strongest trigger: a reload's comparison is never lost to a poll.
+    readonly property var readRank: ({ poll: 0, start: 1, reload: 2 })
+    property string readTrigger: ""
+    property string readNext: ""
+    function readConfig(trigger: string): void {
+        if (configQuery.running || configWait.running) {
+            if (readNext === "" || readRank[trigger] > readRank[readNext])
+                readNext = trigger;
+            return;
+        }
+        readTrigger = trigger;
+        if (trigger === "reload")
+            configWait.restart();
+        else
+            configQuery.running = true;
+    }
+    // A config with an error raises Hyprland's error overlay. On 0.56.2, a request right after the
+    // reload's event can leave its main thread waiting forever on the overlay's text (the lab: 4 hangs
+    // in 25 rounds reading at once, none in 25 with this wait; lab/019/prova-trava, sondagem.md).
+    // The value read later is still the file's: nothing else sets it in between.
+    Timer {
+        id: configWait
+        interval: 300
+        onTriggered: configQuery.running = true
+    }
+    // "[[EMPTY]]" is how getoption says an empty string (T003 P9).
+    function optionText(reply: var): string {
+        const s = String(reply?.str ?? "");
+        return s === "[[EMPTY]]" ? "" : s;
+    }
+    // The replies come one after the other: each one is a JSON value, and they are split where one
+    // ends. null if any of the five didn't come back whole: a read half done is no read at all.
+    function parseConfigReplies(text: string): var {
+        const parts = [];
+        let rest = text.trim();
+        while (rest !== "" && parts.length < 5) {
+            const cut = rest.indexOf("\n\n");
+            parts.push(cut < 0 ? rest : rest.slice(0, cut));
+            rest = cut < 0 ? "" : rest.slice(cut + 2).trim();
+        }
+        if (parts.length !== 5)
+            return null;
+        try {
+            const r = parts.map(p => JSON.parse(p));
+            if (!Number.isInteger(r[0].int) || !Number.isInteger(r[1].int) || typeof r[2].str !== "string"
+                    || typeof r[3].str !== "string" || !Array.isArray(r[4]))
+                return null;
+            return {
+                values: { repeatDelay: r[0].int, repeatRate: r[1].int, kbOptions: optionText(r[2]), kbLayout: optionText(r[3]) },
+                errors: r[4].map(x => String(x)).filter(x => x.trim() !== "")
+            };
+        } catch (e) {
+            return null;
+        }
+    }
+    Process {
+        id: configQuery
+        command: ["hyprctl", "--batch", "j/getoption input:repeat_delay ; j/getoption input:repeat_rate ; j/getoption input:kb_options ; j/getoption input:kb_layout ; j/configerrors"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const trigger = root.readTrigger;
+                const read = root.parseConfigReplies(text);
+                if (read) {
+                    root.configValues = read.values;
+                    root.configRead(read.values, trigger, read.errors);
+                } else {
+                    console.info(`compositor: the config read (${trigger}) didn't come back whole, nothing compared`);
+                }
+                // spec 013's reapply, until etapa 1C moves it to FileWins: after the read, so what
+                // was just read is the file's value and not this eval's.
+                if (trigger === "reload")
+                    root.refreshKeyboardLayouts();
+            }
+        }
+        onExited: {
+            root.flushWrite();
+            if (root.readNext === "")
+                return;
+            const next = root.readNext;
+            root.readNext = "";
+            root.readConfig(next);
+        }
+    }
+
+    // Only the keys of `map`, in one eval. Numbers are checked; texts only with ^[a-z0-9_:,]*$, because
+    // they go into the command (as setKeyboardLayouts). The last wanted one wins (research R3).
+    readonly property var configKeys: ({ repeatDelay: "repeat_delay", repeatRate: "repeat_rate", kbOptions: "kb_options", kbLayout: "kb_layout" })
+    property string writeCode: ""
+    property string writeNext: ""
+    function setConfigValues(map: var): string {
+        const parts = [];
+        for (const k of Object.keys(map ?? {})) {
+            const name = configKeys[k];
+            const v = map[k];
+            if (!name)
+                return `error: unknown value ${k}`;
+            if (k === "repeatDelay" || k === "repeatRate") {
+                if (!Number.isInteger(v) || v < 0 || v > 100000)
+                    return `error: ${k} is not a whole number`;
+                parts.push(`${name} = ${v}`);
+            } else {
+                if (typeof v !== "string" || !/^[a-z0-9_:,]*$/.test(v))
+                    return `error: ${k} has characters that can't go in the command`;
+                parts.push(`${name} = "${v}"`);
+            }
+        }
+        if (parts.length === 0)
+            return "ok";
+        writeNext = `hl.config({ input = { ${parts.join(", ")} } })`;
+        flushWrite();
+        return "ok";
+    }
+    // Never during a read that compares: what the read finds has to be the file's value.
+    function flushWrite(): void {
+        if (writeNext === "" || configSet.running || configWait.running || (configQuery.running && readTrigger !== "poll"))
+            return;
+        writeCode = writeNext;
+        writeNext = "";
+        configSet.command = ["hyprctl", "eval", writeCode];
+        configSet.running = true;
+    }
+    Process {
+        id: configSet
+        stdout: StdioCollector {
+            id: configSetOut
+        }
+        onExited: code => {
+            const good = code === 0 && configSetOut.text.startsWith("ok");
+            if (!good)
+                console.info(`compositor: "${root.writeCode}" failed (${code}): ${configSetOut.text.trim()}`);
+            root.configWriteDone(good, good ? "" : configSetOut.text.trim());
+            root.readConfig("poll");
+            root.flushWrite();
+        }
+    }
+    // --- end spec 019 ---------------------------------------------------------------------------------
+
     Component.onCompleted: {
         refresh("all");
         refreshKeyboardLayouts();
+        readConfig("start");
     }
 
     // A scale change alone (`hyprctl eval 'hl.monitor(…)'`, as `lab/profile` does) raises no event
@@ -379,10 +538,12 @@ Item {
                 root.submap = String(event.data ?? "");
             if (event.name === "activewindowv2")       // "<address>", or nothing with no window in focus
                 root.nothingFocused = String(event.data ?? "").replace(/,/g, "").trim() === "";
-            if (event.name.startsWith("monitor") || event.name.startsWith("focusedmon") || event.name === "configreloaded")
+            if (event.name.startsWith("monitor") || event.name.startsWith("focusedmon"))
                 monitorQuery.running = true;
-            if (event.name === "configreloaded")
-                root.refreshKeyboardLayouts();         // and sets the wanted layouts again if they were lost
+            if (event.name === "configreloaded") {     // spec 019: nothing asked at once (configWait)
+                root.readConfig("reload");             // (R1) the file's values, before any reapply
+                afterReload.restart();
+            }
             if (root.windowEvents.includes(event.name))
                 windowsTimer.restart();
             // spec 008: full screen (R10, R11)
@@ -400,8 +561,17 @@ Item {
         "changefloatingmode", "workspace", "workspacev2", "createworkspace", "createworkspacev2",
         "destroyworkspace", "destroyworkspacev2", "moveworkspace", "moveworkspacev2",
         "renameworkspace", "activewindowv2", "fullscreen", "activespecial", "activespecialv2",
-        "monitoradded", "monitoraddedv2", "monitorremoved", "monitorremovedv2", "configreloaded"
+        "monitoradded", "monitoraddedv2", "monitorremoved", "monitorremovedv2"
     ]
+    // The windows and the monitors after a reload, as late as the config's read (configWait).
+    Timer {
+        id: afterReload
+        interval: configWait.interval
+        onTriggered: {
+            monitorQuery.running = true;
+            windowsTimer.restart();
+        }
+    }
 
     Timer {
         id: windowsTimer

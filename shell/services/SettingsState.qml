@@ -61,6 +61,27 @@ Singleton {
         changed();
     }
 
+    // spec 019 (contracts/file-rule.md): several changes at once, one `values` change and one write.
+    // `sets`: key → value; `removes`: keys.
+    function patch(sets: var, removes: var): void {
+        const next = Object.assign({}, values);
+        let any = false;
+        for (const k of removes)
+            if (Object.prototype.hasOwnProperty.call(next, k)) {
+                delete next[k];
+                any = true;
+            }
+        for (const k of Object.keys(sets))
+            if (JSON.stringify(next[k]) !== JSON.stringify(sets[k])) {
+                next[k] = sets[k];
+                any = true;
+            }
+        if (!any)
+            return;
+        values = next;
+        changed();
+    }
+
     // --- file ----------------------------------------------------------------------------------
     property string badState: ""
     function load(): void {

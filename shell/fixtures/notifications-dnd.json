@@ -84,5 +84,6 @@
     ],
     "overflow": 0,
     "osd": null
-  }
+  },
+  "settings": "fixtures/settings-showroom.json"
 }

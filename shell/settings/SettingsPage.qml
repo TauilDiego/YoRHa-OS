@@ -35,7 +35,7 @@ FocusScope {
 
     signal closeRequested()
 
-    readonly property var cats: SettingsModel.categories
+    readonly property var cats: SettingsModel.visibleCategories     // spec 019 (FR-045)
     readonly property var cat: cats.length > 0 ? cats[Math.max(0, Math.min(category, cats.length - 1))] : null
     readonly property string categoryId: cat?.id ?? ""          // spec 015 (PauseMenu: SYSTEM › Updates shown)
     readonly property string catId: cat?.id ?? ""
@@ -77,7 +77,11 @@ FocusScope {
     Component.onDestruction: {
         Osd.suppress("volume", false);
         Osd.suppress("brightness", false);
+        SettingsModel.watching = "";
     }
+    // spec 019 (R5): which category is on screen, for what raises no event
+    readonly property string watchKey: visible ? catId : ""
+    onWatchKeyChanged: SettingsModel.watching = watchKey
 
     // A row whose value ← and → change (toggle, choice, slider, not dimmed).
     function changes(o: var): bool {
@@ -93,13 +97,33 @@ FocusScope {
     property string choiceCat: ""
     property string choiceOptId: ""
     property bool choiceMulti: false
-    // { option, values, selected, multi, checked[] } or null (the `pause dump`'s `choice`)
+    property bool choiceReadOnly: false          // spec 019: a row that `opens` a list, only to read
+    // { option, values, selected, multi, checked[], readOnly } or null (the `pause dump`'s `choice`)
     readonly property var choiceState: choiceId === "" ? null : {
         option: choiceId,
         values: choicePopup.values,
         selected: choicePopup.current,
         multi: choiceMulti,
-        checked: choiceMulti ? choicePopup.marked : []
+        checked: choiceMulti ? choicePopup.marked : [],
+        readOnly: choiceReadOnly
+    }
+
+    // spec 019 (US2.6, FR-003): the open pop-up follows a list that changes, and the cursor stays on
+    // the same id, or on a row that still exists.
+    property var choiceIds: null
+    readonly property var choiceLive: choiceId === "" ? null : SettingsModel.popupValues(SettingsModel.find(choiceCat, choiceOptId))
+    onChoiceLiveChanged: {
+        if (choiceId === "" || choiceMulti || !choiceLive)
+            return;
+        const ids = SettingsModel.levelIds(SettingsModel.find(choiceCat, choiceOptId));
+        const same = JSON.stringify(choiceLive) === JSON.stringify(choicePopup.values) && JSON.stringify(ids) === JSON.stringify(choiceIds);
+        if (same)
+            return;
+        const was = choiceIds ? choiceIds[choicePopup.current] : undefined;
+        const at = ids && was !== undefined ? ids.indexOf(was) : -1;
+        choicePopup.current = at >= 0 ? at : Math.max(0, Math.min(choicePopup.current, choiceLive.length - 1));
+        choicePopup.values = choiceLive;
+        choiceIds = ids;
     }
 
     function activateOption(o: var): void {
@@ -120,12 +144,15 @@ FocusScope {
         const v = SettingsModel.value(catId, o.id);
         const p = row.mapToItem(root, 0, 0);
         choiceMulti = o.type === "multi";
+        choiceReadOnly = SettingsModel.opensOf(o) !== null;
         choiceCat = catId;
         choiceOptId = o.id;
-        choicePopup.values = o.values;
+        choicePopup.values = SettingsModel.popupValues(o);
+        choiceIds = SettingsModel.levelIds(o);
         choicePopup.multi = choiceMulti;
+        choicePopup.readOnly = choiceReadOnly;
         choicePopup.marked = choiceMulti ? v : [];
-        choicePopup.current = choiceMulti ? (v[0] ?? 0) : v;
+        choicePopup.current = choiceMulti ? (v[0] ?? 0) : choiceReadOnly ? 0 : v;
         choicePopup.anchorX = p.x + row.width;
         choicePopup.anchorY = p.y;
         choicePopup.anchorH = row.height;
@@ -168,6 +195,8 @@ FocusScope {
         }
         if (cmd !== "pick" && cmd !== "toggle")
             return `error: unknown command ${cmd} (open, pick, toggle or close)`;
+        if (choiceReadOnly)
+            return "error: this list is only to read";
         if (!Number.isInteger(i) || i < 0 || i >= choicePopup.count)
             return `error: ${arg} is not a value index`;
         if (cmd === "pick" && choiceMulti)
@@ -301,7 +330,7 @@ FocusScope {
             category: catId,
             option: opt ? opt.id : null,
             keys: keys.map(k => `${k.key} ${k.label}`),
-            card: { title: card.title, note: card.note },
+            card: { title: card.title, note: card.note, meta: card.meta },
             geometry: {
                 s: Math.round(s * 1000) / 1000,
                 // spec 014: the columns' scroll, in whole rows (layout: it follows the panel's size)
@@ -344,13 +373,24 @@ FocusScope {
             };
         const dimmed = SettingsModel.isDimmed(catId, opt.id);
         const busy = SettingsModel.busy === catId + "." + opt.id;
-        // spec 013: a "multi" option the compositor can't apply says why
-        const multiNote = opt.type === "multi" ? Compositor.keyboardLayoutsNote : "";
+        // spec 019 (FR-005): a value of the system has no DEFAULT, only NOW, after what the provider
+        // adds; a provider's note is a refused write or a state to tell (FR-002).
+        if (SettingsModel.isSys(opt)) {
+            const note = dimmed ? SettingsModel.needsText(catId, opt.id) : SettingsModel.noteOf(opt);
+            const now = opt.type === "action" ? [] : [{ label: Strings.settings.nowLabel, value: SettingsModel.display(catId, opt.id) }];
+            return {
+                title: opt.label,
+                text: plain(opt.desc ?? ""),
+                note: note,
+                kind: "alert",
+                meta: SettingsModel.metaOf(opt).concat(now)
+            };
+        }
         return {
             title: opt.label,
             text: plain(opt.desc ?? ""),
-            note: dimmed ? SettingsModel.needsText(catId, opt.id) : busy ? String(opt.busy ?? "") : multiNote,
-            kind: dimmed || multiNote !== "" ? "alert" : "info",
+            note: dimmed ? SettingsModel.needsText(catId, opt.id) : busy ? String(opt.busy ?? "") : "",
+            kind: dimmed ? "alert" : "info",
             meta: opt.type === "multi" ? [{ label: Strings.settings.nowLabel, value: SettingsModel.display(catId, opt.id) }]
                 : SettingsModel.hasValue(opt) ? [
                 { label: Strings.settings.defaultLabel, value: SettingsModel.defaultDisplay(catId, opt.id) },
@@ -362,7 +402,10 @@ FocusScope {
     // The extra hints go before Esc, as in the pause menu's mockup ("… Tab Next tab, Esc Close").
     readonly property var keys: choiceId !== "" ? choiceKeys : listKeys
     // spec 013: the pop-up takes Tab too, so the hints have no "Next tab"
-    readonly property var choiceKeys: [
+    readonly property var choiceKeys: choiceReadOnly ? [
+        { key: Strings.settings.keyUpDown, label: Strings.settings.select },
+        { key: Strings.settings.keyEsc, label: Strings.settings.close }
+    ] : [
         { key: Strings.settings.keyUpDown, label: Strings.settings.select },
         { key: Strings.settings.keyEnter, label: choiceMulti ? Strings.settings.mark : Strings.settings.choose },
         { key: Strings.settings.keyEsc, label: choiceMulti ? Strings.settings.done : Strings.settings.cancel }

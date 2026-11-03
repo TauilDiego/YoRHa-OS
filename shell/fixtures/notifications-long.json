@@ -933,5 +933,6 @@
     "critical": [],
     "overflow": 2,
     "osd": null
-  }
+  },
+  "settings": "fixtures/settings-showroom.json"
 }

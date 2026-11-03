@@ -608,9 +608,9 @@ PanelWindow {
                     DescriptionCard {
                         s: root.s
                         minHeight: 0
-                        title: SettingsModel.categories[0]?.label ?? ""
-                        text: SettingsModel.categories[0]?.about ?? ""
-                        meta: [{ label: Strings.settings.count, value: String(SettingsModel.categories[0]?.options?.length ?? 0) }]
+                        title: SettingsModel.visibleCategories[0]?.label ?? ""
+                        text: SettingsModel.visibleCategories[0]?.about ?? ""
+                        meta: [{ label: Strings.settings.count, value: String(SettingsModel.visibleCategories[0]?.options?.length ?? 0) }]
                     }
                 }
 
@@ -624,7 +624,7 @@ PanelWindow {
                             s: root.s
                             keysEnabled: false
                             focused: false
-                            model: SettingsModel.categories.slice(0, 2).map(c => c.label)
+                            model: SettingsModel.visibleCategories.slice(0, 2).map(c => c.label)
                             currentIndex: 1
                         }
                     }

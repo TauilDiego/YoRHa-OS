@@ -4,7 +4,7 @@
 
 **Input**: Feature specification from `specs/019-sistema-real/spec.md` (aprovada pelo dono em 03.11)
 
-**Status**: esperando o OK do dono (princípio V). A T003 é o primeiro passo depois dele.
+**Status**: aprovado pelo dono em 03.11 ("sim manda bala ai", princípio V). A T003 é o primeiro passo.
 
 ## Summary
 
@@ -54,7 +54,7 @@ As decisões de desenho:
 | II. Sistema visual | `hyprland.lua` e `shell.json` são só lidos. A escrita em tempo de execução é o que a emenda 2.2.0 permite. A check-019 confere o `sha256sum` |
 | III. Padrões e usuário | Update não esquece valor (FR-043). A remoção dos valores falsos é idempotente (FR-007) |
 | IV. Evidência | Cada tarefa de teste nomeia a evidência, e cada rodada fica em `lab/perf` |
-| V. Spec antes de código | Spec aprovada. **O plano espera o OK do dono.** Se a prova falhar, a D2 volta pra ele |
+| V. Spec antes de código | Spec e plano aprovados pelo dono em 03.11. Se a prova falhar, a D2 volta pra ele |
 | VI. Paralelo com contrato antes | Etapa 0 sequencial, com a T003 antes; as frentes só começam depois do congelamento (T021) |
 | VII. Simplicidade | Um provedor por família, nenhuma camada a mais. `SysProof` tem uso concreto: testar a mecânica antes de existir som |
 | Restrições (adaptador, marcas, licença) | FR-044 cumprida; nenhum asset; nenhum código de terceiro. Serpantinum fica só como referência das etapas 2 e 3 |

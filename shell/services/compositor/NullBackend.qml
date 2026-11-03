@@ -16,7 +16,12 @@ Item {
         actsOnAnyWindow: false,
         hasGeometry: "none",
         fullscreenKnown: false,
-        keyboardLayouts: false
+        keyboardLayouts: false,
+        // spec 019 (contracts/compositor-adapter.md): rows that need these disappear (FR-045)
+        keyboardOptions: false,
+        monitorInfo: false,
+        shortcutsList: false,
+        configFile: false
     })
     readonly property var monitors: []
     readonly property var workspaces: []
@@ -31,6 +36,19 @@ Item {
         return "error: no compositor";
     }
     function refreshKeyboardLayouts(): void {
+    }
+
+    // spec 019: no config file to read; what was saved stays saved, and nothing is compared (FR-046)
+    readonly property string sessionId: ""
+    readonly property var configValues: null
+    readonly property var shortcuts: []
+    readonly property string shortcutModifier: ""
+    signal configRead(var values, string trigger, var errors)
+    signal configWriteDone(bool ok, string error)
+    function readConfig(trigger: string): void {
+    }
+    function setConfigValues(map: var): string {
+        return "error: no compositor";
     }
 
     function activeIndexOn(monitorName: string): int {

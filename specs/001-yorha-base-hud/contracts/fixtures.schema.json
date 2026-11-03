@@ -5,49 +5,385 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "clock": { "type": "string", "format": "date-time", "description": "Fixed local time, e.g. 2026-10-26T13:37:00" },
-    "cpu": { "type": "number", "minimum": 0, "maximum": 100 },
-    "mem": { "type": "number", "minimum": 0, "maximum": 100 },
+    "clock": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Fixed local time, e.g. 2026-10-26T13:37:00"
+    },
+    "cpu": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "mem": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
     "volume": {
-      "type": "object", "additionalProperties": false,
-      "properties": { "percent": { "type": "number", "minimum": 0, "maximum": 100 }, "muted": { "type": "boolean" } },
-      "required": ["percent"]
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "muted": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "percent"
+      ]
     },
     "battery": {
       "oneOf": [
-        { "type": "null", "description": "No battery: the reading disappears" },
         {
-          "type": "object", "additionalProperties": false,
-          "properties": { "percent": { "type": "number", "minimum": 0, "maximum": 100 }, "charging": { "type": "boolean" } },
-          "required": ["percent"]
+          "type": "null",
+          "description": "No battery: the reading disappears"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "percent": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "charging": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "percent"
+          ]
         }
       ]
     },
     "workspaces": {
-      "type": "object", "additionalProperties": false,
+      "type": "object",
+      "additionalProperties": false,
       "properties": {
-        "existing": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
-        "focused": { "type": "integer", "minimum": 1 }
+        "existing": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "focused": {
+          "type": "integer",
+          "minimum": 1
+        }
       },
-      "required": ["existing", "focused"]
+      "required": [
+        "existing",
+        "focused"
+      ]
     },
-    "activeWindow": { "type": "string", "description": "Empty string = no active window" },
-    "settings": { "type": "string", "description": "Caminho de outro catálogo de configurações (spec 003)" },
+    "activeWindow": {
+      "type": "string",
+      "description": "Empty string = no active window"
+    },
+    "settings": {
+      "type": "string",
+      "description": "Caminho de outro catálogo de configurações (spec 003)"
+    },
     "wallpaper": {
-      "type": "object", "additionalProperties": false,
+      "type": "object",
+      "additionalProperties": false,
       "description": "Spec 004 (data-model, 'Fixture'): a pasta de imagens (relativa ao shell/), a escolha e a transição; com ele nada é escrito no estado e as trocas são instantâneas",
       "properties": {
-        "folder": { "type": "string" },
-        "all": { "type": "string", "description": "Id do papel de parede de todos os monitores (scene:menu, image:<caminho>)" },
-        "monitors": { "type": "object", "additionalProperties": { "type": "string" } },
-        "transition": {
-          "type": "object", "additionalProperties": false,
-          "properties": {
-            "kind": { "enum": ["camouflage", "wipe", "tiles", "crossfade"] },
-            "cell": { "enum": [16, 24, 32] },
-            "trail": { "type": "integer", "minimum": 400, "maximum": 4000 },
-            "glitch": { "enum": [0, 1, 2] }
+        "folder": {
+          "type": "string"
+        },
+        "all": {
+          "type": "string",
+          "description": "Id do papel de parede de todos os monitores (scene:menu, image:<caminho>)"
+        },
+        "monitors": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
           }
+        },
+        "transition": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "camouflage",
+                "wipe",
+                "tiles",
+                "crossfade"
+              ]
+            },
+            "cell": {
+              "enum": [
+                16,
+                24,
+                32
+              ]
+            },
+            "trail": {
+              "type": "integer",
+              "minimum": 400,
+              "maximum": 4000
+            },
+            "glitch": {
+              "enum": [
+                0,
+                1,
+                2
+              ]
+            }
+          }
+        }
+      }
+    },
+    "apps": {
+      "type": "string",
+      "description": "Spec 007: caminho do fixture dos apps (specs/007-menu-de-pausa/contracts)"
+    },
+    "windows": {
+      "type": "string",
+      "description": "Spec 007: caminho do fixture das janelas (specs/007-menu-de-pausa/contracts)"
+    },
+    "session": {
+      "type": "string",
+      "description": "Spec 007: caminho do fixture da sessão (specs/007-menu-de-pausa/contracts)"
+    },
+    "notifications": {
+      "type": "object",
+      "description": "Spec 008: as preferências, o não perturbe e a tela cheia dos testes (specs/008-pod-text-log/contracts)"
+    },
+    "audioDevices": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Spec 019 (data-model.md): saídas e fontes, no lugar do PipeWire",
+      "required": [
+        "sinks",
+        "sources",
+        "defaultSink",
+        "defaultSource"
+      ],
+      "properties": {
+        "sinks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "label"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "volume": {
+                "type": "number",
+                "minimum": 0
+              },
+              "muted": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "label"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "volume": {
+                "type": "number",
+                "minimum": 0
+              },
+              "muted": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "defaultSink": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "defaultSource": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "brightness": {
+      "oneOf": [
+        {
+          "type": "null",
+          "description": "Spec 019: sem luz de tela"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "percent"
+          ],
+          "properties": {
+            "percent": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "device": {
+              "type": "string"
+            },
+            "tool": {
+              "type": "boolean",
+              "description": "false = sem brightnessctl"
+            }
+          }
+        }
+      ]
+    },
+    "monitors": {
+      "type": "array",
+      "description": "Spec 019: as telas, no lugar do compositor",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "width",
+          "height",
+          "refreshRate",
+          "scale",
+          "focused"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "width": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "refreshRate": {
+            "type": "number",
+            "minimum": 0
+          },
+          "scale": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "focused": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Spec 019: o teclado, no lugar do compositor",
+      "properties": {
+        "repeatDelay": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "repeatRate": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kbOptions": {
+          "type": "string"
+        },
+        "kbLayout": {
+          "type": "string"
+        },
+        "modifier": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "null = o compositor não disse"
+        }
+      }
+    },
+    "sysProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Spec 019: só pro catálogo de prova (settings-proof.json)",
+      "properties": {
+        "level": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "choice": {
+              "type": "string"
+            },
+            "slider": {
+              "type": "number"
+            },
+            "toggle": {
+              "type": "boolean"
+            },
+            "info": {
+              "type": "string"
+            }
+          }
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "label"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "failWrites": {
+          "type": "boolean"
         }
       }
     }

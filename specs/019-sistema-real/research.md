@@ -36,6 +36,9 @@ em `hypr-iso` (0.56.2) e `hypr-057` (0.57.0), e registra cada item em `sondagem.
 | P8 | `hyprctl repl 'return YORHA_MOD'` (R2) | Ver R2 |
 | P9 | Formato do `getoption -j` nas 4 opções e campos `width`, `height`, `refreshRate`, `scale`, `focused` do `monitors -j` | Ajustar o parser; não muda o desenho |
 
+**Resultado (03.11, `sondagem.md`):** P1 a P9 passam em 0.56.2 e 0.57.0, e o portão passou. A prova achou uma trava do Hyprland 0.56.2: um erro na config e um pedido
+pelo socket logo depois do evento podem parar a sessão. Por isso o backend espera 300 ms antes de ler depois do `configreloaded` (a consequência de P5).
+
 **Portão:** P1 a P7 são a prova da D2. Se P2 ou P3 falharem de um jeito que a coluna da direita não resolve, ou P1 ou P6
 falharem, a etapa 0 para, e o resultado vai pro dono antes de qualquer frente: a D2 diz que a regra não muda sozinha.
 

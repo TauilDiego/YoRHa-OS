@@ -28,6 +28,9 @@ import "notify"
 ShellRoot {
     id: shell
 
+    // spec 019: the singleton has to exist before the two files' first reads end (FileWins).
+    readonly property bool fileRuleActive: FileWins.active
+
     // Fixtures freeze animations so two screenshots are pixel-identical (SC-002).
     Binding {
         target: Tokens
@@ -813,7 +816,7 @@ ShellRoot {
                 open: open,
                 monitor: shell.pauseMonitor,
                 focus: page.focus ?? "categories",
-                category: page.category ?? (SettingsModel.categories[shell.settingsCategory]?.id ?? ""),
+                category: page.category ?? (SettingsModel.visibleCategories[shell.settingsCategory]?.id ?? ""),
                 option: page.option ?? null,
                 busy: SettingsModel.busy,
                 error: SettingsModel.error,
@@ -823,6 +826,12 @@ ShellRoot {
                 // spec 013: the shell settings by key (Settings.keys), as `settings set` takes them
                 shellValues: Object.keys(Settings.keys).reduce((o, k) => (o[k] = Settings.valueOf(k), o), {}),
                 dimmed: SettingsModel.dimmedIds(),
+                // spec 019 (contracts/ipc.md)
+                reasons: SettingsModel.reasons(),
+                hidden: SettingsModel.hiddenIds(),
+                backend: Compositor.backendName,
+                fileBase: FileWins.dump(),
+                watching: SettingsModel.watching,
                 geometry: open ? page.geometry : null
             });
         }
@@ -854,7 +863,7 @@ ShellRoot {
     }
     // SYSTEM › Updates (the transmission's click, `updates open`).
     function openUpdates(): void {
-        const i = SettingsModel.categories.findIndex(c => c.id === "updates");
+        const i = SettingsModel.visibleCategories.findIndex(c => c.id === "updates");
         if (i >= 0)
             settingsCategory = i;
         openPause("system");
