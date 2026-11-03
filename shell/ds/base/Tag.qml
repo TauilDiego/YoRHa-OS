@@ -32,10 +32,12 @@ Item {
     // --- layout, in physical pixels ---------------------------------------------------------------
     readonly property real d: dpr > 0 ? dpr : 1
     readonly property int line: outline ? Math.round(Tokens.vline(1.5 * s, d) * d) : 0
-    // The ink's tight bounds, relative to the pen origin on the baseline (y < 0 above it).
+    // The ink's tight bounds in physical px, relative to the pen origin on the baseline (y < 0
+    // above it). Measured on the font at its physical size: the bounds come in whole pixels, and at
+    // the logical size a fractional scale would multiply that rounding.
     readonly property rect inkRect: metrics.tightBoundingRect
-    readonly property int inkW: Math.max(1, Math.round(inkRect.width * d))
-    readonly property int inkH: Math.max(1, Math.round(inkRect.height * d))
+    readonly property int inkW: Math.max(1, Math.round(inkRect.width))
+    readonly property int inkH: Math.max(1, Math.round(inkRect.height))
     // The size the line-box layout had.
     readonly property real lineBoxW: (label.implicitWidth + 2 * Tokens.px(outline ? 4 : 8, s)) * d
     readonly property real lineBoxH: Math.round(label.size + Tokens.px(outline ? 5 : 9, s)) * d
@@ -45,8 +47,8 @@ Item {
     readonly property int boxW: inkW + 2 * (gapX + line)
     readonly property int boxH: inkH + 2 * (gapY + line)
     // The pen origin, from the box's top-left corner.
-    readonly property int penX: Math.round(line + gapX - inkRect.x * d)
-    readonly property int baseY: Math.round(line + gapY - inkRect.y * d)
+    readonly property int penX: Math.round(line + gapX - inkRect.x)
+    readonly property int baseY: Math.round(line + gapY - inkRect.y)
 
     implicitWidth: boxW / d
     implicitHeight: boxH / d
@@ -66,9 +68,15 @@ Item {
     onWindowChanged: Qt.callLater(place)
     onDChanged: Qt.callLater(place)
 
+    // The label's font at the physical size. QFont's pixel size is whole, so go through points
+    // (Qt converts them at 96 dpi: 1 pt = 4/3 px).
     TextMetrics {
         id: metrics
-        font: label.font
+        font.family: label.font.family
+        font.weight: label.font.weight
+        font.variableAxes: label.font.variableAxes
+        font.letterSpacing: label.font.letterSpacing * root.d
+        font.pointSize: label.font.pixelSize * root.d * 0.75
         text: label.text
     }
 
