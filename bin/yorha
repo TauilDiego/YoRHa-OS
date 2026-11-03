@@ -340,7 +340,7 @@ cmd_ipc() {
 BOOT_LOGIN() { printf '%s/system/boot-login/%s-boot-login' "$(shell_root)" "$YORHA_NAME"; }
 
 cmd_boot_login() {
-    local sub=${1:-} mod
+    local sub=${1:-} mod rc
     mod=$(BOOT_LOGIN)
     [[ -x $mod ]] || yorha_fail "the boot and login module is not in this version"
     case $sub in
@@ -348,7 +348,14 @@ cmd_boot_login() {
         install)
             yorha_say "the boot (Plymouth) and login (SDDM) themes change system files, with a backup of each;"
             yorha_say "this is what would change:"
-            sudo "$mod" install --dry-run --src "$(shell_root)" || true
+            # A failed precondition (exit 1: no Plymouth, no SDDM, no mkinitcpio...) stops here, so
+            # nobody is asked to install something that cannot be installed; exit 3 (a bootloader
+            # without automatic cmdline) still goes on, with its manual step.
+            rc=0; sudo "$mod" install --dry-run --src "$(shell_root)" || rc=$?
+            if ((rc == 1)); then
+                yorha_say "nothing changed: fix what the error above asks, then run $YORHA_CMD boot-login install again"
+                exit 1
+            fi
             yorha_ask "install them (sudo)?" || { yorha_say "nothing changed"; exit 1; }
             # The module's own packages (the boot sound's aplay), offered like the shell's; a no
             # installs the rest anyway, and the module keeps its warning.
@@ -356,7 +363,12 @@ cmd_boot_login() {
             exec sudo "$mod" install --src "$(shell_root)" ;;
         uninstall)
             yorha_say "this is what would go back as it was:"
-            sudo "$mod" uninstall --dry-run || true
+            # Exit 1 (not root, unexpected) or 4 without a manifest: nothing to undo, nothing to ask
+            rc=0; sudo "$mod" uninstall --dry-run || rc=$?
+            if ((rc == 1)) || { ((rc == 4)) && ! sudo test -f "/var/lib/$YORHA_NAME/boot-login.json"; }; then
+                yorha_say "nothing changed"
+                exit 1
+            fi
             yorha_ask "undo the boot and login themes (sudo)?" || { yorha_say "nothing changed"; exit 1; }
             exec sudo "$mod" uninstall ;;
         *) usage ;;
