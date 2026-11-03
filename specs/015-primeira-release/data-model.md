@@ -30,8 +30,10 @@ Os nomes saem do `name.sh` da versão em uso. Com YoRHa-Shell:
 | `~/.local/bin/<cmd de A>` | Link pro comando de B (atalho) |
 | `~/.local/state/B/renamed-from` | `A`, o comando antigo e a data (o rollback e o uninstall usam) |
 
-O rollback desfaz isso na ordem inversa. O uninstall de B remove também o atalho, os links e a pasta
-de compatibilidade de A.
+O rollback não apaga a troca: ele faz a mesma troca no sentido contrário (de B pra A), e B vira a pasta
+de compatibilidade, com os links e o atalho do comando de B. Isso apareceu no teste da frente C: depois
+de update, novo login e rollback, as teclas que o Hyprland carregou pelo `B.lua` paravam de funcionar.
+O uninstall remove os dois lados: os atalhos, os links e as pastas de compatibilidade.
 
 ## Configurações novas (SYSTEM › Updates)
 

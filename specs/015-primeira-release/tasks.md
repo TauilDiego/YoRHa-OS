@@ -256,31 +256,37 @@ automática pode ser desligada.
 
 **Independent Test**: cenários 7 e 11.
 
-- [ ] T024 [P] [US5] O catálogo e os textos:
+- [X] T024 [P] [US5] O catálogo e os textos:
   - `sign` e `auto-check` na categoria `updates` de `shell/fixtures/settings-default.json`;
   - os textos de ajuda do contracts/sinal.md;
   - em `shell/strings/Strings.qml`, o `UPDATE` e os rótulos das formas
-- [ ] T025 [US5] `shell/services/Updater.qml`:
+- [X] T025 [US5] `shell/services/Updater.qml`:
   - `sign` e `autoCheck` lidos das opções;
   - os timers só com `installed && autoCheck`;
   - o `check()` ao abrir SYSTEM › Updates com a conferência desligada;
   - a forma `login`, pela trava `update-reminded-<latest>` (como o `Sounds.sessionStart`);
   - os campos novos do `dump`
-- [ ] T026 [US5] `shell/hud/UpdateTag.qml`, no molde do `LogCounter`:
+- [X] T026 [US5] `shell/hud/UpdateTag.qml`, no molde do `LogCounter`:
   - o tom e a placa da barra;
   - o clique emite o `Updater.showUpdates`.
 
   Ligar no `shell/hud/Hud.qml`, antes do LOG
-- [ ] T027 [US5] O menu:
+- [X] T027 [US5] O menu:
   - `shell/ds/composites/TabBar.qml` aceita uma `tag` por aba;
   - a aba SYSTEM e a linha da categoria Updates recebem a `Tag` "NEW" com a forma `menu` ou `both`.
 
   Toda lista continua cabendo e rolando por linhas inteiras
-- [ ] T028 [US5] O `lab/015/check.d/b-sign` cobre os cenários 7 e 11:
+- [X] T028 [US5] O `lab/015/check.d/b-sign` cobre os cenários 7 e 11:
   - screenshots das cinco formas, trocadas com o shell aberto;
   - o clique no `UPDATE`;
   - depois do update, nada;
   - os screenshots de antes e depois guardados pra página de revisão
+
+Feito em 02.11 (frente B, 015-b 183df24…1d8dd94, lab-015-b c1a94a6; perf `…193938…` pass): `b-sign` 20
+de 20, as cinco formas trocando ao vivo, zero pedidos em 3 min com a conferência desligada. O NEW da aba
+SYSTEM fica acima dela (dentro, encostava no texto). A página de antes e depois:
+https://claude.ai/artifact/AZ4z2gCncH8mwbWnaobiPD (o dono ainda vai olhar o lugar do NEW e o texto de ajuda
+do "Check automatically").
 
 ## Phase 8: US6, o repositório público em ordem (P3) · frente D (Opus 5.5 · médio, `t015-d`)
 
@@ -289,7 +295,7 @@ pra Phase 10.
 
 **Independent Test**: cenário 13; a auditoria sem achados (ou com os achados explicados).
 
-- [ ] T029 [P] [US6] `README.md` (FR-013):
+- [X] T029 [P] [US6] `README.md` (FR-013):
   - o comando público;
   - o estado (antes da 1.0, testado em VM, pode quebrar entre versões);
   - os requisitos;
@@ -298,22 +304,26 @@ pra Phase 10.
   - "sem telemetria: o shell só pergunta qual é a versão mais nova".
 
   Nada de detalhe do lab
-- [ ] T030 [US6] A emenda 2.1.0 em `.specify/memory/constitution.md`, com o texto exato do plan.md e
+- [X] T030 [US6] A emenda 2.1.0 em `.specify/memory/constitution.md`, com o texto exato do plan.md e
   a entrada no Sync Impact Report. Também:
   - os `CLAUDE.md` (o da YoRHa-OS e o da pasta do projeto, que é privado: só o texto do nome);
   - o `PLAN.md`: S3 e S4 com o canal público; nas decisões de 02.11, o nome, a assinatura antes da
     1.0, a telemetria adiada e a VPS na 016;
   - o `docs/design-system.md`, com o `UPDATE` da barra
-- [ ] T031 [US6] `.github/workflows/lint.yml` ganha o `workflow_dispatch`. Rodar o `shellcheck` e o
+- [X] T031 [US6] `.github/workflows/lint.yml` ganha o `workflow_dispatch`. Rodar o `shellcheck` e o
   `qmllint` do jeito do workflow **dentro da `t015-d`** (cenário 13) e corrigir o que aparecer, no
   arquivo da frente dona ou anotado pra junção
-- [ ] T032 [US6] `lab/015/audit`, que só lê o histórico que vai subir (`origin/main..015`):
+- [X] T032 [US6] `lab/015/audit`, que só lê o histórico que vai subir (`origin/main..015`):
   - caminhos do repositório privado;
   - padrões de token e chave;
   - binários acima de 8 MB;
   - extensões do jogo.
 
   Rodar e trazer o relatório
+
+Feito em 02.11 (frente D, 015-d 09135e8, 8e50ba8, d12eb8c; lab-015-d 54ce9e8): README, constituição
+2.1.0, CLAUDE.md, PLAN e design system. A auditoria não achou vazamento real: 71 menções a caminhos
+privados no que vai subir, todas só nomes e caminhos. O lint ficou verde na junção (T033).
 
 ## Phase 9: Junção (agente J · Opus 5.5 · médio, até 2 VMs)
 
