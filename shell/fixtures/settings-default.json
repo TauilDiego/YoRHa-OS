@@ -73,9 +73,9 @@
         {"id": "bar-height", "label": "Top bar height", "type": "choice", "desc": "Height of the bar at the top of the screen. The tabs and the dotted rule follow it.", "values": ["40 px", "50 px", "68 px", "80 px"], "value": 2, "default": 2},
         {"id": "bar-contrast", "label": "Bar contrast", "type": "choice", "desc": "How the texts of the top bar stand out from the wallpaper. High draws the texts darker, on a light plate over paper, and the clock heavier.", "setting": "barContrast", "values": ["Normal", "High"], "value": 0, "default": 0},
         {"id": "menu-presentation", "label": "Menu presentation", "type": "choice", "desc": "How the pause menu and the other menus open. Floating panel keeps the desktop around a panel; Full screen fills the whole screen, like the game. Switching is live, with the menu open.", "setting": "menuPresentation", "values": ["Floating panel", "Full screen"], "value": 0, "default": 0},
-        {"id": "vignette", "label": "Vignette", "type": "toggle", "desc": "Darkens the edges and corners of full-screen menus and the desktop, like the game.", "value": true, "default": true},
-        {"id": "bg-motion", "label": "Background motion", "type": "toggle", "desc": "The arcs and beams that drift slowly behind the desktop.", "value": true, "default": true},
-        {"id": "reduce-motion", "label": "Reduce motion", "type": "toggle", "desc": "Stops the ink sweeps and the blink of the selector.", "value": false, "default": false},
+        {"id": "vignette", "label": "Vignette", "type": "toggle", "setting": "vignette", "desc": "Darkens the edges and corners of full-screen menus and the desktop, like the game.", "value": true, "default": true},
+        {"id": "bg-motion", "label": "Background motion", "type": "toggle", "setting": "wallpaperMotion", "desc": "The arcs and beams that drift slowly behind the desktop.", "value": true, "default": true},
+        {"id": "reduce-motion", "label": "Reduce motion", "type": "toggle", "setting": "reduceMotion", "desc": "Stops the ink sweeps and the blink of the selector.", "value": false, "default": false},
         {"id": "cursor-size", "label": "Cursor size", "type": "choice", "desc": "Size of the mouse pointer, in logical pixels.", "values": ["32", "48", "64"], "value": 1, "default": 1},
         {"id": "language", "label": "Language", "type": "choice", "desc": "Language of the interface. Applies to every menu after a restart of the shell.", "values": ["English", "Português", "日本語"], "value": 0, "default": 0}
       ]
@@ -121,7 +121,7 @@
         {"id": "available", "label": "Available", "type": "info", "updates": "available", "desc": "The newest version, checked every hour. `yorha update --check` checks now.", "text": "Up to date"},
         {"id": "update-now", "label": "Update now", "type": "action", "updates": "now", "desc": "Opens a terminal running `yorha update`: the new version is checked, the state is kept, and the shell restarts on it. `yorha rollback` goes back.", "text": "Update", "busy": "Opening the terminal."},
         {"id": "sign", "label": "Update sign", "type": "choice", "setting": "updates.sign", "desc": "How a newer version stays on screen until you update. Off shows only the first transmission.", "values": ["Bar", "Menu", "Bar and menu", "Each login", "Off"], "value": 2, "default": 2},
-        {"id": "auto-check", "label": "Check automatically", "type": "toggle", "setting": "updates.autoCheck", "desc": "Checks for a newer version 30 s after the shell starts and then every hour. Off: only `yorha update` checks.", "value": true, "default": true}
+        {"id": "auto-check", "label": "Check automatically", "type": "toggle", "setting": "updates.autoCheck", "desc": "Checks for a newer version 30 s after the shell starts and then every hour. Off: it checks only when you open Updates or run `yorha update`.", "value": true, "default": true}
       ]
     }
   ]

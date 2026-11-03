@@ -11,10 +11,12 @@ Singleton {
 
     readonly property real uiScale: valid(merged.uiScale, 0.5, 3.0, "uiScale") ? merged.uiScale : defaults.uiScale
     readonly property int barHeight: Math.round(Math.max(28, Math.min(96, Number(merged.barHeight) || defaults.barHeight)))
-    readonly property bool vignette: typeof merged.vignette === "boolean" ? merged.vignette : defaults.vignette
-    readonly property bool wallpaperMotion: typeof merged.wallpaperMotion === "boolean" ? merged.wallpaperMotion : defaults.wallpaperMotion
-    // Reduced motion: fades, the selector blink and wallpaper transitions become instant.
-    readonly property bool reduceMotion: typeof merged.reduceMotion === "boolean" ? merged.reduceMotion : defaults.reduceMotion
+    // The vignette, the background's motion and Reduce motion (spec 013 FR-016: every effect goes
+    // straight to its final state). From shell.json / defaults.json; SYSTEM › Appearance changes
+    // them live and saves them (keys below, "shell.<key>"), which wins over the config.
+    readonly property bool vignette: valueOf("shell.vignette")
+    readonly property bool wallpaperMotion: valueOf("shell.wallpaperMotion")
+    readonly property bool reduceMotion: valueOf("shell.reduceMotion")
 
     readonly property var defaults: parse(defaultsFile.text(), "defaults.json") ?? ({ uiScale: 1.0, barHeight: 68, vignette: true, wallpaperMotion: true, reduceMotion: false, barContrast: "normal", terminal: ["kitty"] })
     readonly property var user: userFile.loaded ? (parse(userFile.text(), userFile.path) ?? ({})) : ({})
@@ -142,6 +144,10 @@ Singleton {
     //   input.kbLayouts: [] = the compositor's layout as it is (the Keyboard › Layouts option fills it).
     readonly property var keys: ({
         "shell.menuPresentation": { type: "choice", values: ["floating", "fullscreen"], fallback: "floating", config: ["menuPresentation"] },
+        // U13 (audit D-02): Appearance's toggles, bound to what the shell already does with them
+        "shell.vignette": { type: "bool", fallback: true, config: ["vignette"] },
+        "shell.wallpaperMotion": { type: "bool", fallback: true, config: ["wallpaperMotion"] },
+        "shell.reduceMotion": { type: "bool", fallback: false, config: ["reduceMotion"] },
         "sound.ui": { type: "bool", fallback: true, config: ["sound", "ui"] },
         "sound.volume": { type: "int", min: 0, max: 100, fallback: 40, config: ["sound", "volume"] },
         "sound.folder": { type: "string", fallback: "", config: ["sound", "folder"] },

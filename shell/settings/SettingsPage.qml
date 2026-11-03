@@ -324,6 +324,11 @@ FocusScope {
     }
 
     // --- what the card and the footer say (FR-014, FR-015) ------------------------------------
+    // The catalog marks commands as code spans (`yorha update`); the card has no code style, so they
+    // read as plain words, as in every other description (audit D-10).
+    function plain(t: string): string {
+        return t.split("`").join("");
+    }
     readonly property var cardInfo: {
         if (SettingsModel.error !== "")
             return { title: Strings.settings.title, text: "", note: SettingsModel.error, kind: "alert", meta: [] };
@@ -332,7 +337,7 @@ FocusScope {
         if (!opt)
             return {
                 title: cat.label,
-                text: cat.about ?? "",
+                text: plain(cat.about ?? ""),
                 note: "",
                 kind: "alert",
                 meta: [{ label: Strings.settings.count, value: String(opts.length) }]
@@ -343,7 +348,7 @@ FocusScope {
         const multiNote = opt.type === "multi" ? Compositor.keyboardLayoutsNote : "";
         return {
             title: opt.label,
-            text: opt.desc ?? "",
+            text: plain(opt.desc ?? ""),
             note: dimmed ? SettingsModel.needsText(catId, opt.id) : busy ? String(opt.busy ?? "") : multiNote,
             kind: dimmed || multiNote !== "" ? "alert" : "info",
             meta: opt.type === "multi" ? [{ label: Strings.settings.nowLabel, value: SettingsModel.display(catId, opt.id) }]
