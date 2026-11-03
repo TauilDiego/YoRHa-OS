@@ -4,16 +4,15 @@
 
 **Created**: 2026-11-03
 
-**Status**: Rascunho. O dono aprovou o plano e a ordem das ondas e respondeu às 5 perguntas em 03.11
-(ver "Decisões do dono"). Falta ele aprovar o texto.
+**Status**: Aprovada pelo dono em 03.11, junto com o plano geral, a ordem das ondas e as respostas às 5
+perguntas (ver "Decisões do dono").
 
 **Input**: A auditoria da 015 (D-01) achou 31 das 63 opções do SYSTEM (SUPER+I) com valores
 inventados: Wi-Fi `home-5G`, teclado Bluetooth `K2 Keyboard`, bateria `87% · charging` num PC sem
 bateria. Mudar o valor só grava no `settings.json`. O dono, em 03.11: "mapear tudo que a gente tem
 faltando e fazer um plano pra implementar TODAS os placeholders... classificar por ordem de
 complexidade e fazer os mais simples. os que dependem de outra ferramenta tu fala comigo pra gente
-ir ajustando." Ele decidiu não esconder nem apagar: as opções viram reais, das simples pras
-difíceis. Fonte: o plano aprovado (`frolicking-juggling-lemon.md`); aqui, "onda" é o que o plano
+ir ajustando." As opções viram reais, das simples pras difíceis. Fonte: o plano aprovado (`frolicking-juggling-lemon.md`); aqui, "onda" é o que o plano
 chama de onda.
 
 ## As 31 opções
