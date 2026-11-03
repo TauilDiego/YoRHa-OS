@@ -34,5 +34,6 @@
 - Os três itens abertos são de propósito. O plano aprovado e a constituição (princípio IV) pedem a fonte de cada valor
   e um comando como evidência, e as specs do projeto citam comandos e nomes de código.
 - As dúvidas que mudavam o que é construído foram respondidas pelo dono em 03.11: ver "Decisões do dono (03.11)" (D1 a
-  D5). O `/speckit-plan` espera o dono aprovar o texto e os requisitos de "Acrescentados, a aprovar".
-- FR-012, FR-013, FR-023 e FR-026 vêm de D1, D4, D5 e D2.
+  D7). O `/speckit-plan` espera o dono aprovar o texto.
+- FR-012, FR-013, FR-023, FR-026 e FR-044 vêm de D1, D4, D5, D2 e D6.
+- Limite marcado na spec, sem garantia: um `hyprctl eval` antes da primeira subida do shell numa sessão pode virar a base.

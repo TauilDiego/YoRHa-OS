@@ -5,7 +5,7 @@
 **Created**: 2026-11-03
 
 **Status**: Rascunho. O dono aprovou o plano e a ordem das ondas e respondeu às 5 perguntas em 03.11
-(ver "Decisões do dono"). Falta ele aprovar o texto e os requisitos de "Acrescentados, a aprovar".
+(ver "Decisões do dono"). Falta ele aprovar o texto.
 
 **Input**: A auditoria da 015 (D-01) achou 31 das 63 opções do SYSTEM (SUPER+I) com valores
 inventados: Wi-Fi `home-5G`, teclado Bluetooth `K2 Keyboard`, bateria `87% · charging` num PC sem
@@ -26,7 +26,7 @@ em duas ondas: leem na 1B e mudam na 2.
 
 | Opção | Onda | O que a linha faz quando real | De onde vem o valor | Sem o hardware ou a ferramenta |
 |---|---|---|---|---|
-| Display › Resolution | 1B lê; 2 muda | 1B: mostra a resolução real, só leitura. 2: troca | `hyprctl monitors -j` | Sem resposta do compositor: apagada com o motivo |
+| Display › Resolution | 1B lê; 2 muda | 1B: mostra a resolução real, só leitura. 2: troca | `hyprctl monitors -j`, pelo adaptador | Compositor sem suporte: a linha some |
 | Display › Refresh rate | 1B lê; 2 muda | 1B: mostra os Hz reais, só leitura. 2: troca | `hyprctl monitors -j` | Igual a Resolution |
 | Display › Scale | 1B lê; 2 muda | 1B: mostra a escala real, só leitura. 2: troca | `hyprctl monitors -j` | Igual a Resolution |
 | Display › Brightness | 1B | Lê e muda a luz da tela | sysfs, o mesmo aparelho que o `Osd.qml` usa; escreve por `brightnessctl` | Sem luz de tela: apagada, "No backlight on this screen." Com luz e sem `brightnessctl`: mostra o valor, não muda, e o card diz por quê |
@@ -48,10 +48,10 @@ em duas ondas: leem na 1B e mudam na 2.
 | Appearance › Top bar height | 1D | Muda a altura da barra na hora | `Settings.barHeight`; salvo na pasta de estado | Não depende de nada |
 | Appearance › Cursor size | 2 | Muda o tamanho do ponteiro | Depende do cursor vir no instalador (D-21) | A definir com a D-21 |
 | Appearance › Language | 2 | Troca o idioma da UI | Fase U5b: `Strings.qml` e catálogo por idioma | A definir na U5b |
-| Keyboard › Caps Lock | 1C | Muda o que a tecla faz | `input:kb_options` do Hyprland, somado ao que a pessoa já tem; salvo na pasta de estado | Compositor sem suporte: apagada com o motivo |
+| Keyboard › Caps Lock | 1C | Muda o que a tecla faz | `input:kb_options` do Hyprland, pelo adaptador, somado ao que a pessoa já tem; salvo na pasta de estado | Compositor sem suporte: a linha some |
 | Keyboard › Repeat delay | 1C | Muda a espera antes de repetir | `input:repeat_delay`; salvo na pasta de estado | Igual a Caps Lock |
 | Keyboard › Repeat rate | 1C | Muda a velocidade da repetição | `input:repeat_rate`; salvo na pasta de estado | Igual a Caps Lock |
-| Keyboard › Shortcuts | 1C | Abre a lista dos atalhos do produto, só leitura | Os binds do `yorha-shell.lua`, com o `YORHA_MOD` em uso | Compositor que não diz o modificador: a lista usa SUPER e avisa |
+| Keyboard › Shortcuts | 1C | Abre a lista dos atalhos do produto, só leitura | Os binds do `yorha-shell.lua`, com o `YORHA_MOD` em uso | Compositor sem suporte: a linha some. Hyprland que não diz o modificador: a lista usa SUPER e avisa |
 | Power › Battery | 1B | Mostra a carga real, só leitura | `Battery.qml` (UPower) | Sem bateria: apagada, "No battery on this machine." Sem UPower: apagada, "UPower is not installed." |
 | Power › Profile | 3 | Troca o perfil de energia | power-profiles-daemon | A definir na conversa |
 | Power › Screen off after | 3 | Desliga a tela depois do tempo parado | IdleMonitor (embutido) | A definir na conversa |
@@ -67,6 +67,11 @@ em duas ondas: leem na 1B e mudam na 2.
   catálogo do produto. Os dados de teste vão pra `fixtures/settings-showroom.json` (FR-008).
 - **003, FR-017** (linha apagada por dependência): a mesma aparência passa a valer pra "o sistema não
   tem isso" (FR-004).
+- **013, Keyboard › Layouts** (research R6): hoje os layouts salvos voltam depois de todo reload. Passam a
+  voltar só enquanto o `kb_layout` do arquivo e o `kbLayouts` do `shell.json` não mudarem (FR-040). A nota
+  "The layouts are saved, but … can't apply them yet" sai: num compositor sem suporte, a linha some (FR-045).
+- **004, FR-030 e FR-031; 008, a ordem de quem vale; e as chaves salvas da 013, da U13 e da 015:** "a escolha
+  guardada vale mais que o `shell.json`" passa a valer só até a pessoa editar aquela chave no arquivo (FR-041).
 
 ## Princípio II
 
@@ -74,9 +79,9 @@ Nada desta spec edita o `hyprland.lua` da pessoa. Leitura e mudança passam pelo
 PipeWire, e o que o produto guarda fica em `$XDG_STATE_HOME/yorha-shell/settings.json`. Os dois pontos
 que encostavam no princípio foram decididos pelo dono em 03.11:
 
-1. **"O `hyprland.lua` e os dotfiles são da pessoa" (1C).** Uma linha que a pessoa mudou no menu volta depois
-   de um reload só enquanto o valor do arquivo dela não mudar. Se ela editou o arquivo, vale o arquivo. Uma
-   linha que ela não mexeu fica com o valor do arquivo. Ver D2.
+1. **"O `hyprland.lua` e os dotfiles são da pessoa".** Um valor que a pessoa mudou no menu vale só enquanto o
+   valor do arquivo dela não mudar. Se ela editou o arquivo, vale o arquivo. Isso vale pra todas as opções com
+   um arquivo por trás. Uma linha que ela não mexeu fica com o valor do arquivo. Ver D2.
 2. **"O que fica de fora: hardware" (1A, 1B e a onda 3).** "Hardware" quer dizer drivers e firmware. A
    emenda MINOR da constituição (2.2.0) diz isso nesta branch. Ver D3.
 
@@ -261,6 +266,63 @@ visual.
 
 ---
 
+### User Story 6 - O arquivo editado vence, em todas as opções (Priority: P2)
+
+Quem edita o próprio arquivo depois de mexer no menu fica com o que escreveu. O menu não desfaz a edição.
+
+**Why this priority**: É a regra geral do dono sobre as configs da pessoa, e vale pra opções que já existem.
+
+**Independent Test**: Na VM, mudar a opção no menu, dar um reload sem editar (o menu fica), editar o arquivo e
+recarregar (o arquivo fica).
+
+**Acceptance Scenarios**:
+
+1. **Given** Layouts em `us,br` pelo menu, **When** roda um reload sem editar, **Then** fica `us,br`; **When** o
+   `kb_layout` do arquivo muda pra `de` e recarrega, **Then** fica `de` e a escolha salva some. **Evidência:**
+   `hyprctl devices -j`, `jq` no `settings.json`.
+2. **Given** Interface scale em 110% e Top bar height em 50 px pelo menu, **When** o shell reinicia sem editar nada,
+   **Then** os dois continuam; **When** o `shell.json` ganha `uiScale: 1.25` e `barHeight: 72`, **Then** valem os do
+   arquivo e os salvos somem. **Evidência:** `settings dump`, `jq` no `settings.json`, screenshot.
+3. **Given** Reduce motion, Vignette e Background motion mudados pelo menu, **When** cada chave é editada no
+   `shell.json`, **Then** vale o arquivo e o salvo daquela chave some; as outras ficam. **Evidência:** `shellValues`
+   do `settings dump`, `jq` no `settings.json`.
+4. **Given** um valor salvo, **When** o `shell.json` fica com JSON inválido e depois volta ao que era, **Then** o
+   valor salvo continua. **Evidência:** `jq` no `settings.json` depois de cada passo.
+5. **Given** o arquivo com `repeat_rate = 25` e o menu em 50, **When** `hyprctl eval` põe 40 e só o shell reinicia,
+   **Then** a escolha do menu continua; **When** roda um reload, **Then** fica em 50. **Evidência:** `getoption -j`,
+   `jq` no `settings.json`.
+6. **Given** o arquivo com `repeat_rate = 25`, depois de um reload, e `hyprctl eval` pondo 40, **When** a pessoa muda
+   a linha pra 50 e roda um reload, **Then** fica em 50: a edição fora do arquivo não virou a base. **Evidência:**
+   `getoption -j`, `jq` no `settings.json`.
+7. **Given** um valor salvo, **When** o `defaults.json` muda aquele padrão, como num update, e o shell reinicia, **Then**
+   o valor salvo continua. **Evidência:** `settings dump`, `jq` no `settings.json`.
+8. **Given** um valor salvo no teclado, **When** o arquivo fica com erro de config e recarrega, **Then** o valor salvo
+   não some. **Evidência:** `hyprctl configerrors`, `jq` no `settings.json`.
+
+---
+
+### User Story 7 - Pronto pra outros compositores (Priority: P2)
+
+O SYSTEM não supõe o Hyprland. Num compositor sem suporte, a linha não aparece, em vez de prometer o que não faz.
+
+**Why this priority**: O dono: "algumas dessas configs vão precisar suportar mango e niri".
+
+**Independent Test**: Na VM, subir o shell com `YORHA_COMPOSITOR=none` e com `=niri`, e abrir o SYSTEM.
+
+**Acceptance Scenarios**:
+
+1. **Given** `YORHA_COMPOSITOR=none`, **When** o SYSTEM abre, **Then** as linhas de teclado e de Display que dependem do
+   compositor não aparecem, o `settings dump` as lista em `hidden`, e Sound continua funcionando. **Evidência:**
+   screenshot, `settings dump`, `wpctl get-volume`.
+2. **Given** `YORHA_COMPOSITOR=niri` numa sessão do Hyprland, **When** o shell sobe, **Then** o backend é o `none`, e
+   nada é lido nem aplicado no Hyprland. **Evidência:** o backend no dump, `getoption -j` antes e depois.
+3. **Given** uma categoria que ficou sem nenhuma linha, **When** o SYSTEM abre, **Then** ela não aparece e nenhuma
+   coluna fica vazia. **Evidência:** screenshot, `settings dump`.
+4. **Given** o código do shell, **When** a check-019 procura `hyprctl` e `Quickshell.Hyprland` fora de
+   `shell/services/compositor/`, **Then** não acha nada além de comentários. **Evidência:** o resultado da busca.
+
+---
+
 ### Edge Cases
 
 - **Volume acima de 100%:** as teclas sobem até 150% (`wpctl -l 1.5`). O slider mostra o topo e o card, o
@@ -286,6 +348,14 @@ visual.
   continua. É um limite conhecido.
 - **O arquivo mudou com a sessão desligada:** o login conta como reload, porque o compositor sobe com o valor do
   arquivo.
+- **`hyprctl eval` antes de um reload, com o shell reiniciando:** não conta como edição (FR-039).
+- **Limite, sem garantia: `hyprctl eval` antes da primeira subida do shell numa sessão** (um `exec-once` da pessoa, ou
+  instalar no meio da sessão). O shell não tem como saber que o valor não veio do arquivo, então ele vira a base. No
+  reload ou login seguinte, isso pode parecer uma edição, e o valor do menu é esquecido. O erro cai pro lado do arquivo
+  da pessoa, e a linha continua mostrando o valor real.
+- **Limite: reload com o arquivo editado e o shell desligado, na mesma sessão.** O shell sobe e reaplica o valor do menu,
+  porque não viu o reload. O próximo reload percebe a edição e o arquivo volta a valer.
+- **`shell.json` apagado:** é uma edição. As chaves que estavam nele perdem o valor salvo.
 
 ## Requirements *(mandatory)*
 
@@ -318,8 +388,8 @@ visual.
   ativo, nada é escrito no sistema. `network`, `bluetooth` e `powerProfile` só entram na onda 3.
 - **FR-010**: `specs/003-settings-popup/contracts/settings.schema.json` e a validação do catálogo
   (`problemOf`) MUST aceitar as linhas `sys.*` e o `live` do `settings dump` MUST listá-las.
-- **FR-011**: O contrato do provedor (FR-001, FR-003, FR-004) MUST estar pronto e estável antes das frentes
-  1A a 1D (princípio VI).
+- **FR-011**: O contrato do provedor (FR-001, FR-003, FR-004), o do arquivo da pessoa (FR-039, FR-041) e o do
+  adaptador (FR-044, FR-045) MUST estar prontos e estáveis antes das frentes 1A a 1D (princípio VI).
 - **FR-012**: A 0.1.0 MUST sair com as 31 opções reais, feitas na ordem das ondas (D1). Isso inclui as ondas 2
   e 3: as 16 linhas que as ondas 0 e 1 não cobrem e a mudança de Resolution, Refresh rate e Scale. Nenhum valor
   inventado fica no catálogo do produto na release.
@@ -356,31 +426,27 @@ visual.
 
 - **FR-024**: Keyboard › Repeat delay, Repeat rate e Caps Lock MUST ler o valor do compositor e, ao mudar,
   aplicar na hora, pelo mesmo caminho do `setKeyboardLayouts`, e salvar na pasta de estado do produto.
-- **FR-025**: Enquanto a pessoa não mudar a linha, o produto MUST NOT aplicar nem salvar nada. Um valor da
-  config que não está na lista aparece como está (`250 ms`).
-- **FR-026**: Ao mudar uma linha, o produto MUST guardar, na pasta de estado, o valor salvo e o valor do arquivo
-  da pessoa, que é o que o compositor tinha antes da mudança. A cada reload ou login, MUST ler o valor do arquivo
-  antes de reaplicar. Igual ao guardado: reaplica o valor do menu. Diferente: a pessoa editou o arquivo, então o
-  valor novo fica, e o valor salvo da linha é esquecido (D2). Um shell reiniciado sem reload encontra o valor do
-  menu ainda aplicado: isso não conta como edição.
+- **FR-025**: Enquanto a pessoa não mudar a linha, o produto MUST NOT aplicar nada nem salvar um valor do menu; só
+  guarda a base da FR-039. Um valor da config que não está na lista aparece como está (`250 ms`).
+- **FR-026**: A cada reload ou login, o produto MUST ler o valor do arquivo antes de reaplicar e comparar com a base
+  da FR-039. Igual: reaplica o valor do menu. Diferente: a pessoa editou o arquivo, então o valor novo fica, e o valor
+  salvo da linha é esquecido (D2). Um shell reiniciado na mesma sessão não compara nada (FR-039).
 - **FR-027**: Caps Lock MUST mexer só na parte do Caps de `kb_options`, somando ao que a pessoa já tem. A comparação
   da FR-026 MUST usar a parte do Caps do valor do arquivo, nunca o valor somado. Uma edição em outra parte de
   `kb_options` fica valendo e não apaga a escolha do menu.
 - **FR-028**: Repeat rate MUST mostrar repetições por segundo e não chegar a 0, porque 0 desliga a repetição.
   O mínimo é 5, o passo do slider.
-- **FR-029**: `settings reset` MUST limpar os valores salvos do teclado, e o valor do arquivo guardado com eles, sem
-  dar reload. O da config da pessoa
+- **FR-029**: `settings reset` MUST limpar os valores salvos do teclado sem dar reload. O da config da pessoa
   volta no próximo reload ou login, e a linha mostra sempre o valor real.
 - **FR-030**: Keyboard › Shortcuts MUST abrir a lista dos atalhos do `yorha-shell.lua`, só leitura, com o
   `YORHA_MOD` em uso. Se o compositor não disser o modificador, a lista usa SUPER e avisa. A descrição da linha
   MUST dizer que são os atalhos do produto.
-- **FR-031**: Num compositor que não aplica essas opções, as linhas MUST ficar apagadas com o motivo, como a
-  nota de `keyboardLayoutsNote`.
+- **FR-031**: Num compositor que não aplica essas opções, as linhas MUST sumir (FR-045).
 
 **Onda 1D: aparência**
 
 - **FR-032**: Appearance › Interface scale e Top bar height MUST aplicar na hora e salvar em `shell.uiScale` e
-  `shell.barHeight`, com o valor salvo vencendo o `shell.json`, no molde das opções da U13.
+  `shell.barHeight`, com o valor salvo vencendo o `shell.json` até a pessoa editar aquela chave (FR-041), no molde das opções da U13.
 - **FR-033**: Um `uiScale` ou `barHeight` do `shell.json` válido na faixa de hoje (0,5–3,0; 28–96) e fora da
   lista do menu MUST continuar valendo e aparecer na linha. O molde da U13 descartaria esse valor; aqui não pode.
 - **FR-034**: Em todos os valores, nas duas telas, a barra e os menus MUST caber e nada fica cortado.
@@ -394,10 +460,44 @@ visual.
 - **FR-038**: Nenhuma ferramenta nova em `system/deps` nesta spec. Tudo que as ondas 0 e 1 usam já é dependência
   ou já é opcional, com a ressalva do UPower em Assumptions.
 
+**O arquivo da pessoa (todas as opções; o contrato é da onda 0, as linhas são das ondas 1C e 1D)**
+
+- **FR-039**: A base de uma opção do compositor MUST ser o valor lido logo depois de um reload, ou na primeira subida do
+  shell numa sessão nova do compositor, sempre antes de reaplicar. Ela é guardada na pasta de estado, com o id da
+  sessão, mesmo pra uma linha nunca mexida. Mudar a linha não muda a base. Reiniciar o shell na mesma sessão não
+  compara nem atualiza nada, e o shell reaplica o valor do menu. A escrita do próprio produto não conta como reload.
+- **FR-040**: Keyboard › Layouts MUST seguir a FR-026 e a FR-039, como as outras linhas de teclado.
+- **FR-041**: Todo valor salvo pelo menu com uma chave no `shell.json` MUST ter a base no valor dessa chave no arquivo da
+  pessoa (ausente também é um valor), comparada na subida do shell e quando o arquivo muda. Diferente: vale o arquivo, e
+  o salvo daquela chave é esquecido. Vale pra `uiScale`, `barHeight`, `reduceMotion`, `vignette`, `wallpaperMotion`,
+  `barContrast`, `menuPresentation`, `sound.*`, `kbLayouts`, `updates.*` e `notifications.*`.
+- **FR-042**: Com `shell.json` ilegível ou JSON inválido, ou com erro de config no compositor, o produto MUST NOT
+  comparar nem esquecer nada. Um valor inválido numa chave de um arquivo legível é uma edição: o salvo é esquecido, e a
+  chave cai no padrão, como hoje.
+- **FR-043**: A comparação MUST olhar só o arquivo da pessoa, nunca o valor somado ao `defaults.json`. Um update MUST NOT
+  esquecer um valor salvo nem mudar um arquivo da pessoa.
+
+**O adaptador de compositor (todas as opções; o contrato é da onda 0)**
+
+- **FR-044**: Tudo que depende do compositor (teclado, telas, cursor, atalhos, tampa e a leitura de arquivo da FR-039) MUST
+  passar pelo adaptador em `shell/services/compositor/`. Nenhuma linha ou serviço chama `hyprctl` nem importa
+  `Quickshell.Hyprland` fora dele. A comparação da FR-026 é igual pra todo compositor; só a leitura é do backend.
+- **FR-045**: Uma linha que o compositor atual não consegue fazer MUST sumir nesse compositor, e o `settings dump` a lista em
+  `hidden`, conforme as `capabilities` do backend. Uma categoria sem nenhuma linha some também. O estado apagado da FR-004
+  fica pro que falta na máquina.
+- **FR-046**: Um compositor desconhecido, ou sem backend (Niri e Mango, hoje), MUST usar o `NullBackend` e nunca ser tratado
+  como Hyprland.
+
 ### Ondas 2 e 3: só escopo e dependência
 
 As duas ondas entram na 0.1.0 (D1), depois da onda 1. Os requisitos delas não estão aqui: cada item terá os
 seus quando chegar a vez, e cada ferramenta da onda 3 é conversada com o dono, uma por vez.
+
+O cursor, as telas e a tampa passam pelo adaptador (FR-044). Os comandos de Niri e Mango no Serpantinum
+(`/home/diego/.local/share/serpantinum/src`, AGPL; se algum código for reusado, com crédito em `CREDITS.md`) são só
+referência, e ele não tem modelo de reaplicar nem de detectar edição de arquivo nesses compositores.
+
+**Conflito pra 018:** a opção "This menu wins" da proposta vai contra a regra da D2. A 018 é que decide.
 
 **Onda 2 (depende de outra frente):**
 
@@ -450,6 +550,11 @@ instalar (`lib/yorha/deps.sh`). Rede e Bluetooth já estão na emenda do princí
 - **SC-008**: Antes da 0.1.0, com as ondas 2 e 3 prontas, as 31 opções são reais, e o `settings dump` do catálogo do
   produto na VM sem fixture não traz `home-5G`, `K2 Keyboard` nem outro valor inventado. **Evidência:** a busca no
   dump, feita na ref da release, e o resumo do relatório do `lab/perf`.
+- **SC-009**: Em todas as opções da User Story 6, um reload ou reinício sem edição mantém o valor do menu, e uma edição do
+  arquivo faz valer o arquivo. **Evidência:** `results.txt` da check-019.
+- **SC-010**: Fora de `shell/services/compositor/`, a busca por `hyprctl` e `Quickshell.Hyprland` não acha código, e com
+  `YORHA_COMPOSITOR=none` o SYSTEM abre sem linha que dependa do compositor. **Evidência:** a busca, o `settings dump` e
+  o log do QML.
 
 ## Assumptions
 
@@ -464,6 +569,8 @@ instalar (`lib/yorha/deps.sh`). Rede e Bluetooth já estão na emenda do princí
   ao da config no login seguinte, porque nada foi escrito na config dela.
 - As chamadas `hyprctl eval`, `getoption` e os campos do `monitors -j` valem na 0.56 e na 0.57; o plano confere isso.
 - O `YORHA_MOD` é uma variável do Lua e o shell não a enxerga hoje. O plano escolhe como perguntar ao compositor.
+- Os backends de Niri e de Mango **não entram na 0.1.0**. É uma suposição, dita ao dono, que não objetou, e pode ser revertida.
+  Até lá, a 0.1.0 só prepara o caminho (FR-044 a FR-046).
 - O plano técnico pode mudar nomes de chaves; os comportamentos e as evidências desta spec, não.
 
 ## Decisões do dono (03.11)
@@ -472,11 +579,12 @@ instalar (`lib/yorha/deps.sh`). Rede e Bluetooth já estão na emenda do princí
 implementar na ordem dessas atividades ai." A release inclui as ondas 2 (a 018, o cursor no instalador, Language) e 3.
 Não há estado intermediário de "ainda não feito" na release (FR-012, SC-008).
 
-**D2. No teclado, o arquivo editado vence.** "se a pessoa editou pra ficar 30 deixa 30. ela editou um arquivo né."
-Uma linha mudada no menu volta depois de um reload só enquanto o valor do arquivo não mudar. Se mudou, vale o arquivo e
-o valor do menu é esquecido. Uma linha que a pessoa não mexeu fica com o valor do arquivo (FR-025 a FR-027). Limite
-conhecido: uma edição que grava o mesmo valor que o arquivo já tinha não é percebida. A VM precisa provar a detecção
-(User Story 4, cenários 9 e 10). Se não provar, isso volta pro dono; a regra não muda sozinha.
+**D2. O arquivo editado vence, em todas as opções.** "se a pessoa editou pra ficar 30 deixa 30. ela editou um arquivo né."
+E depois: "vale pra todas". Um valor mudado no menu vale só enquanto o valor do arquivo não mudar. Se mudou, vale o
+arquivo e o valor do menu é esquecido. Uma linha que a pessoa não mexeu fica com o valor do arquivo (FR-025 a FR-027,
+FR-039 a FR-043). Limite conhecido: uma edição que grava o mesmo valor que o arquivo já tinha não é percebida. A VM
+precisa provar a detecção (User Story 4, cenários 9 e 10; User Story 6). Se não provar, isso volta pro dono; a regra não
+muda sozinha.
 
 **Regra geral do dono.** "acho que é importante a gente só mexer se for a primeira vez em uma coisa nova. tipo a primeira
 vez q ela instala o yorha shell algo assim. depois mantém o máximo de configs do user possivel". O produto só muda alguma
@@ -493,11 +601,9 @@ reiniciando; se a saída não ficar, a decisão volta pro dono (User Story 2, ce
 
 **D5. Display mostra a tela em foco**, com o nome dela no card, e segue o foco (FR-023).
 
-### Acrescentados, a aprovar
+**D6. Outros compositores.** "algumas dessas configs vão precisar suportar mango e niri". Tudo que depende do compositor
+passa pelo adaptador. Uma linha que o compositor não faz some, e um compositor desconhecido nunca é tratado como Hyprland
+(FR-044 a FR-046).
 
-O dono ainda não viu estes quatro requisitos, que não vieram do plano:
-
-- **FR-006**: `settings reset` não muda volume, mudo, microfone, saída nem luz de tela.
-- **FR-007**: valores falsos salvos pela versão anterior são removidos na subida, sem nunca serem aplicados.
-- **FR-022**: pela linha, a luz de tela não desce abaixo de 5%.
-- **FR-028**: Repeat rate tem mínimo de 5, porque 0 desliga a repetição.
+**D7. Os quatro requisitos que vieram da spec foram aprovados:** FR-006 (`settings reset` não mexe no sistema), FR-007 (os
+valores falsos antigos são removidos na subida), FR-022 (luz de tela com mínimo de 5%) e FR-028 (Repeat rate com mínimo de 5).
