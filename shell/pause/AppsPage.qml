@@ -100,6 +100,27 @@ FocusScope {
         layout.column = "list";
         query = "";
     }
+    // U13 (audit D-04): a key the compositor caught while the menu opened (PauseMenu.deliverKey).
+    function key(name: string): void {
+        switch (name) {
+        case "BackSpace":
+            backspace();
+            break;
+        case "Return":
+        case "KP_Enter":
+            if (layout.column === "list" && layout.count > 0)
+                layout.apply(layout.index);
+            break;
+        case "Up":
+        case "Down":
+            if (layout.column === "list" && layout.count > 0)
+                layout.index = (layout.index + (name === "Up" ? -1 : 1) + layout.count) % layout.count;
+            break;
+        case "Escape":
+            layout.closeRequested();
+            break;
+        }
+    }
     // Tests only (`pause search`): the whole search at once.
     function setQuery(text: string): void {
         layout.column = "list";
@@ -288,9 +309,13 @@ FocusScope {
                 : app ? app.name : root.ps.noMatchTitle
             readonly property string text: Apps.error !== "" ? Apps.error
                 : app ? app.description : root.ps.noMatchText
+            // `uses` counts the launches from this menu; an app never launched from here may still
+            // have windows (opened elsewhere): then the card says so, never "not opened" (audit D-14).
             readonly property string footer: !app ? ""
-                : app.uses === 0 ? root.ps.neverOpened
-                : app.uses === 1 ? root.ps.openedOnce : root.ps.opened.arg(app.uses)
+                : app.uses > 1 ? root.ps.opened.arg(app.uses)
+                : app.uses === 1 ? root.ps.openedOnce
+                : root.appWindows > 1 ? root.ps.runningWindows.arg(root.appWindows)
+                : root.appWindows === 1 ? root.ps.runningWindow : root.ps.neverOpened
 
             Card {
                 anchors.fill: parent

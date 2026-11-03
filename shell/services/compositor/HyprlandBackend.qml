@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQml.Models
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
@@ -51,13 +52,75 @@ Item {
     property var workspaceMonitors: ({})
     // { monitor id: name }, from `hyprctl monitors -j` (a client names its monitor by id).
     property var monitorNames: ({})
-    readonly property string activeTitle: Hyprland.activeToplevel?.title ?? startupTitle
+    // Quickshell keeps the last active toplevel after its window closes or the focus moves to an
+    // empty workspace, so the title would stay on the bar (audit D-08). Nothing in focus (the
+    // activewindowv2 event with no address) or a focused workspace with no windows = no title.
+    readonly property string activeTitle: nothingFocused || focusedWorkspaceEmpty ? "" : (Hyprland.activeToplevel?.title ?? startupTitle)
+    property bool nothingFocused: false
+    property bool windowsRead: false            // the first `clients -j` read came back
+    readonly property bool focusedWorkspaceEmpty: {
+        const ws = workspaces.find(w => w.focused);
+        return windowsRead && ws !== undefined && ws.windows.length === 0;
+    }
     // spec 008 (R11): is the window in focus full screen? From `hyprctl activewindow -j` (field
     // `fullscreen`, a mode: 0 none, 1 maximized, 2 full screen, 3 both; only the full-screen bit
     // counts), re-read on the fullscreen, active window and workspace events.
     property bool fullscreen: false
 
     signal changed()
+    // U13 (audit D-04/D-05): a key bound to `global, yorha:<name>` (hyprland_global_shortcuts_v1)
+    // reaches the shell over Wayland, without starting a process; the facade passes it on.
+    signal shortcut(string name)
+
+    GlobalShortcut {
+        appid: "yorha"
+        name: "pause"
+        description: "Open or close the pause menu"
+        onPressed: root.shortcut("pause")
+    }
+    GlobalShortcut {
+        appid: "yorha"
+        name: "settings"
+        description: "Open or close the settings (SYSTEM)"
+        onPressed: root.shortcut("settings")
+    }
+
+    // U13 (audit D-04): the keys typed while the menu opens. The menu key also puts Hyprland in the
+    // submap "yorha-menu" (yorha-shell.lua), where these keys are bound to `global, yorha:key-<k>` and
+    // every other key is swallowed, so nothing reaches the window under the menu before the menu has
+    // the keyboard. The shell hands them to the menu and ends the submap once it has the keyboard
+    // (endKeyCapture); the submap also ends by itself after 1.5 s.
+    readonly property var menuKeys: {
+        const out = [];
+        for (const c of "abcdefghijklmnopqrstuvwxyz") {
+            out.push(c);
+            out.push("shift-" + c);
+        }
+        for (const c of "0123456789")
+            out.push(c);
+        return out.concat(["space", "minus", "period", "Return", "KP_Enter", "BackSpace", "Tab", "Escape", "Up", "Down"]);
+    }
+    signal menuKey(string name)
+    Instantiator {
+        model: root.menuKeys
+        delegate: GlobalShortcut {
+            required property string modelData
+            appid: "yorha"
+            name: "key-" + modelData
+            description: "A key typed while the menu opens"
+            onPressed: root.menuKey(modelData)
+        }
+    }
+    property string submap: ""                  // the submap Hyprland is in (the "submap" event)
+    function endKeyCapture(): void {
+        if (submap !== "yorha-menu")
+            return;
+        submap = "";
+        if (Hyprland.usingLua)
+            Hyprland.dispatch(`hl.dsp.submap("reset")`);
+        else
+            Hyprland.dispatch("submap reset");
+    }
 
     // The index of the workspace shown on `monitorName` (0 = none known). Hyprland.monitors is
     // empty with a Lua config, so this is usually the focused workspace.
@@ -185,6 +248,7 @@ Item {
                 } catch (e) {
                     root.startupTitle = "";
                 }
+                root.nothingFocused = root.startupTitle === "" && Hyprland.activeToplevel === null;
             }
         }
     }
@@ -311,6 +375,10 @@ Item {
         target: Hyprland
         function onRawEvent(event) {
             Qt.callLater(root.changed);
+            if (event.name === "submap")
+                root.submap = String(event.data ?? "");
+            if (event.name === "activewindowv2")       // "<address>", or nothing with no window in focus
+                root.nothingFocused = String(event.data ?? "").replace(/,/g, "").trim() === "";
             if (event.name.startsWith("monitor") || event.name.startsWith("focusedmon") || event.name === "configreloaded")
                 monitorQuery.running = true;
             if (event.name === "configreloaded")
@@ -392,6 +460,7 @@ Item {
                 }
                 const next = list.filter(c => c && c.mapped !== false && root.validId(String(c.address ?? "")))
                     .map(c => root.windowOf(c));
+                root.windowsRead = true;
                 if (JSON.stringify(next) !== JSON.stringify(root.windows)) {
                     root.windows = next;
                     root.changed();

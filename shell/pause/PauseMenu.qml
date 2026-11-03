@@ -80,6 +80,31 @@ PopupWindow {
         return true;
     }
 
+    // U13: the menu is made once and kept hidden; before it shows, the tab it opens on is set
+    // quietly (no sound, no tab change), so the opening is the plain one.
+    function prepareTab(id: string): void {
+        if (!keyboardActive && !closing && tabIds.includes(id))
+            tab = id;
+    }
+
+    // U13 (audit D-04): a key typed while the menu opened, caught by the compositor before the menu
+    // had the keyboard (Compositor.menuKey), given to the menu as if it had been typed in it: a
+    // letter, a digit, space, - or . go to APPS's search; Tab, Escape, Backspace, Enter and ↑↓ do
+    // what they do there. Other tabs take Tab and Escape.
+    function deliverKey(name: string): void {
+        const chars = { space: " ", minus: "-", period: "." };
+        const text = name.startsWith("shift-") ? name.slice(6).toUpperCase() : name.length === 1 ? name : (chars[name] ?? "");
+        if (name === "Tab")
+            step(1);
+        else if (text !== "") {
+            if (tab === "apps")
+                appsPage.type(text);
+        } else if (tab === "apps")
+            appsPage.key(name);
+        else if (name === "Escape")
+            closeRequested();
+    }
+
     // Text that may go to APPS's search: something, and no control character in it (C0, DEL,
     // C1). Delete sends "\x7f", which is past " " and used to slip into the query.
     function printable(text: string): bool {
@@ -139,7 +164,7 @@ PopupWindow {
         return last?.key === Strings.settings.keyEsc ? keys.slice(0, -1).concat([t, last]) : keys.concat([t]);
     }
 
-    readonly property var pageKeys: tab === "system" ? systemPage.keys : withTab(page?.keys ?? [])
+    readonly property var pageKeys: tab === "system" ? systemPage.keys : page?.footerBlank ? [] : withTab(page?.keys ?? [])
 
     // spec 013, front A (FR-006): while the tab changes, the old page stays shown and fades
     // (PopupFrame's swapFrom, swapLevel), and the new one waits hidden (swapHold) until it mounts.

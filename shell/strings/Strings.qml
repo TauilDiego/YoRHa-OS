@@ -283,6 +283,8 @@ Singleton {
         readonly property string opened: "Opened: %1 times"
         readonly property string openedOnce: "Opened: once"
         readonly property string neverOpened: "Not opened yet"
+        readonly property string runningWindow: "Running: 1 window"
+        readonly property string runningWindows: "Running: %1 windows"
         readonly property string appOptions: "Options"
         readonly property string workspace: "Workspace"
         readonly property string current: "Current"

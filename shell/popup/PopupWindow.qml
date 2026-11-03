@@ -57,6 +57,19 @@ PanelWindow {
     WlrLayershell.keyboardFocus: keyboardActive ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     color: "transparent"
     mask: keyboardActive ? null : noInput
+    // U13: a pop-up kept made while closed (the pause menu) is hidden then: no surface, no layer.
+    // `mapNow` lets the owner map it a moment before keyboardActive, so the compositor makes the
+    // surface while the pages get ready for the opening.
+    property bool mapNow: false
+    visible: keyboardActive || closing || mapNow
+    // U13 (audit D-04): true from the window's first frame while open: the surface is mapped, and with
+    // it the keyboard (Exclusive) is the pop-up's. False again when it closes.
+    property bool ready: false
+    FrameAnimation {
+        running: root.visible && root.keyboardActive && !root.ready
+        onTriggered: root.ready = true
+    }
+
 
     Region {
         id: noInput
@@ -84,11 +97,12 @@ PanelWindow {
         leaveNext = false;
         frame.open();
     }
-    Component.onCompleted: appear()
+    Component.onCompleted: if (keyboardActive) appear()
     onKeyboardActiveChanged: {
         if (keyboardActive)
             appear();
         else {
+            ready = false;
             Sounds.play("close");             // spec 013, front D
             frame.close(leaveNext);
             leaveNext = false;
