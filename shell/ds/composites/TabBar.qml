@@ -59,13 +59,21 @@ Item {
 
     signal activated(int index)
 
-    // Where tab `i` is, in window coordinates (logical px), for tests: { x, w, tag }.
+    // Where tab `i` is, in window coordinates (logical px), for tests: { x, w, tag }, plus, with a
+    // tag, `tagBox`: its box and the tab's, unrounded ({ x, y, w, h }, logical px), and the dpr.
     function tabGeometry(i: int): var {
         const tab = tabs.itemAt(i) as HeaderButton;
         if (!tab)
             return { x: -1, w: 0, tag: "" };
         const p = tab.mapToItem(null, 0, 0);
-        return { x: Math.round(p.x), w: Math.round(tab.width), tag: tab.tag };
+        const g = { x: Math.round(p.x), w: Math.round(tab.width), tag: tab.tag };
+        if (tab.tag !== "") {
+            const b = tab.tagItem;
+            const q = b.mapToItem(null, 0, 0);
+            g.tagBox = { x: q.x, y: q.y, w: b.width, h: b.height, dpr: b.d,
+                         tab: { x: p.x, y: p.y, w: tab.width, h: tab.bandH } };
+        }
+        return g;
     }
 
     readonly property int bandH: Tokens.px(Tokens.space.tabH, s)
