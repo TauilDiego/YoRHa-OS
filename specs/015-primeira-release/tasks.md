@@ -361,6 +361,10 @@ privados no que vai subir, todas só nomes e caminhos. O lint ficou verde na jun
   - trocar a forma do sinal.
 
   Também: as fotos de antes e depois no Chrome dele e o `specs/015-primeira-release/relatorio.md`
+
+  Em andamento 02.11 ~21:24: o dono abriu o `ver --hidpi` (a 0.0.1 do lab, de 76b696d, instalada do zero
+  em 56 s, perf `2026-11-02T212353-vm-ver-…`). Este commit é a versão nova pro teste do aviso
+  (`ver --hidpi --no-update`).
 - [ ] T036 Com o OK do dono: o merge da 015 e da `lab-015` nas duas `main`, e as branches e os
   worktrees apagados
 
