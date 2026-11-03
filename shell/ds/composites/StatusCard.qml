@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import ".."
 import "../primitives"
 import "../base"
@@ -17,6 +18,11 @@ import "../../strings"
 // The parent sets the width; the height follows the content.
 Item {
     id: root
+
+    // The window's monitor decides the hairlines (ceil(N × scale) physical px, Tokens.vline).
+    // QsWindow.window is typed QObject, so go through a `var` (as Rule does).
+    readonly property var window: QsWindow.window
+    readonly property real dpr: Tokens.scaleOf(window?.screen?.name ?? "")
 
     property real s: 1
     property string title: Strings.pause.status
@@ -100,7 +106,7 @@ Item {
         x: root.margin
         y: rowColumn.y + rowColumn.height + root.u(22)
         width: root.width - 2 * root.margin
-        height: Tokens.line(Tokens.space.rule, root.s)
+        height: Tokens.vline(Tokens.line(Tokens.space.rule, root.s), root.dpr)
         color: Tokens.color.lightGray
     }
 
@@ -117,7 +123,7 @@ Item {
                 width: root.u(Tokens.space.statusBox)
                 height: width
                 color: "transparent"
-                border.width: Tokens.line(2, root.s)
+                border.width: Tokens.vline(Tokens.line(2, root.s), root.dpr)
                 border.color: Tokens.color.mediumGray
             }
         }

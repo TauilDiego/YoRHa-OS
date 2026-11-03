@@ -38,8 +38,9 @@ Item {
     readonly property real k: Math.min(width / monW, height / monH)
     readonly property real boxX: (width - monW * k) / 2
     readonly property real boxY: (height - monH * k) / 2
-    readonly property real outline: Tokens.hair(Tokens.line(2, s), dpr)
-    readonly property real thin: Tokens.hair(1, dpr)
+    // Hairlines as ceil(N × scale) physical px (audit D-13: hair() rounded 1.25 down to 1 px).
+    readonly property real outline: Tokens.vline(Tokens.line(2, s), dpr)
+    readonly property real thin: Tokens.vline(1, dpr)
 
     function idOf(w: var): string {
         return String(w?.address ?? w?.id ?? "");

@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import ".."
 import "../primitives"
 
@@ -72,7 +73,12 @@ Item {
     readonly property int bandH: Tokens.px(Tokens.space.listItemH, s)
     readonly property int pad: Tokens.px(16, cs)         // band edge → square, and trailing → edge
     readonly property int gap: Tokens.px(16, cs)         // square → label (approved mockup)
-    readonly property int rail: Tokens.line(Tokens.space.rail, s)
+    // The window's monitor decides the hairlines (ceil(N × scale) physical px, Tokens.vline).
+    // QsWindow.window is typed QObject, so go through a `var` (as Rule does).
+    readonly property var window: QsWindow.window
+    readonly property real dpr: Tokens.scaleOf(window?.screen?.name ?? "")
+    // The rails: whole physical px (audit D-13: at 1.25 they came out 2 px over the band, 3 under).
+    readonly property real rail: Tokens.vline(Tokens.line(Tokens.space.rail, s), dpr)
     readonly property int railGap: Tokens.px(Tokens.space.railGap, s)
 
     implicitHeight: bandH
@@ -322,7 +328,7 @@ Item {
 
     // spec 013: everything but the kite, in a box that clips it while the row wipes in (the rails
     // stick out above and below, the shadow on the right).
-    readonly property int outY: railGap + rail
+    readonly property real outY: railGap + rail
     readonly property int shadowX: Tokens.px(Tokens.shadow.boxX, s)
     readonly property int bandW: Math.round(inkW * stretch)
     Item {
