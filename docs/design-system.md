@@ -588,7 +588,7 @@ as informações. É o corpo do seletor de papel de parede e serve pros próximo
 | lista | `↑↓ Select` `Enter Apply` `→ Options` `Esc Close` (sem `Enter Apply` num item apagado) |
 | opções | `↑↓ Select` `←→ Change` `Esc Back` |
 
-**No seletor de papel de parede** (`WallpaperPicker`, `ALT + W` na VM, `qs ipc call wallpaper picker
+**No seletor de papel de parede** (`WallpaperPicker`, `ALT + T` na VM, `qs ipc call wallpaper picker
 open|close|toggle`):
 - **título:** `WALLPAPER -Select`; rodapé à esquerda: `YoRHa-Shell 0.1 · N monitors`;
 - **lista:** SCENES, IMAGES e VIDEO, com `● ALL` (ou as saídas) no que está aplicado; abre com o
@@ -1000,7 +1000,7 @@ No fim do update, o `yorha` reinicia o shell, que sobe na versão nova.
 ### Comandos
 
 - **IPC:** `updates check | now | open | dump`.
-- **Teclas:** o arquivo `system/hypr/yorha-shell.lua` liga SUPER+Escape, SUPER+I, SUPER+W, SUPER+N e
+- **Teclas:** o arquivo `system/hypr/yorha-shell.lua` liga SUPER+Escape, SUPER+I, SUPER+T (o seletor; não o SUPER+W, que fecha a janela em muitas configs), SUPER+N e
   SUPER+CTRL+N ao `yorha ipc …`. O modificador muda com `YORHA_MOD`, definido antes da linha do
   include.
 

@@ -278,7 +278,7 @@ medido nos pixels). Sem dados de teste, gravar rajadas da camuflagem Menu → Da
   - **imagens:** os arquivos `jpg`, `png` e `webp` da pasta do usuário (padrão `~/Pictures/Wallpapers`,
     configurável);
   - **vídeos:** só listados, apagados, como "depois".
-- **FR-006**: O seletor MUST abrir por um atalho da sessão (`SUPER + W`; na VM, `ALT + W`, research R11) e por comando de
+- **FR-006**: O seletor MUST abrir por um atalho da sessão (`SUPER + T`; na VM, `ALT + T`, research R11; era `W` até 03.11, quando o dono trocou: o `SUPER + W` fecha a janela em muitas configs) e por comando de
   controle, como o popup da 003:
   - centrado no monitor em foco;
   - resto da tela escurecido, sem desfoque;

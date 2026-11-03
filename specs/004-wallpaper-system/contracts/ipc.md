@@ -48,8 +48,8 @@ O `picker` também traz, pra conferência nos testes (US2):
 - `monitor` é o rótulo do valor da opção Monitor (`All monitors` ou o nome da saída).
 - `elapsed` é o tempo da transição em andamento, em ms.
 
-**Atalho na VM:** `ALT + W` → `picker toggle` (research R11). Nos padrões do instalador, vai ser
-`SUPER + W`.
+**Atalho na VM:** `ALT + T` → `picker toggle` (research R11; era `W` até 03.11). Nos padrões do instalador,
+`SUPER + T` (o `SUPER + W` fecha a janela em muitas configs).
 
 ## Emenda da US6: o tom da barra (2026-10-27)
 

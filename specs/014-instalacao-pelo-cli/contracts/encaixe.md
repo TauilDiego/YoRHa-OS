@@ -15,7 +15,7 @@ pcall(dofile, os.getenv("HOME") .. "/.local/share/yorha-os/current/system/hypr/y
   |---|---|
   | SUPER+Escape | `pause toggle` |
   | SUPER+I | `settings toggle` |
-  | SUPER+W | `wallpaper picker toggle` |
+  | SUPER+T | `wallpaper picker toggle` (não o SUPER+W, que fecha a janela em muitas configs; decisão do dono, 03.11) |
   | SUPER+N | `notify toggle` |
   | SUPER+CTRL+N | `notify dnd toggle` |
 - as teclas de volume, microfone (`wpctl`) e brilho (`brightnessctl`); o OSD do shell mostra a mudança;

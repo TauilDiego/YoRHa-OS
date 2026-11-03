@@ -31,7 +31,8 @@ end)
 -- disturb (008).
 hl.bind(mod .. " + Escape", ipc("pause toggle"))
 hl.bind(mod .. " + I", ipc("settings toggle"))
-hl.bind(mod .. " + W", ipc("wallpaper picker toggle"))
+-- T, not W: SUPER+W closes the focused window in many setups.
+hl.bind(mod .. " + T", ipc("wallpaper picker toggle"))
 hl.bind(mod .. " + N", ipc("notify toggle"))
 hl.bind(mod .. " + CTRL + N", ipc("notify dnd toggle"))
 
