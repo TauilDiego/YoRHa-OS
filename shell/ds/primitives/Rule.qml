@@ -195,11 +195,33 @@ Item {
         }
     }
 
+    // vertical, as a scroll bar (design-system §4, "lista com cursor: … + barra de rolagem"; audit
+    // D-12): with thumbSize < 1 the wide strip is the track, faint, and the part in view (from
+    // thumbFrom, thumbSize of the height, fractions) is drawn whole, so a column that scrolls shows
+    // it has more. thumbSize ≥ 1 (everything in view): the plain strips.
+    property real thumbFrom: 0
+    property real thumbSize: 1
     Row {
         visible: root.kind === "vertical"
         height: root.height
         spacing: Tokens.px(4, root.s)
         Rectangle { width: Tokens.px(3, root.s); height: parent.height; color: root.color }
-        Rectangle { width: Tokens.px(6, root.s); height: parent.height; color: root.color }
+        Item {
+            width: Tokens.px(6, root.s)
+            height: parent.height
+            Rectangle {
+                anchors.fill: parent
+                color: root.color
+                opacity: root.thumbSize < 1 ? 0.3 : 1
+            }
+            Rectangle {
+                readonly property real h: Math.max(Tokens.px(24, root.s), Math.round(root.thumbSize * parent.height))
+                visible: root.thumbSize < 1
+                y: Math.max(0, Math.min(parent.height - h, Math.round(root.thumbFrom * parent.height)))
+                width: parent.width
+                height: h
+                color: root.color
+            }
+        }
     }
 }
