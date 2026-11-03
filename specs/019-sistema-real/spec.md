@@ -74,9 +74,9 @@ Nada desta spec edita o `hyprland.lua` da pessoa. Leitura e mudança passam pelo
 PipeWire, e o que o produto guarda fica em `$XDG_STATE_HOME/yorha-shell/settings.json`. Os dois pontos
 que encostavam no princípio foram decididos pelo dono em 03.11:
 
-1. **"O `hyprland.lua` e os dotfiles são da pessoa" (1C).** Uma linha que a pessoa mudou no menu vence a
-   config dela e volta depois de cada reload, sem editar o arquivo. Uma linha que ela não mexeu fica com
-   o valor do arquivo. Ver D2.
+1. **"O `hyprland.lua` e os dotfiles são da pessoa" (1C).** Uma linha que a pessoa mudou no menu volta depois
+   de um reload só enquanto o valor do arquivo dela não mudar. Se ela editou o arquivo, vale o arquivo. Uma
+   linha que ela não mexeu fica com o valor do arquivo. Ver D2.
 2. **"O que fica de fora: hardware" (1A, 1B e a onda 3).** "Hardware" quer dizer drivers e firmware. A
    emenda MINOR da constituição (2.2.0) diz isso nesta branch. Ver D3.
 
@@ -220,6 +220,16 @@ falsos sobre a máquina.
 8. **Given** a config com `repeat_delay = 250` e `repeat_rate = 30`, **When** a pessoa muda só Repeat delay pra
    300 e roda `hyprctl reload`, **Then** `repeat_delay` fica em 300 e `repeat_rate` fica em 30, o do arquivo.
    **Evidência:** `getoption -j` das duas, depois do reload.
+9. **Given** Repeat rate em 50 pelo menu, com outro valor no arquivo, **When** roda um `hyprctl reload` sem editar
+   nada, **Then** fica em 50; **When** o arquivo é editado pra 30 e recarregado, **Then** fica em 30, o valor
+   salvo do menu some e um novo reload continua em 30. **Evidência:** `getoption -j input:repeat_rate` depois de
+   cada passo, `jq` no `settings.json`.
+10. **Given** Caps Lock em Escape pelo menu e o arquivo com `kb_options = "grp:alt_shift_toggle"`, **When** o
+    arquivo troca só o `grp:` e recarrega, **Then** `caps:escape` continua somado ao valor novo; **When** o arquivo
+    ganha `ctrl:nocaps` e recarrega, **Then** vale o do arquivo e a escolha do menu some. **Evidência:**
+    `getoption -j input:kb_options` depois de cada passo, `jq` no `settings.json`.
+11. **Given** um valor mudado pelo menu, **When** só o shell reinicia, sem reload, **Then** a escolha continua e
+    não conta como edição do arquivo. **Evidência:** `getoption -j`, `jq` no `settings.json`.
 
 ---
 
@@ -270,7 +280,12 @@ visual.
 - **Saídas que aparecem em outro perfil da placa de som:** Output lista só as que o PipeWire expõe; trocar
   o perfil da placa fica fora.
 - **Tela em foco muda com o menu aberto:** Display segue a tela em foco, e o card troca o nome (D5).
-- **A pessoa edita a config depois de mudar a linha no menu:** o valor do menu continua vencendo (D2).
+- **A pessoa edita a config depois de mudar a linha no menu:** vale o arquivo, e o valor salvo do menu é esquecido
+  (D2).
+- **A pessoa grava no arquivo o mesmo valor que já estava lá:** não dá pra perceber a edição, e o valor do menu
+  continua. É um limite conhecido.
+- **O arquivo mudou com a sessão desligada:** o login conta como reload, porque o compositor sobe com o valor do
+  arquivo.
 
 ## Requirements *(mandatory)*
 
@@ -343,12 +358,18 @@ visual.
   aplicar na hora, pelo mesmo caminho do `setKeyboardLayouts`, e salvar na pasta de estado do produto.
 - **FR-025**: Enquanto a pessoa não mudar a linha, o produto MUST NOT aplicar nem salvar nada. Um valor da
   config que não está na lista aparece como está (`250 ms`).
-- **FR-026**: O valor salvo MUST voltar na subida do shell e depois de cada reload do Hyprland, como os layouts
-  da 013. Uma linha que a pessoa mudou vence a config dela (D2).
-- **FR-027**: Caps Lock MUST mexer só na parte do Caps de `kb_options`, somando ao que a pessoa já tem.
+- **FR-026**: Ao mudar uma linha, o produto MUST guardar, na pasta de estado, o valor salvo e o valor do arquivo
+  da pessoa, que é o que o compositor tinha antes da mudança. A cada reload ou login, MUST ler o valor do arquivo
+  antes de reaplicar. Igual ao guardado: reaplica o valor do menu. Diferente: a pessoa editou o arquivo, então o
+  valor novo fica, e o valor salvo da linha é esquecido (D2). Um shell reiniciado sem reload encontra o valor do
+  menu ainda aplicado: isso não conta como edição.
+- **FR-027**: Caps Lock MUST mexer só na parte do Caps de `kb_options`, somando ao que a pessoa já tem. A comparação
+  da FR-026 MUST usar a parte do Caps do valor do arquivo, nunca o valor somado. Uma edição em outra parte de
+  `kb_options` fica valendo e não apaga a escolha do menu.
 - **FR-028**: Repeat rate MUST mostrar repetições por segundo e não chegar a 0, porque 0 desliga a repetição.
   O mínimo é 5, o passo do slider.
-- **FR-029**: `settings reset` MUST limpar os valores salvos do teclado sem dar reload. O da config da pessoa
+- **FR-029**: `settings reset` MUST limpar os valores salvos do teclado, e o valor do arquivo guardado com eles, sem
+  dar reload. O da config da pessoa
   volta no próximo reload ou login, e a linha mostra sempre o valor real.
 - **FR-030**: Keyboard › Shortcuts MUST abrir a lista dos atalhos do `yorha-shell.lua`, só leitura, com o
   `YORHA_MOD` em uso. Se o compositor não disser o modificador, a lista usa SUPER e avisa. A descrição da linha
@@ -451,8 +472,17 @@ instalar (`lib/yorha/deps.sh`). Rede e Bluetooth já estão na emenda do princí
 implementar na ordem dessas atividades ai." A release inclui as ondas 2 (a 018, o cursor no instalador, Language) e 3.
 Não há estado intermediário de "ainda não feito" na release (FR-012, SC-008).
 
-**D2. No teclado, o menu vence.** "o nosso prevalece. a pessoa edita depois se quiser". Uma linha que a pessoa mudou no
-menu vence a config e volta depois de um reload; uma linha que ela não mexeu fica com o valor do arquivo (FR-025, FR-026).
+**D2. No teclado, o arquivo editado vence.** "se a pessoa editou pra ficar 30 deixa 30. ela editou um arquivo né."
+Uma linha mudada no menu volta depois de um reload só enquanto o valor do arquivo não mudar. Se mudou, vale o arquivo e
+o valor do menu é esquecido. Uma linha que a pessoa não mexeu fica com o valor do arquivo (FR-025 a FR-027). Limite
+conhecido: uma edição que grava o mesmo valor que o arquivo já tinha não é percebida. A VM precisa provar a detecção
+(User Story 4, cenários 9 e 10). Se não provar, isso volta pro dono; a regra não muda sozinha.
+
+**Regra geral do dono.** "acho que é importante a gente só mexer se for a primeira vez em uma coisa nova. tipo a primeira
+vez q ela instala o yorha shell algo assim. depois mantém o máximo de configs do user possivel". O produto só muda alguma
+coisa na primeira vez em que ela é nova (a primeira instalação, por exemplo). Depois, mantém o máximo possível da config
+da pessoa, e um update nunca passa por cima dela. Esta spec não cria nenhum comportamento de primeira instalação: as
+linhas da onda 1 que a pessoa não mexeu continuam com o valor do arquivo.
 
 **D3. "Hardware" quer dizer drivers e firmware.** O produto pode ler e mudar, em tempo de execução, o que o sistema já
 oferece (som, luz de tela, teclado, rede, Bluetooth), sem instalar driver nem editar arquivo do sistema. A constituição
