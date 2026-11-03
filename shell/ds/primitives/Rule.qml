@@ -20,11 +20,12 @@ Item {
     property real tone: 0
     property color color: Tokens.hudColor(kind === "vertical" ? "rest" : "rule", tone)
 
-    readonly property int thickness: Tokens.line(Tokens.space.rule, s)
     // The window's monitor decides the snap. QsWindow.window is typed QObject, so go through
     // a `var` (qmllint can't see `screen` on QObject).
     readonly property var window: QsWindow.window
     readonly property real dpr: Tokens.scaleOf(window?.screen?.name ?? "")
+    // The line, as a vector hairline: whole physical px (ceil), so it never vanishes or blurs.
+    readonly property real thickness: Tokens.vline(Tokens.line(Tokens.space.rule, s), dpr)
 
     // Dotted pattern geometry (game px, measured on 1080p captures).
     readonly property real period: 77
@@ -42,6 +43,7 @@ Item {
 
     Rectangle {
         visible: root.kind !== "vertical"
+        y: marks.sy(0)                           // on the physical grid
         width: root.width
         height: root.thickness
         color: root.color

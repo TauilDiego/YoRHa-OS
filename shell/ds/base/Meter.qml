@@ -17,6 +17,8 @@ Rectangle {
     property bool editable: false
     property bool inverted: false
     property real tone: 0
+    // The top bar passes its barTrack (translucent, readable over any wallpaper).
+    property color track: inverted ? Tokens.color.mediumGray : Tokens.hudColor("track", tone)
 
     signal picked(real value)
 
@@ -24,7 +26,7 @@ Rectangle {
 
     implicitWidth: Tokens.px(w, s)
     implicitHeight: Tokens.px(h, s)
-    color: inverted ? Tokens.color.mediumGray : Tokens.hudColor("track", tone)
+    color: track
 
     Rectangle {
         height: parent.height
