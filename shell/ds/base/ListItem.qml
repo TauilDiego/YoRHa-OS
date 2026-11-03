@@ -291,9 +291,13 @@ Item {
         ScrollingLabel {
             id: label
             x: root.pad + Tokens.px(Tokens.space.square, root.cs) + root.gap + (root.lead !== "" ? leadLabel.width + root.gap : 0)
-            width: Math.max(0, Math.min(implicitWidth, root.width - x - Math.max(root.pad, root.reserve)
-                                                        - (root.tag !== "" ? Math.ceil(tagBox.implicitWidth) + root.gap : 0)
-                                                        - (root.trailing !== "" ? root.gap + Math.ceil(tail.implicitWidth) + root.pad : 0)))
+            // All the room there is, not min(implicitWidth, room): a width taken from a measure
+            // made before the font's weight axis applied came out a few px short and cut the
+            // last letter ("automaticalll", audit D-11). The box clips (and scrolls) only when
+            // the text really overflows the room.
+            width: Math.max(0, root.width - x - Math.max(root.pad, root.reserve)
+                                - (root.tag !== "" ? Math.ceil(tagBox.implicitWidth) + root.gap : 0)
+                                - (root.trailing !== "" ? root.gap + Math.ceil(tail.implicitWidth) + root.pad : 0))
             height: parent.height
             anchors.verticalCenter: parent.verticalCenter
             s: root.cs

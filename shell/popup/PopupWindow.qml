@@ -77,7 +77,11 @@ PanelWindow {
 
     PopupFrame {
         id: frame
-        anchors.fill: parent
+        // The screen's size, not the window's: a pop-up kept made while hidden (U13) has no window
+        // size then, and would lay everything out at s = 0 and again when it shows. Full-screen
+        // anchored, the window is the screen's size anyway.
+        width: root.screen?.width ?? root.width
+        height: root.screen?.height ?? root.height
         visible: root.keyboardActive || root.closing
         motion: true
         title: root.title
