@@ -492,7 +492,10 @@ Item {
         TabBar {
             id: tabBar
             x: root.inset + root.u(48)
-            y: root.u(Tokens.space.pauseTabsY)
+            // On the physical grid (spec 015): at a half physical px the selected tab's clipped
+            // plate and a resting tab's band round their top edge apart (1 px at 1.5), and the NEW
+            // badge above SYSTEM would seem to move when the tab is selected.
+            y: Tokens.snap(root.u(Tokens.space.pauseTabsY), root.dpr)
             width: parent.width - 2 * x
             visible: root.tabbed
             s: root.s
