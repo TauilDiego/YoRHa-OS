@@ -33,9 +33,14 @@ Item {
     readonly property real d: dpr > 0 ? dpr : 1
     readonly property int line: outline ? Math.round(Tokens.vline(1.5 * s, d) * d) : 0
     // The ink's tight bounds in physical px, relative to the pen origin on the baseline (y < 0
-    // above it). Measured on the font at its physical size: the bounds come in whole pixels, and at
-    // the logical size a fractional scale would multiply that rounding.
-    readonly property rect inkRect: metrics.tightBoundingRect
+    // above it). Measured on the font at its physical size (the bounds come in whole pixels, and at
+    // the logical size a fractional scale would multiply that rounding). QFont's pixel size is
+    // whole, so the metrics use the nearest one and scale back (exact at whole scales).
+    readonly property real physSize: label.font.pixelSize * d
+    readonly property int metricsSize: Math.max(1, Math.round(physSize))
+    readonly property real k: physSize / metricsSize
+    readonly property rect inkRect: Qt.rect(metrics.tightBoundingRect.x * k, metrics.tightBoundingRect.y * k,
+                                            metrics.tightBoundingRect.width * k, metrics.tightBoundingRect.height * k)
     readonly property int inkW: Math.max(1, Math.round(inkRect.width))
     readonly property int inkH: Math.max(1, Math.round(inkRect.height))
     // The size the line-box layout had.
@@ -68,15 +73,14 @@ Item {
     onWindowChanged: Qt.callLater(place)
     onDChanged: Qt.callLater(place)
 
-    // The label's font at the physical size. QFont's pixel size is whole, so go through points
-    // (Qt converts them at 96 dpi: 1 pt = 4/3 px).
+    // The label's font at the physical size.
     TextMetrics {
         id: metrics
         font.family: label.font.family
         font.weight: label.font.weight
         font.variableAxes: label.font.variableAxes
-        font.letterSpacing: label.font.letterSpacing * root.d
-        font.pointSize: label.font.pixelSize * root.d * 0.75
+        font.letterSpacing: label.font.letterSpacing * root.d / root.k
+        font.pixelSize: root.metricsSize
         text: label.text
     }
 
