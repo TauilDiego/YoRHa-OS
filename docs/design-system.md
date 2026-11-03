@@ -855,7 +855,7 @@ fecha; opções ↑↓, ←→ mudam, Enter, Esc volta. O rodapé mostra só as 
 - **Tokens** (`Tokens.notify`): as cores da faixa acima; `block` 14; `stackW` 540, `stackGap` 12,
   `stackRight` 16, `stackTop` 12; `topPad` 360; `subtitleW` 1100, `subtitleBottom` 210; `critMinH`
   230, `critCol` 1080, `critSide` 62; `imageSize` 72; `actionH` 32; `lines` 4, `critLines` 3,
-  `previewLines` 9; `osdW` 600, `osdH` 72, `osdBottom` 110, `osdTop` 12, `osdMeterW` 300; `cps` 90,
+  `previewLines` 9; `osdW` 672 (600 até a U13, que deu ao número a coluna própria `osdNumW` 70, a `osdNumGap` 16 do medidor), `osdH` 72, `osdBottom` 110, `osdTop` 12, `osdMeterW` 300; `cps` 90,
   `typeMaxMs` 700, `lowMs` 4000, `normalMs` 6000, `maxMs` 12000, `osdHold` 1200, `sweep` e `fade`
   150. Papéis de texto novos em `Tokens.type`: `bandWho`, `bandTitle`, `bandBody`, `bandTime`,
   `bandAction`, `bandTag`, `critWho`, `critTitle`, `critBody`, `osdLabel`, `osdValue`.

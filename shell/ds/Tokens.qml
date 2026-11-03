@@ -410,13 +410,18 @@ Singleton {
         readonly property real progressNumW: 54
         readonly property real replyH: 36
         // the OSD
-        readonly property real osdW: 600
+        // 600 in spec 008; U13 (audit D-06, spec 010 item E): the number gets its own column after the
+        // 300 meter (osdNumGap, then osdNumW, then the right margin), so the band grows to fit it:
+        // 38 + 14 + 18 + 168 + 18 + 300 + 16 + 70 + 30 = 672.
+        readonly property real osdW: 672
         readonly property real osdH: 72
         readonly property real osdBottom: 110
         readonly property real osdTop: 12                  // below the bar (or the critical band)
         readonly property real osdLabelW: 168
         readonly property real osdMeterW: 300
-        readonly property real osdNumW: 70
+        readonly property real osdNumW: 70                 // the number's column: fits "100" and "MUTE"
+        readonly property real osdNumGap: 16               // between the meter's end and that column
+        readonly property real osdRight: 30                // the column's right edge to the band's
         // the top bar's counter (LOG 3 / DND 3)
         readonly property real counterSquare: 9
         // the typing and the times (FR-006, FR-007, FR-029)
