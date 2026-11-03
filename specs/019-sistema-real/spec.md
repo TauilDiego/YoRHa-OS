@@ -4,8 +4,8 @@
 
 **Created**: 2026-11-03
 
-**Status**: Rascunho. O dono aprovou o plano e a ordem das ondas em 03.11; este texto e as
-perguntas do fim esperam a resposta dele.
+**Status**: Rascunho. O dono aprovou o plano e a ordem das ondas e respondeu às 5 perguntas em 03.11
+(ver "Decisões do dono"). Falta ele aprovar o texto e os requisitos de "Acrescentados, a aprovar".
 
 **Input**: A auditoria da 015 (D-01) achou 31 das 63 opções do SYSTEM (SUPER+I) com valores
 inventados: Wi-Fi `home-5G`, teclado Bluetooth `K2 Keyboard`, bateria `87% · charging` num PC sem
@@ -31,7 +31,7 @@ em duas ondas: leem na 1B e mudam na 2.
 | Display › Scale | 1B lê; 2 muda | 1B: mostra a escala real, só leitura. 2: troca | `hyprctl monitors -j` | Igual a Resolution |
 | Display › Brightness | 1B | Lê e muda a luz da tela | sysfs, o mesmo aparelho que o `Osd.qml` usa; escreve por `brightnessctl` | Sem luz de tela: apagada, "No backlight on this screen." Com luz e sem `brightnessctl`: mostra o valor, não muda, e o card diz por quê |
 | Display › Night light | 3 | Esquenta as cores | hyprsunset (a conversar) | A definir na conversa com o dono |
-| Sound › Output | 1A | Troca a saída padrão do sistema | `Pipewire.nodes` e a saída padrão do PipeWire; id estável | Nenhuma saída: apagada, "No sound output found." |
+| Sound › Output | 1A | Troca a saída padrão do sistema | `Pipewire.nodes` e a saída padrão do PipeWire, que guarda a escolha; o produto não guarda cópia | Nenhuma saída: apagada, "No sound output found." |
 | Sound › Volume | 1A | Lê e muda o volume da saída padrão | PipeWire, sem cópia salva | Igual a Output |
 | Sound › Mute | 1A | Liga e desliga o mudo da saída padrão | PipeWire, sem cópia salva | Igual a Output |
 | Sound › Microphone | 1A | Lê e muda o nível do microfone padrão | PipeWire, sem cópia salva | Sem microfone: apagada, "No microphone found." |
@@ -68,19 +68,17 @@ em duas ondas: leem na 1B e mudam na 2.
 - **003, FR-017** (linha apagada por dependência): a mesma aparência passa a valer pra "o sistema não
   tem isso" (FR-004).
 
-## Princípio II: pontos de atrito
+## Princípio II
 
 Nada desta spec edita o `hyprland.lua` da pessoa. Leitura e mudança passam pelo compositor e pelo
-PipeWire, e o que o produto guarda fica em `$XDG_STATE_HOME/yorha-shell/settings.json`. Dois pontos
-encostam no princípio. Ficam marcados aqui e não foram reinterpretados; vão como perguntas ao dono:
+PipeWire, e o que o produto guarda fica em `$XDG_STATE_HOME/yorha-shell/settings.json`. Os dois pontos
+que encostavam no princípio foram decididos pelo dono em 03.11:
 
-1. **"O `hyprland.lua` e os dotfiles são da pessoa" (1C).** Se a pessoa define `repeat_delay` na config
-   e muda a mesma coisa no menu, o valor do menu volta depois de cada reload e passa por cima da
-   linha dela, sem editar o arquivo. É o padrão já aprovado na 013 pros layouts, mas é uma dobra.
-   Ver P2.
-2. **"O que fica de fora: hardware" (1A, 1B e, sobretudo, a onda 3).** Mudar a saída de som, o volume
-   e a luz da tela é mexer em hardware, se a palavra for lida ao pé da letra. A proposta da 018 lê
-   "hardware" como drivers e firmware e sugere uma emenda. Ver P3.
+1. **"O `hyprland.lua` e os dotfiles são da pessoa" (1C).** Uma linha que a pessoa mudou no menu vence a
+   config dela e volta depois de cada reload, sem editar o arquivo. Uma linha que ela não mexeu fica com
+   o valor do arquivo. Ver D2.
+2. **"O que fica de fora: hardware" (1A, 1B e a onda 3).** "Hardware" quer dizer drivers e firmware. A
+   emenda MINOR da constituição (2.2.0) diz isso nesta branch. Ver D3.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -153,6 +151,9 @@ sempre o mesmo número, porque os dois leem o sistema.
    screenshot, `settings dump`, log do QML.
 7. **Given** nenhum sink, **When** a categoria abre, **Then** Output, Volume e Mute ficam apagadas com o
    motivo. **Evidência:** screenshot e `settings dump`.
+8. **Given** a outra saída escolhida em Output, **When** a VM reinicia, **Then** ela continua a saída padrão, e
+   o `settings.json` não tem a escolha. **Evidência:** `wpctl status` antes e depois, `jq` no `settings.json`.
+   Se a saída não ficar, a decisão D4 volta pro dono.
 
 ---
 
@@ -182,6 +183,9 @@ a máquina não tem.
    `settings dump` comparado com o `hyprctl`, screenshot, nas duas telas.
 6. **Given** a escala muda por `hyprctl eval` com o menu aberto, **When** passa 1 s, **Then** a linha Scale
    mostra o valor novo. **Evidência:** `settings dump`.
+7. **Given** duas telas (uma saída `headless` a mais na VM), **When** o foco passa pra outra, **Then** as três
+   linhas mostram os valores dela, e o card, o nome dela. **Evidência:** `settings dump` comparado com o
+   `hyprctl monitors -j`, screenshot.
 
 ---
 
@@ -213,6 +217,9 @@ falsos sobre a máquina.
    `yorha-shell.lua`. **Evidência:** screenshot e a comparação feita pela check-019.
 7. **Given** a check-019 inteira rodada, **When** ela termina, **Then** o `hyprland.lua` da VM está igual.
    **Evidência:** `sha256sum` antes e depois.
+8. **Given** a config com `repeat_delay = 250` e `repeat_rate = 30`, **When** a pessoa muda só Repeat delay pra
+   300 e roda `hyprctl reload`, **Then** `repeat_delay` fica em 300 e `repeat_rate` fica em 30, o do arquivo.
+   **Evidência:** `getoption -j` das duas, depois do reload.
 
 ---
 
@@ -262,7 +269,8 @@ visual.
 - **Teclado com regra própria na config (`hl.device`):** o valor geral não vale pra ele. Fica como está.
 - **Saídas que aparecem em outro perfil da placa de som:** Output lista só as que o PipeWire expõe; trocar
   o perfil da placa fica fora.
-- **Tela em foco muda com o menu aberto:** Display segue a tela em foco, conforme P5.
+- **Tela em foco muda com o menu aberto:** Display segue a tela em foco, e o card troca o nome (D5).
+- **A pessoa edita a config depois de mudar a linha no menu:** o valor do menu continua vencendo (D2).
 
 ## Requirements *(mandatory)*
 
@@ -278,7 +286,8 @@ visual.
 - **FR-003**: A lista de valores de uma linha `sys.*` MAY ser dinâmica, pelo caminho do `resolve()` já usado
   no `notify.monitor`. O que for salvo de uma lista dessas MUST ser um id estável, nunca um índice.
 - **FR-004**: Uma linha com `available` falso MUST ficar apagada, focável e sem efeito, com o motivo no card,
-  no mesmo visual do `needs`. O `settings dump` MUST trazer essas linhas em `dimmed` e o motivo. Os textos
+  no mesmo visual do `needs`. Esse estado é só pro que falta na máquina da pessoa (sem bateria, sem luz de
+  tela, ferramenta ausente), nunca pra uma opção que o produto ainda não fez. O `settings dump` MUST trazer essas linhas em `dimmed` e o motivo. Os textos
   ficam em inglês, em `Strings.qml`.
 - **FR-005**: O card de uma linha `sys.*` MUST mostrar só NOW. A linha DEFAULT não existe pra um valor que é
   do sistema.
@@ -296,19 +305,22 @@ visual.
   (`problemOf`) MUST aceitar as linhas `sys.*` e o `live` do `settings dump` MUST listá-las.
 - **FR-011**: O contrato do provedor (FR-001, FR-003, FR-004) MUST estar pronto e estável antes das frentes
   1A a 1D (princípio VI).
-- **FR-012**: As linhas ainda não reais MUST seguir a resposta de P1. Em qualquer resposta, nenhuma versão
-  publicada mostra um valor inventado sobre a máquina.
+- **FR-012**: A 0.1.0 MUST sair com as 31 opções reais, feitas na ordem das ondas (D1). Isso inclui as ondas 2
+  e 3: as 16 linhas que as ondas 0 e 1 não cobrem e a mudança de Resolution, Refresh rate e Scale. Nenhum valor
+  inventado fica no catálogo do produto na release.
 
 **Onda 1A: som**
 
 - **FR-013**: Sound › Output MUST listar as saídas do PipeWire (sem fluxos de aplicativos), pelo nome legível,
-  marcar a saída padrão real e, ao escolher, trocá-la. O id é o `node.name`. Guardar ou não essa escolha é P4.
+  marcar a saída padrão real e, ao escolher, trocá-la. O id é o `node.name`. O produto MUST NOT guardar essa
+  escolha: quem guarda é o PipeWire (D4).
 - **FR-014**: Sound › Volume MUST ler e mudar o volume da saída padrão, em passos de 2, os mesmos das teclas.
   Com mudo, a linha continua mostrando o nível.
 - **FR-015**: Sound › Mute MUST ler e mudar o mudo da saída padrão. O texto da linha MUST deixar de dizer
   "every output".
 - **FR-016**: Sound › Microphone MUST ler e mudar o nível da fonte padrão.
-- **FR-017**: O volume, o mudo e o microfone MUST NOT ter cópia salva: ela brigaria com as teclas.
+- **FR-017**: A saída, o volume, o mudo e o microfone MUST NOT ter cópia salva: ela brigaria com as teclas e com
+  o `wpctl`.
 - **FR-018**: Uma mudança de fora (teclas, `wpctl`, outro programa) MUST aparecer na linha em até 1 s. A
   supressão do OSD que já existe (`SettingsPage`, 008 FR-029) continua valendo.
 
@@ -321,9 +333,9 @@ visual.
 - **FR-021**: Display › Brightness MUST escrever por `brightnessctl`, no mesmo aparelho da leitura. Sem
   `brightnessctl`, a linha mostra o valor e não muda, e o card diz por quê.
 - **FR-022**: Pela linha, a luz MUST NOT descer abaixo de 5%, pra tela não apagar por um clique no slider.
-- **FR-023**: Display › Resolution, Refresh rate e Scale MUST virar informação só de leitura, com os valores do
+- **FR-023**: Até a onda 2, Display › Resolution, Refresh rate e Scale MUST virar informação só de leitura, com os valores do
   `hyprctl monitors -j` (o `HyprlandBackend` passa a guardar `width`, `height` e `refreshRate`). Seguem o
-  compositor, sem reiniciar o shell. Qual tela: P5.
+  compositor, sem reiniciar o shell. Mostram a tela em foco, com o nome dela no card, e seguem o foco (D5).
 
 **Onda 1C: teclado**
 
@@ -332,7 +344,7 @@ visual.
 - **FR-025**: Enquanto a pessoa não mudar a linha, o produto MUST NOT aplicar nem salvar nada. Um valor da
   config que não está na lista aparece como está (`250 ms`).
 - **FR-026**: O valor salvo MUST voltar na subida do shell e depois de cada reload do Hyprland, como os layouts
-  da 013. Quem vence sobre a config da pessoa: P2.
+  da 013. Uma linha que a pessoa mudou vence a config dela (D2).
 - **FR-027**: Caps Lock MUST mexer só na parte do Caps de `kb_options`, somando ao que a pessoa já tem.
 - **FR-028**: Repeat rate MUST mostrar repetições por segundo e não chegar a 0, porque 0 desliga a repetição.
   O mínimo é 5, o passo do slider.
@@ -363,7 +375,8 @@ visual.
 
 ### Ondas 2 e 3: só escopo e dependência
 
-Nada aqui é decidido nesta spec. Cada item terá requisitos próprios quando chegar a vez.
+As duas ondas entram na 0.1.0 (D1), depois da onda 1. Os requisitos delas não estão aqui: cada item terá os
+seus quando chegar a vez, e cada ferramenta da onda 3 é conversada com o dono, uma por vez.
 
 **Onda 2 (depende de outra frente):**
 
@@ -386,7 +399,7 @@ Nada aqui é decidido nesta spec. Cada item terá requisitos próprios quando ch
 | Network › Airplane mode | Network e Bluetooth prontos | S |
 
 Cada ferramenta aceita entra depois como opcional em `system/deps`, e o instalador pergunta antes de
-instalar (`lib/yorha/deps.sh`). A onda 3 é onde o ponto "hardware" do princípio II pesa mais (P3).
+instalar (`lib/yorha/deps.sh`). Rede e Bluetooth já estão na emenda do princípio II (D3).
 
 ### Key Entities
 
@@ -402,8 +415,8 @@ instalar (`lib/yorha/deps.sh`). A onda 3 é onde o ponto "hardware" do princípi
 
 - **SC-001**: Nas 15 opções das ondas 0 e 1, o valor mostrado é igual ao do sistema em 100% das comparações da
   check-019, ou a linha está apagada com o motivo. **Evidência:** `results.txt` da check-019.
-- **SC-002**: Na VM sem fixture, o `settings dump` não traz `home-5G`, `K2 Keyboard`, `87% · charging` nem um
-  valor de Display que o `hyprctl` não confirma. **Evidência:** a busca feita pela check-019 no dump.
+- **SC-002**: Ao fim da onda 1, na VM sem fixture, o `settings dump` não traz `87% · charging` nem um valor de
+  Display, som ou teclado que o sistema não confirma. **Evidência:** a busca feita pela check-019 no dump.
 - **SC-003**: Uma mudança feita fora do menu aparece na linha em até 1 s. **Evidência:** tempo medido na check-019.
 - **SC-004**: Depois de uma rodada inteira, o `settings.json` não tem volume, mudo, microfone nem luz de tela, e o
   `hyprland.lua` da VM tem o mesmo `sha256sum`. **Evidência:** `jq` e `sha256sum` na check-019.
@@ -413,6 +426,9 @@ instalar (`lib/yorha/deps.sh`). A onda 3 é onde o ponto "hardware" do princípi
   **Evidência:** os screenshots do lab e a aprovação.
 - **SC-007**: A lista de testes de hardware (tabela de "Como cada coisa se prova") fica marcada como teste do dono,
   e nenhuma entrega da onda 1 se diz pronta nesses itens sem ele. **Evidência:** a lista na entrega da onda 1.
+- **SC-008**: Antes da 0.1.0, com as ondas 2 e 3 prontas, as 31 opções são reais, e o `settings dump` do catálogo do
+  produto na VM sem fixture não traz `home-5G`, `K2 Keyboard` nem outro valor inventado. **Evidência:** a busca no
+  dump, feita na ref da release, e o resumo do relatório do `lab/perf`.
 
 ## Assumptions
 
@@ -421,52 +437,37 @@ instalar (`lib/yorha/deps.sh`). A onda 3 é onde o ponto "hardware" do princípi
 - A linha Battery continua visível, e a barra segue escondendo o BAT como hoje.
 - O UPower é usado hoje pelo `Battery.qml`, mas **não está em `system/deps`**. Num notebook sem ele, a linha só diz
   que falta. Esta spec não acrescenta; a decisão fica pro plano ou pra conversa da onda 3.
+- Enquanto as ondas 2 e 3 não terminam, o catálogo da branch ainda tem as linhas falsas delas. Isso não sai em release
+  (FR-012, SC-008).
 - Volume, luz e saída mudados pelo menu são do sistema e ficam como estão se a pessoa desinstalar. O teclado volta
   ao da config no login seguinte, porque nada foi escrito na config dela.
 - As chamadas `hyprctl eval`, `getoption` e os campos do `monitors -j` valem na 0.56 e na 0.57; o plano confere isso.
 - O `YORHA_MOD` é uma variável do Lua e o shell não a enxerga hoje. O plano escolhe como perguntar ao compositor.
 - O plano técnico pode mudar nomes de chaves; os comportamentos e as evidências desta spec, não.
 
-## Perguntas para o dono
+## Decisões do dono (03.11)
 
-**P1. O que as linhas ainda não reais mostram quando a 0.1.0 sair?** (O plano remete a esta pergunta, mas ela não
-estava escrita.)
-- **A.** A 0.1.0 espera as 31. Nada de apagado na release, mas ela fica presa às conversas de ferramentas da onda 3 e
-  à spec 018, e a sua migração também.
-- **B.** A 0.1.0 sai com as ondas 0 e 1, e as outras 16 linhas ficam visíveis, apagadas, sem valor nenhum, com
-  "Coming in a later version." no card.
-- **C.** Igual à B, mas as outras somem, e Network e Bluetooth somem inteiras.
+**D1. As linhas que faltam: a 0.1.0 espera as 31.** "a gente faz a 0.1.0 com tudo isso... sem problema. o importante é
+implementar na ordem dessas atividades ai." A release inclui as ondas 2 (a 018, o cursor no instalador, Language) e 3.
+Não há estado intermediário de "ainda não feito" na release (FR-012, SC-008).
 
-**Recomendo a B.** Nada inventado aparece, cumpre o "não esconder nem apagar" (a opção continua à vista) e não segura a
-release. Os dois aparelhos falsos de Bluetooth (`K2 Keyboard`, `Headphones`) não podem nem aparecer apagados, porque o
-nome já é mentira: nesse período, Bluetooth mostra só as linhas Bluetooth e Pair a device.
+**D2. No teclado, o menu vence.** "o nosso prevalece. a pessoa edita depois se quiser". Uma linha que a pessoa mudou no
+menu vence a config e volta depois de um reload; uma linha que ela não mexeu fica com o valor do arquivo (FR-025, FR-026).
 
-**P2. No teclado, quando a config da pessoa e o menu definem a mesma coisa, quem vence depois de um reload?**
-- **A.** O menu, só depois que a pessoa mexeu na linha, como nos layouts da 013. Dobra o princípio II sem editar nada.
-- **B.** A config. O valor do menu dura até o próximo reload, e o card avisa.
+**D3. "Hardware" quer dizer drivers e firmware.** O produto pode ler e mudar, em tempo de execução, o que o sistema já
+oferece (som, luz de tela, teclado, rede, Bluetooth), sem instalar driver nem editar arquivo do sistema. A constituição
+2.2.0 diz isso nesta branch. A pergunta da 018, sobre quem vence nas regras de monitor, continua aberta lá.
 
-**Recomendo a A**: é o padrão que você já aprovou, a pessoa pediu com a própria mão e o `settings reset` desfaz. Fica
-diferente do "Your config wins" proposto pra 018, porque aqui errar não apaga a tela.
+**D4. Sound › Output não é guardado pelo produto.** O PipeWire guarda a saída padrão (FR-013, FR-017). A VM confere
+reiniciando; se a saída não ficar, a decisão volta pro dono (User Story 2, cenário 8).
 
-**P3. "Hardware" fora do produto (princípio II) quer dizer só drivers e firmware?**
-- **A.** Sim. O produto pode ler e mudar, em tempo de execução, o que o sistema já oferece (som, luz, teclado e, na onda
-  3, rede e Bluetooth), e a constituição ganha essa frase numa emenda MINOR.
-- **B.** Não. Som e luz ficam só em leitura, como propunha a AU-03, e boa parte da onda 3 sai do produto.
+**D5. Display mostra a tela em foco**, com o nome dela no card, e segue o foco (FR-023).
 
-**Recomendo a A**, com a emenda aprovada junto desta spec. A pergunta 2 da proposta da 018 é a mesma, e a emenda pode
-resolver as duas.
+### Acrescentados, a aprovar
 
-**P4. A escolha de Sound › Output é guardada pelo produto?**
-- **A.** Não. O PipeWire já guarda a saída padrão, e a linha só lê e pede a troca.
-- **B.** Sim, pelo `node.name`, e o shell reaplica ao subir.
+O dono ainda não viu estes quatro requisitos, que não vieram do plano:
 
-**Recomendo a A**, pelo mesmo motivo do volume: uma cópia salva brigaria com `wpctl set-default` e com outros programas.
-O plano falava em salvar por id estável; isso continua valendo pras listas da onda 3. A VM confere, reiniciando, que a
-saída fica; se não ficar, esta pergunta volta.
-
-**P5. Com mais de uma tela, o que Display mostra na onda 1B?**
-- **A.** A tela em foco, com o nome dela no card, seguindo o foco.
-- **B.** Uma linha por tela, como dizia a AU-03.
-
-**Recomendo a A**: mantém as três linhas de hoje e é provisória, porque a proposta da 018 leva isso pra aba SCREENS. A B
-monta uma estrutura que a 018 vai jogar fora.
+- **FR-006**: `settings reset` não muda volume, mudo, microfone, saída nem luz de tela.
+- **FR-007**: valores falsos salvos pela versão anterior são removidos na subida, sem nunca serem aplicados.
+- **FR-022**: pela linha, a luz de tela não desce abaixo de 5%.
+- **FR-028**: Repeat rate tem mínimo de 5, porque 0 desliga a repetição.

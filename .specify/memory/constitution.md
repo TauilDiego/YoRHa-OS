@@ -1,5 +1,12 @@
 <!--
 Sync Impact Report
+- Versão: 2.1.0 → 2.2.0 (MINOR: amplia o que o princípio II cobre). Spec 019; o dono decidiu em 03.11.
+- Princípio II, "O que fica de fora": "hardware" passa a dizer drivers e firmware. O produto pode ler
+  e mudar, em tempo de execução, o que o sistema já oferece (som, luz de tela, teclado, rede,
+  Bluetooth), sem instalar driver nem editar arquivo do sistema.
+- Templates: nenhum muda.
+
+Anterior (2.1.0, 02.11):
 - Versão: 2.0.0 → 2.1.0 (MINOR: amplia a regra de Restrições, Marcas). Spec 015, FR-016; o dono
   aprovou a emenda junto com o plano da 015, em 02.11.
 - Título: "YoRHa-OS Constitution" vira "YoRHa-Shell Constitution".
@@ -62,10 +69,12 @@ funciona, e o desktop ganha a cara do projeto. Não existe ISO nem imagem própr
   e com um comando de desfazer.
 - **O que fica de fora:**
   - gerenciar pacotes além das dependências do próprio shell;
-  - hardware;
+  - hardware, no sentido de drivers e firmware;
   - serviços que não sejam da experiência;
   - as configs pessoais de quem instala. O `hyprland.lua` e os dotfiles são da pessoa; o produto
     oferece um arquivo pra ela incluir.
+- **O que o sistema já oferece:** o produto pode ler e mudar em tempo de execução o som, a luz de
+  tela, o teclado, a rede e o Bluetooth. Pra isso, nunca instala driver nem edita arquivo do sistema.
 
 ### III. Padrões gerenciados separados dos arquivos do usuário
 
@@ -158,4 +167,4 @@ Toda fase do `PLAN.md` passa por spec → plan → tasks antes de implementar:
 - **Revisão:** toda revisão de entrega confere os princípios I, IV e V explicitamente.
 - **Fonte complementar:** `PLAN.md` (roteiro).
 
-**Version**: 2.1.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-02
+**Version**: 2.2.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-03
