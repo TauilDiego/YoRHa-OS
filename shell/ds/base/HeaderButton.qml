@@ -18,7 +18,7 @@ import "../primitives"
 // game's trapezoid, every motion.pulse (the pause menu's open tab; the top bar never sets it).
 // spec 015 (contracts/sinal.md): `tag`, an outline Tag (NEW) above the tab, in the resting ink (a
 // tab's label fills its band, so the tag goes above it); "" = none. Placed by TagAbove's rule:
-// railGap game px over the tab's top edge, in whole physical px, flush with its right edge
+// railGap game px over the tab's top edge, in whole physical px, 2 game px in from its right edge
 // (`tagAlign` "right") or centered over it ("center"). It takes no room in the bar's layout.
 Item {
     id: root

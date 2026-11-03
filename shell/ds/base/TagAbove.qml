@@ -7,7 +7,8 @@ import ".."
 // - vertically, its bottom edge sits Tokens.space.railGap game px above the parent's top edge, as
 //   the rails sit above a selected list item (the design system's "ornament riding on an item"
 //   gap), rounded to whole physical pixels (at least 1);
-// - horizontally (`align`), "right": its right edge flush with the parent's right edge;
+// - horizontally (`align`), "right": its right edge `inset` game px in from the parent's right
+//   edge (2, the owner's call of 03.11: off the corner, not flush), rounded like the gap;
 //   "center": centered over the parent, the offset rounded to whole physical pixels.
 // All offsets are whole physical pixels relative to the parent, so the badge's edges fall on the
 // physical grid exactly as the parent's do. It reads nothing from the parent's state, so hover and
@@ -28,13 +29,17 @@ Item {
 
     // The gap between the badge's bottom edge and the parent's top edge, in logical px.
     readonly property real gap: Math.max(1, Math.round(Tokens.space.railGap * s * d)) / d
+    // "right": how far the badge's right edge sits in from the parent's, in game px (the unit of
+    // railGap), and in logical px rounded to whole physical px (at least 1).
+    readonly property real insetGame: 2
+    readonly property real inset: Math.max(1, Math.round(insetGame * s * d)) / d
 
     readonly property real hostW: parent ? parent.width : 0
 
     visible: text !== ""
     width: tag.width
     height: tag.height
-    x: align === "center" ? Math.round((hostW - width) / 2 * d) / d : hostW - width
+    x: align === "center" ? Math.round((hostW - width) / 2 * d) / d : hostW - width - inset
     y: -height - gap
 
     Tag {
