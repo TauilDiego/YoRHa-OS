@@ -350,6 +350,9 @@ cmd_boot_login() {
             yorha_say "this is what would change:"
             sudo "$mod" install --dry-run --src "$(shell_root)" || true
             yorha_ask "install them (sudo)?" || { yorha_say "nothing changed"; exit 1; }
+            # The module's own packages (the boot sound's aplay), offered like the shell's; a no
+            # installs the rest anyway, and the module keeps its warning.
+            [[ -f $(dirname "$mod")/deps ]] && yorha_deps_ensure "$(dirname "$mod")/deps"
             exec sudo "$mod" install --src "$(shell_root)" ;;
         uninstall)
             yorha_say "this is what would go back as it was:"

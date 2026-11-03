@@ -52,6 +52,8 @@ if [[ -n $json ]]; then
 fi
 if [[ $enabled != true ]]; then log "off for ${user:-?} (muted or boot and login sounds off)"; exit 0; fi
 
+command -v aplay >/dev/null || { log "aplay is missing (pacman -S alsa-utils): staying quiet"; exit 0; }
+
 # The card: the first that is not an HDMI/DisplayPort one (a laptop's HDMI shows up as its own card);
 # wait a moment for the main one, then take whatever there is.
 card=""

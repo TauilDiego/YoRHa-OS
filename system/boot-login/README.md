@@ -71,5 +71,7 @@ O `install` também põe o som de início (contracts/boot-sound.md): `/etc/udev/
 sem `Before=` nem dependentes) e `/usr/share/yorha-shell/boot/sound/` com o script `yorha-boot-sound` e os
 `boot-start-<nível>.wav`. O script lê o volume e o mudo do `sound.json` do último usuário, toca com `aplay`
 direto na placa e só então grava `/run/yorha-shell/sound.state` (o tema de login espera por ele). Precisa de
-`alsa-utils`; sem ele o módulo avisa e o som fica calado. Sem `system/sounds/boot` na origem, o passo é pulado.
+`alsa-utils`: o `yorha boot-login install` oferece o pacote (listado em `system/boot-login/deps`, no
+formato do `system/deps`) e só instala depois do sim, com `sudo pacman -S --needed`; sem ele o resto é
+instalado, o módulo avisa e o som fica calado. O `status` diz se o som pode tocar (`can play`). Sem `system/sounds/boot` na origem, o passo é pulado.
 O `uninstall` tira tudo (e recarrega o udev); o `status` mostra o que há.
