@@ -349,6 +349,25 @@ privados no que vai subir, todas só nomes e caminhos. O lint ficou verde na jun
     (`…202041…`, 58/9) usou a pasta do `check-015`, onde a release falsa do `c-rename` (`fake-shell`)
     fica como a mais nova; a 2ª (`…202915…`, 65/2) achou o `hyprland.lua` com a linha que as rodadas
     anteriores deixaram. Com a `t015-a` refeita pelo `prep` e uma pasta própria, passou.
+
+  Depois, 03.11: a `main` trazida de novo (merge 81e9041, o `fix-som-boot`: `system/boot-login/deps`
+  com o `alsa-utils` opcional, oferecido pelo `yorha boot-login install`, o `can play` no status e o
+  aviso no journal). Os 2 conflitos ficaram com o texto da `main` e o `/run/yorha-shell`; o merge não
+  trouxe nenhum nome antigo. Medido em camadas `t-port-*` do 0.56, canal 8771/8772:
+  - `release build 0.0.1 --lab-only` + `check --strict` (`…023739…`): ok, com o `deps` no pacote.
+  - `check-015` inteiro (`…023829…`): 116/0. `check-014` (`…024820…`): 67/0.
+  - `check-011 undo` inteiro na `boot-iso` (`…025422…`): 95/0.
+  - Som de boot pelo `yorha boot-login install` (`…030700…`, WAVs a -60 dB em `…031302…`): com o
+    `alsa-utils` recusado, os temas entram, o status diz `can play  no`, o journal diz que falta o
+    `aplay` e o WAV só tem a intro do login (598 ms); com o sim, o `alsa-utils` 1.2.16 entra, o journal
+    diz que tocou o `boot-start-30` e o WAV tem o boot (1013 ms) e depois a intro. O critério do
+    roteiro (ataque de mais de 800 ms no limiar padrão de -40 dB) deu 1 FAIL falso; a -60 dB, como no
+    teste do fix, bate. A 1ª rodada (`…025709…`) falhou porque o `sudo` jogava fora as respostas
+    digitadas antes do prompt.
+  - `check-014 --only boot-login` (`…030944…`): 5/0. A 1ª rodada (`…030519…`, 4/1) foi numa VM sem
+    os temas, e o bloco começa pelo `uninstall`; o `install` dela já ofereceu e instalou o `alsa-utils`.
+  - Lint (`…031203…`): shellcheck 0 achados; qmllint só os falsos positivos do filtro. As 2 primeiras
+    rodadas falharam pelo script do lab (a pasta `src` e o `git archive`, que deixa o `.github` de fora).
 - [X] T034 O Central (comandos novos: `yorha channel`, `lab/015/canal`, `release` e `audit`) e o Mapa
   do projeto (015 em junção)
 
