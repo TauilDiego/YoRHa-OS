@@ -7,7 +7,7 @@ import "../services"
 // Every fixed UI text, in English like the game (FR-018). Kept in one place for future i18n.
 Singleton {
     readonly property string cpu: "CPU"
-    readonly property string mem: "MEM"
+    readonly property string mem: "RAM"
     readonly property string vol: "VOL"
     readonly property string bat: "BAT"
     readonly property string system: "SYSTEM"

@@ -12,7 +12,7 @@ import "../strings"
 
 // The HUD (FR-009–FR-014): one bar at the top of each monitor, reserving its height.
 // Left → right: the brand (the TabBar's vertical strips), workspace tabs, the active window's
-// title (centered), CPU/MEM/VOL/BAT readings, date and time; the dotted rule along the bottom.
+// title (centered), CPU/RAM/VOL/BAT readings, date and time; the dotted rule along the bottom.
 // spec 004 US6: the bar has no background of its own. The monitor's wallpaper (and its
 // transitions) shows under it, and its colors follow that wallpaper: `tone`, 0 paper → 1 light,
 // from WallpaperStore.toneMix (set by the monitor's Wallpaper), handed to every piece.
