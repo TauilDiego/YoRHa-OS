@@ -14,6 +14,15 @@ local function ipc(args)
   return hl.dsp.exec_cmd(yorha .. " ipc " .. args)
 end
 
+-- Transparent layers (the bar, notifications, OSD, popups) need GL buffers with alpha. Hyprland
+-- 0.57.0 turned quirks:skip_non_kms_dmabuf_formats on by default (hyprwm/Hyprland#15803): it then
+-- offers clients only the formats the display planes can scan out, and on a GPU whose planes take
+-- just XRGB8888 (e.g. virtio-gpu) every GL client gets an opaque buffer, so the bar's empty area is
+-- drawn black instead of the wallpaper. Upstream reverted that default (#16731, after 0.57.0); this
+-- keeps the old default until then. A person's own setting, later in their config, still wins.
+-- pcall: an option this Hyprland does not know must not stop the rest of this file.
+pcall(hl.config, { quirks = { skip_non_kms_dmabuf_formats = false } })
+
 hl.on("hyprland.start", function()
   hl.exec_cmd(yorha .. " shell start")
 end)
