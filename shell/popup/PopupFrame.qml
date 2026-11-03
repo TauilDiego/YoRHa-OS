@@ -400,7 +400,7 @@ Item {
     function tabGeometry(i: int): var {
         const g = tabBar.tabGeometry(i);
         const p = tabBar.mapToItem(null, 0, 0);
-        return { x: g.x, y: Math.round(p.y), w: g.w, h: tabBar.bandH, tag: g.tag };    // tag: spec 015
+        return { x: g.x, y: Math.round(p.y), w: g.w, h: tabBar.bandH, tag: g.tag, tagBox: g.tagBox ?? null };    // tag: spec 015
     }
 
     Rectangle {
@@ -492,7 +492,10 @@ Item {
         TabBar {
             id: tabBar
             x: root.inset + root.u(48)
-            y: root.u(Tokens.space.pauseTabsY)
+            // On the physical grid (spec 015): at a half physical px the selected tab's clipped
+            // plate and a resting tab's band round their top edge apart (1 px at 1.5), and the NEW
+            // badge above SYSTEM would seem to move when the tab is selected.
+            y: Tokens.snap(root.u(Tokens.space.pauseTabsY), root.dpr)
             width: parent.width - 2 * x
             visible: root.tabbed
             s: root.s
