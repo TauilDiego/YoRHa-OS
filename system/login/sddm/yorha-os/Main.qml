@@ -284,7 +284,9 @@ Rectangle {
 
     // full only on the first greeter after the boot: the boot's handoff mark (written by the
     // sddm.service drop-in) is younger than 30 s and no greeter used it yet; a logout or a user
-    // switch gets the fade (FR-019). The used mark is kept in the sddm user's cache.
+    // switch gets the fade (FR-019). The used mark is kept in the sddm user's cache, with the boot
+    // id: the mark is the uptime in 10 ms steps, and two boots can write the same one (seen on a lab
+    // VM, 3.58 twice in a row), which made the second boot's greeter take it as a re-login.
     Settings {
         id: memory
         location: StandardPaths.writableLocation(StandardPaths.GenericCacheLocation) + "/yorha-os/greeter.conf"
@@ -308,9 +310,10 @@ Rectangle {
         const mark = readFile("/run/yorha-os/handoff").trim();
         const handoff = parseFloat(mark);
         const uptime = parseFloat(readFile("/proc/uptime"));
-        if (!isFinite(handoff) || !isFinite(uptime) || uptime < handoff || uptime - handoff >= 30 || mark === memory.handoffUsed)
+        const used = readFile("/proc/sys/kernel/random/boot_id").trim() + " " + mark;
+        if (!isFinite(handoff) || !isFinite(uptime) || uptime < handoff || uptime - handoff >= 30 || used === memory.handoffUsed)
             return "fade";
-        memory.handoffUsed = mark;
+        memory.handoffUsed = used;
         memory.sync();
         return "full";
     }
