@@ -209,7 +209,9 @@ Segue o modelo do Serpantinum, que funciona bem com monitores de escalas diferen
   - menus de tela inteira: `s = alturaLógicaDoMonitor / 1080`, pra ocupar a tela como no jogo.
 - **`uiScale`** (padrão 1) multiplica tudo, pra quem quiser a UI maior ou menor sem mexer na
   escala do monitor.
-- Linhas finas (grid, réguas) arredondam pra pixel inteiro, com mínimo de 1px, pra ficar nítidas.
+- Linhas finas são como vetor: uma linha de N px lógicos vira ceil(N × escala) pixels físicos
+  inteiros, alinhados à grade física; nunca somem nem borram. 1 px lógico = 1 px na escala 1 e
+  2 px em 1,25 a 2 (`Tokens.vline`; a régua da barra, `Rule`).
 - Testes no laboratório nos dois perfis: 1920x1080 @1 e 2560x1600 @1,25.
 
 ## 6. Observações do jogo

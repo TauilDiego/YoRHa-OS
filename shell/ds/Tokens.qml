@@ -296,6 +296,13 @@ Singleton {
         return Math.max(1, Math.round(v * dpr)) / dpr;
     }
 
+    // A vector hairline: `v` logical px drawn as ceil(v × dpr) whole physical pixels, in logical px
+    // (1 → 1 px at scale 1, 2 px at 1.25–2). Thinner than that, a fractional scale either drops it
+    // to 1 physical px (gone once the screen is downscaled) or blurs it. Snap its position too.
+    function vline(v: real, dpr: real): real {
+        return Math.max(1, Math.ceil(v * dpr - 1e-6)) / dpr;
+    }
+
     // --- helpers ----------------------------------------------------------------------------
     // Hairlines: whole pixels, never thinner than 1 (FR-002, SC-008).
     function line(v: real, s: real): int {
