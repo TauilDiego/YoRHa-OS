@@ -10,8 +10,10 @@ Soma-se a `specs/003-settings-popup/contracts/ipc.md`. Os campos antigos não mu
 | `hidden` | `["cat.opt"]` das linhas que somem; uma categoria vazia não entra em `values` | FR-045 |
 | `backend` | `Compositor.backendName` | US7.2 |
 | `fileBase` | `{ compositor, shell }` | SC-009 |
+| `watching` | A categoria à vista, ou `""` | R5 |
+| `card.meta` | `[{ label, value }]`, as linhas do card (o `pause dump` e o `settings dump`) | FR-005 |
 
 `values` traz só as linhas visíveis. Com a janelinha aberta, o `pause dump` traz `system.choice` com `readOnly`, e `pause choice
-pick` responde `error` nela.
+pick` responde `error` nela numa lista só de leitura. O `choiceGeometry` ganha `first` (a primeira linha à vista) e `overflows`.
 
 **Espera na subida:** como hoje, o `settings dump` pode responder antes de o catálogo ser lido; quem testa abre o menu uma vez.
