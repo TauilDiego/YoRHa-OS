@@ -44,18 +44,32 @@ PanelWindow {
     readonly property real tabH: Math.round(Settings.barHeight * tabShare)
     // spec 019 (FR-034): Interface scale grows the tabs and the texts, inside the height the person
     // chose. Above 100% the rule keeps the bar's own size and the gap over it gives way; the tabs stop
-    // growing when only a sliver of gap is left, or when they and the readings fill the width.
+    // growing when only a sliver of gap is left, or when they and the readings fill the screen's width.
     readonly property real barS: tabH / Tokens.space.tabH   // s at 100%
-    readonly property real s: Math.min(barS * Settings.uiScale,
-                                       (Settings.barHeight - fullRule.implicitHeight - 2) / Tokens.space.tabH,
-                                       contentGame > 0 ? root.width / contentGame : Infinity)
-    // The game px the tabs, the readings and their room take. Set after a layout, and only when it
-    // really moved: those widths follow `s`, and a binding here would be a loop.
-    property real contentGame: 0
-    function measureContent(): void {
-        const need = (tabBar.implicitWidth + status.implicitWidth) / s + 2 * 14 + 2 * title.gapGame;
-        if (Math.abs(need - contentGame) > 2)
-            contentGame = need;
+    readonly property real heightS: Math.min(barS * Settings.uiScale,
+                                             (Settings.barHeight - fullRule.implicitHeight - 2) / Tokens.space.tabH)
+    readonly property real s: heightS * widthFit
+    // The width follows `s`, so this is no binding: the fit only ever shrinks, until it all fits, and
+    // starts over only when what the bar holds changes. (Measuring and setting both ways never settles.)
+    property real widthFit: 1
+    readonly property string fitKey: [heightS, tabs.length, modelData?.width ?? 0, readings.map(r => r.available).join(),
+                                      updateTag.visible, logCounter.visible].join("|")
+    onFitKeyChanged: {
+        widthFit = 1;
+        fitTimer.restart();
+    }
+    function shrinkToFit(): void {
+        const room = modelData?.width ?? 0;      // the screen's: a hidden bar's window has no width
+        const need = tabBar.implicitWidth + status.implicitWidth + 2 * margin + 2 * title.gap;
+        if (room > 0 && need > room) {
+            widthFit *= room / need;
+            fitTimer.restart();
+        }
+    }
+    Timer {
+        id: fitTimer
+        interval: 50                             // the row has settled
+        onTriggered: root.shrinkToFit()
     }
     readonly property real ruleScale: Math.min(s, barS) * ruleShare
     readonly property real ruleGap: Math.min(17, (Settings.barHeight - Tokens.px(Tokens.space.tabH, s) - usedRule.implicitHeight) / s)   // game px between the tabs and the rule
@@ -205,7 +219,7 @@ PanelWindow {
         high: root.high
         ruleGap: root.ruleGap
         ruleScale: root.ruleScale
-        onImplicitWidthChanged: Qt.callLater(root.measureContent)
+        onImplicitWidthChanged: fitTimer.restart()
         model: root.tabs.map((t, i) => ({
             label: t.label,
             state: i === tabBar.hoveredIndex && t.state !== "selected" ? "hovered" : t.state
@@ -228,8 +242,7 @@ PanelWindow {
         // the readings, never pushing them.
         Label {
             id: title
-            readonly property real gapGame: 26
-            readonly property int gap: Tokens.px(gapGame, root.s)
+            readonly property int gap: Tokens.px(26, root.s)
             readonly property real leftEdge: tabBar.x + tabBar.implicitWidth + gap
             readonly property real rightEdge: status.x - gap
             readonly property real half: Math.max(0, Math.min(root.width / 2 - leftEdge, rightEdge - root.width / 2))
@@ -258,7 +271,7 @@ PanelWindow {
             anchors.rightMargin: root.margin
             anchors.verticalCenter: parent.verticalCenter
             spacing: Tokens.px(26, root.s)
-            onImplicitWidthChanged: Qt.callLater(root.measureContent)
+            onImplicitWidthChanged: fitTimer.restart()
 
             Repeater {
                 id: readingViews
