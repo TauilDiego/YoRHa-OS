@@ -5,10 +5,10 @@
       "id": "display", "label": "Display",
       "about": "Screens, resolution, scale, brightness and night light.",
       "options": [
-        {"id": "resolution", "label": "Resolution", "type": "choice", "desc": "Pixels on the built-in screen. The native resolution is the sharpest.", "values": ["1920 × 1080", "2560 × 1600"], "value": 1, "default": 1},
-        {"id": "refresh", "label": "Refresh rate", "type": "choice", "desc": "How many times per second the screen redraws. Higher is smoother and uses more battery.", "values": ["60 Hz", "120 Hz", "165 Hz"], "value": 1, "default": 1},
-        {"id": "scale", "label": "Scale", "type": "choice", "desc": "Makes everything bigger on dense screens. 1.25× suits a 2560 × 1600 laptop.", "values": ["1.00×", "1.25×", "1.50×", "2.00×"], "value": 1, "default": 1},
-        {"id": "brightness", "label": "Brightness", "type": "slider", "desc": "Backlight of the built-in screen.", "value": 70, "default": 70, "step": 5},
+        {"id": "resolution", "label": "Resolution", "type": "info", "setting": "sys.display.resolution", "requires": "monitorInfo", "desc": "Pixels on the screen in focus. The native resolution is the sharpest."},
+        {"id": "refresh", "label": "Refresh rate", "type": "info", "setting": "sys.display.refresh", "requires": "monitorInfo", "desc": "How many times per second the screen in focus redraws. Higher is smoother and uses more battery."},
+        {"id": "scale", "label": "Scale", "type": "info", "setting": "sys.display.scale", "requires": "monitorInfo", "desc": "How much bigger everything is drawn on the screen in focus. 1.25× suits a 2560 × 1600 laptop."},
+        {"id": "brightness", "label": "Brightness", "type": "slider", "setting": "sys.display.brightness", "desc": "Backlight of the built-in screen.", "step": 5},
         {"id": "night", "label": "Night light", "type": "toggle", "desc": "Warms the colors after sunset so the screen is easier on the eyes at night.", "value": false, "default": false}
       ]
     },
@@ -106,7 +106,7 @@
       "id": "power", "label": "Power",
       "about": "Battery, profiles and what happens when idle.",
       "options": [
-        {"id": "battery", "label": "Battery", "type": "info", "desc": "Charge of the internal battery. The top bar shows it as BAT.", "text": "87% · charging"},
+        {"id": "battery", "label": "Battery", "type": "info", "setting": "sys.power.battery", "desc": "Charge of the internal battery. The top bar shows it as BAT."},
         {"id": "profile", "label": "Profile", "type": "choice", "desc": "Trades speed for battery life.", "values": ["Power saver", "Balanced", "Performance"], "value": 1, "default": 1},
         {"id": "screen-off", "label": "Screen off after", "type": "choice", "desc": "Idle time before the screen turns off.", "values": ["2 min", "5 min", "10 min", "Never"], "value": 1, "default": 1},
         {"id": "suspend", "label": "Suspend after", "type": "choice", "desc": "Idle time before the computer suspends.", "values": ["10 min", "15 min", "30 min", "Never"], "value": 1, "default": 1},
