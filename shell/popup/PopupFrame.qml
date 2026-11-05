@@ -15,8 +15,8 @@ import "../services"
 // it, a plain rule over the footer, a text on the footer's left, the key hints on its right and
 // the vignette on top. A click on the ink emits dismissed(); clicks on the panel stay there.
 // The body (default property) fills the panel; it is laid out in px of a 1612×908 game-px frame
-// times `s` = min(panel height / 908, panel width / 1612) × uiScale. On screens taller than 16:9
-// the extra height goes above the footer, which stays at the panel's bottom.
+// times `s` = min(panel height / 908, panel width / 1612), the panel growing with uiScale. On screens
+// taller than 16:9 the extra height goes above the footer, which stays at the panel's bottom.
 // PopupWindow puts it in a window; the gallery shows it as a miniature.
 // spec 007: with `tabs` (the pause menu), the panel draws the game's tab bar at y 26 (the tab `tab`
 // selected and reaching the dotted rule, the others normal or hovered, no kite), the title at y 127
@@ -370,15 +370,18 @@ Item {
         }
     }
 
-    readonly property real s: Math.min(shareH / Tokens.space.popupH, shareW / Tokens.space.popupW) * Settings.uiScale
+    // spec 019 (FR-034): Interface scale zooms the floating panel with what is in it, so every layout
+    // keeps its 1612×908 game-px frame and fits at any scale. The panel stops growing at the whole area.
+    readonly property real zoom: Math.min(Settings.uiScale, 1 / Tokens.space.popupShare)
+    readonly property real s: Math.min(shareH / Tokens.space.popupH, shareW / Tokens.space.popupW)
     readonly property Item panel: panelItem
 
     // Edges on the monitor's physical pixels, as the other surfaces do.
     readonly property var window: QsWindow.window
     readonly property real dpr: Tokens.scaleOf(window?.screen?.name ?? "")
     // The floating panel's size (it sets `s` in both presentations), and the panel's.
-    readonly property real shareW: Tokens.snap(width * Tokens.space.popupShare, dpr)
-    readonly property real shareH: Tokens.snap(height * Tokens.space.popupShare, dpr)
+    readonly property real shareW: Tokens.snap(width * Tokens.space.popupShare * zoom, dpr)
+    readonly property real shareH: Tokens.snap(height * Tokens.space.popupShare * zoom, dpr)
     // spec 013, front B (FR-013): the panel grows from the floating size to the whole area by `morph`
     // (0 floating, 1 full screen), which follows `presentation` over Tokens.motion.popupFade (at once
     // with Tokens.instant). Switching with the menu open is just this number moving.

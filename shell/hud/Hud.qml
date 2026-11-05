@@ -40,10 +40,25 @@ PanelWindow {
     // Layout, top to bottom: a little room, the tabs, a visible gap, then the dotted rule.
     // The tab takes a fixed share of the bar; s (research R5) scales the game's 47 px tab to it.
     readonly property real tabShare: 0.485             // 33 px of the default 68
-    readonly property real ruleGap: 17                   // game px between the tabs and the rule
     readonly property real ruleShare: 1.0                // the rule's pattern, relative to s: the game's own size
     readonly property real tabH: Math.round(Settings.barHeight * tabShare)
-    readonly property real s: tabH / Tokens.space.tabH * Settings.uiScale
+    // spec 019 (FR-034): Interface scale grows the tabs and the texts, inside the height the person
+    // chose. Above 100% the rule keeps the bar's own size and the gap over it gives way; the tabs stop
+    // growing when only a sliver of gap is left, or when they and the readings fill the width.
+    readonly property real barS: tabH / Tokens.space.tabH   // s at 100%
+    readonly property real s: Math.min(barS * Settings.uiScale,
+                                       (Settings.barHeight - fullRule.implicitHeight - 2) / Tokens.space.tabH,
+                                       contentGame > 0 ? root.width / contentGame : Infinity)
+    // The game px the tabs, the readings and their room take. Set after a layout, and only when it
+    // really moved: those widths follow `s`, and a binding here would be a loop.
+    property real contentGame: 0
+    function measureContent(): void {
+        const need = (tabBar.implicitWidth + status.implicitWidth) / s + 2 * 14 + 2 * title.gapGame;
+        if (Math.abs(need - contentGame) > 2)
+            contentGame = need;
+    }
+    readonly property real ruleScale: Math.min(s, barS) * ruleShare
+    readonly property real ruleGap: Math.min(17, (Settings.barHeight - Tokens.px(Tokens.space.tabH, s) - usedRule.implicitHeight) / s)   // game px between the tabs and the rule
     readonly property int margin: Tokens.px(14, s)
 
     // --- data ---------------------------------------------------------------------------------
@@ -165,6 +180,20 @@ PanelWindow {
     }
     // --- end spec 004 US6 --------------------------------------------------------------------------
 
+    // The rule's height, at the bar's own size and as drawn (never shown).
+    Rule {
+        id: fullRule
+        visible: false
+        kind: "dotted"
+        s: root.barS * root.ruleShare
+    }
+    Rule {
+        id: usedRule
+        visible: false
+        kind: "dotted"
+        s: root.ruleScale
+    }
+
     // Tabs + strips + the dotted rule, sitting on the bar's bottom edge.
     TabBar {
         id: tabBar
@@ -175,7 +204,8 @@ PanelWindow {
         tone: root.tone
         high: root.high
         ruleGap: root.ruleGap
-        ruleScale: root.s * root.ruleShare
+        ruleScale: root.ruleScale
+        onImplicitWidthChanged: Qt.callLater(root.measureContent)
         model: root.tabs.map((t, i) => ({
             label: t.label,
             state: i === tabBar.hoveredIndex && t.state !== "selected" ? "hovered" : t.state
@@ -198,7 +228,8 @@ PanelWindow {
         // the readings, never pushing them.
         Label {
             id: title
-            readonly property int gap: Tokens.px(26, root.s)
+            readonly property real gapGame: 26
+            readonly property int gap: Tokens.px(gapGame, root.s)
             readonly property real leftEdge: tabBar.x + tabBar.implicitWidth + gap
             readonly property real rightEdge: status.x - gap
             readonly property real half: Math.max(0, Math.min(root.width / 2 - leftEdge, rightEdge - root.width / 2))
@@ -227,6 +258,7 @@ PanelWindow {
             anchors.rightMargin: root.margin
             anchors.verticalCenter: parent.verticalCenter
             spacing: Tokens.px(26, root.s)
+            onImplicitWidthChanged: Qt.callLater(root.measureContent)
 
             Repeater {
                 id: readingViews
