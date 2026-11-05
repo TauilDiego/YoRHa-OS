@@ -77,7 +77,7 @@ Singleton {
         try {
             const d = JSON.parse(text);
             if (d && typeof d.values === "object" && d.values !== null && !Array.isArray(d.values)) {
-                values = d.values;
+                values = withMovedKeys(d.values);
                 return;
             }
         } catch (e) {
@@ -87,6 +87,31 @@ Singleton {
             console.info(`settings: ${path} is not a valid state file, starting from the defaults`);
         }
         values = {};
+    }
+
+    // Appearance's toggles were saved under their catalog ids before they became live (U13): the
+    // person's choice moves to the live key once, and the old key goes. A value equal to the toggle's
+    // default is only dropped, so it doesn't start overriding shell.json.
+    readonly property var movedKeys: ({
+        "settings.appearance.vignette": { to: "shell.vignette", fallback: true },
+        "settings.appearance.bg-motion": { to: "shell.wallpaperMotion", fallback: true },
+        "settings.appearance.reduce-motion": { to: "shell.reduceMotion", fallback: false }
+    })
+    function withMovedKeys(saved: var): var {
+        const out = Object.assign({}, saved);
+        let moved = false;
+        for (const from of Object.keys(movedKeys)) {
+            if (!Object.prototype.hasOwnProperty.call(out, from))
+                continue;
+            const m = movedKeys[from];
+            if (typeof out[from] === "boolean" && out[from] !== m.fallback && !Object.prototype.hasOwnProperty.call(out, m.to))
+                out[m.to] = out[from];
+            delete out[from];
+            moved = true;
+        }
+        if (moved)
+            saveSoon.restart();
+        return out;
     }
 
     function changed(): void {
