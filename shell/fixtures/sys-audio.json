@@ -1,0 +1,54 @@
+{
+  "clock": "2026-10-26T13:37:00",
+  "cpu": 23,
+  "mem": 41,
+  "volume": {
+    "percent": 64,
+    "muted": false
+  },
+  "battery": {
+    "percent": 87,
+    "charging": false
+  },
+  "workspaces": {
+    "existing": [
+      1,
+      2,
+      3
+    ],
+    "focused": 2
+  },
+  "activeWindow": "kitty — ~/projetos",
+  "audioDevices": {
+    "sinks": [
+      {
+        "id": "alsa_output.speakers",
+        "label": "Built-in Speakers",
+        "volume": 64,
+        "muted": false
+      },
+      {
+        "id": "alsa_output.headphones",
+        "label": "Headphones",
+        "volume": 30,
+        "muted": true
+      },
+      {
+        "id": "alsa_output.hdmi",
+        "label": "HDMI Monitor",
+        "volume": 130,
+        "muted": false
+      }
+    ],
+    "sources": [
+      {
+        "id": "alsa_input.mic",
+        "label": "Built-in Microphone",
+        "volume": 80,
+        "muted": false
+      }
+    ],
+    "defaultSink": "alsa_output.speakers",
+    "defaultSource": "alsa_input.mic"
+  }
+}
