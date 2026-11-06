@@ -196,13 +196,13 @@ Singleton {
     FileView {
         id: brightFile
         path: root.backlight ? root.backlight + "/brightness" : ""
-        blockLoading: true
+        blockAllReads: true
         printErrors: false
     }
     FileView {
         id: maxFile
         path: root.backlight ? root.backlight + "/max_brightness" : ""
-        blockLoading: true
+        blockAllReads: true
         printErrors: false
     }
 
