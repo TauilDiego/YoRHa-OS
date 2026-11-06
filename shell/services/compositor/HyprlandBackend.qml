@@ -391,10 +391,10 @@ Item {
         configQuery.running = true;
     }
     property bool writeCrossedReload: false
-    // A config with an error raises Hyprland's error overlay. On 0.56.2, a request right after the
-    // reload's event can leave its main thread waiting forever on the overlay's text (the lab: 4 hangs
-    // in 25 rounds reading at once, none in 25 with this wait; lab/019/prova-trava, sondagem.md).
-    // The value read later is still the file's: nothing else sets it in between.
+    // A wait after a reload, before anything is asked. It came in for Hyprland's hang when it draws a
+    // config error's overlay, but that hang isn't caused by our requests and the wait has no shown
+    // benefit against it (sondagem.md). The value read later is still the file's: nothing else sets it
+    // in between.
     Timer {
         id: configWait
         interval: 300
