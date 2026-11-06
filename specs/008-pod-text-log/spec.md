@@ -523,7 +523,7 @@ o log; tudo por screenshots e pelo estado exportado.
     app não muda);
   - `Typing`: On / Off (Off: o texto aparece inteiro, como com movimento reduzido, FR-006);
   - `In fullscreen`: Hold / Show (FR-027).
-- **FR-040**: As escolhas MUST ser guardadas como estado do usuário (`$XDG_STATE_HOME/yorha-os/`),
+- **FR-040** (revista pela 019: a escolha guardada vale só até a pessoa editar aquela chave no `shell.json`, FR-041 da 019): As escolhas MUST ser guardadas como estado do usuário (`$XDG_STATE_HOME/yorha-os/`),
   nunca na config dele. A ordem de quem vale: a escolha guardada, depois o `shell.json` do usuário,
   depois os padrões do projeto (como o papel de parede da 004).
 - **FR-041**: Uma troca de `Position`, `OSD position`, `Monitor` ou `On screen` MUST valer também pro

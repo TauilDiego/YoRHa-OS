@@ -200,10 +200,10 @@ dependentes.
     andamento no quadro por ≈2 s; nada mais acontece;
   - **informação:** só leitura (`Not connected`, `87% · charging`).
   As setas ◂ ▸ só aparecem na linha em foco.
-- **FR-017**: Uma opção pode depender de outra de liga/desliga. Com a outra desligada, ela fica
+- **FR-017** (revista pela 019: o mesmo visual vale pra "o sistema não tem isso", `specs/019-sistema-real/spec.md`, FR-004): Uma opção pode depender de outra de liga/desliga. Com a outra desligada, ela fica
   apagada (o estado `dimmed` da 001), continua focável, não muda de valor nem dispara, e o quadro
   diz o que fazer ("Turn on Wi-Fi first.", "Turn on Bluetooth first.").
-- **FR-018**: Os valores MUST valer só em memória durante a sessão do shell: continuam ao fechar e
+- **FR-018** (revista pela 019: só pras opções sem provedor do sistema; as `sys.*` mudam o sistema, `specs/019-sistema-real/spec.md`): Os valores MUST valer só em memória durante a sessão do shell: continuam ao fechar e
   reabrir; voltam aos dos dados de teste quando o shell reinicia. **Nada** mexe no sistema nem
   grava arquivo. **Revisto por decisão do dono de 2026-10-27 ("salvar sempre", spec 004, emendas
   (2) e (3), FR-030 e FR-031):** os valores mudados no popup são salvos em
@@ -214,7 +214,7 @@ dependentes.
 
 **Dados, textos e testes**
 
-- **FR-019**: As categorias e opções MUST vir de um arquivo de dados de teste do shell
+- **FR-019** (revista pela 019: `settings-default.json` é o catálogo do produto, e os dados de teste vão pro `settings-showroom.json`, FR-008 da 019): As categorias e opções MUST vir de um arquivo de dados de teste do shell
   (`settings-default.json`), com as 7 categorias e as opções do mockup aprovado: nome, tipo,
   valores, valor atual, padrão, passo, dependência, rótulo e aviso de ação, e descrição.
 - **FR-020**: Todo texto fixo da UI MUST ficar em inglês, no lugar central de textos da 001, pra

@@ -88,6 +88,8 @@ fica coberto pelo menu, e recriar a superfície dele traz ele pra frente. O plan
 
 ## R6. Keyboard › Layouts no Hyprland 0.56 (configuração em Lua)
 
+**Revista pela 019:** os layouts salvos voltam só enquanto o `kb_layout` do arquivo e o `kbLayouts` do `shell.json` não mudarem (FR-040 da 019).
+
 **Decisão:** a lista vira `input.kb_layout` (separado por vírgula), aplicada sem reiniciar por
 `hyprctl eval 'hl.config({ input = { kb_layout = "us,br" } })'` e gravada também na configuração
 gerenciada (o `hyprctl reload` volta ao arquivo). A troca é por um atalho de "próximo layout"

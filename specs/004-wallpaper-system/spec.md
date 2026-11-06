@@ -392,13 +392,13 @@ medido nos pixels). Sem dados de teste, gravar rajadas da camuflagem Menu → Da
 - **FR-029**: O `hud dump` MUST mostrar, por monitor, o `tone` (`"paper"` ou `"light"`) e o `toneMix`
   (0 = papel, 1 = claro); o `wallpaper dump`, a luminância medida da imagem de cada monitor.
   **Emenda (2):** e o `contrast` (`"normal"` ou `"high"`).
-- **FR-030** (emenda (2)): A opção **Bar contrast** (`Normal` / `High`) MUST aparecer em System
+- **FR-030** (emenda (2); revista pela 019: a escolha guardada vale só até a pessoa editar a chave no arquivo, FR-041 da 019): A opção **Bar contrast** (`Normal` / `High`) MUST aparecer em System
   Settings › Appearance, logo depois de "Top bar height", e trocar a barra na hora, com o popup
   aberto. O valor vem da configuração `barContrast` (`"normal"` / `"high"`, padrão `"normal"` no
   `defaults.json`, sobrescrito pelo `shell.json`), como as outras configurações do shell. **Emenda
   (3):** a troca pelo popup é salva no estado (`shell.barContrast`, FR-031) e vale mais que a config;
   o `settings reset` volta ao valor configurado.
-- **FR-031** (emenda (3), decisão do dono de 2026-10-27, "salvar sempre"): Todo valor mudado no popup
+- **FR-031** (emenda (3), decisão do dono de 2026-10-27, "salvar sempre"; revista pela 019: FR-041 da 019): Todo valor mudado no popup
   de configurações MUST continuar depois de reiniciar o shell. Um mecanismo comum guarda os valores
   em `$XDG_STATE_HOME/yorha-os/settings.json` (nunca no `~/.config`): lido no início, escrito 250 ms
   depois da última mudança, de forma atômica, por cima da base (`shell.json` e `defaults.json`). O
