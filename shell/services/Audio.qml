@@ -6,11 +6,12 @@ import Quickshell.Services.Pipewire
 import "../strings"
 
 // Volume Reading of the default PipeWire sink (research R2), or the "volume" fixture
-// ({ percent, muted }). Muted → value 0 and extra "muted"; no sink → value 0.
+// ({ percent, muted }). Muted → value 0 and extra "muted"; no sink → value 0. WirePlumber's "Dummy
+// Output" (auto_null) plays nothing, so it counts as no sink (spec 019, R6; SysAudio leaves it out too).
 Singleton {
     id: root
 
-    readonly property PwNode sink: Pipewire.defaultAudioSink
+    readonly property PwNode sink: Pipewire.defaultAudioSink?.name === "auto_null" ? null : Pipewire.defaultAudioSink
 
     readonly property var vol: {
         let value = 0;
