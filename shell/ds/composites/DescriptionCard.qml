@@ -122,14 +122,32 @@ Item {
                 { text: String(m?.value ?? ""), value: true }
             ]), [])
 
+            // A value that doesn't fit the card scrolls (spec 019: a device's name can be any length).
+            ScrollingLabel {
+                required property var modelData
+                width: modelData.value ? Math.min(implicitWidth, root.width - 2 * root.margin - metaGrid.columnSpacing - metaLabels.width) : implicitWidth
+                s: root.s
+                role: "small"
+                label.font.weight: modelData.value ? Font.DemiBold : Font.Medium
+                label.font.variableAxes: ({ "wght": modelData.value ? Font.DemiBold : Font.Medium })
+                text: modelData.text
+                color: modelData.value ? Tokens.color.darkGray : Tokens.color.mediumGray
+            }
+        }
+    }
+    // The label column's width, for the room left to the values.
+    Column {
+        id: metaLabels
+        opacity: 0
+        Repeater {
+            model: root.meta
             Label {
                 required property var modelData
                 s: root.s
                 role: "small"
-                font.weight: modelData.value ? Font.DemiBold : Font.Medium
-                font.variableAxes: ({ "wght": modelData.value ? Font.DemiBold : Font.Medium })
-                text: modelData.text
-                color: modelData.value ? Tokens.color.darkGray : Tokens.color.mediumGray
+                font.weight: Font.Medium
+                font.variableAxes: ({ "wght": Font.Medium })
+                text: String(modelData?.label ?? "")
             }
         }
     }
