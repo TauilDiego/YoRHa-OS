@@ -28,15 +28,20 @@ Rodada em 03.11, sem o shell, nas duas versões, com `lab/019/prova-base` (um `h
 
 ## O que a prova achou além da tabela: o Hyprland pode travar
 
-> **Corrigido em 05.11, na junção.** O texto de 03.11 dizia que a trava era da 0.56.2, que dependia de um pedido logo depois do `configreloaded`, e que a espera de 300 ms a evitava. As frentes
-> mostraram outra coisa:
+> **Corrigido em 05.11, na junção.** O texto de 03.11 dizia que a trava era da 0.56.2, que dependia de um pedido logo depois do `configreloaded`, e que a espera de 300 ms a evitava. Nada disso se sustenta.
+> A medida que vale é a da `fix-trava-reload` (`central/fix-trava-reload/rodadas-056/resumo.txt` e `rodadas-057/resumo.txt`):
 >
-> - **O que a trava precisa é um erro na config na hora em que o aviso é desenhado.** Um pedido logo depois do `configreloaded` não é necessário: ela apareceu com a primeira leitura 1 s depois do save (`1c/sonda-trava-sem-shell-056.txt`).
-> - **Acontece na 0.57.0 também:** 1 caso, a mesma pilha (`COverlay::createQueued` → `renderText` → `await`), em 40 rodadas com o SYSTEM em Keyboard, `central/sistema-real-019/1c/estresse-057/` (`stack-1.txt`).
-> - **Acontece sem o shell:** na 0.56.2, com o `qs` parado, 1 em 100 rodadas (`1b/trava-display/ab-noshell.txt`, pilha em `ab-noshell.txt.stack-46`), e 1 caso em 14 rodadas com leituras 1 s depois do save (`1c/sonda-trava-sem-shell-056.txt`). Então a causa está no Hyprland, e não nos pedidos do shell.
-> - **A espera de 300 ms reduz, no máximo.** Ela não é uma garantia, e os "0 em N" abaixo são amostra. Com a espera, ainda travou (0.56.2, Display à vista: 2 em 100; menu fechado: 0 em 100, `1b/trava-display/`; 0.56.2, SYSTEM em Keyboard: 0 em 40 em duas séries, `1c/estresse-056/` e `1c/estresse-056-chave/`; 0.57.0, SYSTEM em Keyboard: 1 em 40). Essas amostras são pequenas e não comparam nada entre si. Uma medição da taxa está em andamento, fora desta branch, e nenhum número sobre o efeito da espera sai daqui até ela terminar.
+> | Saves com erro na config, travas por rodadas | Com a espera de 300 ms | `main`, sem a espera | Sem shell nenhum |
+> |---|---|---|---|
+> | 0.56.2 | 5 em 400 (1,2%) | 6 em 400 (1,5%) | 21 em 400 (5,2%) |
+> | 0.57.0 | 3 em 200 (1,5%) | 6 em 200 (3,0%) | 11 em 200 (5,5%) |
 >
-> As tabelas abaixo ficam como foram medidas em 03.11. O que muda é a leitura delas.
+> - **A espera não tem benefício mostrado contra a trava.** Com a espera e sem ela não dá pra separar: p combinado 0,50, diferença de +0,67 ponto percentual, intervalo de 95% de −0,78 a +2,11.
+> - **A causa não são os nossos pedidos.** Sem shell nenhum, a trava acontece, e mais do que com o shell (0.56.2: 21 em 400 contra 6 em 400, Fisher p = 0,005; 0.57.0: 11 em 200 contra 6 em 200, p = 0,322, sem separar).
+> - **O que a trava precisa é um erro na config na hora em que o aviso é desenhado** (a pilha abaixo, `COverlay::createQueued` → `renderText` → `await`). Um pedido logo depois do `configreloaded` não é necessário.
+> - **Os números de 03.11 não valem.** O "0 em 70 rodadas" do shell real e o "na 0.57.0 não apareceu" caem: a 0.57.0 trava, a mesma pilha, também em `1c/estresse-057/stack-1.txt`. O "6 em 50 lendo na hora, 0 em 50 com 300 ms" da tabela abaixo foi amostra pequena.
+>
+> As tabelas abaixo ficam como foram medidas em 03.11. Elas não sustentam o que este texto dizia antes.
 
 Na primeira rodada da prova, o Hyprland 0.56.2 parou de responder: `hyprctl` dá `Hyprland IPC didn't respond in time`, para sempre, e a
 sessão inteira fica parada, até reiniciar. A linha principal fica presa assim (`eu-stack`, cópia em `t003/prova-trava-56/`):
@@ -60,14 +65,10 @@ Render::IHyprRenderer::renderMonitor
 | Shell real, com a espera só na leitura da config | 0 em 30 | não medido |
 | Shell real, com a espera em tudo que o backend pede | 0 em 40 | não medido |
 
-**O que muda no desenho:** é a consequência de P5 em R1, "espera curta, medida, antes de ler". Ela reduz o risco, no máximo, e não o elimina (ver a correção acima). Depois do `configreloaded`, o backend espera 300 ms
-antes de ler a config, as telas e as janelas (`configWait`, `afterReload`). A base continua sendo o valor do arquivo: nada mais escreve nessa janela, e
-uma escrita do próprio menu pedida nela espera a leitura acabar. Um `hyprctl eval` de fora nesses 300 ms cairia na base: é o mesmo tipo de limite do "`eval`
-antes da primeira subida", com a janela bem menor. A D2 não muda.
+**O que está no código hoje:** depois do `configreloaded`, o backend espera 300 ms antes de ler a config, as telas e as janelas (`configWait`, `afterReload`). Ela entrou por causa desta trava, e a medida acima não mostra benefício.
+A decisão de manter ou tirar é do dono, e este texto não a antecipa. A base continua sendo o valor do arquivo: nada mais escreve nessa janela, e uma escrita do próprio menu pedida nela espera a leitura acabar. Um `hyprctl eval` ou `dispatch` de fora nesses 300 ms cai nos limites da spec. A D2 não muda.
 
-**O que continua fora do nosso controle:** o Quickshell pede `monitors` e `workspaces` por conta própria nesse mesmo evento (o módulo `Quickshell.Hyprland`). E a trava existe sem shell nenhum.
-
-**A `main` tem o mesmo risco hoje:** quem tem um erro na config, com ou sem o shell no ar, pode ter a sessão parada, na 0.56.2 e na 0.57.0.
+**A `main` tem o mesmo risco hoje, com o shell ou sem ele:** quem tem um erro na config pode ter a sessão parada, na 0.56.2 e na 0.57.0.
 
 ## Medição
 
@@ -81,3 +82,5 @@ antes da primeira subida", com a janela bem menor. A D2 não muda.
 | Shell real, as três linhas da tabela | `2026-11-03T201932-vm-t-base-0-019-t004-t013-subir-o-shell-da-etapa-0-t` | n/a |
 | Taxa com o shell, 0.56.2 (frente 1B, Display à vista, menu fechado, sem shell) | `2026-11-05T155706-…`, `2026-11-05T160534-…`, `2026-11-05T161257-vm-t-leituras-1b-019-1b-taxa-de-trava-da-0-56-2-shell-rea` | n/a |
 | Sondas da 0.57.0 (frente 1C) | `2026-11-05T165104-vm-t-teclado-57-019-1c-sondas-na-0-57-quem-apaga-o-confi` | n/a |
+| A taxa final, 0.56.2 (com a espera, `main`, sem shell) | `2026-11-05T164642-…` e `2026-11-05T200438-vm-t-trava-56-fix-trava-reload-taxa-de-travas-0-56-2-r` | n/a |
+| A taxa final, 0.57.0 (com a espera, `main`, sem shell) | `2026-11-05T200548-…` e `2026-11-05T215822-vm-t-trava-57-fix-trava-reload-taxa-de-travas-0-57-0-c` | n/a |

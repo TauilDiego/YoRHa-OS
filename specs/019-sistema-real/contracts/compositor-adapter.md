@@ -34,7 +34,7 @@ Etapas 2 e 3 acrescentam `monitorSet`, `cursorSize` e `lidSwitch`.
 - `monitors` guarda `width`, `height` e `refreshRate`, em px físicos e Hz (FR-023).
 - `readConfig`: `hyprctl --batch` com `j/getoption` das 4 opções e `j/configerrors`, um pedido só, e uma leitura pedida no meio roda
   depois, com o gatilho mais forte (P4). `[[EMPTY]]` vira `""`; o `configerrors -j` sem erro é `[""]` (P9, `sondagem.md`).
-- `configreloaded` chama `readConfig("reload")`, que espera 300 ms antes de ler (`sondagem.md`, a trava da 0.56.2); `Component.onCompleted`,
+- `configreloaded` chama `readConfig("reload")`, que espera 300 ms antes de ler (entrou por causa da trava de `sondagem.md`, contra a qual não tem benefício mostrado); `Component.onCompleted`,
   `readConfig("start")`.
 - `setConfigValues`: um `eval` de `hl.config({ input = { … } })`. Inteiros validados; `kb_options` e `kb_layout` só com
   `^[a-z0-9_:,]*$`, porque entram no comando, como `setKeyboardLayouts` já faz. Saída que não começa com `ok` é erro. Vale o último pedido,
