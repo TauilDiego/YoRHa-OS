@@ -34,7 +34,7 @@ Item {
     })
 
     // [Monitor] { name, x, y, w, h (logical), width, height (physical px), refreshRate (Hz), scale,
-    // focused }; replaced on every successful read.
+    // focused }; replaced only when a read says something new, because a change re-reads the windows.
     property var monitors: []
     // [Workspace] { key, index, label, monitor, focused, exists, windows: [id] }. The list and the
     // focus come from Quickshell's Hyprland.workspaces (live, what the bar has always read); the
@@ -229,8 +229,7 @@ Item {
                     const names = {};
                     for (const m of list)
                         names[String(m.id)] = String(m.name);
-                    root.monitorNames = names;
-                    root.monitors = list.map(m => ({
+                    const next = list.map(m => ({
                         name: String(m.name),
                         x: Number(m.x) || 0,
                         y: Number(m.y) || 0,
@@ -242,6 +241,10 @@ Item {
                         scale: m.scale,
                         focused: m.focused === true
                     }));
+                    if (JSON.stringify(next) !== JSON.stringify(root.monitors)) {
+                        root.monitorNames = names;
+                        root.monitors = next;
+                    }
                 } catch (e) {
                     // keep the last known monitors
                 }
