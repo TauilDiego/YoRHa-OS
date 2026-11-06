@@ -186,8 +186,8 @@ shell_log_guard() {
     done
 }
 
-# After the guard killed a qs: what the person (or a bug report) needs from the flood, at its full size only
-# once, and the dead instance's run folder gone, since Quickshell never removes it and it is what filled the tmpfs.
+# After the guard killed a qs: shell.log cut to what a bug report needs, with the reason at the end, and the
+# dead instance's run folder gone (a flood's is what filled the tmpfs; it holds the same lines).
 shell_log_after_flood() {
     local log=$1 flag=$2 dir=$3 why tmp
     why=$(cat -- "$flag"); rm -f -- "$flag"
@@ -231,7 +231,7 @@ cmd_shell_start() {
         flag="$rd/shell.flood"; rm -f "$flag"
         shell_log_guard "$qspid" "$log" "$flag" 9>&- &
         guardpid=$!
-        # The folder goes with the process's by-pid link's target; read it while qs lives, as late as possible.
+        # Quickshell makes its folder when it starts; the link to it is only good while qs lives.
         rundir=""
         while kill -0 "$qspid" 2>/dev/null && [[ ! -e $flag ]]; do
             rundir=$(qs_run_dir "$qspid"); [[ -n $rundir && -d $rundir ]] && break
@@ -241,6 +241,12 @@ cmd_shell_start() {
         kill "$guardpid" 2>/dev/null || true
         wait "$guardpid" 2>/dev/null || true
         rm -f "$rd/shell.pid" "$rd/shell.root"
+        # Quickshell never removes a dead instance's folder. A small one stays for `qs log`; a big one is
+        # tmpfs the session needs back, whatever ended it.
+        if [[ -n $rundir && $rundir == */quickshell/by-id/* ]] \
+            && (($(file_bytes "$rundir/log.log") + $(file_bytes "$rundir/log.qslog") > SHELL_LOG_KEEP)); then
+            rm -rf -- "$rundir"
+        fi
         if [[ -s $flag ]]; then
             shell_log_after_flood "$log" "$flag" "$rundir"
             # A loop that comes back at once must not turn into a restart storm with the screen flickering.
