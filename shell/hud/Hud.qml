@@ -40,10 +40,39 @@ PanelWindow {
     // Layout, top to bottom: a little room, the tabs, a visible gap, then the dotted rule.
     // The tab takes a fixed share of the bar; s (research R5) scales the game's 47 px tab to it.
     readonly property real tabShare: 0.485             // 33 px of the default 68
-    readonly property real ruleGap: 17                   // game px between the tabs and the rule
     readonly property real ruleShare: 1.0                // the rule's pattern, relative to s: the game's own size
     readonly property real tabH: Math.round(Settings.barHeight * tabShare)
-    readonly property real s: tabH / Tokens.space.tabH * Settings.uiScale
+    // spec 019 (FR-034): Interface scale grows the tabs and the texts, inside the height the person
+    // chose. Above 100% the rule keeps the bar's own size and the gap over it gives way; the tabs stop
+    // growing when only a sliver of gap is left, or when they and the readings fill the screen's width.
+    readonly property real barS: tabH / Tokens.space.tabH   // s at 100%
+    readonly property real heightS: Math.min(barS * Settings.uiScale,
+                                             (Settings.barHeight - fullRule.implicitHeight - 2) / Tokens.space.tabH)
+    readonly property real s: heightS * widthFit
+    // The width follows `s`, so this is no binding: the fit only ever shrinks, until it all fits, and
+    // starts over only when what the bar holds changes. (Measuring and setting both ways never settles.)
+    property real widthFit: 1
+    readonly property string fitKey: [heightS, tabs.length, modelData?.width ?? 0, readings.map(r => r.available).join(),
+                                      updateTag.visible, logCounter.visible].join("|")
+    onFitKeyChanged: {
+        widthFit = 1;
+        fitTimer.restart();
+    }
+    function shrinkToFit(): void {
+        const room = modelData?.width ?? 0;      // the screen's: a hidden bar's window has no width
+        const need = tabBar.implicitWidth + status.implicitWidth + 2 * margin + 2 * title.gap;
+        if (room > 0 && need > room) {
+            widthFit *= room / need;
+            fitTimer.restart();
+        }
+    }
+    Timer {
+        id: fitTimer
+        interval: 50                             // the row has settled
+        onTriggered: root.shrinkToFit()
+    }
+    readonly property real ruleScale: Math.min(s, barS) * ruleShare
+    readonly property real ruleGap: Math.min(17, (Settings.barHeight - Tokens.px(Tokens.space.tabH, s) - usedRule.implicitHeight) / s)   // game px between the tabs and the rule
     readonly property int margin: Tokens.px(14, s)
 
     // --- data ---------------------------------------------------------------------------------
@@ -165,6 +194,20 @@ PanelWindow {
     }
     // --- end spec 004 US6 --------------------------------------------------------------------------
 
+    // The rule's height, at the bar's own size and as drawn (never shown).
+    Rule {
+        id: fullRule
+        visible: false
+        kind: "dotted"
+        s: root.barS * root.ruleShare
+    }
+    Rule {
+        id: usedRule
+        visible: false
+        kind: "dotted"
+        s: root.ruleScale
+    }
+
     // Tabs + strips + the dotted rule, sitting on the bar's bottom edge.
     TabBar {
         id: tabBar
@@ -175,7 +218,8 @@ PanelWindow {
         tone: root.tone
         high: root.high
         ruleGap: root.ruleGap
-        ruleScale: root.s * root.ruleShare
+        ruleScale: root.ruleScale
+        onImplicitWidthChanged: fitTimer.restart()
         model: root.tabs.map((t, i) => ({
             label: t.label,
             state: i === tabBar.hoveredIndex && t.state !== "selected" ? "hovered" : t.state
@@ -227,6 +271,7 @@ PanelWindow {
             anchors.rightMargin: root.margin
             anchors.verticalCenter: parent.verticalCenter
             spacing: Tokens.px(26, root.s)
+            onImplicitWidthChanged: fitTimer.restart()
 
             Repeater {
                 id: readingViews

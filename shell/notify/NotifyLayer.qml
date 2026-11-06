@@ -62,6 +62,7 @@ PanelWindow {
     // --- the critical band, under the bar (the top band's position: right on its edge) ---------------
     CriticalBand {
         id: band
+        z: 1                                     // spec 019: a tall stack passes behind it, never over it
         visible: root.critEntries.length > 0
         y: root.position === "top" ? root.barH : root.barH + Tokens.px(root.nt.stackTop, root.s)
         width: root.width

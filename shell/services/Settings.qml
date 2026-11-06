@@ -10,8 +10,10 @@ import "../strings"
 Singleton {
     id: root
 
-    readonly property real uiScale: valid(merged.uiScale, 0.5, 3.0, "uiScale") ? merged.uiScale : defaults.uiScale
-    readonly property int barHeight: Math.round(Math.max(28, Math.min(96, Number(merged.barHeight) || defaults.barHeight)))
+    // spec 019 (FR-032, FR-033): SYSTEM › Appearance changes these two live and saves them, which wins
+    // over the config (keys below). A value of shell.json in range and off the menu's list still counts.
+    readonly property real uiScale: valueOf("shell.uiScale")
+    readonly property int barHeight: valueOf("shell.barHeight")
     // The vignette, the background's motion and Reduce motion (spec 013 FR-016: every effect goes
     // straight to its final state). From shell.json / defaults.json; SYSTEM › Appearance changes
     // them live and saves them (keys below, "shell.<key>"), which wins over the config.
@@ -55,16 +57,6 @@ Singleton {
             console.warn(`settings: ${name} is not valid JSON, ignoring it (${e})`);
             return null;
         }
-    }
-
-    function valid(v, lo, hi, key) {
-        if (v === undefined)
-            return false;
-        if (typeof v !== "number" || v < lo || v > hi) {
-            console.warn(`settings: ${key} must be a number between ${lo} and ${hi}, using the default`);
-            return false;
-        }
-        return true;
     }
 
     // --- spec 004: wallpaper (research R12) ---------------------------------------------------
@@ -189,8 +181,7 @@ Singleton {
         "shell.wallpaperMotion": { type: "bool", fallback: true, config: ["wallpaperMotion"] },
         "shell.reduceMotion": { type: "bool", fallback: false, config: ["reduceMotion"] },
         // spec 019 (FR-032, FR-033): a number in a range, with the menu's levels; a value of shell.json
-        // off the list still counts and shows (levelsOf). `uiScale` and `barHeight`, above, read these
-        // from etapa 1D on.
+        // off the list still counts and shows (levelsOf). `uiScale` and `barHeight`, above, read these.
         "shell.uiScale": { type: "levels", levels: [0.9, 1, 1.1, 1.25], min: 0.5, max: 3, unit: "%", fallback: 1, config: ["uiScale"] },
         "shell.barHeight": { type: "levels", levels: [40, 50, 68, 80], min: 28, max: 96, integer: true, unit: "px", fallback: 68, config: ["barHeight"] },
         "sound.ui": { type: "bool", fallback: true, config: ["sound", "ui"] },
