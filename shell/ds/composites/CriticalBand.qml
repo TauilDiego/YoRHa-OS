@@ -203,7 +203,7 @@ Item {
                 width: root.u(root.nt.critClose)
                 height: width
                 color: "transparent"
-                border.width: Tokens.hair(2 * root.s, root.dpr)
+                border.width: Tokens.vline(2 * root.s, root.dpr)
                 border.color: Tokens.notify.bandText2
                 Label {
                     anchors.centerIn: parent

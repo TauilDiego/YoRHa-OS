@@ -13,6 +13,56 @@ local mod = YORHA_MOD or "SUPER"
 local function ipc(args)
   return hl.dsp.exec_cmd(yorha .. " ipc " .. args)
 end
+-- The menu keys go to the shell as global shortcuts (hyprland_global_shortcuts_v1, "yorha:<name>"):
+-- no process starts, so the menu is up right after the key. Opening it also puts Hyprland in the
+-- submap "yorha-menu" until the menu has the keyboard (the shell ends it, or it ends by itself after
+-- 1.5 s): there, the keys typed meanwhile go to the shell as "yorha:key-<k>" and every other key is
+-- swallowed, so nothing typed right after the shortcut reaches the window under the menu; the shell
+-- hands those keys to the menu. A Hyprland without these calls falls back to the IPC.
+local menu_keys = {}
+for c in ("abcdefghijklmnopqrstuvwxyz"):gmatch(".") do
+  menu_keys[#menu_keys + 1] = { c, c }
+  menu_keys[#menu_keys + 1] = { "SHIFT + " .. c, "shift-" .. c }
+end
+for c in ("0123456789"):gmatch(".") do menu_keys[#menu_keys + 1] = { c, c } end
+for _, k in ipairs({ "space", "minus", "period", "Return", "KP_Enter", "BackSpace", "Tab", "Escape", "Up", "Down" }) do
+  menu_keys[#menu_keys + 1] = { k, k }
+end
+local capture = pcall(function()
+  assert(hl.dsp.global and hl.dsp.submap and hl.define_submap and hl.timer and hl.get_layers)
+  hl.define_submap("yorha-menu", function()
+    for _, k in ipairs(menu_keys) do hl.bind(k[1], hl.dsp.global("yorha:key-" .. k[2])) end
+    hl.bind(mod .. " + Escape", hl.dsp.global("yorha:pause"))
+    hl.bind(mod .. " + I", hl.dsp.global("yorha:settings"))
+    hl.bind("catchall", hl.dsp.no_op())
+  end)
+end)
+YORHA_MENU_SEQ = YORHA_MENU_SEQ or 0
+local function menu_open()
+  for _, l in ipairs(hl.get_layers() or {}) do
+    if l.namespace == "yorha-popup" then return true end
+  end
+  return false
+end
+local function shortcut(name, args)
+  local ok, d = pcall(function() return hl.dsp.global("yorha:" .. name) end)
+  if not (ok and d) then return ipc(args) end
+  if not capture then return d end
+  return function()
+    hl.dispatch(d)
+    local open = true
+    pcall(function() open = menu_open() end)
+    if open then return end
+    hl.dispatch(hl.dsp.submap("yorha-menu"))
+    YORHA_MENU_SEQ = YORHA_MENU_SEQ + 1
+    local seq = YORHA_MENU_SEQ
+    hl.timer(function()
+      if seq == YORHA_MENU_SEQ and hl.get_current_submap() == "yorha-menu" then
+        hl.dispatch(hl.dsp.submap("reset"))
+      end
+    end, { timeout = 1500, type = "oneshot" })
+  end
+end
 
 -- Transparent layers (the bar, notifications, OSD, popups) need GL buffers with alpha. Hyprland
 -- 0.57.0 turned quirks:skip_non_kms_dmabuf_formats on by default (hyprwm/Hyprland#15803): it then
@@ -29,8 +79,8 @@ end)
 
 -- The menus (spec 007/013), the settings (003), the wallpaper picker (004), the text log and do not
 -- disturb (008).
-hl.bind(mod .. " + Escape", ipc("pause toggle"))
-hl.bind(mod .. " + I", ipc("settings toggle"))
+hl.bind(mod .. " + Escape", shortcut("pause", "pause toggle"))
+hl.bind(mod .. " + I", shortcut("settings", "settings toggle"))
 -- T, not W: SUPER+W closes the focused window in many setups.
 hl.bind(mod .. " + T", ipc("wallpaper picker toggle"))
 hl.bind(mod .. " + N", ipc("notify toggle"))

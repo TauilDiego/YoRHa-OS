@@ -226,7 +226,7 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     color: "transparent"
-                    border.width: Tokens.hair(root.nt.imageFrame * root.s, root.dpr)
+                    border.width: Tokens.vline(root.nt.imageFrame * root.s, root.dpr)
                     border.color: Tokens.notify.bandText2
                 }
             }
@@ -330,7 +330,7 @@ Item {
                 Rectangle {
                     anchors.bottom: parent.bottom
                     width: parent.width
-                    height: Tokens.hair(2 * root.s, root.dpr)
+                    height: Tokens.vline(2 * root.s, root.dpr)
                     color: Tokens.notify.bandText
                 }
                 TextInput {
@@ -396,7 +396,7 @@ Item {
         width: root.u(root.nt.closeSize)
         height: width
         color: Qt.rgba(0x1E / 255, 0x1D / 255, 0x19 / 255, 0.9)
-        border.width: Tokens.hair(2 * root.s, root.dpr)
+        border.width: Tokens.vline(2 * root.s, root.dpr)
         border.color: Tokens.notify.bandText2
         Label {
             anchors.centerIn: parent

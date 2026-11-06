@@ -34,7 +34,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         color: "transparent"
-        border.width: Tokens.hair(Tokens.notify.line * root.s, root.dpr)
+        border.width: Tokens.vline(Tokens.notify.line * root.s, root.dpr)
         border.color: Tokens.notify.bandText
     }
     Label {

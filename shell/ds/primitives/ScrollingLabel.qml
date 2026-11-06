@@ -58,7 +58,7 @@ Item {
             property: "offset"
             from: 0
             to: root.distance
-            duration: Math.round(root.distance * 1000 / (Tokens.motion.marqueeSpeed * Math.max(0.01, root.s)))
+            duration: Math.max(0, Math.round(root.distance * 1000 / (Tokens.motion.marqueeSpeed * Math.max(0.01, root.s))) || 0)
         }
         PauseAnimation { duration: Tokens.motion.marqueeHold }
         PropertyAction { target: root; property: "offset"; value: 0 }

@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import ".."
 import "../primitives"
 import "../base"
@@ -51,6 +52,11 @@ import "../../strings"
 // The default (fluid, stretch and bodyOnly false) is the picker of specs 004 and 007, unchanged.
 FocusScope {
     id: root
+
+    // The window's monitor decides the hairlines (ceil(N × scale) physical px, Tokens.vline).
+    // QsWindow.window is typed QObject, so go through a `var` (as Rule does).
+    readonly property var window: QsWindow.window
+    readonly property real dpr: Tokens.scaleOf(window?.screen?.name ?? "")
 
     property real s: 1
     property var entries: []
@@ -398,7 +404,7 @@ FocusScope {
             id: infoRule
             y: rowColumn.y + rowColumn.height + optionsBox.railRoom + root.u(6)
             width: parent.width
-            height: Tokens.line(Tokens.space.rule, root.s)
+            height: Tokens.vline(Tokens.line(Tokens.space.rule, root.s), root.dpr)
             visible: root.info.length > 0
             color: Tokens.color.lightGray
         }

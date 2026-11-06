@@ -78,7 +78,7 @@ Item {
             preferredRendererType: Shape.CurveRenderer
             ShapePath {
                 strokeColor: Tokens.notify.bandLine
-                strokeWidth: Tokens.hair(Tokens.notify.line * root.s, root.dpr)
+                strokeWidth: Tokens.vline(Tokens.notify.line * root.s, root.dpr)
                 fillColor: "transparent"
                 capStyle: ShapePath.FlatCap
                 PathSvg {
@@ -104,7 +104,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         color: "transparent"
-        border.width: Tokens.hair(1, root.dpr)
+        border.width: Tokens.vline(1, root.dpr)
         border.color: Tokens.notify.bandEdge
     }
 

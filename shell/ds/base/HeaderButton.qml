@@ -16,9 +16,10 @@ import "../primitives"
 // `high` (004 acabamento): the bar's High contrast (Tokens.hudPaperHigh over paper).
 // spec 013 (FR-002): with `pulse`, a selected tab's plate brightens by motion.pulseLight in the
 // game's trapezoid, every motion.pulse (the pause menu's open tab; the top bar never sets it).
-// spec 015 (contracts/sinal.md): `tag`, an outline Tag (NEW) sitting on the tab's top edge at its
-// right end, in the resting ink (a tab's label fills its band, so the tag goes above it); "" = none.
-// It takes no room in the bar's layout.
+// spec 015 (contracts/sinal.md): `tag`, an outline Tag (NEW) above the tab, in the resting ink (a
+// tab's label fills its band, so the tag goes above it); "" = none. Placed by TagAbove's rule:
+// railGap game px over the tab's top edge, in whole physical px, 2 game px in from its right edge
+// (`tagAlign` "right") or centered over it ("center"). It takes no room in the bar's layout.
 Item {
     id: root
 
@@ -31,6 +32,8 @@ Item {
     property real fixedWidth: 0                  // game px; 0 = fit the label
     property bool pulse: false                   // spec 013
     property string tag: ""                      // spec 015
+    property string tagAlign: "right"            // spec 015: "right" | "center" (TagAbove.align)
+    readonly property alias tagItem: tagBox      // for tests: where the tag landed
 
     readonly property bool hovered: mouse.containsMouse
 
@@ -159,13 +162,10 @@ Item {
         }
     }
 
-    Tag {
+    TagAbove {
         id: tagBox
-        visible: root.tag !== ""
-        x: root.width - width
-        y: -height - Tokens.px(4, root.s)
         s: root.s
-        outline: true
+        align: root.tagAlign
         ink: Tokens.hudColorAt("ink", root.tone, root.high)
         text: root.tag
     }

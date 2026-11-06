@@ -2,9 +2,10 @@ import QtQuick
 import ".."
 import "../primitives"
 
-// The on-screen display (spec 008, FR-028): a band of 600 × 72 with the light block, a square, the
+// The on-screen display (spec 008, FR-028): a band of 672 × 72 (600 before U13) with the light block, a square, the
 // label (VOLUME, BRIGHTNESS, MIC ON / MIC OFF), the inverted hp-bar of 300 (at 35% when muted, full
-// above 100) and the number on the right, in tabular figures. MIC has no meter.
+// above 100) and the number in its own column on the right (16 px after the meter), in tabular
+// figures. MIC has no meter.
 Item {
     id: root
 
@@ -64,9 +65,17 @@ Item {
             }
         }
     }
+    // The number's own column (spec 010 item E), right-aligned in it: never over the meter. It is
+    // at least osdNumW wide, wider if "MUTE" needs it at this size.
+    TextMetrics {
+        id: widest
+        font: valueLabel.font
+        text: "MUTE"
+    }
     Label {
-        anchors.right: parent.right
-        anchors.rightMargin: root.u(30)
+        id: valueLabel
+        x: root.width - root.u(root.nt.osdRight) - width
+        width: Math.max(root.u(root.nt.osdNumW), Math.ceil(widest.advanceWidth))
         anchors.verticalCenter: parent.verticalCenter
         s: root.s
         role: "osdValue"

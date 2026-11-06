@@ -8,7 +8,7 @@
 | `available` | Available | info | (014) |
 | `update-now` | Update now | action | (014) |
 | `sign` | Update sign | choice: Bar · Menu · Bar and menu · Each login · Off (ids `bar`, `menu`, `both`, `login`, `off`), padrão `both` | "How a newer version stays on screen until you update. Off shows only the first transmission." |
-| `auto-check` | Check automatically | toggle, padrão ligado | "Checks for a newer version 30 s after the shell starts and then every hour. Off: only `yorha update` checks." |
+| `auto-check` | Check automatically | toggle, padrão ligado | "Checks for a newer version 30 s after the shell starts and then every hour. Off: it checks only when you open Updates or run `yorha update`." |
 
 ## As formas (`Updater.sign`)
 

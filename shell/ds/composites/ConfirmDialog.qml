@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Effects
+import Quickshell
 import ".."
 import "../primitives"
 import "../base"
@@ -26,6 +27,11 @@ import "../../strings"
 // ink goes back over dialogDim, and only then it hides. With Tokens.instant it just shows.
 FocusScope {
     id: root
+
+    // The window's monitor decides the hairlines (ceil(N × scale) physical px, Tokens.vline).
+    // QsWindow.window is typed QObject, so go through a `var` (as Rule does).
+    readonly property var window: QsWindow.window
+    readonly property real dpr: Tokens.scaleOf(window?.screen?.name ?? "")
 
     property real s: 1
     property string title
@@ -281,7 +287,7 @@ FocusScope {
                 x: card.margin
                 y: rowColumn.y + rowColumn.height + root.u(30)
                 width: parent.width - 2 * card.margin
-                height: Tokens.line(Tokens.space.rule, root.s)
+                height: Tokens.vline(Tokens.line(Tokens.space.rule, root.s), root.dpr)
                 color: Tokens.color.lightGray
             }
 

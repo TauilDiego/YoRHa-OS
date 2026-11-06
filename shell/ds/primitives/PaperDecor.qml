@@ -49,7 +49,7 @@ Item {
     property real swing: 9                          // degrees, each way
     property real slide: 70                         // game px, each way
     property color ink: Qt.rgba(Tokens.color.darkGray.r, Tokens.color.darkGray.g, Tokens.color.darkGray.b, 0.15)
-    readonly property real stroke: Tokens.hair(Tokens.line(2, s), dpr)
+    readonly property real stroke: Tokens.vline(Tokens.line(2, s), dpr)
 
     function arcStart(i: int): real {
         return arcs[i].start + swing * Math.sin(2 * Math.PI * phase * arcCycles + i * 1.7);

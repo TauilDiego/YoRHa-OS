@@ -384,6 +384,43 @@ privados no que vai subir, todas só nomes e caminhos. O lint ficou verde na jun
   Em andamento 02.11 ~21:24: o dono abriu o `ver --hidpi` (a 0.0.1 do lab, de 76b696d, instalada do zero
   em 56 s, perf `2026-11-02T212353-vm-ver-…`). Este commit é a versão nova pro teste do aviso
   (`ver --hidpi --no-update`).
+  Correções da auditoria de UX (U13, 03.11, branch `015-correcoes`, ainda NÃO mesclada aqui: decisão
+  do dono, a `check-013` não ficou toda verde; lab `lab-015-correcoes`; evidência em `YoRHa-OS-private/central/correcoes-015/`):
+  - os selos aprovados: `015-selo-posicao` (NEW 2 px de jogo pra dentro da borda direita da aba,
+    TagAbove) e `015-selo-centro` (texto centrado pela tinta, contorno pelo `Tokens.vline`);
+  - D-02: Reduce motion, Vignette e Background motion viraram chaves vivas (`shell.reduceMotion`,
+    `shell.vignette`, `shell.wallpaperMotion`); o Reduce motion liga o `Tokens.instant` (013 FR-016);
+  - D-04/D-05: SUPER+Escape e SUPER+I são atalhos globais (`yorha:pause`, `yorha:settings`); o menu é
+    feito escondido 1,5 s depois do start e só aparece; abrir põe o Hyprland no submapa `yorha-menu`
+    até o menu ter o teclado (as teclas vão pro shell como `yorha:key-<k>` e o resto é engolido; acaba
+    sozinho em 1,5 s), e o shell entrega essas teclas ao menu. Primeiro quadro ~120 ms depois da tecla
+    na VM (antes ~250); `kitty`+Enter digitado junto com o atalho abre o kitty, nada chega na janela;
+  - D-06: o número do OSD numa coluna própria (a faixa foi de 600 pra 672, o medidor fica em 300);
+  - D-07: rodapé do painel vazio com o diálogo do POWER aberto (010 item B);
+  - D-08: sem janela em foco a barra não mostra título;
+  - D-09/D-10: o texto do Check automatically da decisão (5) e o card sem crases;
+  - D-11: o rótulo da lista ocupa todo o espaço (só recorta e rola quando passa de verdade);
+  - D-12: as faixas da lista viram barra de rolagem quando a coluna rola, e um NEW fora da vista
+    aparece debaixo da coluna (▼ NEW);
+  - D-13: toda linha fina desenhada pelo `Tokens.vline` (trilhos 3/3, régua do Options 3, borda da
+    faixa e mapa 2, em 1,25);
+  - D-14: APPS diz "Running: 1 window" de um app aberto fora do menu.
+  Testes (perf em `YoRHa-OS-relatorios/runs/`, lista em `correcoes-015/results.txt`):
+  - na ref final (b61bcc9): `check-003` 25/0 (`…175931…`), `check-007` 76/0 (`…144306…`), `check-013`
+    169/4 (`…142934…`) e `--only motion,open` 28/1 (`…145550…`);
+  - antes das duas últimas correções (o `var` do PopupWindow e o relógio da abertura), sem repetir:
+    `check-004` 63/0 (`…133922…`), `check-008` 110/0 (`…140244…`), `check-015` 116/0 com o `b-sign` 20/0
+    (`…133636…`), `check-014` 68/0 (`…134502…`); a `check-013` ali deu 172/1 (`…141305…`);
+  - os FAIL da `check-013` são de tempo: FR-009 (grade e triângulos), FR-004 e FR-008, e mudam de uma
+    rodada pra outra. No A/B do `--only open` (`…150118…`, 3 rodadas de cada), a a301e8a e a final falham
+    o FR-009 de forma intermitente; a amostra é pequena e não prova que as duas são iguais.
+  U24 (05–06.11, ainda NÃO mesclada; evidência em `YoRHa-OS-private/central/correcoes-015/u24/`): os FAIL de tempo da
+  `check-013` eram da medida, não do produto, e o roteiro mudou (`lab-015-correcoes`, nenhum limite mudou): FR-009
+  triângulos pela janela ajustada à lei do shader, 16 aberturas; FR-008 sem o quadro dos triângulos na janela (o caso
+  dos 1555 ms); FR-004, FR-009 e FR-010 por mediana de várias rodadas. Produto: as opções antigas de Appearance
+  (`settings.appearance.*`) migram uma vez pras chaves vivas. O segundo tique do relógio da abertura (3d83fa2) foi
+  desfeito (5750057): não encurtou a grade. O motivo sobre os triângulos no commit 5750057 não se confirmou na
+  rodada de controle com a ordem trocada. A inundação `QSocketNotifier` ao abrir apps (U25) também derruba a `check-013`.
 - [ ] T036 Com o OK do dono: o merge da 015 e da `lab-015` nas duas `main`, e as branches e os
   worktrees apagados
 

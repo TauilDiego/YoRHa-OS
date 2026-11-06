@@ -550,6 +550,9 @@ Item {
         kind: "vertical"
         // No entries (e.g. APPS without data): no strips, not a 7 px stub of the rails' room.
         height: root.entries.length > 0 ? Math.min(root.height, root.contentHeight) : 0
+        // A list that scrolls shows it (audit D-12): the strips are its scroll bar.
+        thumbFrom: root.overflows ? root.scrollY / root.contentHeight : 0
+        thumbSize: root.overflows ? root.height / root.contentHeight : 1
     }
 
     // A clipped window on the entries, with the kite's room on its left and the shadow's on its right.

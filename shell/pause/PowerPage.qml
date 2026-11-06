@@ -81,7 +81,12 @@ FocusScope {
     readonly property string footerLeft: Strings.pause.powerFooter.arg(uptimeText(status.uptime))
 
     // --- the footer ------------------------------------------------------------------------------
+    // With the dialog open the panel's footer is blank: the dialog shows its own keys (spec 010
+    // item B, audit D-07). `footerBlank` tells the pause menu not to add its "Tab Next tab".
+    readonly property bool footerBlank: dialogAction !== ""
     readonly property var keys: {
+        if (footerBlank)
+            return [];
         const K = Strings.settings;
         const out = [{ key: K.keyUpDown, label: K.select }];
         if (current && current.available)

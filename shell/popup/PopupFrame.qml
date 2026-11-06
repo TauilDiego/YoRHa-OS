@@ -122,11 +122,19 @@ Item {
     // The third tick: the first frames are out and shown (making them can take a while: the shader,
     // the texture, the compositor mapping the surface), so no part of the grid is spent before it
     // shows. In the lab VM the grid still shows for 60–150 ms (its first frames come irregularly).
+    // U13: a pop-up kept made while hidden (the pause menu) may get a tick at once, in the same event
+    // as the open, from a frame drawn before it showed; only ticks after that count.
     FrameAnimation {
         id: firstFrame
         property int ticks: 0
-        onRunningChanged: if (running) ticks = 0
+        property real startedAt: 0
+        onRunningChanged: if (running) {
+            ticks = 0;
+            startedAt = Date.now();
+        }
         onTriggered: {
+            if (Date.now() - startedAt < 2)
+                return;
             if (++ticks < 3)
                 return;
             stop();
@@ -400,7 +408,7 @@ Item {
     function tabGeometry(i: int): var {
         const g = tabBar.tabGeometry(i);
         const p = tabBar.mapToItem(null, 0, 0);
-        return { x: g.x, y: Math.round(p.y), w: g.w, h: tabBar.bandH, tag: g.tag };    // tag: spec 015
+        return { x: g.x, y: Math.round(p.y), w: g.w, h: tabBar.bandH, tag: g.tag, tagBox: g.tagBox ?? null };    // tag: spec 015
     }
 
     Rectangle {
@@ -492,7 +500,10 @@ Item {
         TabBar {
             id: tabBar
             x: root.inset + root.u(48)
-            y: root.u(Tokens.space.pauseTabsY)
+            // On the physical grid (spec 015): at a half physical px the selected tab's clipped
+            // plate and a resting tab's band round their top edge apart (1 px at 1.5), and the NEW
+            // badge above SYSTEM would seem to move when the tab is selected.
+            y: Tokens.snap(root.u(Tokens.space.pauseTabsY), root.dpr)
             width: parent.width - 2 * x
             visible: root.tabbed
             s: root.s

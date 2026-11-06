@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import ".."
 import "../primitives"
 
@@ -72,7 +73,12 @@ Item {
     readonly property int bandH: Tokens.px(Tokens.space.listItemH, s)
     readonly property int pad: Tokens.px(16, cs)         // band edge → square, and trailing → edge
     readonly property int gap: Tokens.px(16, cs)         // square → label (approved mockup)
-    readonly property int rail: Tokens.line(Tokens.space.rail, s)
+    // The window's monitor decides the hairlines (ceil(N × scale) physical px, Tokens.vline).
+    // QsWindow.window is typed QObject, so go through a `var` (as Rule does).
+    readonly property var window: QsWindow.window
+    readonly property real dpr: Tokens.scaleOf(window?.screen?.name ?? "")
+    // The rails: whole physical px (audit D-13: at 1.25 they came out 2 px over the band, 3 under).
+    readonly property real rail: Tokens.vline(Tokens.line(Tokens.space.rail, s), dpr)
     readonly property int railGap: Tokens.px(Tokens.space.railGap, s)
 
     implicitHeight: bandH
@@ -285,9 +291,13 @@ Item {
         ScrollingLabel {
             id: label
             x: root.pad + Tokens.px(Tokens.space.square, root.cs) + root.gap + (root.lead !== "" ? leadLabel.width + root.gap : 0)
-            width: Math.max(0, Math.min(implicitWidth, root.width - x - Math.max(root.pad, root.reserve)
-                                                        - (root.tag !== "" ? Math.ceil(tagBox.implicitWidth) + root.gap : 0)
-                                                        - (root.trailing !== "" ? root.gap + Math.ceil(tail.implicitWidth) + root.pad : 0)))
+            // All the room there is, not min(implicitWidth, room): a width taken from a measure
+            // made before the font's weight axis applied came out a few px short and cut the
+            // last letter ("automaticalll", audit D-11). The box clips (and scrolls) only when
+            // the text really overflows the room.
+            width: Math.max(0, root.width - x - Math.max(root.pad, root.reserve)
+                                - (root.tag !== "" ? Math.ceil(tagBox.implicitWidth) + root.gap : 0)
+                                - (root.trailing !== "" ? root.gap + Math.ceil(tail.implicitWidth) + root.pad : 0))
             height: parent.height
             anchors.verticalCenter: parent.verticalCenter
             s: root.cs
@@ -322,7 +332,7 @@ Item {
 
     // spec 013: everything but the kite, in a box that clips it while the row wipes in (the rails
     // stick out above and below, the shadow on the right).
-    readonly property int outY: railGap + rail
+    readonly property real outY: railGap + rail
     readonly property int shadowX: Tokens.px(Tokens.shadow.boxX, s)
     readonly property int bandW: Math.round(inkW * stretch)
     Item {

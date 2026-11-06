@@ -43,6 +43,24 @@ Singleton {
     readonly property string backendFile: backendFiles[backendWanted] ?? backendFiles.none
     readonly property var backend: backendLoader.item
     readonly property string backendName: backend?.name ?? "none"
+    // U13: a global shortcut of the compositor ("pause", "settings"), when the backend has them.
+    signal shortcut(string name)
+    // U13 (audit D-04): a key typed while the menu opens, caught by the compositor (see the backend).
+    signal menuKey(string name)
+    function endKeyCapture(): void {
+        if (backend && typeof backend.endKeyCapture === "function")
+            backend.endKeyCapture();
+    }
+    Connections {
+        target: root.backend
+        ignoreUnknownSignals: true
+        function onShortcut(name: string): void {
+            root.shortcut(name);
+        }
+        function onMenuKey(name: string): void {
+            root.menuKey(name);
+        }
+    }
 
     // What the compositor can do (contracts/compositor.md §3). Under the "windows" fixture,
     // Hyprland's, so the reference images don't depend on the session the tests run in.

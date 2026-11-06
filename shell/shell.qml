@@ -151,6 +151,11 @@ ShellRoot {
     readonly property var pauseMenu: pauseOpen ? pauseLoader.item : null
 
     // Open the menu in tab `tab`, or switch an open one to it.
+    // U13 (audit D-04/D-05): the menu is made once, hidden, soon after the start (pauseLoaded) and
+    // only shown and hidden after that, so it maps with the keyboard in the frame after the key. With
+    // the focused monitor already known (the backend follows the focus events) it shows at once; the
+    // monitors are re-read anyway, and the old wait (the re-read, or 250 ms) is only for when the
+    // focused monitor is still unknown.
     function openPause(tab: string): void {
         if (pauseOpen) {
             pauseLoader.item?.setTab(tab);
@@ -161,8 +166,13 @@ ShellRoot {
             return;
         closePicker();
         pauseOpening = true;
-        Compositor.refreshFocusedMonitor();
-        pauseFallback.restart();
+        if (Compositor.focusedMonitor !== "") {
+            showPause();
+            Compositor.refreshFocusedMonitor();      // after: starting the process takes a while
+        } else {
+            Compositor.refreshFocusedMonitor();
+            pauseFallback.restart();
+        }
     }
     // Called when the monitor query is back (or after the fallback, if it never comes).
     function showPause(): void {
@@ -171,11 +181,81 @@ ShellRoot {
         pauseOpening = false;
         pauseFallback.stop();
         pauseMonitor = Compositor.focusedMonitor;
+        pauseLoaded = true;
+        const menu = pauseLoader.item;
+        if (menu) {
+            menu.prepareTab(pauseTab);               // the tab it opens on, without a tab change
+            menu.systemCategory = settingsCategory;  // where SYSTEM opens (restart() reads it)
+            menu.mapNow = true;                      // the surface first (PopupWindow.mapNow)
+        }
         pauseOpen = true;
+        if (menu)
+            menu.mapNow = false;
+    }
+    // SUPER+I (spec 003's toggle, now the SYSTEM tab): closed → opens on SYSTEM; open on another tab
+    // → switches to SYSTEM; on SYSTEM → closes.
+    function toggleSettings(): void {
+        if ((pauseOpen || pauseOpening) && pauseTab === "system")
+            closePause();
+        else
+            openPause("system");
+    }
+    // U13: the compositor's global shortcuts (yorha-shell.lua binds SUPER+Escape and SUPER+I to them).
+    Connections {
+        target: Compositor
+        function onShortcut(name: string): void {
+            if (name === "pause")
+                shell.togglePause();
+            else if (name === "settings")
+                shell.toggleSettings();
+            if (!shell.pauseOpen && !shell.pauseOpening)
+                shell.endKeyCapture();
+        }
+        // U13 (audit D-04): keys typed while the menu opens, caught by the compositor; kept until the
+        // menu has the keyboard, then given to it in order.
+        function onMenuKey(name: string): void {
+            if (!shell.pauseOpen && !shell.pauseOpening) {
+                shell.endKeyCapture();
+                return;
+            }
+            shell.pendingKeys = shell.pendingKeys.concat([name]);
+            if (pauseLoader.item?.ready)
+                shell.flushKeys();
+        }
+    }
+    property var pendingKeys: []
+    function flushKeys(): void {
+        const menu = pauseLoader.item;
+        const keys = pendingKeys;
+        pendingKeys = [];
+        if (menu && pauseOpen)
+            for (const k of keys)
+                menu.deliverKey(k);
+    }
+    function endKeyCapture(): void {
+        pendingKeys = [];
+        Compositor.endKeyCapture();
+    }
+    Connections {
+        target: pauseLoader.item
+        ignoreUnknownSignals: true
+        function onReadyChanged(): void {
+            if (!pauseLoader.item.ready)
+                return;
+            Compositor.endKeyCapture();              // the menu has the keyboard: the submap ends
+            shell.flushKeys();
+        }
+    }
+    // Made a moment after the start, hidden (U13, audit D-05): the first open only shows it.
+    Timer {
+        running: true
+        interval: 1500
+        onTriggered: shell.pauseLoaded = true
     }
     function closePause(): void {
         pauseOpening = false;
         pauseOpen = false;
+        endKeyCapture();
     }
     function togglePause(): void {
         if (pauseOpen || pauseOpening)
@@ -197,9 +277,16 @@ ShellRoot {
 
     onPauseOpenChanged: {
         if (pauseOpen) {
-            pauseUnload.stop();
             pauseLoaded = true;
             pauseLoader.item?.setTab(pauseTab);
+            // `pause search` before the menu was up: after the menu's own restart (same event).
+            if (pausePendingQuery !== "")
+                Qt.callLater(() => {
+                    if (shell.pauseMenu && shell.pausePendingQuery !== "") {
+                        shell.pauseMenu.search(shell.pausePendingQuery);
+                        shell.pausePendingQuery = "";
+                    }
+                });
         } else {
             const menu = pauseLoader.item;
             if (menu) {
@@ -210,13 +297,7 @@ ShellRoot {
                 settingsLast = menu.systemDump();
             }
             pausePendingQuery = "";
-            pauseUnload.restart();
         }
-    }
-    Timer {
-        id: pauseUnload
-        interval: 150 + Tokens.motion.popupClose     // spec 013, front A: the closing triangles first
-        onTriggered: if (!shell.pauseOpen) shell.pauseLoaded = false
     }
     LazyLoader {
         id: pauseLoader
@@ -614,9 +695,10 @@ ShellRoot {
             Apps.resetFixture();
             Compositor.resetWindowsFixture();
             Session.resetFixture();
-            if (shell.pauseMenu) {
-                shell.pauseMenu.systemCategory = 0;
-                shell.pauseMenu.restart();
+            // The menu is kept made while closed (U13): reset it too, open or not.
+            if (pauseLoader.item) {
+                pauseLoader.item.systemCategory = 0;
+                pauseLoader.item.restart();
             }
         }
         // spec 013 (research R7), tests only: `start` clears and starts counting the menu's frames
@@ -687,12 +769,7 @@ ShellRoot {
                 shell.closePause();
         }
         // Closed → opens on SYSTEM; open on another tab → switches to SYSTEM; on SYSTEM → closes.
-        function toggle(): void {
-            if ((shell.pauseOpen || shell.pauseOpening) && shell.pauseTab === "system")
-                shell.closePause();
-            else
-                shell.openPause("system");
-        }
+        function toggle(): void { shell.toggleSettings(); }
         function isOpen(): string { return shell.pauseOpen && shell.pauseTab === "system" ? "true" : "false"; }
         // Values back to the catalog and SYSTEM back to its first category, so a test always
         // starts from the same place.
@@ -700,9 +777,9 @@ ShellRoot {
             SettingsModel.reset();
             shell.settingsCategory = 0;
             shell.settingsLast = {};
-            if (shell.pauseMenu) {
-                shell.pauseMenu.systemCategory = 0;
-                shell.pauseMenu.restartSystem(0);
+            if (pauseLoader.item) {
+                pauseLoader.item.systemCategory = 0;
+                pauseLoader.item.restartSystem(0);
             }
         }
         // spec 013 (contracts/ipc.md): a shell setting by key (Settings.keys, e.g.

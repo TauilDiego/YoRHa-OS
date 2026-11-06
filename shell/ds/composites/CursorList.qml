@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Shapes
 import ".."
 import "../primitives"
 import "../base"
@@ -26,6 +27,8 @@ import "../base"
 // the column scrolls by whole rows with `currentIndex`, as the OptionList's, and the wheel scrolls
 // it one row per notch (the cursor, if left out, comes to the nearest row in view: `currentIndex`,
 // or `cursorRequested(index)` with keysEnabled: false). A list that fits is drawn as before.
+// U13 (audit D-12): while it scrolls, the strips are a scroll bar (the part in view drawn whole),
+// and a tagged row out of view below shows its tag under the column (▼ NEW).
 Item {
     id: root
 
@@ -190,6 +193,53 @@ Item {
         s: root.s
         kind: "vertical"
         height: root.height
+        // A column that scrolls shows it (audit D-12): the strips are its scroll bar.
+        thumbFrom: root.overflows ? root.firstRow() / root.count : 0
+        thumbSize: root.overflows ? root.visibleRows / root.count : 1
+    }
+
+    // A row out of view below that carries a Tag (NEW on SYSTEM › Updates, spec 015) shows that tag
+    // under the column, after a ▼, so the sign can be followed (audit D-12).
+    readonly property string tagBelow: {
+        if (!overflows)
+            return "";
+        const last = firstRow() + visibleRows - 1;
+        for (let i = last + 1; i < count; i++) {
+            const t = tagOf(model[i]);
+            if (t !== "")
+                return t;
+        }
+        return "";
+    }
+    Row {
+        id: moreBelow
+        x: root.itemX
+        y: root.height + Tokens.px(2, root.s)
+        spacing: Tokens.px(8, root.s)
+        visible: root.tagBelow !== ""
+        Shape {
+            id: down
+            anchors.verticalCenter: parent.verticalCenter
+            width: Tokens.px(14, root.s)
+            height: Tokens.px(9, root.s)
+            preferredRendererType: Shape.CurveRenderer
+            ShapePath {
+                fillColor: Tokens.color.darkGray
+                strokeWidth: -1
+                startX: 0
+                startY: 0
+                PathLine { x: down.width; y: 0 }
+                PathLine { x: down.width / 2; y: down.height }
+                PathLine { x: 0; y: 0 }
+            }
+        }
+        Tag {
+            anchors.verticalCenter: parent.verticalCenter
+            s: root.s
+            outline: true
+            ink: Tokens.color.darkGray
+            text: root.tagBelow
+        }
     }
 
     // The rows' window: clipped only while they don't fit (the kite's room on its left, the shadow's
