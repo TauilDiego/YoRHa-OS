@@ -65,8 +65,16 @@ Render::IHyprRenderer::renderMonitor
 | Shell real, com a espera só na leitura da config | 0 em 30 | não medido |
 | Shell real, com a espera em tudo que o backend pede | 0 em 40 | não medido |
 
-**O que está no código hoje:** depois do `configreloaded`, o backend espera 300 ms antes de ler a config, as telas e as janelas (`configWait`, `afterReload`). Ela entrou por causa desta trava, e a medida acima não mostra benefício.
-A decisão de manter ou tirar é do dono, e este texto não a antecipa. A base continua sendo o valor do arquivo: nada mais escreve nessa janela, e uma escrita do próprio menu pedida nela espera a leitura acabar. Um `hyprctl eval` ou `dispatch` de fora nesses 300 ms cai nos limites da spec. A D2 não muda.
+**O produto não espera mais (06.11).** A espera de 300 ms depois do `configreloaded` (`configWait`, `afterReload`) saiu: não tinha benefício mostrado contra a trava, custava cerca de 300 ms em cada reaplicação (316 ms contra 17 ms na 0.56.2, 314 contra 15 na 0.57.0) e a própria janela fazia uma config com erro e um `dispatch` de fora esquecerem o valor salvo. O resto é igual: a base é o valor do arquivo, lido logo depois do evento, e as escritas do menu esperam a leitura em andamento.
+
+**A trava é do Hyprland, e o produto não tem como evitá-la.** Sem a espera, com o shell no ar, o SYSTEM em Keyboard e um valor salvo pra reaplicar, saves com chave desconhecida (`lab/019/estresse-trava`, a mesma rodada da `fix-trava-reload`, que media com o menu fechado e nada salvo, então o cenário não é igual):
+
+| Versão | Sem a espera | `main` (fix-trava-reload) | Sem shell (fix-trava-reload) |
+|---|---|---|---|
+| 0.56.2 | 4 em 200 (0 em 100 e 4 em 100; 2,0%) | 6 em 400 (1,5%), p = 0,74 | 21 em 400 (5,2%), p = 0,08 |
+| 0.57.0 | 3 em 126 (1 em 26 e 2 em 100; 2,4%) | 6 em 200 (3,0%), p = 1,00 | 11 em 200 (5,5%), p = 0,26 |
+
+Não dá pra separar de `main`. Toda pilha guardada é a do aviso (`COverlay::createQueued`). Perf: `2026-11-06T052553-…`, `2026-11-06T081153-…`, `2026-11-06T061122-…`, `2026-11-06T080108-…`. As 74 rodadas restantes de `061122` e o `074754` não contam: sem o shell no ar (camada subiu com a config da rodada anterior).
 
 **A `main` tem o mesmo risco hoje, com o shell ou sem ele:** quem tem um erro na config pode ter a sessão parada, na 0.56.2 e na 0.57.0.
 
