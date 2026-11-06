@@ -355,6 +355,11 @@ O SYSTEM não supõe o Hyprland. Num compositor sem suporte, a linha não aparec
 - **Limite: reload com o arquivo editado e o shell desligado, na mesma sessão.** O shell sobe e reaplica o valor do menu,
   porque não viu o reload. O próximo reload percebe a edição e o arquivo volta a valer.
 - **`shell.json` apagado:** é uma edição. As chaves que estavam nele perdem o valor salvo.
+- **`shell.json` criado com o shell no ar, sem a pasta `~/.config/yorha-shell`:** vale sem reiniciar. **Limite:** o aviso vem da pasta de cima (`~/.config`); se ela também não existir quando o shell sobe, só um reinício lê o arquivo.
+- **Limite, só visto na 0.57: uma config com erro, mais um `hyprctl dispatch` de fora na janela de 300 ms depois do reload.** O valor salvo do menu é esquecido, porque o `dispatch` apaga o `configerrors` antes da
+  leitura, e aquela leitura parece uma edição. Medido com o `dispatch` 0,05 s depois do save: 3 de 3; 1 s depois: 0 de 1 (`central/sistema-real-019/1c/sonda-janela-057.txt`). O erro cai pro lado do arquivo da pessoa, e a linha continua mostrando o valor real.
+- **Layouts com as duas bases (a confirmar com o dono):** quando a pessoa tem `kbLayouts` no `shell.json` e também muda o `kb_layout` do arquivo do compositor, o valor salvo do menu é esquecido e vale o `kbLayouts` do `shell.json`. É o comportamento da
+  frente 1C, seguindo a 013 (o `shell.json` também é da pessoa). A dúvida é se o dono prefere que o `kb_layout` ganhe.
 
 ## Requirements *(mandatory)*
 
