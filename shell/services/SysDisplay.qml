@@ -37,8 +37,7 @@ Singleton {
     }
 
     // No event for some changes (a mode set by `hyprctl eval`), so with Display on screen they are read
-    // again, in time to show within 1 s (SC-003). The backend asks nothing in its wait after a reload
-    // (sondagem.md), so this can't land there.
+    // again, in time to show within 1 s (SC-003).
     Timer {
         interval: 800
         repeat: true

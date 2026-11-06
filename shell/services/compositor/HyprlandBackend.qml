@@ -213,11 +213,8 @@ Item {
         return /^0x[0-9a-f]+$/.test(id);
     }
 
-    // spec 019 (sondagem.md): nothing is asked in the wait after a reload; afterReload reads them at its
-    // end, so a read skipped here isn't lost. The windows' read, the same (windowsTimer).
     function readMonitors(): void {
-        if (!afterReload.running)
-            monitorQuery.running = true;
+        monitorQuery.running = true;
     }
     Process {
         id: monitorQuery
@@ -351,7 +348,7 @@ Item {
     // errors, with no other read on its way: a config with errors keeps the person's `configerrors`.
     property bool modifierDue: false
     function readModifier(): void {
-        if (modifierDue && !configQuery.running && !configWait.running && !(readRank[readNext] > 0)) {
+        if (modifierDue && !configQuery.running && !(readRank[readNext] > 0)) {
             modifierDue = false;
             modifierQuery.running = true;
         }
@@ -370,36 +367,16 @@ Item {
         // can't compare (see where it ends).
         if (trigger === "reload" && (configSet.running || modifierQuery.running))
             writeCrossedReload = true;
-        // The read that is waiting will see this reload too, and nothing is written meanwhile.
-        if (trigger === "reload" && configWait.running) {
-            configWait.restart();
-            return;
-        }
-        if (configQuery.running || configWait.running) {
+        if (configQuery.running) {
             if (readNext === "" || readRank[trigger] > readRank[readNext])
                 readNext = trigger;
             return;
         }
         readTrigger = trigger;
-        if (trigger === "reload")
-            configWait.restart();
-        else
-            startRead();
-    }
-    function startRead(): void {
         readSerial = writeSerial;
         configQuery.running = true;
     }
     property bool writeCrossedReload: false
-    // A wait after a reload, before anything is asked. It came in for Hyprland's hang when it draws a
-    // config error's overlay, but that hang isn't caused by our requests and the wait has no shown
-    // benefit against it (sondagem.md). The value read later is still the file's: nothing else sets it
-    // in between.
-    Timer {
-        id: configWait
-        interval: 300
-        onTriggered: root.startRead()
-    }
     // "[[EMPTY]]" is how getoption says an empty string (T003 P9).
     function optionText(reply: var): string {
         const s = String(reply?.str ?? "");
@@ -517,7 +494,7 @@ Item {
     // Never during a read that compares, or with one waiting: what it finds has to be the file's value.
     function flushWrite(): void {
         const keys = Object.keys(writeAsked);
-        if (keys.length === 0 || configSet.running || configWait.running || (configQuery.running && readTrigger !== "poll")
+        if (keys.length === 0 || configSet.running || (configQuery.running && readTrigger !== "poll")
                 || readRank[readNext] > 0)
             return;
         writeCode = `hl.config({ input = { ${keys.map(k => configLine(k, writeAsked[k])).join(", ")} } })`;
@@ -575,9 +552,10 @@ Item {
                 root.nothingFocused = String(event.data ?? "").replace(/,/g, "").trim() === "";
             if (event.name.startsWith("monitor") || event.name.startsWith("focusedmon"))
                 root.readMonitors();
-            if (event.name === "configreloaded") {     // spec 019: nothing asked at once (configWait)
-                root.readConfig("reload");             // (R1) the file's values, before any reapply
-                afterReload.restart();
+            if (event.name === "configreloaded") {
+                root.readConfig("reload");             // spec 019 (R1): the file's values, before any reapply
+                root.readMonitors();
+                windowsTimer.restart();
             }
             if (root.windowEvents.includes(event.name))
                 windowsTimer.restart();
@@ -598,22 +576,10 @@ Item {
         "renameworkspace", "activewindowv2", "fullscreen", "activespecial", "activespecialv2",
         "monitoradded", "monitoraddedv2", "monitorremoved", "monitorremovedv2"
     ]
-    // The windows and the monitors after a reload, as late as the config's read (configWait).
-    Timer {
-        id: afterReload
-        interval: configWait.interval
-        onTriggered: {
-            monitorQuery.running = true;
-            windowsTimer.restart();
-        }
-    }
-
     Timer {
         id: windowsTimer
         interval: 50
         onTriggered: {
-            if (afterReload.running)
-                return;
             // A read still running when a new burst ends: read again once it is done.
             if (clientsQuery.running || workspacesQuery.running) {
                 root.readAgain = true;
