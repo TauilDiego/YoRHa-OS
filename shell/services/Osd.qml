@@ -15,6 +15,8 @@ import "../ds"
 //   microphone        the default source's mute (MIC ON / MIC OFF, no meter);
 //   brightness        `udevadm monitor` on the backlight subsystem, then the sysfs values (the VM has
 //                     no backlight: brightnessAvailable is false and only `notify osd` shows it).
+//                     spec 019 (R7): the same reading feeds Display › Brightness, by brightnessPercent
+//                     and backlightDevice; the first one, at start, shows nothing.
 // A menu that already shows the value suppresses its kind (SettingsPage, FR-029). It never enters
 // the log. With fixtures: the "notifications.osd" fixture, frozen; live changes are ignored.
 Singleton {
@@ -24,6 +26,8 @@ Singleton {
     property real hideAt: 0
     property var suppressed: ({})              // kind → true
     property bool brightnessAvailable: false
+    property int brightnessPercent: -1         // spec 019: the backlight in %, -1 = not read
+    readonly property string backlightDevice: backlight.slice(backlight.lastIndexOf("/") + 1)   // "" = none
     readonly property bool fixed: Fixtures.has("notifications")
 
     // "ok" or "error: …" (IPC `notify osd`, and the live sources).
@@ -166,8 +170,10 @@ Singleton {
             onStreamFinished: {
                 root.backlight = text.trim();
                 root.brightnessAvailable = root.backlight !== "";
-                if (root.brightnessAvailable)
+                if (root.brightnessAvailable) {
                     udev.running = true;
+                    root.readBrightness();
+                }
             }
         }
     }
@@ -186,23 +192,30 @@ Singleton {
         id: brightRead
         interval: 30
         onTriggered: {
-            brightFile.reload();
-            maxFile.reload();
-            const v = Number(brightFile.text()), m = Number(maxFile.text());
-            if (m > 0)
-                root.changed("brightness", Math.round(v / m * 100), false);
+            if (root.readBrightness())
+                root.changed("brightness", root.brightnessPercent, false);
         }
+    }
+    // The sysfs values, now, into brightnessPercent; false if they make no sense.
+    function readBrightness(): bool {
+        brightFile.reload();
+        maxFile.reload();
+        const v = Number(brightFile.text()), m = Number(maxFile.text());
+        if (!(m > 0))
+            return false;
+        brightnessPercent = Math.round(v / m * 100);
+        return true;
     }
     FileView {
         id: brightFile
         path: root.backlight ? root.backlight + "/brightness" : ""
-        blockLoading: true
+        blockAllReads: true
         printErrors: false
     }
     FileView {
         id: maxFile
         path: root.backlight ? root.backlight + "/max_brightness" : ""
-        blockLoading: true
+        blockAllReads: true
         printErrors: false
     }
 

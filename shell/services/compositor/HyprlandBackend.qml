@@ -137,7 +137,7 @@ Item {
 
     function refresh(what: string): void {
         if (what === "monitors" || what === "all")
-            monitorQuery.running = true;
+            readMonitors();
         if (what === "windows" || what === "all")
             windowsTimer.restart();
         if (what === "fullscreen" || what === "all")
@@ -213,6 +213,12 @@ Item {
         return /^0x[0-9a-f]+$/.test(id);
     }
 
+    // spec 019 (sondagem.md): nothing is asked in the wait after a reload; afterReload reads them at its
+    // end, so a read skipped here isn't lost. The windows' read, the same (windowsTimer).
+    function readMonitors(): void {
+        if (!afterReload.running)
+            monitorQuery.running = true;
+    }
     Process {
         id: monitorQuery
         command: ["hyprctl", "monitors", "-j"]
@@ -526,7 +532,7 @@ Item {
     Timer {
         id: scaleQuery
         interval: 100
-        onTriggered: monitorQuery.running = true
+        onTriggered: root.readMonitors()
     }
 
     // Quickshell updates its objects while handling the event, so signal after it.
@@ -539,7 +545,7 @@ Item {
             if (event.name === "activewindowv2")       // "<address>", or nothing with no window in focus
                 root.nothingFocused = String(event.data ?? "").replace(/,/g, "").trim() === "";
             if (event.name.startsWith("monitor") || event.name.startsWith("focusedmon"))
-                monitorQuery.running = true;
+                root.readMonitors();
             if (event.name === "configreloaded") {     // spec 019: nothing asked at once (configWait)
                 root.readConfig("reload");             // (R1) the file's values, before any reapply
                 afterReload.restart();
@@ -577,6 +583,8 @@ Item {
         id: windowsTimer
         interval: 50
         onTriggered: {
+            if (afterReload.running)
+                return;
             // A read still running when a new burst ends: read again once it is done.
             if (clientsQuery.running || workspacesQuery.running) {
                 root.readAgain = true;
