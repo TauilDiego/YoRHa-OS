@@ -138,11 +138,71 @@ cmd_migrate() {
 run_dir() { printf '%s/%s' "${XDG_RUNTIME_DIR:-/tmp}" "$YORHA_NAME"; }
 shell_root() { readlink -f "$YORHA_HOME/current"; }
 
+# --- the log guard --------------------------------------------------------------------------------------
+# A qs stuck in a log loop (the QSocketNotifier one writes ~190k lines/s) must not take the session down.
+# It writes in two places nothing else limits: stdout/stderr, redirected to shell.log on the disk, and
+# Quickshell's own log.log + log.qslog in $XDG_RUNTIME_DIR/quickshell/by-id/<id>/, a tmpfs shared with the
+# rest of the session (it filled up and Xwayland aborted). Quickshell has no switch for those two, so the guard
+# looks from outside. It is a poll, not a pipe: programs started from the shell inherit its stderr and would
+# die with SIGPIPE if a pipe's reader went away.
+#   growth over SHELL_LOG_FLOOD in one poll: a loop, not a chatty shell. Kill qs; the supervisor restarts it.
+#   shell.log over SHELL_LOG_CAP: keep the last part, in place (qs appends, so its offset follows).
+#   Quickshell's two files over SHELL_RUN_CAP: only a restart empties them. Kill qs.
+SHELL_LOG_POLL=${YORHA_LOG_POLL:-2}                   # seconds
+SHELL_LOG_FLOOD=${YORHA_LOG_FLOOD:-$((8 * 1048576))}  # bytes per poll, in all three files
+SHELL_LOG_CAP=${YORHA_LOG_CAP:-$((20 * 1048576))}     # bytes
+SHELL_LOG_KEEP=$((1048576))                           # bytes kept when shell.log is cut
+SHELL_RUN_CAP=${YORHA_RUN_CAP:-$((128 * 1048576))}    # bytes
+
+# The folder of a running qs (by-pid is a link Quickshell makes when it starts).
+qs_run_dir() { readlink -f "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/quickshell/by-pid/$1" 2>/dev/null || true; }
+file_bytes() { stat -c %s -- "$1" 2>/dev/null || echo 0; }
+
+shell_log_guard() {
+    local qspid=$1 log=$2 flag=$3 dir now total last=-1 tmp
+    while kill -0 "$qspid" 2>/dev/null; do
+        sleep "$SHELL_LOG_POLL"
+        dir=$(qs_run_dir "$qspid")
+        now=$(file_bytes "$log")
+        total=$((now + $(file_bytes "$dir/log.log") + $(file_bytes "$dir/log.qslog")))
+        if ((last >= 0 && total - last > SHELL_LOG_FLOOD)); then
+            echo "flood $((total - last)) bytes in ${SHELL_LOG_POLL}s" >"$flag"
+            kill -9 "$qspid" 2>/dev/null || true
+            return 0
+        fi
+        if ((total - now > SHELL_RUN_CAP)); then
+            echo "run dir over $SHELL_RUN_CAP bytes" >"$flag"
+            kill -9 "$qspid" 2>/dev/null || true
+            return 0
+        fi
+        if ((now > SHELL_LOG_CAP)); then
+            tmp="$log.cut"
+            tail -c "$SHELL_LOG_KEEP" -- "$log" >"$tmp" && cat -- "$tmp" >"$log"
+            rm -f -- "$tmp"
+            now=$(file_bytes "$log")
+            total=$((now + $(file_bytes "$dir/log.log") + $(file_bytes "$dir/log.qslog")))
+        fi
+        last=$total
+    done
+}
+
+# After the guard killed a qs: what the person (or a bug report) needs from the flood, at its full size only
+# once, and the dead instance's run folder gone, since Quickshell never removes it and it is what filled the tmpfs.
+shell_log_after_flood() {
+    local log=$1 flag=$2 dir=$3 why tmp
+    why=$(cat -- "$flag"); rm -f -- "$flag"
+    tmp="$log.cut"
+    { head -c 65536 -- "$log"; printf '\n[%s log guard: qs killed at %s: %s; log cut]\n' "$YORHA_CMD" "$(date -Is)" "$why"; } >"$tmp" 2>/dev/null \
+        && mv -f -- "$tmp" "$log"
+    [[ -n $dir && $dir == */quickshell/by-id/* ]] && rm -rf -- "$dir"
+    return 0
+}
+
 # Supervise qs on the version in use: one instance (a lock), restarted when it exits, so that
 # `shell restart` (and an update) bring up whatever "current" points at. Stops when uninstalled.
 # --relaunch: the same supervisor, re-executed from a newer version (it keeps the lock on fd 9).
 cmd_shell_start() {
-    local rd root qspid log
+    local rd root qspid log guardpid flag rundir floods=0
     rd=$(run_dir); mkdir -p "$rd" "$YORHA_STATE"
     # Quickshell only watches the applications folder if it exists when it starts; without it, an app
     # installed later stays out of the APPS tab until a restart (spec 007, T041; PLAN, S3).
@@ -168,9 +228,28 @@ cmd_shell_start() {
         qspid=$!
         echo "$qspid" > "$rd/shell.pid"
         echo "$root" > "$rd/shell.root"
+        flag="$rd/shell.flood"; rm -f "$flag"
+        shell_log_guard "$qspid" "$log" "$flag" 9>&- &
+        guardpid=$!
+        # The folder goes with the process's by-pid link's target; read it while qs lives, as late as possible.
+        rundir=""
+        while kill -0 "$qspid" 2>/dev/null && [[ ! -e $flag ]]; do
+            rundir=$(qs_run_dir "$qspid"); [[ -n $rundir && -d $rundir ]] && break
+            sleep 0.5
+        done
         wait "$qspid" || true
+        kill "$guardpid" 2>/dev/null || true
+        wait "$guardpid" 2>/dev/null || true
         rm -f "$rd/shell.pid" "$rd/shell.root"
-        sleep 1
+        if [[ -s $flag ]]; then
+            shell_log_after_flood "$log" "$flag" "$rundir"
+            # A loop that comes back at once must not turn into a restart storm with the screen flickering.
+            floods=$((floods + 1))
+            sleep "$((floods >= 6 ? 60 : 1 << floods))"
+        else
+            floods=0
+            sleep 1
+        fi
     done
     yorha_say "not installed anymore; the shell stays off"
 }
