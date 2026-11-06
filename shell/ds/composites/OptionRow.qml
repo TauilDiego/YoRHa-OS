@@ -94,8 +94,8 @@ Item {
     readonly property bool stepping: type === "toggle" || type === "choice"
     readonly property string valueText: {
         switch (type) {
-        case "toggle":
-            return value ? Strings.settings.on : Strings.settings.off;
+        case "toggle":      // spec 019: null is a live row with nothing to read (no device)
+            return value === null ? Strings.settings.sys.empty : value ? Strings.settings.on : Strings.settings.off;
         case "choice":
             return String(option.values?.[value] ?? "");
         case "slider":

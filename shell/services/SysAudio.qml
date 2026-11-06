@@ -128,8 +128,11 @@ Singleton {
             return [];
         return fx ? fx.sinks.map(x => String(x.label)) : sinkNodes.map(n => String(n.description || n.nickname || n.name));
     }
+    // Null where there is nothing to read: a row with no device has no number to show (SC-002).
     function levelOf(key: string): var {
-        return has(asked, key) ? asked[key] : real(key);
+        if (has(asked, key))
+            return asked[key];
+        return key === "output" || available(key) ? real(key) : null;
     }
     function setLevel(key: string, level: var): void {
         if (fx) {

@@ -377,7 +377,8 @@ FocusScope {
         // adds; a provider's note is a refused write or a state to tell (FR-002).
         if (SettingsModel.isSys(opt)) {
             const note = dimmed ? SettingsModel.needsText(catId, opt.id) : SettingsModel.noteOf(opt);
-            const now = opt.type === "action" ? [] : [{ label: Strings.settings.nowLabel, value: SettingsModel.display(catId, opt.id) }];
+            const shown = SettingsModel.display(catId, opt.id);
+            const now = opt.type === "action" || shown === "" ? [] : [{ label: Strings.settings.nowLabel, value: shown }];
             return {
                 title: opt.label,
                 text: plain(opt.desc ?? ""),

@@ -204,6 +204,9 @@ Singleton {
     function value(catId: string, optId: string): var {
         const opt = find(catId, optId);
         const l = liveOf(opt);
+        // spec 019 (SC-002): the provider has nothing to read, so the row has no value to show.
+        if (l?.sys && (opt.type === "slider" || opt.type === "toggle") && (l.src.levelOf(l.key) ?? null) === null)
+            return null;
         if (l?.sys && opt.type === "slider") {       // held to the track; display() says the real number
             const r = rangeOf(l);
             return Math.max(r.min, Math.min(r.max, Number(l.src.levelOf(l.key)) || 0));
@@ -296,6 +299,8 @@ Singleton {
     function display(catId: string, optId: string): string {
         const opt = find(catId, optId);
         const l = liveOf(opt);
+        if (l?.sys && (opt.type === "slider" || opt.type === "toggle") && value(catId, optId) === null)
+            return "";                               // nothing to read, nothing invented (SC-002)
         if (l?.sys && opt.type === "slider")         // the real number, also above the track's top
             return String(Number(l.src.levelOf(l.key)) || 0);
         return textOf(opt, value(catId, optId));
