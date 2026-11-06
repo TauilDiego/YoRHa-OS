@@ -28,6 +28,7 @@ Singleton {
     // is compared, FR-042). `user` is {} when there's nothing usable, as before.
     property var user: ({})
     signal userFileRead(string state)
+    property bool userFileMissing: false
     function readUser(): void {
         const text = userFile.text();
         const d = parse(text, userFile.path);
@@ -35,6 +36,7 @@ Singleton {
         if (d !== null && !usable)
             console.warn(`settings: ${userFile.path} is not a JSON object, ignoring it`);
         user = usable ? d : {};
+        userFileMissing = false;
         userFileRead(usable ? "ok" : "unreadable");
     }
     function rereadUser(): void {
@@ -42,7 +44,8 @@ Singleton {
     }
     function userReadFailed(error: int): void {
         user = {};
-        userFileRead(error === FileViewError.FileNotFound ? "missing" : "unreadable");
+        userFileMissing = error === FileViewError.FileNotFound;
+        userFileRead(userFileMissing ? "missing" : "unreadable");
     }
     readonly property var merged: Object.assign({}, defaults, user)
 
@@ -337,6 +340,16 @@ Singleton {
         onFileChanged: userFileQuiet.restart()
         onLoaded: root.readUser()
         onLoadFailed: error => root.userReadFailed(error)
+    }
+    // A FileView only watches a folder that exists when it reads. While shell.json is missing, this one
+    // watches its folder, from the folder above: the folder showing up, or changing, reads the file again
+    // (spec 019), and that read also makes userFile watch the new folder.
+    FileView {
+        path: root.userFileMissing ? Product.configDir : ""
+        preload: false
+        printErrors: false
+        watchChanges: true
+        onFileChanged: userFileQuiet.restart()
     }
     Timer {
         id: userFileQuiet
