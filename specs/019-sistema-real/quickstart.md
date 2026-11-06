@@ -10,6 +10,7 @@ valores estão em `research.md` (R3) e `contracts/`.
 lab/new t-<tema>-x --from hypr-iso
 NIER_LAB_PROFILE=hidpi lab/up t-<tema>-x
 lab/provision-step notify          # áudio nulo, brightnessctl, libnotify
+lab/provision-step sound           # qt6-multimedia e os backends que o shell usa nos sons
 lab/019/audio-sinks                # o segundo sink
 YORHA_REPO=<worktree> lab/sync
 ```
@@ -43,7 +44,8 @@ lab/check-019 [--only contract,filewins,adapter,audio,reads,keyboard,appearance,
 ## A rodada inteira (SC-005)
 
 Em 1080 e em 1,25, cada uma medida: `check-003`, `004`, `007`, `008`, `013`, `014`, `015`, `019`. **Esperado:** `results.txt` e `summary.txt` sem FAIL, `ui.log` sem WARN nem ERROR além dos
-marcados `expected-warn` (o `no backend for "niri"` e o JSON inválido de propósito).
+marcados `expected-warn` (o `no backend for "niri"`, o JSON inválido de propósito, e o `Ignoring dummy output` do Qt Multimedia, sem nenhuma saída de som). O `QSocketNotifier` não é marcado:
+é um FAIL no bloco `audio` enquanto a causa não for corrigida (`fix-laco-log`).
 
 ## Antes e depois
 
