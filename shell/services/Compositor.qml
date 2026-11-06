@@ -146,17 +146,20 @@ Singleton {
         }
     }
 
-    // --- spec 013, front C: the keyboard layouts (Keyboard › Layouts, research R6) ------------------
-    // What the compositor has now, whether this one can set it, and a note for the settings card when
-    // it can't. Settings.kbLayouts (what the option saved) goes to the compositor when it changes;
-    // at start, FileWins sets it (spec 019). A reload returns to the file: the backend sets it back
-    // until etapa 1C moves that to FileWins too. [] = leave the compositor's own layout. The fixtures'
-    // capabilities don't apply here: the real backend's do.
-    readonly property var keyboardLayouts: backend?.keyboardLayouts ?? []
+    // --- spec 013, front C: the keyboard layouts (Keyboard › Layouts, research R6; spec 019, FR-040) ----
+    // What the compositor has now. Settings.kbLayouts is what the person asked for: the menu's value, or
+    // else shell.json's `kbLayouts`. It goes to the compositor when it changes. After a reload or a login,
+    // a saved value comes back through FileWins, only while the two files didn't change; shell.json's is
+    // the person's file, so it always comes back: that is how the row stays true. [] = leave the
+    // compositor's own layout. The fixtures' capabilities don't apply here: the real backend's do.
+    readonly property var keyboardLayouts: {
+        const s = root.configValues?.kbLayout ?? "";
+        return s === "" ? [] : s.split(",");
+    }
     readonly property bool canSetKeyboardLayouts: backend?.capabilities?.keyboardLayouts === true
     function applyKeyboardLayouts(): string {
         const want = Settings.kbLayouts;
-        if (!want || want.length === 0)
+        if (!want || want.length === 0 || Fixtures.active)
             return "ok";
         if (!canSetKeyboardLayouts)
             return "error: this compositor can't set the keyboard layouts";
@@ -167,6 +170,10 @@ Singleton {
         function onKbLayoutsChanged(): void {
             root.applyKeyboardLayouts();
         }
+    }
+    onConfigRead: (values, trigger, errors) => {
+        if (trigger !== "poll" && !SettingsState.has("input.kbLayouts"))
+            root.applyKeyboardLayouts();
     }
     // --- end front C ---------------------------------------------------------------------------------
 

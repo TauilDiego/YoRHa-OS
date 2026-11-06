@@ -296,69 +296,14 @@ Item {
     }
     // --- end spec 008 --------------------------------------------------------------------------------
 
-    // --- spec 013, front C: the keyboard layouts (research R6) ---------------------------------------
-    // `keyboardLayouts` is what the compositor has now (`input:kb_layout`, split at commas). A Lua config
-    // (0.56) takes `hyprctl eval 'hl.config({ input = { kb_layout = "us,br" } })'`, live for every
-    // keyboard; `hyprctl keyword` refuses ("Use eval"), so it is only the way for an old (hyprlang)
-    // config. A `hyprctl reload` puts the file's layout back, so the backend reads it again after a
-    // reload and sets the wanted ones back. The layout is also in the managed config, with the shortcut that
-    // switches (`hyprctl switchxkblayout all next`); writing it there is the installer's job.
-    property var keyboardLayouts: []
-    property string wantedLayouts: ""
-    property bool setAgain: false
-
+    // --- spec 013, front C: the keyboard layouts (research R6; spec 019, FR-040) -----------------------
+    // A write like any other keyboard value's (setConfigValues). What the compositor has now comes from
+    // the config's reads. After a reload, whether they come back is FileWins' decision, never this file's.
     // Only XKB layout names go into the command (a-z, 2–8 letters), whoever calls.
     function setKeyboardLayouts(list: var): string {
         if (!Array.isArray(list) || list.length === 0 || !list.every(x => /^[a-z]{2,8}$/.test(String(x))))
             return "error: not a list of layout names";
-        wantedLayouts = list.join(",");
-        if (layoutSet.running) {
-            setAgain = true;
-            return "ok";
-        }
-        layoutSet.command = Hyprland.usingLua
-            ? ["hyprctl", "eval", `hl.config({ input = { kb_layout = "${wantedLayouts}" } })`]
-            : ["hyprctl", "keyword", "input:kb_layout", wantedLayouts];
-        layoutSet.running = true;
-        return "ok";
-    }
-    function refreshKeyboardLayouts(): void {
-        if (!layoutQuery.running)
-            layoutQuery.running = true;
-    }
-
-    Process {
-        id: layoutSet
-        stdout: StdioCollector {
-            id: setOut
-        }
-        onExited: code => {
-            if (code !== 0 || !setOut.text.startsWith("ok"))
-                console.warn(`compositor: setting the keyboard layouts to "${root.wantedLayouts}" failed (${code}): ${setOut.text.trim()}`);
-            if (root.setAgain) {
-                root.setAgain = false;
-                root.setKeyboardLayouts(root.wantedLayouts.split(","));
-            } else {
-                root.refreshKeyboardLayouts();
-            }
-        }
-    }
-    Process {
-        id: layoutQuery
-        command: ["hyprctl", "getoption", "-j", "input:kb_layout"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    const str = String(JSON.parse(text).str ?? "");
-                    root.keyboardLayouts = str === "" || str === "[[EMPTY]]" ? [] : str.split(",");
-                    // A reload went back to the file's layout: the wanted ones come back.
-                    if (root.wantedLayouts !== "" && str !== root.wantedLayouts && !layoutSet.running)
-                        root.setKeyboardLayouts(root.wantedLayouts.split(","));
-                } catch (e) {
-                    // keep the last known layouts
-                }
-            }
-        }
+        return setConfigValues({ kbLayout: list.join(",") });
     }
     // --- end front C ---------------------------------------------------------------------------------
 
@@ -367,9 +312,47 @@ Item {
     readonly property string sessionId: String(Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE") ?? "")
     // The last read: { repeatDelay, repeatRate, kbOptions, kbLayout }, null before the first one.
     property var configValues: null
-    // Etapa 1C fills these (HyprlandBackend.shortcuts, R2).
-    property var shortcuts: []
+    // The keys of system/hypr/yorha-shell.lua, only to show (FR-030, research R2): the shell doesn't
+    // interpret the Lua, and lab/check-019 compares this list with that file's binds.
+    readonly property var shortcuts: [
+        { id: "pause", keys: "Esc", usesMod: true },
+        { id: "settings", keys: "I", usesMod: true },
+        { id: "wallpaper", keys: "T", usesMod: true },
+        { id: "log", keys: "N", usesMod: true },
+        { id: "dnd", keys: "CTRL+N", usesMod: true },
+        { id: "volumeUp", keys: "XF86AudioRaiseVolume", usesMod: false },
+        { id: "volumeDown", keys: "XF86AudioLowerVolume", usesMod: false },
+        { id: "mute", keys: "XF86AudioMute", usesMod: false },
+        { id: "micMute", keys: "XF86AudioMicMute", usesMod: false },
+        { id: "brightnessUp", keys: "XF86MonBrightnessUp", usesMod: false },
+        { id: "brightnessDown", keys: "XF86MonBrightnessDown", usesMod: false }
+    ]
+    // The modifier in use, read again after each reload, as the file runs again: nil is the default of
+    // yorha-shell.lua, SUPER. "" if the answer is no such thing.
     property string shortcutModifier: ""
+    function modifierOf(reply: string): string {
+        const s = reply.trim();
+        if (s === "nil")
+            return "SUPER";
+        return /^[A-Z0-9_ +]+$/.test(s) ? s.replace(/ *\+ */g, "+") : "";
+    }
+    Process {
+        id: modifierQuery
+        command: ["hyprctl", "repl", "return YORHA_MOD"]
+        stdout: StdioCollector {
+            onStreamFinished: root.shortcutModifier = root.modifierOf(text)
+        }
+    }
+    // `repl`, `eval` and `dispatch` empty Hyprland's `configerrors` (the overlay stays; lab, 03.11), and
+    // the read that compares needs them (FR-042). So this runs only after a read of a config without
+    // errors, with no other read on its way: a config with errors keeps the person's `configerrors`.
+    property bool modifierDue: false
+    function readModifier(): void {
+        if (modifierDue && !configQuery.running && !configWait.running && !(readRank[readNext] > 0)) {
+            modifierDue = false;
+            modifierQuery.running = true;
+        }
+    }
     signal configRead(var values, string trigger, var errors)
     signal configWriteDone(bool ok, string error)
 
@@ -379,6 +362,16 @@ Item {
     property string readTrigger: ""
     property string readNext: ""
     function readConfig(trigger: string): void {
+        // A write on its way when a reload arrives may land after it: then the value read is the
+        // write's, and not the file's, and the config's errors are gone (see modifierQuery). That read
+        // can't compare (see where it ends).
+        if (trigger === "reload" && (configSet.running || modifierQuery.running))
+            writeCrossedReload = true;
+        // The read that is waiting will see this reload too, and nothing is written meanwhile.
+        if (trigger === "reload" && configWait.running) {
+            configWait.restart();
+            return;
+        }
         if (configQuery.running || configWait.running) {
             if (readNext === "" || readRank[trigger] > readRank[readNext])
                 readNext = trigger;
@@ -388,8 +381,13 @@ Item {
         if (trigger === "reload")
             configWait.restart();
         else
-            configQuery.running = true;
+            startRead();
     }
+    function startRead(): void {
+        readSerial = writeSerial;
+        configQuery.running = true;
+    }
+    property bool writeCrossedReload: false
     // A config with an error raises Hyprland's error overlay. On 0.56.2, a request right after the
     // reload's event can leave its main thread waiting forever on the overlay's text (the lab: 4 hangs
     // in 25 rounds reading at once, none in 25 with this wait; lab/019/prova-trava, sondagem.md).
@@ -397,7 +395,7 @@ Item {
     Timer {
         id: configWait
         interval: 300
-        onTriggered: configQuery.running = true
+        onTriggered: root.startRead()
     }
     // "[[EMPTY]]" is how getoption says an empty string (T003 P9).
     function optionText(reply: var): string {
@@ -434,22 +432,35 @@ Item {
         command: ["hyprctl", "--batch", "j/getoption input:repeat_delay ; j/getoption input:repeat_rate ; j/getoption input:kb_options ; j/getoption input:kb_layout ; j/configerrors"]
         stdout: StdioCollector {
             onStreamFinished: {
-                const trigger = root.readTrigger;
+                const asked = root.readTrigger;
                 const read = root.parseConfigReplies(text);
-                if (read) {
-                    root.configValues = read.values;
-                    root.configRead(read.values, trigger, read.errors);
-                } else {
-                    console.info(`compositor: the config read (${trigger}) didn't come back whole, nothing compared`);
+                if (!read) {
+                    console.info(`compositor: the config read (${asked}) didn't come back whole, nothing compared`);
+                    return;
                 }
-                // spec 013's reapply, until etapa 1C moves it to FileWins: after the read, so what
-                // was just read is the file's value and not this eval's.
-                if (trigger === "reload")
-                    root.refreshKeyboardLayouts();
+                // A poll that started before a write says nothing about it: that write's own read comes.
+                if (asked === "poll" && root.readSerial !== root.writeSerial)
+                    return;
+                if (JSON.stringify(read.values) !== JSON.stringify(root.configValues))
+                    root.configValues = read.values;
+                if (asked === "poll") {
+                    root.configRead(read.values, asked, read.errors);
+                    return;
+                }
+                // What is still waiting to be written came from what is saved, and comes back from it
+                // now if it is still saved: FileWins reapplies over this read.
+                root.writeAsked = {};
+                // "start" compares nothing and reapplies what is saved: the base stays, and the next
+                // reload looks again (FR-039).
+                const trigger = asked === "reload" && root.writeCrossedReload ? "start" : asked;
+                root.writeCrossedReload = false;
+                root.configRead(read.values, trigger, read.errors);
+                root.modifierDue = read.errors.length === 0;
             }
         }
         onExited: {
             root.flushWrite();
+            root.readModifier();
             if (root.readNext === "")
                 return;
             const next = root.readNext;
@@ -462,36 +473,52 @@ Item {
     // they go into the command (as setKeyboardLayouts). The last wanted one wins (research R3).
     readonly property var configKeys: ({ repeatDelay: "repeat_delay", repeatRate: "repeat_rate", kbOptions: "kb_options", kbLayout: "kb_layout" })
     property string writeCode: ""
-    property string writeNext: ""
-    function setConfigValues(map: var): string {
-        const parts = [];
-        for (const k of Object.keys(map ?? {})) {
-            const name = configKeys[k];
+    property var writeAsked: ({})                // key → value, not sent yet
+    property int writeSerial: 0
+    property int readSerial: 0
+    function configLine(k: string, v: var): string {
+        return k === "repeatDelay" || k === "repeatRate" ? `${configKeys[k]} = ${v}` : `${configKeys[k]} = "${v}"`;
+    }
+    function problemIn(map: var): string {
+        for (const k of Object.keys(map)) {
             const v = map[k];
-            if (!name)
-                return `error: unknown value ${k}`;
+            if (!configKeys[k])
+                return `unknown value ${k}`;
             if (k === "repeatDelay" || k === "repeatRate") {
                 if (!Number.isInteger(v) || v < 0 || v > 100000)
-                    return `error: ${k} is not a whole number`;
-                parts.push(`${name} = ${v}`);
-            } else {
-                if (typeof v !== "string" || !/^[a-z0-9_:,]*$/.test(v))
-                    return `error: ${k} has characters that can't go in the command`;
-                parts.push(`${name} = "${v}"`);
+                    return `${k} is not a whole number`;
+            } else if (typeof v !== "string" || !/^[a-z0-9_:,]*$/.test(v)) {
+                return `${k} has characters that can't go in the command`;
             }
         }
-        if (parts.length === 0)
+        return "";
+    }
+    // From here on configValues already has what was asked: a write ends with a read, and a refused one
+    // goes back to the real value there. So the next change compares with what is on its way.
+    function setConfigValues(map: var): string {
+        const given = map ?? {};
+        const problem = problemIn(given);
+        if (problem !== "") {
+            configWriteDone(false, problem);
+            return `error: ${problem}`;
+        }
+        if (Object.keys(given).length === 0)
             return "ok";
-        writeNext = `hl.config({ input = { ${parts.join(", ")} } })`;
+        writeSerial++;
+        writeAsked = Object.assign({}, writeAsked, given);
+        if (configValues)
+            configValues = Object.assign({}, configValues, given);
         flushWrite();
         return "ok";
     }
-    // Never during a read that compares: what the read finds has to be the file's value.
+    // Never during a read that compares, or with one waiting: what it finds has to be the file's value.
     function flushWrite(): void {
-        if (writeNext === "" || configSet.running || configWait.running || (configQuery.running && readTrigger !== "poll"))
+        const keys = Object.keys(writeAsked);
+        if (keys.length === 0 || configSet.running || configWait.running || (configQuery.running && readTrigger !== "poll")
+                || readRank[readNext] > 0)
             return;
-        writeCode = writeNext;
-        writeNext = "";
+        writeCode = `hl.config({ input = { ${keys.map(k => configLine(k, writeAsked[k])).join(", ")} } })`;
+        writeAsked = {};
         configSet.command = ["hyprctl", "eval", writeCode];
         configSet.running = true;
     }
@@ -513,7 +540,6 @@ Item {
 
     Component.onCompleted: {
         refresh("all");
-        refreshKeyboardLayouts();
         readConfig("start");
     }
 

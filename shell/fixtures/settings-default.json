@@ -96,10 +96,10 @@
       "about": "Layout, repeat and shortcuts.",
       "options": [
         {"id": "layouts", "label": "Layouts", "type": "multi", "requires": "keyboardLayouts", "desc": "The keyboard layouts in use, switched by a shortcut. Mark at least one; the first is the one the keyboard starts with.", "setting": "input.kbLayouts", "values": ["English (US)", "Portuguese (Brazil)", "Portuguese (Portugal)", "Spanish", "German", "French"], "ids": ["us", "br", "pt", "es", "de", "fr"]},
-        {"id": "caps", "label": "Caps Lock", "type": "choice", "desc": "What the Caps Lock key does.", "values": ["Caps Lock", "Escape", "Control"], "value": 1, "default": 0},
-        {"id": "delay", "label": "Repeat delay", "type": "choice", "desc": "How long a key has to be held before it starts repeating.", "values": ["200 ms", "300 ms", "400 ms", "600 ms"], "value": 1, "default": 2},
-        {"id": "rate", "label": "Repeat rate", "type": "slider", "desc": "How fast a held key repeats.", "value": 50, "default": 50, "step": 5},
-        {"id": "shortcuts", "label": "Shortcuts", "type": "action", "desc": "Every keyboard shortcut of the desktop, by area.", "text": "Open", "busy": "Opening the shortcut list…"}
+        {"id": "caps", "label": "Caps Lock", "type": "choice", "requires": "keyboardOptions", "desc": "What the Caps Lock key does.", "setting": "sys.input.caps"},
+        {"id": "delay", "label": "Repeat delay", "type": "choice", "requires": "keyboardOptions", "desc": "How long a key has to be held before it starts repeating.", "setting": "sys.input.delay"},
+        {"id": "rate", "label": "Repeat rate", "type": "slider", "requires": "keyboardOptions", "desc": "How fast a held key repeats, in repeats per second.", "setting": "sys.input.rate", "step": 5},
+        {"id": "shortcuts", "label": "Shortcuts", "type": "action", "requires": "shortcutsList", "desc": "The keyboard shortcuts of YoRHa-Shell. Your own binds aren't listed here.", "opens": "sys.input.shortcuts", "text": "Open", "busy": ""}
       ]
     },
     {
