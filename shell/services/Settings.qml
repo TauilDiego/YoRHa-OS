@@ -332,8 +332,15 @@ Singleton {
         path: root.userPath
         printErrors: false          // a missing user file is the normal case
         watchChanges: true
-        onFileChanged: reload()
+        // A reload asked while a read is in flight is dropped by FileView, and nothing reads again:
+        // read once the writing has stopped (truncate + write comes as two changes).
+        onFileChanged: userFileQuiet.restart()
         onLoaded: root.readUser()
         onLoadFailed: error => root.userReadFailed(error)
+    }
+    Timer {
+        id: userFileQuiet
+        interval: 100
+        onTriggered: userFile.reload()
     }
 }
