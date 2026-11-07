@@ -414,6 +414,13 @@ privados no que vai subir, todas só nomes e caminhos. O lint ficou verde na jun
   - os FAIL da `check-013` são de tempo: FR-009 (grade e triângulos), FR-004 e FR-008, e mudam de uma
     rodada pra outra. No A/B do `--only open` (`…150118…`, 3 rodadas de cada), a a301e8a e a final falham
     o FR-009 de forma intermitente; a amostra é pequena e não prova que as duas são iguais.
+  U24 (05–06.11, ainda NÃO mesclada; evidência em `YoRHa-OS-private/central/correcoes-015/u24/`): os FAIL de tempo da
+  `check-013` eram da medida, não do produto, e o roteiro mudou (`lab-015-correcoes`, nenhum limite mudou): FR-009
+  triângulos pela janela ajustada à lei do shader, 16 aberturas; FR-008 sem o quadro dos triângulos na janela (o caso
+  dos 1555 ms); FR-004, FR-009 e FR-010 por mediana de várias rodadas. Produto: as opções antigas de Appearance
+  (`settings.appearance.*`) migram uma vez pras chaves vivas. O segundo tique do relógio da abertura (3d83fa2) foi
+  desfeito (5750057): não encurtou a grade. O motivo sobre os triângulos no commit 5750057 não se confirmou na
+  rodada de controle com a ordem trocada. A inundação `QSocketNotifier` ao abrir apps (U25) também derruba a `check-013`.
 - [ ] T036 Com o OK do dono: o merge da 015 e da `lab-015` nas duas `main`, e as branches e os
   worktrees apagados
 

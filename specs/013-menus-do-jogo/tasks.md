@@ -211,6 +211,9 @@ nesta VM, então do ambiente.
     `bootsound` + `boot-timing` 11/0 (+0,04 s), `check-011 login` 6/0, `intro` 13/0, `undo` ok;
   - achado na regressão: o backend FFmpeg do Qt entra em laço com processo + som; o shell usa o
     GStreamer, e o greeter fica no FFmpeg (sondagem.md, "Na junção")
+  - correção (06.11.2026, fix-laco-log): o laço não é do FFmpeg nem depende de processo. É uma corrida do
+    Qt Multimedia 6.12.0 com o fim natural de um som, e acontece com FFmpeg, GStreamer e Pulse; quem o segura
+    é o guarda do log em `bin/yorha`
 - [X] T053 A lista das diferenças esperadas do modo janela parado (FR-017), com `lab/diffshot` contra as
   evidências: `diferencas-janela.md` (17 telas, antes e depois, na junção)
   - já conhecida: a galeria passou de 6 pra 7 páginas (a 7 é a da fundação), então os subtítulos
