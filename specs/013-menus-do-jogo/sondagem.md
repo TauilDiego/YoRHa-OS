@@ -174,6 +174,11 @@ O plano B da R5 (o `NotifyLayer` recria a sua superfície quando o menu abre) fu
 **Conclusão:** é uma corrida da thread de áudio do backend FFmpeg do Qt 6.12 com qualquer processo que
 o shell abre enquanto um som toca. Não é do nosso código.
 
+> **Correção (06.11.2026, fix-laco-log):** a conclusão acima está errada na causa, e "nenhum em 20 voltas" com o
+> GStreamer era amostra pequena. O laço é uma corrida do Qt Multimedia 6.12.0 quando a voz de um `SoundEffect`
+> termina sozinha, e acontece com FFmpeg, GStreamer e Pulse, com ou sem processo aberto. Por isso também não
+> vale, abaixo, "o laço não o pega" no greeter. Quem segura o laço no shell é o guarda do log em `bin/yorha`.
+
 **A troca:**
 - **No shell:** `//@ pragma Env QT_MEDIA_BACKEND=gstreamer` no `shell.qml`.
 - **No greeter:** fica no FFmpeg, explícito no `GreeterEnvironment` (`QT_MEDIA_BACKEND=ffmpeg`). Com o

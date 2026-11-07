@@ -935,8 +935,9 @@ dono.
 ### Sons (FR-019 a FR-024)
 
 - **`Sounds.play(event)`:**
-  - `SoundEffect` (QtMultimedia, backend GStreamer no shell: o FFmpeg do Qt 6.12 entra em laço quando
-    um processo abre enquanto um som toca; a tela de login fica no FFmpeg, que inicia mais rápido),
+  - `SoundEffect` (QtMultimedia, backend GStreamer no shell, pela latência menor; a tela de login fica
+    no FFmpeg, que inicia mais rápido. O laço do `QSocketNotifier` é uma corrida do Qt Multimedia 6.12.0
+    e acontece nos dois backends; quem segura é o guarda do log em `bin/yorha`),
     com 3 instâncias pros sons que se repetem (`move`, `change`,
     `osd`) e 1 pros outros;
   - 40 ms de debounce por som e no máximo 4 ao mesmo tempo;

@@ -139,6 +139,10 @@ simples.
     latência menor. O shell escolhe ele com `//@ pragma Env QT_MEDIA_BACKEND=gstreamer`. O greeter fica
     no FFmpeg (`GreeterEnvironment`): ele não abre processos, e o GStreamer atrasava a tela de login em
     ~0,1 s (ver sondagem.md, "Na junção").
+    **Correção (06.11.2026, fix-laco-log):** "o GStreamer não tem o problema" está errado, e a causa
+    também. O laço é uma corrida do Qt Multimedia 6.12.0 quando a voz de um `SoundEffect` termina
+    sozinha, e acontece com FFmpeg, GStreamer e Pulse, com ou sem processo aberto. Quem segura é o guarda
+    do log em `bin/yorha`. O shell continua no GStreamer pela latência.
   - **Alternativa (fallback):** `Process` com `pw-play` (`pipewire-audio`).
   - O `Quickshell.Services.Pipewire` só lê e controla os nós (serve pra ler o volume), não toca som.
   - **Sondagem (T006):** tecla → som em até ~30 ms na VM (quantum de 21 ms), e `play()` repetido toca
