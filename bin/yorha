@@ -148,11 +148,14 @@ shell_root() { readlink -f "$YORHA_HOME/current"; }
 #   growth over SHELL_LOG_FLOOD in one poll: a loop, not a chatty shell. Kill qs; the supervisor restarts it.
 #   shell.log over SHELL_LOG_CAP: keep the last part, in place (qs appends, so its offset follows).
 #   Quickshell's two files over SHELL_RUN_CAP: only a restart empties them. Kill qs.
+# The supervisor waits longer after each kill in a row (up to 60 s), unless the qs that flooded had been up
+# for SHELL_FLOOD_FORGET: then it is an isolated flood, not the same loop coming back, and the count restarts.
 SHELL_LOG_POLL=${YORHA_LOG_POLL:-2}                   # seconds
 SHELL_LOG_FLOOD=${YORHA_LOG_FLOOD:-$((8 * 1048576))}  # bytes per poll, in all three files
 SHELL_LOG_CAP=${YORHA_LOG_CAP:-$((20 * 1048576))}     # bytes
 SHELL_LOG_KEEP=$((1048576))                           # bytes kept when shell.log is cut
 SHELL_RUN_CAP=${YORHA_RUN_CAP:-$((128 * 1048576))}    # bytes
+SHELL_FLOOD_FORGET=${YORHA_FLOOD_FORGET:-300}         # seconds
 
 # The folder of a running qs (by-pid is a link Quickshell makes when it starts).
 qs_run_dir() { readlink -f "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/quickshell/by-pid/$1" 2>/dev/null || true; }
@@ -202,7 +205,7 @@ shell_log_after_flood() {
 # `shell restart` (and an update) bring up whatever "current" points at. Stops when uninstalled.
 # --relaunch: the same supervisor, re-executed from a newer version (it keeps the lock on fd 9).
 cmd_shell_start() {
-    local rd root qspid log guardpid flag rundir floods=0
+    local rd root qspid log guardpid flag rundir started floods=0
     rd=$(run_dir); mkdir -p "$rd" "$YORHA_STATE"
     # Quickshell only watches the applications folder if it exists when it starts; without it, an app
     # installed later stays out of the APPS tab until a restart (spec 007, T041; PLAN, S3).
@@ -224,6 +227,7 @@ cmd_shell_start() {
             exec "$root/bin/$YORHA_CMD" shell start --relaunch
         fi
         [[ -s $log ]] && mv -f "$log" "$log.1"     # the previous run, kept once
+        started=$SECONDS
         YORHA_OS_ROOT="$root" qs -p "$root/shell" >>"$log" 2>&1 &
         qspid=$!
         echo "$qspid" > "$rd/shell.pid"
@@ -250,6 +254,8 @@ cmd_shell_start() {
         if [[ -s $flag ]]; then
             shell_log_after_flood "$log" "$flag" "$rundir"
             # A loop that comes back at once must not turn into a restart storm with the screen flickering.
+            # One after a long run is news: it must not inherit the wait of floods from days ago.
+            if ((SECONDS - started >= SHELL_FLOOD_FORGET)); then floods=0; fi
             floods=$((floods + 1))
             sleep "$((floods >= 6 ? 60 : 1 << floods))"
         else

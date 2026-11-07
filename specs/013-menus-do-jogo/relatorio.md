@@ -96,6 +96,11 @@ O impacto no host ficou em poucos pontos de CPU acima da base, e nunca houve mai
   laço de `QSocketNotifier`, com log de 1,27 GB e disco cheio. Por isso o shell usa o GStreamer
   (pragma no `shell.qml`). A tela de login ficou no FFmpeg, porque com o GStreamer o boot ficava
   +0,13 s mais lento (com o FFmpeg, +0,03 s). Os dois backends entram nas dependências.
+
+> **Correção (06.11.2026, fix-laco-log):** o achado acima está errado na causa. O laço é uma corrida do Qt
+> Multimedia 6.12.0 (a voz de um `SoundEffect` que termina sozinha é destruída na thread de tempo real do
+> PipeWire), e acontece com FFmpeg, GStreamer e Pulse; o GStreamer não evita. Quem segura o laço é o guarda
+> do log em `bin/yorha`. O pragma continua pela latência menor.
 - **`aplay` segurando a placa** derruba o nó ALSA do WirePlumber até ele reiniciar. Por isso o
   `sound.state` só é gravado depois do `aplay`, e o tema de login espera por ele.
 - **Layout de teclado no Hyprland com config em Lua:** o `hyprctl keyword` é recusado. O que funciona
