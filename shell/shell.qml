@@ -6,11 +6,12 @@
 // a Qt with the fix. It has to be in the environment qs starts with: `//@ pragma Env` sets it too
 // late for Quickshell 0.3.2's logger (tried in the lab VM, 2026-10-27).
 //
-// Spec 013: the interface sounds (SoundEffect) play through Qt Multimedia's GStreamer backend. With
-// the FFmpeg one (Qt 6.12.0), starting any process while a sound plays now and then leaves a socket
-// notifier on a closed fd: qs then loops on "QSocketNotifier: Invalid socket … disabling" at full
-// CPU and fills the log (the lab, 2026-11-01: 13.6 M lines in 60 rounds; 0 with GStreamer, whose
-// latency is also lower). Qt Multimedia reads the variable when it first loads, after this.
+// Spec 013: the interface sounds (SoundEffect) play through Qt Multimedia's GStreamer backend, for its
+// lower latency (the lab, 2026-11-01: play() to sound about 7 ms ahead of FFmpeg's on the same marker;
+// specs/013-menus-do-jogo/sondagem.md). It does not avoid the "QSocketNotifier: Invalid socket …
+// disabling" loop, as this comment once said: that is a race in Qt Multimedia 6.12.0, under FFmpeg and
+// GStreamer alike. The log guard in bin/yorha kills a qs caught in it. Qt Multimedia reads the variable
+// when it first loads, after this.
 //@ pragma Env QT_MEDIA_BACKEND=gstreamer
 pragma ComponentBehavior: Bound
 
