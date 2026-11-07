@@ -1,5 +1,13 @@
 <!--
 Sync Impact Report
+- Versão: 2.2.0 → 2.3.0 (MINOR: amplia o que o princípio II cobre). Spec 018; o dono aprovou a emenda em
+  06.11.
+- Princípio II: novo item, "O arranjo de monitores". O produto pode guardar, na pasta de estado dele, o
+  arranjo que a pessoa escolheu e aplicá-lo em tempo de execução. Nunca edita config pessoal, e, se a
+  pessoa editar no arquivo dela o que vale pra uma tela, vale o arquivo.
+- Templates: nenhum muda.
+
+Anterior (2.2.0, 03.11):
 - Versão: 2.1.0 → 2.2.0 (MINOR: amplia o que o princípio II cobre). Spec 019; o dono decidiu em 03.11.
 - Princípio II, "O que fica de fora": "hardware" passa a dizer drivers e firmware. O produto pode ler
   e mudar, em tempo de execução, o que o sistema já oferece (som, luz de tela, teclado, rede,
@@ -75,6 +83,11 @@ funciona, e o desktop ganha a cara do projeto. Não existe ISO nem imagem própr
     oferece um arquivo pra ela incluir.
 - **O que o sistema já oferece:** o produto pode ler e mudar em tempo de execução o som, a luz de
   tela, o teclado, a rede e o Bluetooth. Pra isso, nunca instala driver nem edita arquivo do sistema.
+- **O arranjo de monitores:** o produto pode guardar, na pasta de estado dele, o arranjo de monitores que a
+  pessoa escolheu (modo, escala, rotação, posição, tela ligada ou não, espelho e tela principal, por
+  conjunto de telas) e aplicá-lo em tempo de execução, também depois de um reload e quando uma tela entra
+  ou sai. Nunca edita o `hyprland.lua` nem outra config pessoal. Se a pessoa editar no arquivo dela o que
+  vale pra uma tela, vale o arquivo, e o produto esquece o que tinha guardado pra aquela tela.
 
 ### III. Padrões gerenciados separados dos arquivos do usuário
 
@@ -167,4 +180,4 @@ Toda fase do `PLAN.md` passa por spec → plan → tasks antes de implementar:
 - **Revisão:** toda revisão de entrega confere os princípios I, IV e V explicitamente.
 - **Fonte complementar:** `PLAN.md` (roteiro).
 
-**Version**: 2.2.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-03
+**Version**: 2.3.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-11-06
